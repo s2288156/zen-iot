@@ -5,6 +5,9 @@ spring:
     url: jdbc:postgresql://localhost:5432/db_zen_iot
     username: postgres
     password: postgres
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
 server:
   port: 8080
 
