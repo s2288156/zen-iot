@@ -1,5 +1,10 @@
 spring:
   application:
     name: zen-iot
+  datasource:
+    url: jdbc:postgresql://localhost:5432/db_zen_iot
+    username: postgres
+    password: postgres
 server:
   port: 8080
+
