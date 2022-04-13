@@ -1,3 +1,11 @@
 spring:
   application:
     name: zen-iot
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    open-in-view: false
+  datasource:
+    url: jdbc:postgresql://localhost:5432/db_zen_iot
+    username: postgres
+    password: postgres

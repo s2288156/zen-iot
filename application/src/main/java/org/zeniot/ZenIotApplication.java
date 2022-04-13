@@ -6,6 +6,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 /**
  * @author Wu.Chunyang
  */
+
 @SpringBootApplication
 public class ZenIotApplication {
     public static void main(String[] args) {

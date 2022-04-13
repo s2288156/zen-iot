@@ -11,7 +11,6 @@ plugins {
     id("io.spring.dependency-management").version("1.0.11.RELEASE")
 }
 
-
 allprojects {
     group = "org.zeniot"
     version = "0.0.1"
@@ -27,13 +26,13 @@ allprojects {
         }
         mavenCentral()
     }
+}
 
+subprojects {
     dependencies {
         compileOnly("org.projectlombok:lombok")
         annotationProcessor("org.projectlombok:lombok")
         testImplementation("org.springframework.boot:spring-boot-starter-test")
     }
-
 }
-
 
