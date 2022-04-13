@@ -9,3 +9,4 @@
 
 rootProject.name = "zen-iot"
 include("application")
+include("dao")
