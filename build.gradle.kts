@@ -11,13 +11,20 @@ plugins {
     id("io.spring.dependency-management").version("1.0.11.RELEASE")
 }
 
+
 allprojects {
     group = "org.zeniot"
+    version = "0.0.1"
+
+    apply(plugin = "java")
+    apply(plugin = "idea")
+    apply(plugin = "org.springframework.boot")
+    apply(plugin = "io.spring.dependency-management")
 
     repositories {
-//        maven {
-//            url("https://maven.aliyun.com/repository/public/")
-//        }
+        maven {
+            setUrl("https://maven.aliyun.com/repository/public/")
+        }
         mavenCentral()
     }
 
@@ -26,10 +33,7 @@ allprojects {
         annotationProcessor("org.projectlombok:lombok")
         testImplementation("org.springframework.boot:spring-boot-starter-test")
     }
+
 }
 
-tasks {
-    test {
-        useJUnitPlatform()
-    }
-}
+

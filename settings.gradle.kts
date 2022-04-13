@@ -8,3 +8,4 @@
  */
 
 rootProject.name = "zen-iot"
+include("application")
