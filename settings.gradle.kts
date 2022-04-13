@@ -8,4 +8,3 @@
  */
 
 rootProject.name = "zen-iot"
-include("app", "list", "utilities")
