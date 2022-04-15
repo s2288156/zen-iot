@@ -5,8 +5,6 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-actuator")
 }
 
-tasks {
-    test {
-        useJUnitPlatform()
-    }
+tasks.getByName<Test>("test") {
+    useJUnitPlatform()
 }
