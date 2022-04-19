@@ -4,6 +4,7 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
+import org.hibernate.Hibernate;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -26,6 +27,9 @@ public class Account extends BaseEntity {
     @Column(length = 64, nullable = false)
     private String password;
 
+    @Column(length = 512, columnDefinition = "avatar picture url")
+    private String avatar;
+
     public Account(String username, String password) {
         this.username = username;
         this.password = password;
@@ -34,14 +38,13 @@ public class Account extends BaseEntity {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof Account)) return false;
-        if (!super.equals(o)) return false;
+        if (o == null || Hibernate.getClass(this) != Hibernate.getClass(o)) return false;
         Account account = (Account) o;
-        return Objects.equals(username, account.username) && Objects.equals(password, account.password);
+        return getId() != null && Objects.equals(getId(), account.getId());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(super.hashCode(), username, password);
+        return getClass().hashCode();
     }
 }
