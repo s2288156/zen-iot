@@ -12,3 +12,7 @@ spring:
     password: postgres
   flyway:
     enabled: false
+  security:
+    user:
+      name: admin
+      password: 123
