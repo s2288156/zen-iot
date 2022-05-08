@@ -1,49 +1,50 @@
 package org.zeniot.model;
 
-import lombok.AccessLevel;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.ToString;
-import org.hibernate.Hibernate;
-import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.UpdateTimestamp;
-
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.MappedSuperclass;
+import javax.persistence.*;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.PastOrPresent;
 import java.time.LocalDateTime;
-import java.util.Objects;
 
 /**
- * @author Wu.Chunyang
+ * @author s2288
  */
-@Getter
-@NoArgsConstructor(access = AccessLevel.PROTECTED)
-@ToString
 @MappedSuperclass
 public class BaseEntity {
-
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.AUTO)
+    @Column(name = "id", nullable = false)
     private Long id;
 
-    @CreationTimestamp
+    @PastOrPresent
+    @Column(name = "create_time", nullable = false)
     private LocalDateTime createTime;
 
-    @UpdateTimestamp
+    @PastOrPresent
+    @Column(name = "update_time", nullable = false)
     private LocalDateTime updateTime;
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || Hibernate.getClass(this) != Hibernate.getClass(o)) return false;
-        BaseEntity that = (BaseEntity) o;
-        return id != null && Objects.equals(id, that.id);
+    public void setUpdateTime(LocalDateTime updateTime) {
+        this.updateTime = updateTime;
     }
 
-    @Override
-    public int hashCode() {
-        return getClass().hashCode();
+    public LocalDateTime getUpdateTime() {
+        return updateTime;
     }
+
+    public LocalDateTime getCreateTime() {
+        return createTime;
+    }
+
+    public void setCreateTime(LocalDateTime createTime) {
+        this.createTime = createTime;
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
 }

@@ -1,50 +1,31 @@
 package org.zeniot.model;
 
-import lombok.AccessLevel;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.ToString;
-import org.hibernate.Hibernate;
-
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Table;
-import java.util.Objects;
 
-/**
- * @author Wu.Chunyang
- */
-@Getter
-@NoArgsConstructor(access = AccessLevel.PROTECTED)
-@ToString
 @Entity
 @Table(name = "t_account")
 public class Account extends BaseEntity {
-
-    @Column(length = 64, nullable = false)
+    @Column(name = "username", nullable = false, length = 32)
     private String username;
 
-    @Column(length = 64, nullable = false)
+    @Column(name = "password", nullable = false, length = 64)
     private String password;
 
-    @Column(length = 512, columnDefinition = "avatar picture url")
-    private String avatar;
+    public String getPassword() {
+        return password;
+    }
 
-    public Account(String username, String password) {
-        this.username = username;
+    public void setPassword(String password) {
         this.password = password;
     }
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || Hibernate.getClass(this) != Hibernate.getClass(o)) return false;
-        Account account = (Account) o;
-        return getId() != null && Objects.equals(getId(), account.getId());
+    public String getUsername() {
+        return username;
     }
 
-    @Override
-    public int hashCode() {
-        return getClass().hashCode();
+    public void setUsername(String username) {
+        this.username = username;
     }
 }

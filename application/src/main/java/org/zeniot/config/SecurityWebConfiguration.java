@@ -4,6 +4,7 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.zeniot.security.MyAuthenticationSuccessHandler;
 
 /**
  * @author Wu.Chunyang
@@ -13,13 +14,20 @@ public class SecurityWebConfiguration extends WebSecurityConfigurerAdapter {
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
-        http.headers().cacheControl()
+        http.authorizeHttpRequests()
+                .anyRequest().authenticated()
                 .and()
-                .frameOptions().disable()
-                .and()
-                .cors()
-                .and()
-                .csrf().disable()
-                .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
+                .formLogin();
+//        http.headers().cacheControl()
+//                .and()
+//                .frameOptions().disable()
+//                .and()
+//                .cors()
+//                .and()
+//                .csrf().disable()
+//                .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+//                .and()
+//                .formLogin()
+//                .successHandler(new MyAuthenticationSuccessHandler());
     }
 }

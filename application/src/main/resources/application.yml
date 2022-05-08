@@ -10,3 +10,5 @@ spring:
     url: jdbc:postgresql://localhost:5432/db_zen_iot
     username: postgres
     password: postgres
+  flyway:
+    enabled: false
