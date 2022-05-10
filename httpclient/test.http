@@ -1,0 +1,13 @@
+### api/test
+GET http://localhost:8080/api/test
+Content-Type: application/json
+
+### /login
+
+POST http://localhost:8080/login
+Content-Type: application/json
+
+{
+  "username": "admin",
+  "password": "123123"
+}

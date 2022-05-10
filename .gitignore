@@ -68,3 +68,4 @@ pnpm-debug.log*
 
 # Ignore Gradle build output directory
 build
+/.jpb/
