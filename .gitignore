@@ -1,9 +1,12 @@
 HELP.md
 target/
+.gradle
+build/
+!gradle/wrapper/gradle-wrapper.jar
 !.mvn/wrapper/maven-wrapper.jar
 !**/src/main/**/target/
 !**/src/test/**/target/
-
+httpclient/MyLocal*.http
 ### STS ###
 .apt_generated
 .classpath
@@ -12,12 +15,19 @@ target/
 .settings
 .springBeans
 .sts4-cache
+bin/
+!**/src/main/**/bin/
+!**/src/test/**/bin/
 
 ### IntelliJ IDEA ###
 .idea
+.idea/**
 *.iws
 *.iml
 *.ipr
+out/
+!**/src/main/**/out/
+!**/src/test/**/out/
 
 ### NetBeans ###
 /nbproject/private/
@@ -25,7 +35,6 @@ target/
 /dist/
 /nbdist/
 /.nb-gradle/
-build/
 !**/src/main/**/build/
 !**/src/test/**/build/
 
@@ -56,3 +65,7 @@ pnpm-debug.log*
 *.sln
 *.sw?
 
+
+# Ignore Gradle build output directory
+build
+/.jpb/
