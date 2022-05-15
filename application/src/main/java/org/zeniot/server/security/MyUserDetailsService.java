@@ -1,4 +1,4 @@
-package org.zeniot.security;
+package org.zeniot.server.security;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -7,9 +7,9 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
-import org.zeniot.model.Account;
-import org.zeniot.model.Role;
-import org.zeniot.repository.AccountRepository;
+import org.zeniot.dao.model.AccountEntity;
+import org.zeniot.dao.model.RoleEntity;
+import org.zeniot.dao.repository.AccountRepository;
 
 import java.util.List;
 import java.util.Optional;
@@ -27,15 +27,15 @@ public class MyUserDetailsService implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        Optional<Account> accountOptional = accountRepository.findAccountByUsername(username);
+        Optional<AccountEntity> accountOptional = accountRepository.findAccountByUsername(username);
         if (accountOptional.isPresent()) {
-            Account account = accountOptional.get();
-            Set<Role> roles = account.getRoles();
-            List<SimpleGrantedAuthority> authorities= roles.stream().map(rule -> new SimpleGrantedAuthority(rule.getName()))
+            AccountEntity accountEntity = accountOptional.get();
+            Set<RoleEntity> roleEntities = accountEntity.getRoles();
+            List<SimpleGrantedAuthority> authorities= roleEntities.stream().map(rule -> new SimpleGrantedAuthority(rule.getName()))
                     .collect(Collectors.toList());
             return User.builder()
-                    .username(account.getUsername())
-                    .password(account.getPassword())
+                    .username(accountEntity.getUsername())
+                    .password(accountEntity.getPassword())
                     .authorities(authorities)
                     .build();
         }

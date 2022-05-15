@@ -7,7 +7,7 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 /**
  * @author Wu.Chunyang
  */
-@EnableJpaRepositories("org.zeniot.repository")
+@EnableJpaRepositories("org.zeniot.dao.repository")
 @SpringBootApplication
 public class ZenIotApplication {
     public static void main(String[] args) {

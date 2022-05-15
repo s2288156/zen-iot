@@ -1,4 +1,8 @@
-package org.zeniot.model;
+package org.zeniot.dao.model;
+
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
+import org.springframework.data.annotation.CreatedDate;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
@@ -15,11 +19,13 @@ public class BaseEntity {
     @Column(name = "id", nullable = false)
     private Long id;
 
-    @PastOrPresent
+//    @PastOrPresent
+    @CreationTimestamp
     @Column(name = "create_time", nullable = false)
     private LocalDateTime createTime;
 
-    @PastOrPresent
+    @UpdateTimestamp
+//    @PastOrPresent
     @Column(name = "update_time", nullable = false)
     private LocalDateTime updateTime;
 

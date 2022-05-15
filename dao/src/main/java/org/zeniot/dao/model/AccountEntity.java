@@ -1,4 +1,4 @@
-package org.zeniot.model;
+package org.zeniot.dao.model;
 
 import javax.persistence.*;
 import java.util.LinkedHashSet;
@@ -6,25 +6,29 @@ import java.util.Set;
 
 @Entity
 @Table(name = "t_account")
-public class Account extends BaseEntity {
+public class AccountEntity extends BaseEntity {
     @Column(name = "username", nullable = false, length = 32)
     private String username;
 
     @Column(name = "password", nullable = false, length = 64)
     private String password;
 
-    @ManyToMany
+    @ManyToMany(cascade = {CascadeType.PERSIST, CascadeType.REFRESH})
     @JoinTable(name = "t_account_role",
-            joinColumns = @JoinColumn(name = "account_id"),
-            inverseJoinColumns = @JoinColumn(name = "role_id"))
-    private Set<Role> roles = new LinkedHashSet<>();
+            joinColumns = @JoinColumn(name = "account_id", referencedColumnName = "id"),
+            inverseJoinColumns = @JoinColumn(name = "role_id", referencedColumnName = "id"))
+    private Set<RoleEntity> roleEntities = new LinkedHashSet<>();
 
-    public Set<Role> getRoles() {
-        return roles;
+    public Set<RoleEntity> getRoleEntities() {
+        return roleEntities;
     }
 
-    public void setRoles(Set<Role> roles) {
-        this.roles = roles;
+    public Set<RoleEntity> getRoles() {
+        return roleEntities;
+    }
+
+    public void setRoles(Set<RoleEntity> roleEntities) {
+        this.roleEntities = roleEntities;
     }
 
     public String getPassword() {

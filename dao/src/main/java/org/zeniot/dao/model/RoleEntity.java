@@ -1,7 +1,4 @@
-package org.zeniot.model;
-
-import lombok.Getter;
-import lombok.Setter;
+package org.zeniot.dao.model;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -13,9 +10,16 @@ import java.util.Objects;
  */
 @Entity
 @Table(name = "role")
-public class Role extends BaseEntity {
+public class RoleEntity extends BaseEntity {
     @Column(name = "name", nullable = false, length = 64)
     private String name;
+
+    public RoleEntity() {
+    }
+
+    public RoleEntity(String name) {
+        this.name = name;
+    }
 
     public String getName() {
         return name;
@@ -28,9 +32,9 @@ public class Role extends BaseEntity {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof Role)) return false;
-        Role role = (Role) o;
-        return Objects.equals(name, role.name);
+        if (!(o instanceof RoleEntity)) return false;
+        RoleEntity roleEntity = (RoleEntity) o;
+        return Objects.equals(name, roleEntity.name);
     }
 
     @Override
