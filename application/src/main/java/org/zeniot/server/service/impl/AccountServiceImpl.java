@@ -20,6 +20,9 @@ public class AccountServiceImpl implements AccountService {
 
     @Override
     public void registerAccount(Account account) {
+        if (accountRepository.existsAccountEntityByUsername(account.getUsername())) {
+            throw new RuntimeException("username existed!");
+        }
         accountRepository.save(account.toEntity(passwordEncoder));
     }
 

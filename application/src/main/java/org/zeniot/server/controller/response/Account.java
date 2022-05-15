@@ -1,6 +1,7 @@
 package org.zeniot.server.controller.response;
 
 import lombok.AccessLevel;
+import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -19,6 +20,7 @@ import java.util.stream.Collectors;
 public class Account implements Serializable {
     private static final long serialVersionUID = -6536667040345207843L;
 
+    @Getter
     private String username;
     private String password;
     private Set<String> roles;
