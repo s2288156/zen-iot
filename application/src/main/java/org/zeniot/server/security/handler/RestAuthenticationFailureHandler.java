@@ -6,14 +6,13 @@ import org.springframework.http.MediaType;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.authentication.AuthenticationFailureHandler;
 import org.springframework.stereotype.Component;
+import org.zeniot.server.controller.response.RestResponse;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * @author Wu.Chunyang
@@ -22,11 +21,10 @@ import java.util.Map;
 public class RestAuthenticationFailureHandler implements AuthenticationFailureHandler {
     @Override
     public void onAuthenticationFailure(HttpServletRequest request, HttpServletResponse response, AuthenticationException exception) throws IOException, ServletException {
-        Map<String, Object> result = new HashMap<>();
-        result.put("msg", "登录失败！");
+        RestResponse failure = RestResponse.failure("Authentication Failure!");
         response.setCharacterEncoding(StandardCharsets.UTF_8.name());
         response.setContentType(MediaType.APPLICATION_JSON_VALUE);
         response.setStatus(HttpStatus.FORBIDDEN.value());
-        response.getWriter().println(new ObjectMapper().writeValueAsString(result));
+        response.getWriter().println(new ObjectMapper().writeValueAsString(failure));
     }
 }

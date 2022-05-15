@@ -16,4 +16,12 @@ public class RestResponse {
     public static RestResponse ok() {
         return new RestResponse("Ok!");
     }
+
+    public static RestResponse ok(String msg) {
+        return new RestResponse(msg);
+    }
+
+    public static RestResponse failure(String msg) {
+        return new RestResponse(msg);
+    }
 }
