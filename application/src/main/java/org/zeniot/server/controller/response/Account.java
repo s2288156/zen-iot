@@ -3,6 +3,7 @@ package org.zeniot.server.controller.response;
 import lombok.AccessLevel;
 import lombok.Setter;
 import lombok.ToString;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.zeniot.dao.model.AccountEntity;
 import org.zeniot.dao.model.RoleEntity;
 
@@ -22,10 +23,10 @@ public class Account implements Serializable {
     private String password;
     private Set<String> roles;
 
-    public AccountEntity toEntity() {
+    public AccountEntity toEntity(PasswordEncoder passwordEncoder) {
         AccountEntity accountEntity = new AccountEntity();
         accountEntity.setUsername(username);
-        accountEntity.setPassword(password);
+        accountEntity.setPassword(passwordEncoder.encode(password));
         Set<RoleEntity> roleEntities = roles.stream().map(RoleEntity::new).collect(Collectors.toSet());
         accountEntity.setRoles(roleEntities);
         return accountEntity;
