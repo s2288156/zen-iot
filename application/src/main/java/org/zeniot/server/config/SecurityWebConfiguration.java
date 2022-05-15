@@ -15,6 +15,8 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.zeniot.server.security.LoginFilter;
+import org.zeniot.server.security.handler.RestAuthenticationFailureHandler;
+import org.zeniot.server.security.handler.RestAuthenticationSuccessHandler;
 
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
@@ -29,9 +31,13 @@ public class SecurityWebConfiguration extends WebSecurityConfigurerAdapter {
     @Autowired
     private UserDetailsService userDetailsService;
 
+    @Autowired
+    private RestAuthenticationSuccessHandler successHandler;
+    @Autowired
+    private RestAuthenticationFailureHandler failureHandler;
+
     @Override
     protected void configure(AuthenticationManagerBuilder auth) throws Exception {
-//        auth.userDetailsService(userDetailsService).passwordEncoder(passwordEncoder());
         auth.userDetailsService(userDetailsService);
     }
 
@@ -50,23 +56,8 @@ public class SecurityWebConfiguration extends WebSecurityConfigurerAdapter {
     public LoginFilter loginFilter() throws Exception {
         LoginFilter loginFilter = new LoginFilter();
         loginFilter.setAuthenticationManager(authenticationManagerBean());
-        loginFilter.setAuthenticationSuccessHandler((request, response, authentication) -> {
-            Map<String, Object> result = new HashMap<>();
-            result.put("msg", "登录成功！");
-            response.setCharacterEncoding(StandardCharsets.UTF_8.name());
-            response.setContentType(MediaType.APPLICATION_JSON_VALUE);
-            response.setStatus(HttpStatus.OK.value());
-            response.getWriter().println(new ObjectMapper().writeValueAsString(result));
-        });
-        loginFilter.setAuthenticationFailureHandler((request, response, exception) -> {
-            Map<String, Object> result = new HashMap<>();
-            result.put("msg", "登录失败！");
-            response.setCharacterEncoding(StandardCharsets.UTF_8.name());
-            response.setContentType(MediaType.APPLICATION_JSON_VALUE);
-            response.setStatus(HttpStatus.FORBIDDEN.value());
-            response.getWriter().println(new ObjectMapper().writeValueAsString(result));
-        });
-
+        loginFilter.setAuthenticationSuccessHandler(successHandler);
+        loginFilter.setAuthenticationFailureHandler(failureHandler);
         return loginFilter;
     }
 

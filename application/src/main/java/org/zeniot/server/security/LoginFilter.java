@@ -20,6 +20,7 @@ import java.util.Map;
  */
 public class LoginFilter extends UsernamePasswordAuthenticationFilter {
 
+
     @Override
     public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response) throws AuthenticationException {
         if (!HttpMethod.POST.matches(request.getMethod())) {
