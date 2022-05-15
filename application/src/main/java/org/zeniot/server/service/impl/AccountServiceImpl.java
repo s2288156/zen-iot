@@ -22,4 +22,9 @@ public class AccountServiceImpl implements AccountService {
     public void registerAccount(Account account) {
         accountRepository.save(account.toEntity(passwordEncoder));
     }
+
+    @Override
+    public void deleteAccount(Long id) {
+        accountRepository.deleteById(id);
+    }
 }

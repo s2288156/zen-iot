@@ -9,7 +9,7 @@ import java.util.Objects;
  * @author Wu.Chunyang
  */
 @Entity
-@Table(name = "role")
+@Table(name = "t_role")
 public class RoleEntity extends BaseEntity {
     @Column(name = "name", nullable = false, length = 64)
     private String name;

@@ -7,4 +7,6 @@ import org.zeniot.server.controller.response.Account;
  */
 public interface AccountService {
     void registerAccount(Account account);
+
+    void deleteAccount(Long id);
 }

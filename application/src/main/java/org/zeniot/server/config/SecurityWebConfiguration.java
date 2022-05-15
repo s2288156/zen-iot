@@ -1,11 +1,9 @@
 package org.zeniot.server.config;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -17,10 +15,6 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import org.zeniot.server.security.LoginFilter;
 import org.zeniot.server.security.handler.RestAuthenticationFailureHandler;
 import org.zeniot.server.security.handler.RestAuthenticationSuccessHandler;
-
-import java.nio.charset.StandardCharsets;
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * @author Wu.Chunyang
@@ -66,6 +60,7 @@ public class SecurityWebConfiguration extends WebSecurityConfigurerAdapter {
         http.csrf().disable()
                 .authorizeRequests()
                 .antMatchers("/api/register").permitAll()
+                .antMatchers(HttpMethod.DELETE, "/api/account/**").permitAll()
                 .and()
                 .formLogin();
         http.addFilterAt(loginFilter(), UsernamePasswordAuthenticationFilter.class);
