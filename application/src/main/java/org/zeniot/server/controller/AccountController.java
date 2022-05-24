@@ -16,6 +16,7 @@ public class AccountController {
     @Autowired
     private AccountService accountService;
 
+    @ResponseBody
     @PostMapping("/register")
     public RestResponse registerAccount(@RequestBody Account account) {
         accountService.registerAccount(account);

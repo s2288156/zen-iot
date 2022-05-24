@@ -8,6 +8,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.zeniot.dao.model.AccountEntity;
 import org.zeniot.dao.model.RoleEntity;
 
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
 import java.io.Serializable;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -20,9 +22,14 @@ import java.util.stream.Collectors;
 public class Account implements Serializable {
     private static final long serialVersionUID = -6536667040345207843L;
 
+    @NotBlank
     @Getter
     private String username;
+
+    @NotBlank
     private String password;
+
+    @NotNull(message = "The roles can't be empty!")
     private Set<String> roles;
 
     public AccountEntity toEntity(PasswordEncoder passwordEncoder) {
