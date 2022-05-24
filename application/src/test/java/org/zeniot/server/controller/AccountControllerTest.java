@@ -5,9 +5,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.zeniot.server.controller.request.TAccount;
-import org.zeniot.server.controller.response.Account;
 import org.zeniot.server.utils.JacksonUtil;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -16,9 +16,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 /**
  * @author Wu.Chunyang
  */
-@SpringBootTest
-@AutoConfigureMockMvc
-public class AccountControllerTest {
+public class AccountControllerTest extends AbstractControllerTest{
 
     @Autowired
     private MockMvc mockMvc;
