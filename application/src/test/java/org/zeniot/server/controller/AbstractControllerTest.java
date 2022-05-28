@@ -9,7 +9,7 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
-import org.zeniot.server.utils.JacksonUtil;
+import org.zeniot.common.util.JacksonUtil;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;

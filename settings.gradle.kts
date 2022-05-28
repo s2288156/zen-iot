@@ -10,3 +10,6 @@
 rootProject.name = "zen-iot"
 include("application")
 include("dao")
+include("common")
+include("common:util")
+findProject(":common:util")?.name = "util"
