@@ -3,6 +3,7 @@ plugins {
 }
 
 dependencies {
+    api("org.apache.commons:commons-lang3")
     api("org.springframework.boot:spring-boot-starter-json")
 }
 

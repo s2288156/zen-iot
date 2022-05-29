@@ -5,7 +5,6 @@
  * Learn more about Gradle by exploring our samples at https://docs.gradle.org/7.4.2/samples
  */
 plugins {
-    java
     idea
     id("org.springframework.boot").version("2.6.6")
 }
@@ -14,7 +13,6 @@ allprojects {
     group = "org.zeniot"
     version = "0.0.1"
 
-    apply(plugin = "java")
     apply(plugin = "idea")
     apply(plugin = "org.springframework.boot")
     apply(plugin = "io.spring.dependency-management")
@@ -24,17 +22,6 @@ allprojects {
             setUrl("https://maven.aliyun.com/repository/public/")
         }
         mavenCentral()
-    }
-}
-
-subprojects {
-    dependencies {
-        implementation("org.apache.commons:commons-lang3")
-        compileOnly("org.projectlombok:lombok")
-        annotationProcessor("org.projectlombok:lombok")
-        testImplementation("org.springframework.boot:spring-boot-starter-test")
-        testCompileOnly("org.projectlombok:lombok")
-        testAnnotationProcessor("org.projectlombok:lombok")
     }
 }
 

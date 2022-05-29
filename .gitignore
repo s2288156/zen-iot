@@ -6,7 +6,7 @@ build/
 !.mvn/wrapper/maven-wrapper.jar
 !**/src/main/**/target/
 !**/src/test/**/target/
-httpclient/MyLocal*.http
+doc/httpclient/MyLocal*.http
 ### STS ###
 .apt_generated
 .classpath
