@@ -13,3 +13,4 @@ include("dao")
 include("common")
 include("common:util")
 findProject(":common:util")?.name = "util"
+include("app-ui")
