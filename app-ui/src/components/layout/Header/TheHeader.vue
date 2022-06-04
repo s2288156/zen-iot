@@ -1,5 +1,5 @@
 <template>
-    <el-header class="el-header">Header</el-header>
+  <div>this is header</div>
 </template>
 
 <script lang="ts" setup>
