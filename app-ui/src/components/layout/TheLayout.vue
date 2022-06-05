@@ -15,9 +15,9 @@
 </template>
 
 <script lang="ts" setup>
-import TheHeader from '@/components/layout/Header/TheHeader.vue';
-import AsideMenu from '@/components/layout/Aside/AsideMenu.vue';
-import TheMain from '@/components/layout/Main/TheMain.vue';
+import TheHeader from '@/components/layout/Header/TheHeader.vue'
+import AsideMenu from '@/components/layout/Aside/AsideMenu.vue'
+import TheMain from '@/components/layout/Main/TheMain.vue'
 </script>
 
 <style scoped lang="scss">

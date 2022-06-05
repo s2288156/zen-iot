@@ -1,17 +1,17 @@
-import { createRouter, createWebHashHistory, RouteRecordRaw } from 'vue-router';
-import TheLayout from '@/components/layout/TheLayout.vue';
+import { createRouter, createWebHashHistory, RouteRecordRaw } from 'vue-router'
+import TheLayout from '@/components/layout/TheLayout.vue'
 
 const routes: Array<RouteRecordRaw> = [
   {
     path: '/',
     name: 'layout',
-    component: TheLayout,
-  },
-];
+    component: TheLayout
+  }
+]
 
 const router = createRouter({
   history: createWebHashHistory(),
-  routes,
-});
+  routes
+})
 
-export default router;
+export default router
