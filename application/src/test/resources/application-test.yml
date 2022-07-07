@@ -1,0 +1,14 @@
+spring:
+  application:
+    name: zen-iot
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    open-in-view: false
+    show-sql: true
+  datasource:
+    url: jdbc:postgresql://localhost:5432/db_zen_iot_test
+    username: postgres
+    password: postgres
+  flyway:
+    enabled: false
