@@ -1,3 +1,5 @@
+import org.gradle.plugins.ide.idea.model.Jdk
+
 plugins {
     java
 }
@@ -16,4 +18,8 @@ dependencies {
 
 tasks.getByName<Test>("test") {
     useJUnitPlatform()
+}
+
+tasks.compileJava {
+    options.release.set(17)
 }
