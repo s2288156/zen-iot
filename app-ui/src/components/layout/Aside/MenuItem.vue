@@ -1,35 +1,26 @@
 <template>
-  <el-sub-menu index="1">
-    <template #title>
-      <el-icon>
-        <location/>
-      </el-icon>
-      <span>Navigator One</span>
-    </template>
-    <el-sub-menu index="1-4">
-      <template #title>item four</template>
-      <el-menu-item index="1-4-1">item one</el-menu-item>
+  <template v-for="menu in menuList" :key="menu.path">
+    <el-sub-menu v-if="menu.children && menu.children.length > 0" :index="menu.path">
+      <template #title>
+        <el-icon>
+          <component :is="menu.meta.icon"></component>
+        </el-icon>
+        <span>{{ menu.meta.title }}</span>
+      </template>
+      <menu-item :menu-list="menu.children"></menu-item>
     </el-sub-menu>
-  </el-sub-menu>
-  <el-menu-item index="2">
-    <el-icon><Menu /></el-icon>
-    <span>Navigator Two</span>
-  </el-menu-item>
-  <el-menu-item index="3" disabled>
-    <el-icon>
-      <document/>
-    </el-icon>
-    <span>Navigator Three</span>
-  </el-menu-item>
-  <el-menu-item index="4">
-    <el-icon>
-      <setting/>
-    </el-icon>
-    <span>Navigator Four</span>
-  </el-menu-item>
+    <el-menu-item v-else :index="menu.path">
+      <el-icon>
+        <component :is="menu.meta.icon"></component>
+      </el-icon>
+      <span>{{ menu.meta.title }}</span>
+    </el-menu-item>
+  </template>
 </template>
 
 <script lang="ts" setup>
+
+defineProps(['menuList'])
 
 </script>
 

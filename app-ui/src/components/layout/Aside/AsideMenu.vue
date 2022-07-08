@@ -5,7 +5,7 @@
     @open="handleOpen"
     @close="handleClose"
   >
-    <MenuItem/>
+    <menu-item :menuList="menuList"/>
   </el-menu>
 </template>
 
@@ -19,7 +19,36 @@ const menuList = reactive([
     name: 'System',
     meta: {
       title: '系统管理',
-      icon: '',
+      icon: 'Setting',
+      roles: ['ROLE_ADMIN']
+    },
+    children: [
+      {
+        path: '/system/user',
+        name: 'User',
+        meta: {
+          title: '用户管理',
+          icon: 'User',
+          roles: ['ROLE_ADMIN']
+        }
+      },
+      {
+        path: '/system/menu',
+        name: 'Menu',
+        meta: {
+          title: '菜单管理',
+          icon: 'Menu',
+          roles: ['ROLE_ADMIN']
+        }
+      }
+    ]
+  },
+  {
+    path: '/platform',
+    name: 'Platform',
+    meta: {
+      title: '平台配置',
+      icon: 'Platform',
       roles: ['ROLE_ADMIN']
     }
   }
