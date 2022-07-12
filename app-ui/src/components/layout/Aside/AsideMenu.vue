@@ -65,5 +65,7 @@ const handleClose = (key: string, keyPath: string[]) => {
 </script>
 
 <style scoped lang="scss">
-
+.el-menu-vertical-demo {
+  background-color: #ced6e0;
+}
 </style>

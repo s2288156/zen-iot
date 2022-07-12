@@ -24,13 +24,13 @@ import TheMain from '@/components/layout/Main/TheMain.vue'
 .layout {
   height: 100%;
   .el-header {
-    background-color: #42b983;
+    background-color: #ffffff;
   }
   .el-aside {
-    background-color: azure;
+    background-color: #f1f2f6;
   }
   .el-main {
-    background-color: cornsilk;
+    background-color: #ffffff;
   }
 }
 </style>
