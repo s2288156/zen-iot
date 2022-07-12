@@ -10,6 +10,6 @@ const goBack = () => {
 
 <style scoped lang="scss">
 .el-page-header {
-  margin-top: 30px;
+  margin-top: 15px;
 }
 </style>

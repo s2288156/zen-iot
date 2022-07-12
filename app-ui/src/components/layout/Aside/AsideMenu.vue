@@ -72,10 +72,10 @@ const handleClose = (key: string, keyPath: string[]) => {
 .logo {
   display: flex;
   width: 100%;
-  height: 60px;
+  height: 45px;
   .el-image {
-    width: 115px;
-    height: 60px;
+    width: 90px;
+    height: 45px;
     margin-left: 10px;
   }
 }

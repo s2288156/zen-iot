@@ -24,6 +24,7 @@ import TheMain from '@/components/layout/Main/TheMain.vue'
 .layout {
   height: 100%;
   .el-header {
+    height: 45px;
     background-color: #ffffff;
     border-bottom-style: solid;
     border-bottom-width: 1px;
