@@ -1,12 +1,12 @@
 <template>
   <el-container class="layout">
-    <el-header>
-      <TheHeader/>
-    </el-header>
+    <el-aside width="200px">
+      <AsideMenu/>
+    </el-aside>
     <el-container>
-      <el-aside width="200px">
-        <AsideMenu/>
-      </el-aside>
+      <el-header>
+        <TheHeader/>
+      </el-header>
       <el-main>
         <TheMain/>
       </el-main>
@@ -25,9 +25,15 @@ import TheMain from '@/components/layout/Main/TheMain.vue'
   height: 100%;
   .el-header {
     background-color: #ffffff;
+    border-bottom-style: solid;
+    border-bottom-width: 1px;
+    border-bottom-color: #dfe4ea;
   }
   .el-aside {
     background-color: #f1f2f6;
+    border-right-style: solid;
+    border-right-width: 1px;
+    border-right-color: #dfe4ea;
   }
   .el-main {
     background-color: #ffffff;

@@ -1,7 +1,10 @@
 <template>
+  <div class="logo">
+    <el-image :src="ZenLogo"/>
+  </div>
   <el-menu
     default-active="2"
-    class="el-menu-vertical-demo"
+    class="menu"
     @open="handleOpen"
     @close="handleClose"
   >
@@ -11,6 +14,7 @@
 
 <script lang="ts" setup>
 import MenuItem from '@/components/layout/Aside/MenuItem.vue'
+import ZenLogo from '@/assets/zen-logo.svg'
 import { reactive } from 'vue'
 
 const menuList = reactive([
@@ -65,7 +69,17 @@ const handleClose = (key: string, keyPath: string[]) => {
 </script>
 
 <style scoped lang="scss">
-.el-menu-vertical-demo {
+.logo {
+  display: flex;
+  width: 100%;
+  height: 60px;
+  .el-image {
+    width: 115px;
+    height: 60px;
+    margin-left: 10px;
+  }
+}
+.menu {
   background-color: #ced6e0;
 }
 </style>
