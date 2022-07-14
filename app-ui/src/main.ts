@@ -10,9 +10,9 @@ import { createPinia } from 'pinia'
 
 const app = createApp(App)
 
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
 app.use(createPinia()).use(router).use(ElementPlus, { size: 'default' }).mount('#app')
 for (const [key, component] of Object.entries(ElementPlusIconsVue)) {
   app.component(key, component)
 }
+//
