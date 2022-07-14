@@ -1,11 +1,66 @@
 import { createRouter, createWebHashHistory, RouteRecordRaw } from 'vue-router'
 import TheLayout from '@/components/layout/TheLayout.vue'
+import TheHome from '@/components/home/TheHome.vue'
 
 const routes: Array<RouteRecordRaw> = [
   {
     path: '/',
-    name: 'layout',
-    component: TheLayout
+    component: TheLayout,
+    redirect: '/home',
+    children: [
+      {
+        path: '/home',
+        name: 'Home',
+        component: TheHome,
+        meta: {
+          title: '首页',
+          icon: 'HomeFilled',
+          roles: []
+        }
+      }
+    ]
+  },
+  {
+    path: '/system',
+    name: 'System',
+    component: TheLayout,
+    meta: {
+      title: '系统管理',
+      icon: 'Setting',
+      roles: ['ROLE_ADMIN']
+    },
+    children: [
+      {
+        path: '/system/user',
+        name: 'User',
+        component: () => import('@/components/system/UserManager.vue'),
+        meta: {
+          title: '用户管理',
+          icon: 'User',
+          roles: ['ROLE_ADMIN']
+        }
+      },
+      {
+        path: '/system/menu',
+        name: 'Menu',
+        component: () => import('@/components/system/MenuManager.vue'),
+        meta: {
+          title: '菜单管理',
+          icon: 'Menu',
+          roles: ['ROLE_ADMIN']
+        }
+      }
+    ]
+  },
+  {
+    path: '/platform',
+    name: 'Platform',
+    component: TheLayout,
+    meta: {
+      title: '平台配置',
+      icon: 'Platform',
+      roles: ['ROLE_ADMIN']
+    }
   }
 ]
 

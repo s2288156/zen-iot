@@ -3,10 +3,11 @@
     <el-image :src="ZenLogo"/>
   </div>
   <el-menu
-    default-active="2"
+    :default-active="defaultActive"
     class="menu"
     @open="handleOpen"
     @close="handleClose"
+    router
   >
     <menu-item :menuList="menuList"/>
   </el-menu>
@@ -15,9 +16,25 @@
 <script lang="ts" setup>
 import MenuItem from '@/components/layout/Aside/MenuItem.vue'
 import ZenLogo from '@/assets/zen-logo.svg'
-import { reactive } from 'vue'
+import { computed, reactive } from 'vue'
+import { useRoute } from 'vue-router'
+
+const route = useRoute()
+
+const defaultActive = '/home'
+console.log(defaultActive)
+// console.log(route)
 
 const menuList = reactive([
+  {
+    path: '/',
+    name: 'Home',
+    meta: {
+      title: '首页',
+      icon: 'HomeFilled',
+      roles: []
+    }
+  },
   {
     path: '/system',
     name: 'System',
@@ -59,11 +76,11 @@ const menuList = reactive([
 ])
 
 const handleOpen = (key: string, keyPath: string[]) => {
-  console.log(key, keyPath)
+  // console.log(key, keyPath)
 }
 
 const handleClose = (key: string, keyPath: string[]) => {
-  console.log(key, keyPath)
+  // console.log(key, keyPath)
 }
 
 </script>
@@ -73,12 +90,14 @@ const handleClose = (key: string, keyPath: string[]) => {
   display: flex;
   width: 100%;
   height: 45px;
+
   .el-image {
     width: 90px;
     height: 45px;
     margin-left: 10px;
   }
 }
+
 .menu {
   background-color: #ced6e0;
 }
