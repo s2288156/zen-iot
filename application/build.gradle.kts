@@ -1,5 +1,3 @@
-import org.gradle.plugins.ide.idea.model.Jdk
-
 plugins {
     java
 }
