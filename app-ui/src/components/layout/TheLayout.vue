@@ -8,7 +8,6 @@
         <TheHeader/>
       </el-header>
       <el-main>
-<!--        <TheMain/>-->
         <router-view/>
       </el-main>
     </el-container>

@@ -22,9 +22,10 @@ import TheLayout from '@/components/layout/TheLayout.vue'
 
 const route = useRoute()
 
-const defaultActive = '/home'
-console.log(defaultActive)
-// console.log(route)
+const defaultActive = computed(() => {
+  const { path } = route
+  return path
+})
 
 const menuList = reactive([
   {
