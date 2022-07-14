@@ -60,7 +60,19 @@ const routes: Array<RouteRecordRaw> = [
       title: '平台配置',
       icon: 'Platform',
       roles: ['ROLE_ADMIN']
-    }
+    },
+    children: [
+      {
+        path: '/platform/device',
+        name: 'Device',
+        component: () => import('@/components/platform/DeviceManager.vue'),
+        meta: {
+          title: '设备管理',
+          icon: 'Cpu',
+          roles: ['ROLE_ADMIN']
+        }
+      }
+    ]
   }
 ]
 
