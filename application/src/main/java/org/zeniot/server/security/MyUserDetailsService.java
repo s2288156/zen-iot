@@ -35,7 +35,7 @@ public class MyUserDetailsService implements UserDetailsService {
                     .collect(Collectors.toList());
             return User.builder()
                     .username(accountEntity.getUsername())
-                    .password(accountEntity.getPwd())
+                    .password(accountEntity.getPassword())
                     .authorities(authorities)
                     .build();
         }

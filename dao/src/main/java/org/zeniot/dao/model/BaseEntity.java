@@ -2,6 +2,7 @@ package org.zeniot.dao.model;
 
 import lombok.ToString;
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.UpdateTimestamp;
 import org.springframework.data.annotation.CreatedDate;
 
@@ -17,7 +18,8 @@ import java.time.LocalDateTime;
 @MappedSuperclass
 public class BaseEntity {
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GenericGenerator(name = "id", strategy = "org.zeniot.dao.config.SnowFlakeIdGenerator")
+    @GeneratedValue(generator = "id")
     @Column(name = "id", nullable = false)
     private Long id;
 

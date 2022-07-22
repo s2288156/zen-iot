@@ -16,6 +16,7 @@ import org.zeniot.dao.model.RoleEntity;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -33,7 +34,12 @@ class AccountRepositoryTest {
 
     @BeforeEach
     void setUp() {
-
+        List<RoleEntity> allRole = roleRepository.findAll();
+        AccountEntity admin = new AccountEntity();
+        admin.setUsername("admin");
+        admin.setPassword("123123");
+        admin.setRoles(Set.of(allRole.get(0)));
+        accountRepository.save(admin);
     }
 
     @AfterEach
@@ -43,7 +49,7 @@ class AccountRepositoryTest {
     @Test
     void findAccountByUsername() {
         Optional<AccountEntity> account = accountRepository.findAccountByUsername("admin");
-        System.out.println(account.isEmpty());
+        log.warn("####### {}", account.get());
     }
 
     @Test

@@ -10,6 +10,7 @@ import org.zeniot.dao.model.RoleEntity;
 
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -20,6 +21,7 @@ import java.util.stream.Collectors;
 @Setter(AccessLevel.PRIVATE)
 @ToString
 public class Account implements Serializable {
+    @Serial
     private static final long serialVersionUID = -6536667040345207843L;
 
     @NotBlank
@@ -35,7 +37,7 @@ public class Account implements Serializable {
     public AccountEntity toEntity(PasswordEncoder passwordEncoder) {
         AccountEntity accountEntity = new AccountEntity();
         accountEntity.setUsername(username);
-        accountEntity.setPwd(passwordEncoder.encode(password));
+        accountEntity.setPassword(passwordEncoder.encode(password));
         Set<RoleEntity> roleEntities = roles.stream().map(RoleEntity::new).collect(Collectors.toSet());
         accountEntity.setRoles(roleEntities);
         return accountEntity;

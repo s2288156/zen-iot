@@ -1,9 +1,13 @@
 package org.zeniot.dao.model;
 
+import lombok.ToString;
+
 import javax.persistence.*;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
+
+@ToString(callSuper = true)
 @Entity
 @Table(name = "t_account")
 public class AccountEntity extends BaseEntity {
@@ -11,7 +15,7 @@ public class AccountEntity extends BaseEntity {
     private String username;
 
     @Column(name = "pwd", nullable = false, length = 64)
-    private String pwd;
+    private String password;
 
     @ManyToMany(fetch = FetchType.EAGER, cascade = {CascadeType.PERSIST, CascadeType.REFRESH})
     @JoinTable(name = "t_account_role",
@@ -31,12 +35,12 @@ public class AccountEntity extends BaseEntity {
         this.roleEntities = roleEntities;
     }
 
-    public String getPwd() {
-        return pwd;
+    public String getPassword() {
+        return password;
     }
 
-    public void setPwd(String password) {
-        this.pwd = password;
+    public void setPassword(String password) {
+        this.password = password;
     }
 
     public String getUsername() {
