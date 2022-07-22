@@ -5,7 +5,6 @@ import org.hibernate.engine.spi.SharedSessionContractImplementor;
 import org.hibernate.id.IdentifierGenerator;
 
 import java.io.Serializable;
-import java.util.Random;
 
 /**
  * @author Wu.Chunyang
@@ -13,6 +12,6 @@ import java.util.Random;
 public class SnowFlakeIdGenerator implements IdentifierGenerator {
     @Override
     public Serializable generate(SharedSessionContractImplementor session, Object object) throws HibernateException {
-        return new Random().nextLong();
+        return new SnowFlake(1L, 1L).nextId();
     }
 }
