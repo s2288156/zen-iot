@@ -3,6 +3,7 @@ package org.zeniot.dao.repository;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -46,10 +47,12 @@ class AccountRepositoryTest {
     void tearDown() {
     }
 
+    @DisplayName("find account by username")
     @Test
     void findAccountByUsername() {
         Optional<AccountEntity> account = accountRepository.findAccountByUsername("admin");
-        log.warn("####### {}", account.get());
+        assertTrue(account.isPresent());
+        assertEquals(1, account.get().getRoleEntities().size());
     }
 
     @Test
