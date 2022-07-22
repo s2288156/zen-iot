@@ -1,0 +1,14 @@
+.app-container {
+  padding: 10px;
+}
+
+.filter-container {
+  padding-bottom: 10px;
+  text-align: left;
+
+  .filter-item {
+    display: inline-block;
+    vertical-align: middle;
+    margin-bottom: 10px;
+  }
+}
