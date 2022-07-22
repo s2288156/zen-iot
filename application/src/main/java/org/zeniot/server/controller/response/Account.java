@@ -35,7 +35,7 @@ public class Account implements Serializable {
     public AccountEntity toEntity(PasswordEncoder passwordEncoder) {
         AccountEntity accountEntity = new AccountEntity();
         accountEntity.setUsername(username);
-        accountEntity.setPassword(passwordEncoder.encode(password));
+        accountEntity.setPwd(passwordEncoder.encode(password));
         Set<RoleEntity> roleEntities = roles.stream().map(RoleEntity::new).collect(Collectors.toSet());
         accountEntity.setRoles(roleEntities);
         return accountEntity;

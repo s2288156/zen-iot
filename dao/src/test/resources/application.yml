@@ -1,14 +1,13 @@
 spring:
   datasource:
-    url: jdbc:h2:~/test;MODE=PostgreSQL;database_to_upper=false
+    url: jdbc:h2:~/test;database_to_upper=false
     driver-class-name: org.h2.Driver
-    username: sa
+    username: test
     password: 123456
   jpa:
     hibernate:
       ddl-auto: none
     open-in-view: false
     show-sql: true
-    database: h2
   flyway:
     enabled: true

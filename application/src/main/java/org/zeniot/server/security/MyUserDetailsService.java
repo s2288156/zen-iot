@@ -31,11 +31,11 @@ public class MyUserDetailsService implements UserDetailsService {
         if (accountOptional.isPresent()) {
             AccountEntity accountEntity = accountOptional.get();
             Set<RoleEntity> roleEntities = accountEntity.getRoles();
-            List<SimpleGrantedAuthority> authorities= roleEntities.stream().map(rule -> new SimpleGrantedAuthority(rule.getName()))
+            List<SimpleGrantedAuthority> authorities= roleEntities.stream().map(rule -> new SimpleGrantedAuthority(rule.getRoleName()))
                     .collect(Collectors.toList());
             return User.builder()
                     .username(accountEntity.getUsername())
-                    .password(accountEntity.getPassword())
+                    .password(accountEntity.getPwd())
                     .authorities(authorities)
                     .build();
         }

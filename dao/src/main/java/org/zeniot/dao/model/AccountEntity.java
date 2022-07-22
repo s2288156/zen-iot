@@ -10,8 +10,8 @@ public class AccountEntity extends BaseEntity {
     @Column(name = "username", nullable = false, length = 32)
     private String username;
 
-    @Column(name = "password", nullable = false, length = 64)
-    private String password;
+    @Column(name = "pwd", nullable = false, length = 64)
+    private String pwd;
 
     @ManyToMany(fetch = FetchType.EAGER, cascade = {CascadeType.PERSIST, CascadeType.REFRESH})
     @JoinTable(name = "t_account_role",
@@ -31,12 +31,12 @@ public class AccountEntity extends BaseEntity {
         this.roleEntities = roleEntities;
     }
 
-    public String getPassword() {
-        return password;
+    public String getPwd() {
+        return pwd;
     }
 
-    public void setPassword(String password) {
-        this.password = password;
+    public void setPwd(String password) {
+        this.pwd = password;
     }
 
     public String getUsername() {

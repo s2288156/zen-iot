@@ -3,7 +3,7 @@ CREATE TABLE t_account
     id          int8        NOT NULL,
     create_time timestamp   NOT NULL,
     update_time timestamp   NOT NULL,
-    "password"  varchar(64) NOT NULL,
+    pwd  varchar(64) NOT NULL,
     username    varchar(32) NOT NULL,
     CONSTRAINT t_account_pkey PRIMARY KEY (id)
 );
@@ -13,7 +13,7 @@ CREATE TABLE t_role
     id          int8        NOT NULL,
     create_time timestamp   NOT NULL,
     update_time timestamp   NOT NULL,
-    "name"      varchar(64) NOT NULL,
+    role_name      varchar(64) NOT NULL,
     CONSTRAINT t_role_pkey PRIMARY KEY (id)
 );
 
