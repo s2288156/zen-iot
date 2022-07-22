@@ -1,10 +1,14 @@
 spring:
+  datasource:
+    url: jdbc:h2:~/test;MODE=PostgreSQL;database_to_upper=false
+    driver-class-name: org.h2.Driver
+    username: sa
+    password: 123456
   jpa:
     hibernate:
-      ddl-auto: create-drop
+      ddl-auto: none
     open-in-view: false
     show-sql: true
-  datasource:
-    url: jdbc:postgresql://localhost:5432/db_zen_iot
-    username: postgres
-    password: postgres
+    database: h2
+  flyway:
+    enabled: true
