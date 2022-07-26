@@ -13,6 +13,9 @@ import org.zeniot.server.controller.response.PageResponse;
 import org.zeniot.server.exception.BizException;
 import org.zeniot.server.service.AccountService;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 /**
  * @author Wu.Chunyang
  */
@@ -52,6 +55,10 @@ public class AccountServiceImpl implements AccountService {
         int number = all.getNumber();
         int numberOfElements = all.getNumberOfElements();
         log.warn("totalPages = {}, totalElements = {}, number = {}, numberOfElements = {}", totalPages, totalElements, number, numberOfElements);
-        return null;
+        List<Account> accounts = all.getContent()
+                .stream()
+                .map(Account::listAccountFromEntity)
+                .toList();
+        return PageResponse.of(accounts, totalPages, totalElements, all.hasNext());
     }
 }

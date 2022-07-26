@@ -42,4 +42,10 @@ public class Account implements Serializable {
         accountEntity.setRoles(roleEntities);
         return accountEntity;
     }
+
+    public static Account listAccountFromEntity(AccountEntity accountEntity) {
+        Account account = new Account();
+        account.setUsername(accountEntity.getUsername());
+        return account;
+    }
 }

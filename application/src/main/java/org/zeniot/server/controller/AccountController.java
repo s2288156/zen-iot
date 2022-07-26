@@ -32,8 +32,7 @@ public class AccountController {
 
     @GetMapping("/accounts")
     public PageResponse<Account> findAccounts() {
-        accountService.pageAll();
-        return new PageResponse<>();
+        return accountService.pageAll();
     }
 
 }
