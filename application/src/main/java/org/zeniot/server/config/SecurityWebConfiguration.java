@@ -60,7 +60,7 @@ public class SecurityWebConfiguration extends WebSecurityConfigurerAdapter {
         http.csrf().disable()
                 .authorizeRequests()
                 .antMatchers("/api/register").permitAll()
-                .antMatchers(HttpMethod.DELETE, "/api/account/**").permitAll()
+                .antMatchers("/api/accounts/**").permitAll()
                 .and()
                 .formLogin();
         http.addFilterAt(loginFilter(), UsernamePasswordAuthenticationFilter.class);

@@ -1,11 +1,14 @@
 package org.zeniot.server.controller.response;
 
+import lombok.Data;
+
 import java.util.Collections;
 import java.util.List;
 
 /**
  * @author Wu.Chunyang
  */
+@Data
 public class PageResponse<T> {
 
     private final List<T> data;

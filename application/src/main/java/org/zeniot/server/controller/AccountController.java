@@ -1,6 +1,7 @@
 package org.zeniot.server.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.zeniot.server.controller.response.Account;
 import org.zeniot.server.controller.response.PageResponse;
@@ -19,7 +20,7 @@ public class AccountController {
 
     @ResponseBody
     @PostMapping("/account/register")
-    public RestResponse registerAccount(@RequestBody Account account) {
+    public RestResponse registerAccount(@Validated @RequestBody Account account) {
         accountService.registerAccount(account);
         return RestResponse.ok();
     }
