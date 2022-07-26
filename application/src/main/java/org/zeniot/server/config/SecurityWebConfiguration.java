@@ -6,21 +6,28 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
+import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.web.AuthenticationEntryPoint;
+import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.zeniot.server.security.LoginFilter;
+import org.zeniot.server.security.component.RestAuthenticationEntryPoint;
 import org.zeniot.server.security.handler.RestAuthenticationFailureHandler;
 import org.zeniot.server.security.handler.RestAuthenticationSuccessHandler;
 
 /**
  * @author Wu.Chunyang
  */
+@EnableWebSecurity
 @Configuration
-public class SecurityWebConfiguration extends WebSecurityConfigurerAdapter {
+public class SecurityWebConfiguration {
 
     @Autowired
     private UserDetailsService userDetailsService;
@@ -29,10 +36,32 @@ public class SecurityWebConfiguration extends WebSecurityConfigurerAdapter {
     private RestAuthenticationSuccessHandler successHandler;
     @Autowired
     private RestAuthenticationFailureHandler failureHandler;
+    @Autowired
+    private AuthenticationConfiguration authenticationConfiguration;
 
-    @Override
-    protected void configure(AuthenticationManagerBuilder auth) throws Exception {
-        auth.userDetailsService(userDetailsService);
+    @Bean
+    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+        http.authorizeRequests()
+                .and()
+                .authorizeRequests()
+//                .antMatchers("/api/**").permitAll()
+                .anyRequest().authenticated()
+                .and()
+                .exceptionHandling()
+                .authenticationEntryPoint(authenticationEntryPoint())
+                .and()
+                .csrf().disable()
+                .cors().disable()
+                .formLogin().disable()
+                .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
+        http.userDetailsService(userDetailsService);
+//        http.addFilterAt(loginFilter(), UsernamePasswordAuthenticationFilter.class);
+        return http.build();
+    }
+
+    @Bean
+    public AuthenticationEntryPoint authenticationEntryPoint() {
+        return new RestAuthenticationEntryPoint();
     }
 
     @Bean
@@ -40,30 +69,18 @@ public class SecurityWebConfiguration extends WebSecurityConfigurerAdapter {
         return new BCryptPasswordEncoder();
     }
 
-    @Bean
-    @Override
-    public AuthenticationManager authenticationManagerBean() throws Exception {
-        return super.authenticationManagerBean();
-    }
-
-    @Bean
-    public LoginFilter loginFilter() throws Exception {
-        LoginFilter loginFilter = new LoginFilter();
-        loginFilter.setAuthenticationManager(authenticationManagerBean());
-        loginFilter.setAuthenticationSuccessHandler(successHandler);
-        loginFilter.setAuthenticationFailureHandler(failureHandler);
-        return loginFilter;
-    }
-
-    @Override
-    protected void configure(HttpSecurity http) throws Exception {
-        http.csrf().disable()
-                .authorizeRequests()
-                .antMatchers("/api/register").permitAll()
-                .antMatchers("/api/accounts/**").permitAll()
-                .and()
-                .formLogin();
-        http.addFilterAt(loginFilter(), UsernamePasswordAuthenticationFilter.class);
-    }
+//    @Bean
+//    public AuthenticationManager authenticationManager() throws Exception {
+//        return authenticationConfiguration.getAuthenticationManager();
+//    }
+//
+//    @Bean
+//    public LoginFilter loginFilter() throws Exception {
+//        LoginFilter loginFilter = new LoginFilter();
+//        loginFilter.setAuthenticationManager(authenticationManager());
+//        loginFilter.setAuthenticationSuccessHandler(successHandler);
+//        loginFilter.setAuthenticationFailureHandler(failureHandler);
+//        return loginFilter;
+//    }
 
 }
