@@ -1,6 +1,9 @@
 package org.zeniot.server.security;
 
-import com.nimbusds.jose.*;
+import com.nimbusds.jose.JWSAlgorithm;
+import com.nimbusds.jose.JWSHeader;
+import com.nimbusds.jose.JWSSigner;
+import com.nimbusds.jose.JWSVerifier;
 import com.nimbusds.jose.crypto.MACSigner;
 import com.nimbusds.jose.crypto.MACVerifier;
 import com.nimbusds.jwt.JWTClaimsSet;
@@ -18,13 +21,10 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  */
 @Slf4j
 public class JwtTest {
-    String key = "osaddfu123xzc021ljsaldjsaasdf123";
+    String key = "osaddfu123xzc021ljsaldjsaasdf123osaddfu123xzc021ljsaldjsaasdf123";
 
     @Test
     void test_jwt_sign() throws Exception {
-        byte[] sharedSecret = key.getBytes();
-        // Create HMAC signer
-        JWSSigner signer = new MACSigner(sharedSecret);
 
         // Prepare JWT with claims set
         JWTClaimsSet claimsSet = new JWTClaimsSet.Builder()
@@ -32,8 +32,11 @@ public class JwtTest {
                 .issuer("https://c2id.com")
                 .expirationTime(new Date(new Date().getTime() + 60 * 1000))
                 .build();
-
-        SignedJWT signedJWT = new SignedJWT(new JWSHeader(JWSAlgorithm.HS256), claimsSet);
+        // 512-bit (64-byte) shared secret
+        SignedJWT signedJWT = new SignedJWT(new JWSHeader(JWSAlgorithm.HS512), claimsSet);
+        // Create HMAC signer
+        byte[] sharedSecret = key.getBytes();
+        JWSSigner signer = new MACSigner(sharedSecret);
 
         // Apply the HMAC protection
         signedJWT.sign(signer);

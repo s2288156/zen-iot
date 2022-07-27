@@ -1,4 +1,4 @@
-package org.zeniot.server.security;
+package org.zeniot.server.security.component;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.lang3.StringUtils;
@@ -19,7 +19,6 @@ import java.util.Map;
  * @author Wu.Chunyang
  */
 public class LoginFilter extends UsernamePasswordAuthenticationFilter {
-
 
     @SuppressWarnings("unchecked")
     @Override
