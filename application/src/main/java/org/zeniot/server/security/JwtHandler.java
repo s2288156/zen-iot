@@ -1,14 +1,19 @@
 package org.zeniot.server.security;
 
-import com.nimbusds.jose.*;
+import com.nimbusds.jose.JWSAlgorithm;
+import com.nimbusds.jose.JWSHeader;
+import com.nimbusds.jose.JWSSigner;
+import com.nimbusds.jose.JWSVerifier;
 import com.nimbusds.jose.crypto.MACSigner;
 import com.nimbusds.jose.crypto.MACVerifier;
 import com.nimbusds.jwt.JWTClaimNames;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.stereotype.Component;
 
 import java.text.ParseException;
 import java.util.HashMap;
@@ -18,7 +23,8 @@ import java.util.Map;
  * @author Wu.Chunyang
  */
 @Slf4j
-public class JwtUtils {
+@Component
+public class JwtHandler {
     @Value("${secret.key}")
     private String key;
 
@@ -26,11 +32,12 @@ public class JwtUtils {
         return generateToken(generateClaims(userDetails));
     }
 
-    public boolean verifyToken(String token) {
+    public boolean verifyToken(String token, UserDetails userDetails) {
         try {
             JWSVerifier verifier = new MACVerifier(key.getBytes());
             SignedJWT signedJWT = SignedJWT.parse(token);
-            return signedJWT.verify(verifier);
+            String username = (String) signedJWT.getJWTClaimsSet().getClaim("username");
+            return signedJWT.verify(verifier) && StringUtils.equals(username, userDetails.getUsername());
         } catch (Exception e) {
             log.error("Token verify error: ", e);
         }
