@@ -18,15 +18,14 @@ public class AccountController {
     @Autowired
     private AccountService accountService;
 
-    @ResponseBody
     @PostMapping("/account/register")
-    public RestResponse registerAccount(@Validated @RequestBody Account account) {
+    public RestResponse<Account> registerAccount(@Validated @RequestBody Account account) {
         accountService.registerAccount(account);
         return RestResponse.ok();
     }
 
     @DeleteMapping("/account/{id}")
-    public RestResponse deleteAccount(@PathVariable Long id) {
+    public RestResponse<Account> deleteAccount(@PathVariable Long id) {
         accountService.deleteAccount(id);
         return RestResponse.ok();
     }
