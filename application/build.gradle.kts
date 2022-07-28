@@ -13,6 +13,7 @@ dependencies {
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testCompileOnly("org.projectlombok:lombok")
     testAnnotationProcessor("org.projectlombok:lombok")
+    testRuntimeOnly("com.h2database:h2")
 }
 
 tasks.getByName<Test>("test") {
