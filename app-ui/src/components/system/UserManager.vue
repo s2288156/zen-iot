@@ -17,9 +17,9 @@
 <script lang="ts" setup>
 
 const tableData = {
-  'pageSize': 2,
-  'pageCount': 1,
-  'pages': [
+  pageSize: 2,
+  pageCount: 1,
+  pages: [
     {
       date: '2016-05-03',
       name: 'Tom',

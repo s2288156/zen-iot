@@ -9,6 +9,7 @@ import org.zeniot.common.util.JacksonUtil;
 import org.zeniot.dao.id.AccountId;
 import org.zeniot.server.controller.request.TAccount;
 import org.zeniot.server.controller.response.RestResponse;
+import org.zeniot.server.dto.PageQuery;
 import org.zeniot.server.dto.account.Account;
 
 import java.io.UnsupportedEncodingException;
@@ -38,6 +39,24 @@ public class AccountControllerTest extends AbstractControllerTest {
     @BeforeEach
     void setUp() {
         admin = TAccount.admin();
+    }
+
+    @Test
+    void test_query_account_list() throws Exception{
+        TAccount.accountList().forEach(account -> {
+            try {
+                doPost(API_ACCOUNT_REGISTER, account);
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        });
+        PageQuery pageQuery = new PageQuery();
+        pageQuery.setPage(0);
+        pageQuery.setSize(2);
+        doGet("/api/accounts", JacksonUtil.toString(pageQuery))
+                .andExpect(jsonPath("$.data.size()").value(2))
+                .andExpect(jsonPath("$.totalPages").value(5))
+                .andExpect(jsonPath("$.totalElements").value(10));
     }
 
     @Test

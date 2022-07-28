@@ -1,6 +1,7 @@
 package org.zeniot.server.service;
 
 import org.zeniot.dao.id.AccountId;
+import org.zeniot.server.dto.PageQuery;
 import org.zeniot.server.dto.account.Account;
 import org.zeniot.server.controller.response.PageResponse;
 
@@ -14,5 +15,5 @@ public interface AccountService {
 
     Account findById(AccountId accountId);
 
-    PageResponse<Account> pageAll();
+    PageResponse<Account> pageAll(PageQuery pageQuery);
 }

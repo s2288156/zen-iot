@@ -6,6 +6,7 @@ import org.springframework.web.bind.annotation.*;
 import org.zeniot.dao.id.AccountId;
 import org.zeniot.server.controller.response.PageResponse;
 import org.zeniot.server.controller.response.RestResponse;
+import org.zeniot.server.dto.PageQuery;
 import org.zeniot.server.dto.account.Account;
 import org.zeniot.server.service.AccountService;
 
@@ -41,8 +42,8 @@ public class AccountController {
     }
 
     @GetMapping("/accounts")
-    public PageResponse<Account> findAccounts() {
-        return accountService.pageAll();
+    public PageResponse<Account> findAccounts(@RequestBody @Validated PageQuery query) {
+        return accountService.pageAll(query);
     }
 
 }

@@ -9,6 +9,7 @@ import org.zeniot.dao.id.AccountId;
 import org.zeniot.dao.model.AccountEntity;
 import org.zeniot.dao.model.RoleEntity;
 import org.zeniot.dao.repository.AccountRepository;
+import org.zeniot.server.dto.PageQuery;
 import org.zeniot.server.dto.account.Account;
 import org.zeniot.server.controller.response.PageResponse;
 import org.zeniot.server.exception.BizException;
@@ -57,10 +58,8 @@ public class AccountServiceImpl implements AccountService {
     }
 
     @Override
-    public PageResponse<Account> pageAll() {
-        int page = 0;
-        int size = 10;
-        PageRequest pageable = PageRequest.of(page, size);
+    public PageResponse<Account> pageAll(PageQuery pageQuery) {
+        PageRequest pageable = PageRequest.of(pageQuery.getPage(), pageQuery.getSize());
         Page<AccountEntity> all = accountRepository.findAll(pageable);
         int totalPages = all.getTotalPages();
         long totalElements = all.getTotalElements();

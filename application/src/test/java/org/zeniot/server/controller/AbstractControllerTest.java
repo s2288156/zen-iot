@@ -28,6 +28,7 @@ public class AbstractControllerTest {
     protected MockMvc mockMvc;
 
     protected ResultActions doPost(String urlTemplate, Object content) throws Exception {
+
         MockHttpServletRequestBuilder requestBuilder;
         if (content != null) {
             requestBuilder = post(urlTemplate).contentType(MediaType.APPLICATION_JSON).content(toJson(content));
@@ -49,6 +50,11 @@ public class AbstractControllerTest {
 
     protected ResultActions doGet(String urlTemplate) throws Exception {
         return mockMvc.perform(get(urlTemplate).contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk());
+    }
+
+    protected ResultActions doGet(String urlTemplate, String content) throws Exception {
+        return mockMvc.perform(get(urlTemplate).contentType(MediaType.APPLICATION_JSON).content(content))
                 .andExpect(status().isOk());
     }
 
