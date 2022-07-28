@@ -5,33 +5,21 @@
     </div>
 
     <el-table :data="tableData.pages" style="width: 100%">
-      <el-table-column prop="date" label="Date" width="180"/>
-      <el-table-column prop="name" label="Name" width="180"/>
-      <el-table-column prop="address" label="Address"/>
+      <el-table-column prop="createTime" label="CreateDate" width="180"/>
+      <el-table-column prop="updateTime" label="UpdateDate" width="180"/>
+      <el-table-column prop="username" label="Username" width="180"/>
     </el-table>
 
-    <el-pagination background layout="prev, pager, next" :page-size="tableData.pageSize" :page-count="tableData.pageCount"/>
+    <el-pagination background layout="prev, pager, next" :page-size="tableData.size" :page-count="tableData.totalPages"/>
   </div>
 </template>
 
 <script lang="ts" setup>
+import { getAccounts } from '@/api/account'
+import { PageQuery } from '@/utils/datas'
 
-const tableData = {
-  pageSize: 2,
-  pageCount: 1,
-  pages: [
-    {
-      date: '2016-05-03',
-      name: 'Tom',
-      address: 'No. 189, Grove St, Los Angeles',
-    },
-    {
-      date: '2016-05-02',
-      name: 'Tom',
-      address: 'No. 189, Grove St, Los Angeles',
-    }
-  ]
-}
+const pageQuery = new PageQuery(0, 10)
+const tableData = getAccounts(pageQuery)
 
 </script>
 

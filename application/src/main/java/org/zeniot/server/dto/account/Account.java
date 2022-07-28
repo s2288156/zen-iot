@@ -8,6 +8,7 @@ import org.zeniot.dao.model.AccountEntity;
 import javax.validation.constraints.NotBlank;
 import java.io.Serial;
 import java.io.Serializable;
+import java.time.LocalDate;
 import java.util.Set;
 
 /**
@@ -31,6 +32,12 @@ public class Account implements Serializable {
 
     private Set<String> roles;
 
+    @Getter
+    private LocalDate createTime;
+
+    @Getter
+    private LocalDate updateTime;
+
     public AccountEntity toEntity(PasswordEncoder passwordEncoder) {
         AccountEntity accountEntity = new AccountEntity();
         accountEntity.setUsername(username);
@@ -42,6 +49,8 @@ public class Account implements Serializable {
         Account account = new Account();
         account.setAccountId(AccountId.of(accountEntity.getId()));
         account.setUsername(accountEntity.getUsername());
+        account.setCreateTime(accountEntity.getCreateTime().toLocalDate());
+        account.setUpdateTime(accountEntity.getUpdateTime().toLocalDate());
         return account;
     }
 }
