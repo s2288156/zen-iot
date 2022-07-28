@@ -24,7 +24,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  */
 @ActiveProfiles("test")
 @AutoConfigureMockMvc
-@SpringBootTest
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.MOCK)
 public class AbstractControllerTest {
     @Autowired
     protected MockMvc mockMvc;
@@ -37,8 +37,7 @@ public class AbstractControllerTest {
             requestBuilder = post(urlTemplate).contentType(MediaType.APPLICATION_JSON);
         }
         return mockMvc.perform(requestBuilder)
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk());
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON));
     }
 
     protected ResultActions doMultipart(String urlTemplate,String name, byte[] content) throws Exception {

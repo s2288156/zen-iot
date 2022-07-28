@@ -3,9 +3,9 @@ package org.zeniot.server.controller;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import org.zeniot.server.controller.response.Account;
 import org.zeniot.server.controller.response.PageResponse;
 import org.zeniot.server.controller.response.RestResponse;
+import org.zeniot.server.dto.account.Account;
 import org.zeniot.server.service.AccountService;
 
 /**
@@ -18,10 +18,13 @@ public class AccountController {
     @Autowired
     private AccountService accountService;
 
+    public RestResponse<Account> login(Account account) {
+        return RestResponse.ok();
+    }
+
     @PostMapping("/account/register")
     public RestResponse<Account> registerAccount(@Validated @RequestBody Account account) {
-        accountService.registerAccount(account);
-        return RestResponse.ok();
+        return RestResponse.success(accountService.registerAccount(account));
     }
 
     @DeleteMapping("/account/{id}")
