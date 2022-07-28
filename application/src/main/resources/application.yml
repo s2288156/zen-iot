@@ -14,3 +14,6 @@ spring:
     enabled: true
 server:
   port: 8088
+secret:
+  key: "osaddfu123xzc021ljsaldjsaasdf123osaddfu123xzc021ljsaldjsaasdf123"
+  expiration: 2592000 # 30 * 24 * 60 * 60 s  -- 30天
