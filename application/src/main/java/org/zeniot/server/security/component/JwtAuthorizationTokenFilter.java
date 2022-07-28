@@ -2,7 +2,9 @@ package org.zeniot.server.security.component;
 
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.filter.OncePerRequestFilter;
+import org.zeniot.server.security.JwtHandler;
 
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
@@ -16,6 +18,9 @@ import java.io.IOException;
 @Slf4j
 public class JwtAuthorizationTokenFilter extends OncePerRequestFilter {
 
+    @Autowired
+    private JwtHandler jwtHandler;
+
     private static final String TOKEN_HEADER = "Authorization";
     private static final String TOKEN_HEADER_PREFIX = "Bearer ";
 
@@ -24,7 +29,6 @@ public class JwtAuthorizationTokenFilter extends OncePerRequestFilter {
         String tokenHeader = request.getHeader(TOKEN_HEADER);
         if (StringUtils.isNotBlank(tokenHeader) && StringUtils.startsWith(tokenHeader, TOKEN_HEADER_PREFIX)) {
             String token = StringUtils.substring(tokenHeader, TOKEN_HEADER_PREFIX.length());
-
         }
     }
 }

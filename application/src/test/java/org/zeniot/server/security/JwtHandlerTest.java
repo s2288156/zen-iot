@@ -33,6 +33,13 @@ class JwtHandlerTest extends AbstractBootTest {
     }
 
     @Test
+    void test_getUsernameForToken() {
+        String adminToken = jwtHandler.newToken(admin);
+        String username = jwtHandler.getUsernameForToken(adminToken);
+        assertEquals(admin.getUsername(), username);
+    }
+
+    @Test
     void test_newToken() throws InterruptedException {
         String token1 = jwtHandler.newToken(admin);
         TimeUnit.SECONDS.sleep(1);

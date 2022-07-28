@@ -33,6 +33,8 @@ public class JwtHandler {
     @Value("${secret.expiration}")
     private Long expiration;
 
+    private static final String USERNAME = "username";
+
     public String newToken(UserDetails userDetails) {
         return generateToken(generateClaims(userDetails));
     }
@@ -52,6 +54,15 @@ public class JwtHandler {
         return false;
     }
 
+    public String getUsernameForToken(String token) {
+        try {
+            SignedJWT signedJWT = SignedJWT.parse(token);
+            return signedJWT.getJWTClaimsSet().getStringClaim(USERNAME);
+        } catch (ParseException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
     private String generateToken(JWTClaimsSet claims) {
         // 512-bit (64-byte) shared secret
         SignedJWT signedJWT = new SignedJWT(new JWSHeader(JWSAlgorithm.HS512), claims);
@@ -69,7 +80,7 @@ public class JwtHandler {
     private JWTClaimsSet generateClaims(UserDetails userDetails) {
         Map<String, Object> claims = new HashMap<>();
         claims.put(JWTClaimNames.EXPIRATION_TIME, LocalDateTime.now().toEpochSecond(ZoneOffset.of("+8")) + expiration);
-        claims.put("username", userDetails.getUsername());
+        claims.put(USERNAME, userDetails.getUsername());
         try {
             return JWTClaimsSet.parse(claims);
         } catch (ParseException e) {
