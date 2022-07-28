@@ -10,6 +10,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.zeniot.server.AbstractBootTest;
 
 import java.util.Collections;
+import java.util.concurrent.TimeUnit;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -32,20 +33,23 @@ class JwtHandlerTest extends AbstractBootTest {
     }
 
     @Test
-    void test_newToken() {
+    void test_newToken() throws InterruptedException {
         String token1 = jwtHandler.newToken(admin);
+        TimeUnit.SECONDS.sleep(1);
         String token2 = jwtHandler.newToken(admin);
         assertTrue(StringUtils.isNotBlank(token1));
         assertNotEquals(token1, token2);
     }
 
     @Test
-    void test_verifyToken() {
+    void test_verifyToken() throws InterruptedException {
         String adminToken = jwtHandler.newToken(admin);
         String guestToken = jwtHandler.newToken(guest);
         assertTrue(jwtHandler.verifyToken(adminToken, admin));
         assertTrue(jwtHandler.verifyToken(guestToken, guest));
         assertFalse(jwtHandler.verifyToken(adminToken, guest));
+        TimeUnit.SECONDS.sleep(3);
+        assertFalse(jwtHandler.verifyToken(adminToken, admin));
     }
 
 }

@@ -16,6 +16,9 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
 import java.text.ParseException;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -27,6 +30,8 @@ import java.util.Map;
 public class JwtHandler {
     @Value("${secret.key}")
     private String key;
+    @Value("${secret.expiration}")
+    private Long expiration;
 
     public String newToken(UserDetails userDetails) {
         return generateToken(generateClaims(userDetails));
@@ -37,7 +42,10 @@ public class JwtHandler {
             JWSVerifier verifier = new MACVerifier(key.getBytes());
             SignedJWT signedJWT = SignedJWT.parse(token);
             String username = (String) signedJWT.getJWTClaimsSet().getClaim("username");
-            return signedJWT.verify(verifier) && StringUtils.equals(username, userDetails.getUsername());
+            Date expirationTime = signedJWT.getJWTClaimsSet().getExpirationTime();
+            return signedJWT.verify(verifier)
+                    && StringUtils.equals(username, userDetails.getUsername())
+                    && expirationTime.after(new Date());
         } catch (Exception e) {
             log.error("Token verify error: ", e);
         }
@@ -63,12 +71,17 @@ public class JwtHandler {
 
     private JWTClaimsSet generateClaims(UserDetails userDetails) {
         Map<String, Object> claims = new HashMap<>();
-        claims.put(JWTClaimNames.EXPIRATION_TIME, System.currentTimeMillis() + 30 * 24 * 60 * 60 * 1000L);
+        claims.put(JWTClaimNames.EXPIRATION_TIME, LocalDateTime.now().toEpochSecond(ZoneOffset.of("+8")) + expiration);
         claims.put("username", userDetails.getUsername());
         try {
             return JWTClaimsSet.parse(claims);
         } catch (ParseException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    public static void main(String[] args) {
+        System.out.println(LocalDateTime.now().toEpochSecond(ZoneOffset.UTC));
+        System.out.println(System.currentTimeMillis());
     }
 }
