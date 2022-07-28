@@ -3,6 +3,7 @@ package org.zeniot.server.controller;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import org.zeniot.dao.id.AccountId;
 import org.zeniot.server.controller.response.PageResponse;
 import org.zeniot.server.controller.response.RestResponse;
 import org.zeniot.server.dto.account.Account;
@@ -31,6 +32,12 @@ public class AccountController {
     public RestResponse<Account> deleteAccount(@PathVariable Long id) {
         accountService.deleteAccount(id);
         return RestResponse.ok();
+    }
+
+    @GetMapping("/account/{id}")
+    public RestResponse<Account> findAccountById(@PathVariable Long id) {
+        Account account = accountService.findById(AccountId.of(id));
+        return RestResponse.success(account);
     }
 
     @GetMapping("/accounts")

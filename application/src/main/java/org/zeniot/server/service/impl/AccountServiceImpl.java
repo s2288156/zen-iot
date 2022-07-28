@@ -5,6 +5,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.zeniot.dao.id.AccountId;
 import org.zeniot.dao.model.AccountEntity;
 import org.zeniot.dao.model.RoleEntity;
 import org.zeniot.dao.repository.AccountRepository;
@@ -14,6 +15,7 @@ import org.zeniot.server.exception.BizException;
 import org.zeniot.server.service.AccountService;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 /**
@@ -46,6 +48,12 @@ public class AccountServiceImpl implements AccountService {
     @Override
     public void deleteAccount(Long id) {
         accountRepository.deleteById(id);
+    }
+
+    @Override
+    public Account findById(AccountId accountId) {
+        Optional<AccountEntity> accountEntityOptional = accountRepository.findById(accountId.getId());
+        return accountEntityOptional.map(Account::simpleAccountFromEntity).orElse(null);
     }
 
     @Override

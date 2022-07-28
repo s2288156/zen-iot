@@ -18,4 +18,9 @@ public class AccountControllerTest extends AbstractControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data.username").value(admin.getUsername()));
     }
+
+    @Test
+    void test_account_delete() {
+
+    }
 }

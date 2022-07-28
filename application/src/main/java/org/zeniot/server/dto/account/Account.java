@@ -5,6 +5,7 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.zeniot.dao.id.AccountId;
 import org.zeniot.dao.model.AccountEntity;
 
 import javax.validation.constraints.NotBlank;
@@ -20,6 +21,9 @@ import java.util.Set;
 public class Account implements Serializable {
     @Serial
     private static final long serialVersionUID = -6536667040345207843L;
+
+    @Getter
+    private AccountId accountId;
 
     @NotBlank
     @Getter
@@ -39,6 +43,7 @@ public class Account implements Serializable {
 
     public static Account simpleAccountFromEntity(AccountEntity accountEntity) {
         Account account = new Account();
+        account.setAccountId(AccountId.of(accountEntity.getId()));
         account.setUsername(accountEntity.getUsername());
         return account;
     }
