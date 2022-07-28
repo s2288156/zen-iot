@@ -55,11 +55,8 @@ public class JwtHandler {
     private String generateToken(JWTClaimsSet claims) {
         // 512-bit (64-byte) shared secret
         SignedJWT signedJWT = new SignedJWT(new JWSHeader(JWSAlgorithm.HS512), claims);
-        // Create HMAC signer
-        byte[] sharedSecret = key.getBytes();
-        JWSSigner signer = null;
         try {
-            signer = new MACSigner(sharedSecret);
+            JWSSigner signer = new MACSigner(key.getBytes());
             // Apply the HMAC protection
             signedJWT.sign(signer);
         } catch (Exception e) {
@@ -80,8 +77,4 @@ public class JwtHandler {
         }
     }
 
-    public static void main(String[] args) {
-        System.out.println(LocalDateTime.now().toEpochSecond(ZoneOffset.UTC));
-        System.out.println(System.currentTimeMillis());
-    }
 }
