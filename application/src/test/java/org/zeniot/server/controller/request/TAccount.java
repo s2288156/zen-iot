@@ -23,7 +23,6 @@ public class TAccount implements Serializable {
         TAccount tAccount = new TAccount();
         tAccount.setUsername("test_admin");
         tAccount.setPassword("123123");
-        tAccount.setRoles(Set.of("ADMIN", "TESTER"));
         return tAccount;
     }
 }

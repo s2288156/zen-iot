@@ -41,8 +41,8 @@ public class AccountServiceImpl implements AccountService {
         }
         AccountEntity accountEntity = account.toEntity(passwordEncoder);
         accountEntity.setRoles(Set.of(new RoleEntity(DEFAULT_ROLE_ADMIN)));
-        AccountEntity save = accountRepository.save(accountEntity);
-        return Account.simpleAccountFromEntity(save);
+        accountRepository.save(accountEntity);
+        return Account.simpleAccountFromEntity(accountEntity);
     }
 
     @Override

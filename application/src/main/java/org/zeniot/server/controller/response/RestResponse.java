@@ -2,13 +2,21 @@ package org.zeniot.server.controller.response;
 
 import lombok.Getter;
 
+import java.io.Serial;
+import java.io.Serializable;
+
 /**
  * @author Wu.Chunyang
  */
 @Getter
-public class RestResponse<T> {
+public class RestResponse<T> implements Serializable {
+    @Serial
+    private static final long serialVersionUID = -7560501398215693992L;
     private String msg;
     private T data;
+
+    public RestResponse() {
+    }
 
     private RestResponse(String msg) {
         this.msg = msg;

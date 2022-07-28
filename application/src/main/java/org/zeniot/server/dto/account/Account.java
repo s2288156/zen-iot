@@ -1,9 +1,6 @@
 package org.zeniot.server.dto.account;
 
-import lombok.AccessLevel;
-import lombok.Getter;
-import lombok.Setter;
-import lombok.ToString;
+import lombok.*;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.zeniot.dao.id.AccountId;
 import org.zeniot.dao.model.AccountEntity;

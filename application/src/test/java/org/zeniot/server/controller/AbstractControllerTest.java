@@ -15,8 +15,6 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 /**
@@ -24,7 +22,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  */
 @ActiveProfiles("test")
 @AutoConfigureMockMvc
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.MOCK)
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 public class AbstractControllerTest {
     @Autowired
     protected MockMvc mockMvc;
@@ -36,11 +34,10 @@ public class AbstractControllerTest {
         } else {
             requestBuilder = post(urlTemplate).contentType(MediaType.APPLICATION_JSON);
         }
-        return mockMvc.perform(requestBuilder)
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON));
+        return mockMvc.perform(requestBuilder);
     }
 
-    protected ResultActions doMultipart(String urlTemplate,String name, byte[] content) throws Exception {
+    protected ResultActions doMultipart(String urlTemplate, String name, byte[] content) throws Exception {
         return mockMvc.perform(multipart(urlTemplate).file(name, content))
                 .andExpect(status().isOk());
     }
@@ -52,7 +49,6 @@ public class AbstractControllerTest {
 
     protected ResultActions doGet(String urlTemplate) throws Exception {
         return mockMvc.perform(get(urlTemplate).contentType(MediaType.APPLICATION_JSON))
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk());
     }
 
