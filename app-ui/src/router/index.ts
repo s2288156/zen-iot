@@ -1,6 +1,6 @@
 import { createRouter, createWebHashHistory, RouteRecordRaw } from 'vue-router'
 import TheLayout from '@/components/layout/TheLayout.vue'
-import TheHome from '@/components/home/TheHome.vue'
+import TheHome from '@/views/home/TheHome.vue'
 
 const routes: Array<RouteRecordRaw> = [
   {
@@ -33,7 +33,7 @@ const routes: Array<RouteRecordRaw> = [
       {
         path: '/system/user',
         name: 'User',
-        component: () => import('@/components/system/UserManager.vue'),
+        component: () => import('@/views/system/UserManager.vue'),
         meta: {
           title: '用户管理',
           icon: 'User',
@@ -43,7 +43,7 @@ const routes: Array<RouteRecordRaw> = [
       {
         path: '/system/menu',
         name: 'Menu',
-        component: () => import('@/components/system/MenuManager.vue'),
+        component: () => import('@/views/system/MenuManager.vue'),
         meta: {
           title: '菜单管理',
           icon: 'Menu',
@@ -65,7 +65,7 @@ const routes: Array<RouteRecordRaw> = [
       {
         path: '/platform/device',
         name: 'Device',
-        component: () => import('@/components/platform/DeviceManager.vue'),
+        component: () => import('@/views/platform/DeviceManager.vue'),
         meta: {
           title: '设备管理',
           icon: 'Cpu',
