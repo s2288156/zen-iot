@@ -13,4 +13,5 @@ public interface AccountRepository extends JpaRepository<AccountEntity, Long> {
     Optional<AccountEntity> findAccountByUsername(String username);
 
     boolean existsAccountEntityByUsername(String username);
+
 }

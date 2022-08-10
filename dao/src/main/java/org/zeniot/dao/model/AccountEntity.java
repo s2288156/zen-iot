@@ -1,16 +1,20 @@
 package org.zeniot.dao.model;
 
+import lombok.ToString;
+
 import javax.persistence.*;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
+
+@ToString(callSuper = true)
 @Entity
 @Table(name = "t_account")
 public class AccountEntity extends BaseEntity {
     @Column(name = "username", nullable = false, length = 32)
     private String username;
 
-    @Column(name = "password", nullable = false, length = 64)
+    @Column(name = "pwd", nullable = false, length = 64)
     private String password;
 
     @ManyToMany(fetch = FetchType.EAGER, cascade = {CascadeType.PERSIST, CascadeType.REFRESH})

@@ -15,8 +15,6 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 /**
@@ -24,24 +22,23 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  */
 @ActiveProfiles("test")
 @AutoConfigureMockMvc
-@SpringBootTest
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.MOCK)
 public class AbstractControllerTest {
     @Autowired
     protected MockMvc mockMvc;
 
     protected ResultActions doPost(String urlTemplate, Object content) throws Exception {
+
         MockHttpServletRequestBuilder requestBuilder;
         if (content != null) {
             requestBuilder = post(urlTemplate).contentType(MediaType.APPLICATION_JSON).content(toJson(content));
         } else {
             requestBuilder = post(urlTemplate).contentType(MediaType.APPLICATION_JSON);
         }
-        return mockMvc.perform(requestBuilder)
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk());
+        return mockMvc.perform(requestBuilder);
     }
 
-    protected ResultActions doMultipart(String urlTemplate,String name, byte[] content) throws Exception {
+    protected ResultActions doMultipart(String urlTemplate, String name, byte[] content) throws Exception {
         return mockMvc.perform(multipart(urlTemplate).file(name, content))
                 .andExpect(status().isOk());
     }
@@ -53,7 +50,11 @@ public class AbstractControllerTest {
 
     protected ResultActions doGet(String urlTemplate) throws Exception {
         return mockMvc.perform(get(urlTemplate).contentType(MediaType.APPLICATION_JSON))
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk());
+    }
+
+    protected ResultActions doGet(String urlTemplate, String content) throws Exception {
+        return mockMvc.perform(get(urlTemplate).contentType(MediaType.APPLICATION_JSON).content(content))
                 .andExpect(status().isOk());
     }
 

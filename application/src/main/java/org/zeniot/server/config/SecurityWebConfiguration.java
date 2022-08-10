@@ -3,36 +3,54 @@ package org.zeniot.server.config;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.http.HttpMethod;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
-import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.web.AuthenticationEntryPoint;
+import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-import org.zeniot.server.security.LoginFilter;
-import org.zeniot.server.security.handler.RestAuthenticationFailureHandler;
-import org.zeniot.server.security.handler.RestAuthenticationSuccessHandler;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+import org.springframework.web.filter.CorsFilter;
+import org.zeniot.server.security.component.JwtAuthorizationTokenFilter;
+import org.zeniot.server.security.component.RestAuthenticationEntryPoint;
 
 /**
  * @author Wu.Chunyang
  */
+@EnableWebSecurity
 @Configuration
-public class SecurityWebConfiguration extends WebSecurityConfigurerAdapter {
+public class SecurityWebConfiguration {
 
     @Autowired
-    private UserDetailsService userDetailsService;
+    private JwtAuthorizationTokenFilter jwtAuthorizationTokenFilter;
 
-    @Autowired
-    private RestAuthenticationSuccessHandler successHandler;
-    @Autowired
-    private RestAuthenticationFailureHandler failureHandler;
+    @Bean
+    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+        http.authorizeRequests()
+                .and()
+                .authorizeRequests()
+                .antMatchers("/api/**").permitAll()
+                .anyRequest().authenticated()
+                .and()
+                .exceptionHandling()
+                .authenticationEntryPoint(authenticationEntryPoint())
+                .and()
+                .csrf().disable()
+                .formLogin().disable()
+                .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+                .and()
+                .addFilterBefore(jwtAuthorizationTokenFilter, UsernamePasswordAuthenticationFilter.class);
+        http.addFilterBefore(corsFilter(), UsernamePasswordAuthenticationFilter.class);
+        return http.build();
+    }
 
-    @Override
-    protected void configure(AuthenticationManagerBuilder auth) throws Exception {
-        auth.userDetailsService(userDetailsService);
+    @Bean
+    public AuthenticationEntryPoint authenticationEntryPoint() {
+        return new RestAuthenticationEntryPoint();
     }
 
     @Bean
@@ -40,30 +58,15 @@ public class SecurityWebConfiguration extends WebSecurityConfigurerAdapter {
         return new BCryptPasswordEncoder();
     }
 
-    @Bean
-    @Override
-    public AuthenticationManager authenticationManagerBean() throws Exception {
-        return super.authenticationManagerBean();
+    public CorsFilter corsFilter() {
+        CorsConfiguration corsConfiguration = new CorsConfiguration();
+        corsConfiguration.addAllowedOrigin("*");
+        corsConfiguration.setAllowCredentials(false);
+        corsConfiguration.addAllowedMethod("*");
+        corsConfiguration.addAllowedHeader("*");
+        corsConfiguration.addExposedHeader("*");
+        UrlBasedCorsConfigurationSource corsConfigurationSource = new UrlBasedCorsConfigurationSource();
+        corsConfigurationSource.registerCorsConfiguration("/**", corsConfiguration);
+        return new CorsFilter(corsConfigurationSource);
     }
-
-    @Bean
-    public LoginFilter loginFilter() throws Exception {
-        LoginFilter loginFilter = new LoginFilter();
-        loginFilter.setAuthenticationManager(authenticationManagerBean());
-        loginFilter.setAuthenticationSuccessHandler(successHandler);
-        loginFilter.setAuthenticationFailureHandler(failureHandler);
-        return loginFilter;
-    }
-
-    @Override
-    protected void configure(HttpSecurity http) throws Exception {
-        http.csrf().disable()
-                .authorizeRequests()
-                .antMatchers("/api/register").permitAll()
-                .antMatchers(HttpMethod.DELETE, "/api/account/**").permitAll()
-                .and()
-                .formLogin();
-        http.addFilterAt(loginFilter(), UsernamePasswordAuthenticationFilter.class);
-    }
-
 }

@@ -1,18 +1,15 @@
-package org.zeniot.server.controller.response;
+package org.zeniot.server.dto.account;
 
-import lombok.AccessLevel;
-import lombok.Getter;
-import lombok.Setter;
-import lombok.ToString;
+import lombok.*;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.zeniot.dao.id.AccountId;
 import org.zeniot.dao.model.AccountEntity;
-import org.zeniot.dao.model.RoleEntity;
 
 import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotNull;
+import java.io.Serial;
 import java.io.Serializable;
+import java.time.LocalDate;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 /**
  * @author Wu.Chunyang
@@ -20,7 +17,11 @@ import java.util.stream.Collectors;
 @Setter(AccessLevel.PRIVATE)
 @ToString
 public class Account implements Serializable {
+    @Serial
     private static final long serialVersionUID = -6536667040345207843L;
+
+    @Getter
+    private AccountId accountId;
 
     @NotBlank
     @Getter
@@ -29,15 +30,27 @@ public class Account implements Serializable {
     @NotBlank
     private String password;
 
-    @NotNull(message = "The roles can't be empty!")
     private Set<String> roles;
+
+    @Getter
+    private LocalDate createTime;
+
+    @Getter
+    private LocalDate updateTime;
 
     public AccountEntity toEntity(PasswordEncoder passwordEncoder) {
         AccountEntity accountEntity = new AccountEntity();
         accountEntity.setUsername(username);
         accountEntity.setPassword(passwordEncoder.encode(password));
-        Set<RoleEntity> roleEntities = roles.stream().map(RoleEntity::new).collect(Collectors.toSet());
-        accountEntity.setRoles(roleEntities);
         return accountEntity;
+    }
+
+    public static Account simpleAccountFromEntity(AccountEntity accountEntity) {
+        Account account = new Account();
+        account.setAccountId(AccountId.of(accountEntity.getId()));
+        account.setUsername(accountEntity.getUsername());
+        account.setCreateTime(accountEntity.getCreateTime().toLocalDate());
+        account.setUpdateTime(accountEntity.getUpdateTime().toLocalDate());
+        return account;
     }
 }
