@@ -10,17 +10,22 @@
       <el-table-column prop="username" label="Username" width="180"/>
     </el-table>
 
-    <el-pagination background layout="prev, pager, next" :page-size="tableData.size" :page-count="tableData.totalPages"/>
+<!--    <el-pagination background layout="prev, pager, next" :page-size="tableData.size" :page-count="tableData.totalPages"/>-->
   </div>
 </template>
 
 <script lang="ts" setup>
 import { getAccounts } from '@/api/account'
 import { PageQuery } from '@/utils/datas'
+import { ref } from 'vue'
 
 const pageQuery = new PageQuery(0, 10)
-const tableData = getAccounts(pageQuery)
-
+// const tableData = reactive(getAccounts(pageQuery))
+let tableData = ref()
+getAccounts(pageQuery).then(function (response) {
+  tableData = response.data
+})
+console.log(tableData)
 </script>
 
 <style scoped lang="scss">

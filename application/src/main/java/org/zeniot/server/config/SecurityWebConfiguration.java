@@ -11,6 +11,10 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+import org.springframework.web.filter.CorsFilter;
 import org.zeniot.server.security.component.JwtAuthorizationTokenFilter;
 import org.zeniot.server.security.component.RestAuthenticationEntryPoint;
 
@@ -36,11 +40,11 @@ public class SecurityWebConfiguration {
                 .authenticationEntryPoint(authenticationEntryPoint())
                 .and()
                 .csrf().disable()
-                .cors().disable()
                 .formLogin().disable()
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 .and()
                 .addFilterBefore(jwtAuthorizationTokenFilter, UsernamePasswordAuthenticationFilter.class);
+        http.addFilterBefore(corsFilter(), UsernamePasswordAuthenticationFilter.class);
         return http.build();
     }
 
@@ -54,4 +58,15 @@ public class SecurityWebConfiguration {
         return new BCryptPasswordEncoder();
     }
 
+    public CorsFilter corsFilter() {
+        CorsConfiguration corsConfiguration = new CorsConfiguration();
+        corsConfiguration.addAllowedOrigin("*");
+        corsConfiguration.setAllowCredentials(false);
+        corsConfiguration.addAllowedMethod("*");
+        corsConfiguration.addAllowedHeader("*");
+        corsConfiguration.addExposedHeader("*");
+        UrlBasedCorsConfigurationSource corsConfigurationSource = new UrlBasedCorsConfigurationSource();
+        corsConfigurationSource.registerCorsConfiguration("/**", corsConfiguration);
+        return new CorsFilter(corsConfigurationSource);
+    }
 }

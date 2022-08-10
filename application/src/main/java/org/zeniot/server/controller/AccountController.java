@@ -42,7 +42,7 @@ public class AccountController {
     }
 
     @GetMapping("/accounts")
-    public PageResponse<Account> findAccounts(@RequestBody @Validated PageQuery query) {
+    public PageResponse<Account> findAccounts(@Validated PageQuery query) {
         return accountService.pageAll(query);
     }
 

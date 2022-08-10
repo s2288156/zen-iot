@@ -4,6 +4,6 @@ export function getAccounts (data: object) {
   return request({
     url: '/api/accounts',
     method: 'get',
-    data
+    params: data
   })
 }
