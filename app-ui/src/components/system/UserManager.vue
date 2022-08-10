@@ -4,7 +4,7 @@
       <el-button type="primary" icon="EditPen" class="filter-item">新增</el-button>
     </div>
 
-    <el-table :data="tableData.pages" style="width: 100%">
+    <el-table :data="tableData.data" style="width: 100%">
       <el-table-column prop="createTime" label="CreateDate" width="180"/>
       <el-table-column prop="updateTime" label="UpdateDate" width="180"/>
       <el-table-column prop="username" label="Username" width="180"/>
