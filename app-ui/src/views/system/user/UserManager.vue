@@ -21,11 +21,14 @@
         <el-form-item label="Username" :label-width="formLabelWidth">
           <el-input v-model="createAccountForm.username" autocomplete="off"/>
         </el-form-item>
+        <el-form-item label="Password" :label-width="formLabelWidth">
+          <el-input v-model="createAccountForm.password" autocomplete="off"/>
+        </el-form-item>
       </el-form>
       <template #footer>
       <span class="dialog-footer">
         <el-button @click="dialogFormVisible = false">Cancel</el-button>
-        <el-button type="primary" @click="dialogFormVisible = false">Confirm</el-button>
+        <el-button type="primary" @click="createAccount">Confirm</el-button>
       </span>
       </template>
     </el-dialog>
@@ -33,15 +36,15 @@
 </template>
 
 <script lang="ts" setup>
-import { getAccounts } from '@/api/system/account'
+import { getAccounts, registerAccount } from '@/api/system/account'
 import { PageQuery } from '@/utils/datas'
-import { ref, reactive } from 'vue'
-import { AccountData } from '@/api/system/types'
+import { reactive, ref } from 'vue'
+import { Account } from '@/api/system/types'
 import { BaseDataPage } from '@/api/global-types'
 
 const pageQuery = new PageQuery(0, 10)
 
-const accountDataPage = ref<BaseDataPage<AccountData>>({
+const accountDataPage = ref<BaseDataPage<Account>>({
   data: [],
   size: 0,
   totalPages: 0
@@ -59,7 +62,21 @@ getAccountList()
 const dialogFormVisible = ref(false)
 const formLabelWidth = '140px'
 
-const createAccountForm = reactive<AccountData>({ username: '' })
+const createAccountForm = reactive<Account>({
+  username: '',
+  password: ''
+})
+
+const createAccount = () => {
+  registerAccount(createAccountForm).then(resp => {
+    if (resp.status === 200) {
+      dialogFormVisible.value = false
+      createAccountForm.username = ''
+      createAccountForm.password = ''
+      getAccountList()
+    }
+  })
+}
 
 </script>
 
