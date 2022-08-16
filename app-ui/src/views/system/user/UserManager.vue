@@ -7,13 +7,18 @@
       <el-button type="info" icon="RefreshRight" class="filter-item" @click="getAccountList()">刷新</el-button>
     </div>
 
-    <el-table :data="accountDataPage.data" style="width: 100%">
+    <el-table :data="accountDataPage.data" style="width: 100%" height="445px">
       <el-table-column prop="createTime" label="CreateDate" width="180"/>
       <el-table-column prop="updateTime" label="UpdateDate" width="180"/>
       <el-table-column prop="username" label="Username" width="180"/>
     </el-table>
 
-    <el-pagination background layout="prev, pager, next" :page-size="accountDataPage.size"
+    <el-pagination background layout="prev, pager, next"
+                   @prev-click="prevClick"
+                   @next-click="nextClick"
+                   @current-change="currentChange"
+                   v-model:current-page="currentPage"
+                   :page-size="accountDataPage.size"
                    :page-count="accountDataPage.totalPages"/>
 
     <el-dialog v-model="dialogFormVisible" title="Add Account">
@@ -43,8 +48,7 @@ import { Account } from '@/api/system/types'
 import { BaseDataPage } from '@/api/global-types'
 import { FormRules } from 'element-plus'
 
-const pageQuery = new PageQuery(0, 10)
-
+const pageQuery = reactive(new PageQuery(0, 10))
 const accountDataPage = ref<BaseDataPage<Account>>({
   data: [],
   size: 0,
@@ -56,8 +60,21 @@ const getAccountList = () => {
     accountDataPage.value = response.data
   })
 }
-
 getAccountList()
+
+const currentPage = ref(1)
+const prevClick = () => {
+  pageQuery.page -= 1
+  getAccountList()
+}
+const nextClick = () => {
+  pageQuery.page += 1
+  getAccountList()
+}
+const currentChange = () => {
+  pageQuery.page = currentPage.value - 1
+  getAccountList()
+}
 
 // dialog
 const dialogFormVisible = ref(false)
