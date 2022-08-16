@@ -16,18 +16,18 @@
     <el-pagination background layout="prev, pager, next" :page-size="accountDataPage.size"
                    :page-count="accountDataPage.totalPages"/>
 
-    <el-dialog v-model="dialogFormVisible" title="Shipping address">
-      <el-form :model="createAccountForm">
-        <el-form-item label="Username" :label-width="formLabelWidth">
+    <el-dialog v-model="dialogFormVisible" title="Add Account">
+      <el-form :model="createAccountForm" :rules="rules" status-icon>
+        <el-form-item label="Username" :label-width="formLabelWidth" prop="username">
           <el-input v-model="createAccountForm.username" autocomplete="off"/>
         </el-form-item>
-        <el-form-item label="Password" :label-width="formLabelWidth">
-          <el-input v-model="createAccountForm.password" autocomplete="off"/>
+        <el-form-item label="Password" :label-width="formLabelWidth" prop="password">
+          <el-input type="password" v-model="createAccountForm.password" autocomplete="off"/>
         </el-form-item>
       </el-form>
       <template #footer>
       <span class="dialog-footer">
-        <el-button @click="dialogFormVisible = false">Cancel</el-button>
+        <el-button @click="resetAccountForm">Cancel</el-button>
         <el-button type="primary" @click="createAccount">Confirm</el-button>
       </span>
       </template>
@@ -41,6 +41,7 @@ import { PageQuery } from '@/utils/datas'
 import { reactive, ref } from 'vue'
 import { Account } from '@/api/system/types'
 import { BaseDataPage } from '@/api/global-types'
+import { FormRules } from 'element-plus'
 
 const pageQuery = new PageQuery(0, 10)
 
@@ -60,19 +61,30 @@ getAccountList()
 
 // dialog
 const dialogFormVisible = ref(false)
+const rules = reactive<FormRules>({
+  username: [
+    { required: true, message: 'Please input username!', trigger: 'blur' }
+  ],
+  password: [
+    { required: true, message: 'Please input password!', trigger: 'blur' }
+  ]
+})
 const formLabelWidth = '140px'
 
 const createAccountForm = reactive<Account>({
   username: '',
   password: ''
 })
+const resetAccountForm = () => {
+  dialogFormVisible.value = false
+  createAccountForm.username = ''
+  createAccountForm.password = ''
+}
 
 const createAccount = () => {
   registerAccount(createAccountForm).then(resp => {
     if (resp.status === 200) {
-      dialogFormVisible.value = false
-      createAccountForm.username = ''
-      createAccountForm.password = ''
+      resetAccountForm()
       getAccountList()
     }
   })
