@@ -3,8 +3,8 @@ export type AccountId = {
 }
 
 export type AccountData = {
-  accountId: AccountId,
+  accountId?: AccountId,
   username: string,
-  createTime: string,
-  updateTime: string
+  createTime?: string,
+  updateTime?: string
 }

@@ -33,7 +33,7 @@ const routes: Array<RouteRecordRaw> = [
       {
         path: '/system/user',
         name: 'User',
-        component: () => import('@/views/system/UserManager.vue'),
+        component: () => import('@/views/system/user/UserManager.vue'),
         meta: {
           title: '用户管理',
           icon: 'User',
