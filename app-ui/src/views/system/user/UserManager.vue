@@ -8,9 +8,10 @@
     </div>
 
     <el-table :data="accountDataPage.data" style="width: 100%" height="445px">
+      <el-table-column type="index" width="50" />
+      <el-table-column prop="username" label="Username" width="180"/>
       <el-table-column prop="createTime" label="CreateDate" width="180"/>
       <el-table-column prop="updateTime" label="UpdateDate" width="180"/>
-      <el-table-column prop="username" label="Username" width="180"/>
     </el-table>
 
     <el-pagination background layout="prev, pager, next"
@@ -78,6 +79,17 @@ const currentChange = () => {
 
 // dialog
 const dialogFormVisible = ref(false)
+const createAccountForm = reactive<Account>({
+  username: '',
+  password: ''
+})
+
+const resetAccountForm = () => {
+  dialogFormVisible.value = false
+  createAccountForm.username = ''
+  createAccountForm.password = ''
+}
+
 const rules = reactive<FormRules>({
   username: [
     { required: true, message: 'Please input username!', trigger: 'blur' }
@@ -87,16 +99,6 @@ const rules = reactive<FormRules>({
   ]
 })
 const formLabelWidth = '140px'
-
-const createAccountForm = reactive<Account>({
-  username: '',
-  password: ''
-})
-const resetAccountForm = () => {
-  dialogFormVisible.value = false
-  createAccountForm.username = ''
-  createAccountForm.password = ''
-}
 
 const createAccount = () => {
   registerAccount(createAccountForm).then(resp => {

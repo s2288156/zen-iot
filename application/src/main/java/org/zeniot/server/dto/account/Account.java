@@ -1,6 +1,9 @@
 package org.zeniot.server.dto.account;
 
-import lombok.*;
+import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.ToString;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.zeniot.dao.id.AccountId;
 import org.zeniot.dao.model.AccountEntity;
@@ -8,7 +11,7 @@ import org.zeniot.dao.model.AccountEntity;
 import javax.validation.constraints.NotBlank;
 import java.io.Serial;
 import java.io.Serializable;
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Set;
 
 /**
@@ -33,10 +36,10 @@ public class Account implements Serializable {
     private Set<String> roles;
 
     @Getter
-    private LocalDate createTime;
+    private LocalDateTime createTime;
 
     @Getter
-    private LocalDate updateTime;
+    private LocalDateTime updateTime;
 
     public AccountEntity toEntity(PasswordEncoder passwordEncoder) {
         AccountEntity accountEntity = new AccountEntity();
@@ -49,8 +52,8 @@ public class Account implements Serializable {
         Account account = new Account();
         account.setAccountId(AccountId.of(accountEntity.getId()));
         account.setUsername(accountEntity.getUsername());
-        account.setCreateTime(accountEntity.getCreateTime().toLocalDate());
-        account.setUpdateTime(accountEntity.getUpdateTime().toLocalDate());
+        account.setCreateTime(accountEntity.getCreateTime());
+        account.setUpdateTime(accountEntity.getUpdateTime());
         return account;
     }
 }
