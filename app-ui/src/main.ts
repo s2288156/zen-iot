@@ -8,6 +8,7 @@ import router from './router'
 import { createPinia } from 'pinia'
 const app = createApp(App)
 
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
 app.use(createPinia()).use(router)
   .use(ElementPlus, { size: 'default' }).mount('#app')

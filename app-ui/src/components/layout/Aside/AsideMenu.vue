@@ -85,6 +85,26 @@ const menuList = reactive([
           icon: 'Cpu',
           roles: ['ROLE_ADMIN']
         }
+      },
+      {
+        path: '/platform/parent',
+        name: 'parent',
+        component: () => import('@/views/platform/TheParent.vue'),
+        meta: {
+          title: 'parent',
+          icon: 'Cpu',
+          roles: ['ROLE_ADMIN']
+        }
+      },
+      {
+        path: '/platform/sub',
+        name: 'sub',
+        component: () => import('@/views/platform/TheSub.vue'),
+        meta: {
+          title: 'sub',
+          icon: 'Cpu',
+          roles: ['ROLE_ADMIN']
+        }
       }
     ]
   }

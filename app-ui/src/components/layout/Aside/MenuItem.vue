@@ -19,9 +19,7 @@
 </template>
 
 <script lang="ts" setup>
-
 defineProps(['menuList'])
-
 </script>
 
 <style scoped lang="scss">
