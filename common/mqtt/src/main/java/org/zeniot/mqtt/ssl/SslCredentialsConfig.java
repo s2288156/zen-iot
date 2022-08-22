@@ -1,4 +1,4 @@
-package org.zeniot.ssl;
+package org.zeniot.mqtt.ssl;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -40,5 +40,6 @@ public class SslCredentialsConfig {
         } else {
             log.info("{}: Skipping initialization of disabled SSL credentials.", name);
         }
+        log.info("inited mqtt ssl");
     }
 }

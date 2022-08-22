@@ -1,4 +1,4 @@
-package org.zeniot.ssl;
+package org.zeniot.mqtt.ssl;
 
 import lombok.Data;
 import org.apache.commons.lang3.StringUtils;

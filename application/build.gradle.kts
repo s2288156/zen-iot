@@ -4,6 +4,7 @@ plugins {
 
 dependencies {
     implementation(project(":dao"))
+    implementation(project(":common:mqtt"))
     implementation("org.springframework.boot:spring-boot-starter-web")
     implementation("org.springframework.boot:spring-boot-starter-actuator")
     implementation("com.nimbusds:nimbus-jose-jwt:9.23")

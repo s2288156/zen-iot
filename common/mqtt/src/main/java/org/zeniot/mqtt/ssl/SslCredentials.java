@@ -1,4 +1,4 @@
-package org.zeniot.ssl;
+package org.zeniot.mqtt.ssl;
 
 import javax.net.ssl.KeyManagerFactory;
 import javax.net.ssl.TrustManagerFactory;

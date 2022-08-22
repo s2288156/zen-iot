@@ -1,4 +1,4 @@
-package org.zeniot.ssl;
+package org.zeniot.mqtt.ssl;
 
 /**
  * @author Wu.Chunyang
