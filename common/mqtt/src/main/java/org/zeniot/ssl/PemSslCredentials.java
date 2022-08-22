@@ -9,7 +9,7 @@ import java.security.KeyStore;
  */
 @Data
 public class PemSslCredentials extends AbstractSslCredentials{
-
+    private static final String DEFAULT_KEY_ALIAS = "server";
     private String certFile;
     private String keyFile;
     private String keyPassword;
@@ -27,5 +27,10 @@ public class PemSslCredentials extends AbstractSslCredentials{
     @Override
     protected void updateKeyAlias(String keyAlias) {
 
+    }
+
+    @Override
+    public String getKeyAlias() {
+        return DEFAULT_KEY_ALIAS;
     }
 }

@@ -2,7 +2,6 @@ package org.zeniot.ssl;
 
 import javax.net.ssl.KeyManagerFactory;
 import javax.net.ssl.TrustManagerFactory;
-import java.io.IOException;
 import java.security.*;
 import java.security.cert.X509Certificate;
 
@@ -10,11 +9,13 @@ import java.security.cert.X509Certificate;
  * @author Wu.Chunyang
  */
 public interface SslCredentials {
-    void init(boolean trustsOnly) throws IOException, GeneralSecurityException;
+    void init(boolean trustsOnly) throws GeneralSecurityException;
 
     KeyStore getKeyStore();
 
     String getKeyPassword();
+
+    String getKeyAlias();
 
     PrivateKey getPrivateKey();
 
