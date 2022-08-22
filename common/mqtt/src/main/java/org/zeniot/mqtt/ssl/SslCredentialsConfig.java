@@ -1,5 +1,6 @@
 package org.zeniot.mqtt.ssl;
 
+import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 
 import javax.annotation.PostConstruct;
@@ -7,10 +8,11 @@ import javax.annotation.PostConstruct;
 /**
  * @author Wu.Chunyang
  */
+@Data
 @Slf4j
 public class SslCredentialsConfig {
 
-    private boolean enable;
+    private boolean enabled = true;
     private SslCredentialsType type;
     private PemSslCredentials pem;
 
@@ -26,7 +28,7 @@ public class SslCredentialsConfig {
 
     @PostConstruct
     public void init() {
-        if (this.enable) {
+        if (this.enabled) {
             if (type == SslCredentialsType.PEM && pem.canUse()) {
                 this.credentials = pem;
             } else {

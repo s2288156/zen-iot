@@ -14,10 +14,7 @@ import org.bouncycastle.openssl.jcajce.JcaPEMKeyConverter;
 import org.bouncycastle.openssl.jcajce.JcePEMDecryptorProviderBuilder;
 import org.springframework.util.ResourceUtils;
 
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.security.GeneralSecurityException;
 import java.security.KeyStore;
 import java.security.PrivateKey;
@@ -42,7 +39,11 @@ public class PemSslCredentials extends AbstractSslCredentials {
 
     @Override
     protected boolean canUse() {
-        return false;
+        try {
+            return ResourceUtils.getFile(this.certFile).exists();
+        } catch (FileNotFoundException e) {
+            throw new RuntimeException("pem file not exists!");
+        }
     }
 
     @Override

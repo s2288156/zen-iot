@@ -28,6 +28,6 @@ transport:
       credentials:
         type: PEM
         pem:
-          cert-file: mqtt-server.pem
-          key-file: mqtt-server-key.pem
-          key-password: mqtt-server-key-password
+          cert-file: classpath:server_cert.pem
+          key-file: classpath:server_key.pem
+          key-password: mqtt
