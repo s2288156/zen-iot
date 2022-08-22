@@ -1,0 +1,36 @@
+{
+  "group": [
+    {
+      "name": "transport.mqtt.ssl.credentials.pem.cert-file",
+      "type": "java.lang.String",
+      "description": "Description for transport.mqtt.ssl.credentials.pem.cert-file."
+    }
+  ],
+  "properties": [
+    {
+      "name": "transport.mqtt.ssl.credentials.pem.cert-file",
+      "type": "java.lang.String",
+      "description": "Description for transport.mqtt.ssl.credentials.pem.cert-file."
+    },
+    {
+      "name": "transport.mqtt.ssl.enabled",
+      "type": "java.lang.String",
+      "description": "Description for transport.mqtt.ssl.enabled."
+    },
+    {
+      "name": "transport.mqtt.ssl.credentials.type",
+      "type": "java.lang.String",
+      "description": "Description for transport.mqtt.ssl.credentials.type."
+    },
+    {
+      "name": "transport.mqtt.ssl.credentials.pem.key-file",
+      "type": "java.lang.String",
+      "description": "Description for transport.mqtt.ssl.credentials.pem.key-file."
+    },
+    {
+      "name": "transport.mqtt.ssl.credentials.pem.key-password",
+      "type": "java.lang.String",
+      "description": "Description for transport.mqtt.ssl.credentials.pem.key-password."
+    }
+  ]
+}

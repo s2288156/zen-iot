@@ -2,6 +2,7 @@ package org.zeniot.mqtt.ssl;
 
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.boot.context.properties.ConfigurationProperties;
 
 import javax.annotation.PostConstruct;
 
