@@ -34,7 +34,7 @@ public abstract class AbstractSslCredentials implements SslCredentials {
 
     protected abstract boolean canUse();
 
-    protected abstract KeyStore loadKeyStore(boolean isPrivateKeyRequired, char[] keyPasswordArray);
+    protected abstract KeyStore loadKeyStore(boolean isPrivateKeyRequired, char[] keyPasswordArray) throws IOException, GeneralSecurityException;
 
     protected abstract void updateKeyAlias(String keyAlias);
 

@@ -16,3 +16,14 @@ findProject(":common:util")?.name = "util"
 include("app-ui")
 include("common:mqtt")
 findProject(":common:mqtt")?.name = "mqtt"
+
+//enableFeaturePreview("VERSION_CATALOGS")
+//
+//dependencyResolutionManagement {
+//    versionCatalogs {
+//        create("libs") {
+//            library("bcprov-jdk15on", "org.bouncycastle:bcprov-jdk15on:1.70")
+//            library("bcpkix-jdk15on", "org.bouncycastle:bcpkix-jdk15on:1.70")
+//        }
+//    }
+//}
