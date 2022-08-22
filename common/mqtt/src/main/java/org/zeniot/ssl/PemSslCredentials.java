@@ -12,11 +12,12 @@ import org.bouncycastle.openssl.PEMKeyPair;
 import org.bouncycastle.openssl.PEMParser;
 import org.bouncycastle.openssl.jcajce.JcaPEMKeyConverter;
 import org.bouncycastle.openssl.jcajce.JcePEMDecryptorProviderBuilder;
-import org.bouncycastle.util.io.pem.PemObjectParser;
-import org.bouncycastle.util.io.pem.PemReader;
 import org.springframework.util.ResourceUtils;
 
-import java.io.*;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.security.GeneralSecurityException;
 import java.security.KeyStore;
 import java.security.PrivateKey;
@@ -33,7 +34,7 @@ import java.util.stream.Collectors;
  * @author Wu.Chunyang
  */
 @Data
-public class PemSslCredentials extends AbstractSslCredentials{
+public class PemSslCredentials extends AbstractSslCredentials {
     private static final String DEFAULT_KEY_ALIAS = "server";
     private String certFile;
     private String keyFile;
@@ -56,7 +57,7 @@ public class PemSslCredentials extends AbstractSslCredentials{
         try (InputStream inStream = new FileInputStream(ResourceUtils.getFile(this.certFile))) {
             try (PEMParser pemParser = new PEMParser(new InputStreamReader(inStream))) {
                 Object object;
-                while((object = pemParser.readObject()) != null) {
+                while ((object = pemParser.readObject()) != null) {
                     if (object instanceof X509CertificateHolder) {
                         X509Certificate x509Cert = certConverter.getCertificate((X509CertificateHolder) object);
                         certificates.add(x509Cert);

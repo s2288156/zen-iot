@@ -39,7 +39,7 @@ public abstract class AbstractSslCredentials implements SslCredentials {
     protected abstract void updateKeyAlias(String keyAlias);
 
     @Override
-    public void init(boolean trustsOnly) throws GeneralSecurityException {
+    public void init(boolean trustsOnly) throws IOException, GeneralSecurityException {
         String keyPassword = getKeyPassword();
         if (StringUtils.isBlank(keyPassword)) {
             this.keyPasswordArray = new char[0];
