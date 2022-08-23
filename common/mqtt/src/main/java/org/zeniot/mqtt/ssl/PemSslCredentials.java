@@ -1,6 +1,8 @@
 package org.zeniot.mqtt.ssl;
 
 import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 import org.apache.commons.lang3.StringUtils;
 import org.bouncycastle.asn1.pkcs.PrivateKeyInfo;
 import org.bouncycastle.cert.X509CertificateHolder;
@@ -30,7 +32,8 @@ import java.util.stream.Collectors;
 /**
  * @author Wu.Chunyang
  */
-@Data
+@Setter
+@Getter
 public class PemSslCredentials extends AbstractSslCredentials {
     private static final String DEFAULT_KEY_ALIAS = "server";
     private String certFile;
