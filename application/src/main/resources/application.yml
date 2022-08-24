@@ -24,10 +24,10 @@ secret:
 transport:
   mqtt:
     ssl:
-      enabled: true
+      enabled: ${MQTT_SSL_ENABLE:true}
       credentials:
         type: PEM
         pem:
-          cert-file: classpath:server_cert.pem
-          key-file: classpath:server_key.pem
-          key-password: mqtt
+          cert-file: classpath:${MQTT_SSL_CERT_PEM:server_cert.pem}
+          key-file: classpath:${MQTT_SSL_KEY_PEM:server_key.pem}
+          key-password: ${MQTT_SSL_PWD:mqtt}
