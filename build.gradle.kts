@@ -24,5 +24,11 @@ allprojects {
         }
         mavenCentral()
     }
-}
 
+    dependencyManagement {
+        dependencies {
+            dependency("org.bouncycastle:bcprov-jdk15on:1.70")
+            dependency("org.bouncycastle:bcpkix-jdk15on:1.70")
+        }
+    }
+}
