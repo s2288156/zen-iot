@@ -22,6 +22,10 @@ tasks.getByName<Test>("test") {
     useJUnitPlatform()
 }
 
+//tasks.compileJava {
+//    options.release.set(17)
+//}
+
 java {
     toolchain {
         languageVersion.set(JavaLanguageVersion.of(17))
