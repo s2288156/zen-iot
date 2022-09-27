@@ -1,12 +1,15 @@
 <template>
-  <el-page-header @updateContent="updateHeaderContent" :content="content" @back="goBack" />
+  <el-page-header @updateContent="updateHeaderContent" :content="title" @back="goBack"/>
 </template>
 
 <script lang="ts" setup>
 import { ref } from 'vue'
-
+defineProps({
+  title: String
+})
 const content = ref('11')
-function updateHeaderContent(data: string) {
+
+function updateHeaderContent (data: string) {
   content.value = data
 }
 const goBack = () => {

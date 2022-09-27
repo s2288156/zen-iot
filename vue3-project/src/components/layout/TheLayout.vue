@@ -1,14 +1,14 @@
 <template>
   <el-container class="layout">
     <el-aside width="200px">
-      <AsideMenu />
+      <AsideMenu/>
     </el-aside>
     <el-container>
       <el-header>
-        <TheHeader />
+        <TheHeader :title="headerContent"/>
       </el-header>
       <el-main>
-        <router-view />
+        <router-view @header-title="callBackTitle"/>
       </el-main>
     </el-container>
   </el-container>
@@ -17,6 +17,14 @@
 <script lang="ts" setup>
 import TheHeader from '@/components/layout/Header/TheHeader.vue'
 import AsideMenu from '@/components/layout/Aside/AsideMenu.vue'
+import { ref } from 'vue'
+
+const headerContent = ref('')
+
+const callBackTitle = (title: string) => {
+  console.log('##################' + title)
+  headerContent.value = title
+}
 </script>
 
 <style scoped lang="scss">

@@ -9,12 +9,13 @@
       >
         新增
       </el-button>
-      <el-button type="info" icon="RefreshRight" class="filter-item" @click="getAccountList()"
-        >刷新</el-button
-      >
-      <el-button type="info" icon="RefreshRight" class="filter-item" @click="haha()"
-        >Test</el-button
-      >
+      <el-button
+        type="info"
+        icon="RefreshRight"
+        class="filter-item"
+        @click="getAccountList()"
+        >刷新
+      </el-button>
     </div>
 
     <el-table :data="accountDataPage.data" style="width: 100%">
@@ -37,11 +38,23 @@
 
     <el-dialog v-model="dialogFormVisible" title="Add Account">
       <el-form :model="createAccountForm" :rules="rules" status-icon>
-        <el-form-item label="Username" :label-width="formLabelWidth" prop="username">
+        <el-form-item
+          label="Username"
+          :label-width="formLabelWidth"
+          prop="username"
+        >
           <el-input v-model="createAccountForm.username" autocomplete="off" />
         </el-form-item>
-        <el-form-item label="Password" :label-width="formLabelWidth" prop="password">
-          <el-input type="password" v-model="createAccountForm.password" autocomplete="off" />
+        <el-form-item
+          label="Password"
+          :label-width="formLabelWidth"
+          prop="password"
+        >
+          <el-input
+            type="password"
+            v-model="createAccountForm.password"
+            autocomplete="off"
+          />
         </el-form-item>
       </el-form>
       <template #footer>
@@ -55,91 +68,90 @@
 </template>
 
 <script lang="ts" setup>
-import { getAccounts, registerAccount } from '@/api/system/account'
-import { defineEmits, reactive, ref } from 'vue'
-import type { Account } from '@/api/system/types'
-import type { BaseDataPage, PageQuery } from '@/api/global-types'
-import type { FormRules } from 'element-plus'
+import { getAccounts, registerAccount } from "@/api/system/account";
+import { defineEmits, reactive, ref } from "vue";
+import type { Account } from "@/api/system/types";
+import type { BaseDataPage, PageQuery } from "@/api/global-types";
+import type { FormRules } from "element-plus";
 
-const emit = defineEmits(['updateContent'])
+const emit = defineEmits(["header-title"]);
 
 function haha() {
-  emit('updateContent', 'haha')
-  console.log('ggggggggggggggggg')
+  emit("header-title", "haha");
 }
 
-haha()
+haha();
 
 const pageQuery: PageQuery = {
   page: 0,
-  size: 10
-}
+  size: 10,
+};
 const accountDataPage = ref<BaseDataPage<Account>>({
   data: [],
   size: 0,
-  totalPages: 0
-})
+  totalPages: 0,
+});
 
 const getAccountList = () => {
   getAccounts(pageQuery).then((response) => {
-    accountDataPage.value = response.data
-  })
-}
-getAccountList()
+    accountDataPage.value = response.data;
+  });
+};
+getAccountList();
 
-const currentPage = ref(1)
+const currentPage = ref(1);
 const prevClick = () => {
-  pageQuery.page -= 1
-  getAccountList()
-}
+  pageQuery.page -= 1;
+  getAccountList();
+};
 const nextClick = () => {
-  pageQuery.page += 1
-  getAccountList()
-}
+  pageQuery.page += 1;
+  getAccountList();
+};
 const currentChange = () => {
-  pageQuery.page = currentPage.value - 1
-  getAccountList()
-}
+  pageQuery.page = currentPage.value - 1;
+  getAccountList();
+};
 
 // dialog
-const dialogFormVisible = ref(false)
+const dialogFormVisible = ref(false);
 const createAccountForm = reactive<Account>({
-  username: '',
-  password: ''
-})
+  username: "",
+  password: "",
+});
 
 const resetAccountForm = () => {
-  dialogFormVisible.value = false
-  createAccountForm.username = ''
-  createAccountForm.password = ''
-}
+  dialogFormVisible.value = false;
+  createAccountForm.username = "";
+  createAccountForm.password = "";
+};
 
 const rules = reactive<FormRules>({
   username: [
     {
       required: true,
-      message: 'Please input username!',
-      trigger: 'blur'
-    }
+      message: "Please input username!",
+      trigger: "blur",
+    },
   ],
   password: [
     {
       required: true,
-      message: 'Please input password!',
-      trigger: 'blur'
-    }
-  ]
-})
-const formLabelWidth = '140px'
+      message: "Please input password!",
+      trigger: "blur",
+    },
+  ],
+});
+const formLabelWidth = "140px";
 
 const createAccount = () => {
   registerAccount(createAccountForm).then((resp) => {
     if (resp.status === 200) {
-      resetAccountForm()
-      getAccountList()
+      resetAccountForm();
+      getAccountList();
     }
-  })
-}
+  });
+};
 </script>
 
 <style scoped lang="scss">
