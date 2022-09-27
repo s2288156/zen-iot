@@ -5,7 +5,6 @@
         新增
       </el-button>
       <el-button type="info" icon="RefreshRight" class="filter-item" @click="getAccountList()">刷新</el-button>
-      <el-button type="info" icon="RefreshRight" class="filter-item" @click="haha()">Test</el-button>
     </div>
 
     <el-table :data="accountDataPage.data" style="width: 100%" height="445px">
@@ -50,10 +49,9 @@ import { Account } from '@/api/system/types'
 import { BaseDataPage } from '@/api/global-types'
 import { FormRules } from 'element-plus'
 
-const emit = defineEmits(['updateContent'])
+const emit = defineEmits(['header-title'])
 function haha () {
-  emit('updateContent', 'haha')
-  console.log('ggggggggggggggggg')
+  emit('header-title', 'haha')
 }
 haha()
 
