@@ -4,8 +4,8 @@ plugins {
 
 dependencies {
     implementation(project(":common:util"))
-    implementation("org.bouncycastle:bcprov-jdk15on")
-    implementation("org.bouncycastle:bcpkix-jdk15on")
+    implementation(libs.bcprov.jdk15on)
+    implementation(libs.bcpkix.jdk15on)
 
     compileOnly("org.projectlombok:lombok")
     annotationProcessor("org.projectlombok:lombok")

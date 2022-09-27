@@ -16,3 +16,20 @@ findProject(":common:util")?.name = "util"
 //include("app-ui")
 include("common:mqtt")
 findProject(":common:mqtt")?.name = "mqtt"
+
+enableFeaturePreview("VERSION_CATALOGS")
+dependencyResolutionManagement {
+    repositories {
+        maven {
+            setUrl("https://maven.aliyun.com/repository/public/")
+        }
+        mavenCentral()
+    }
+    versionCatalogs {
+        create("libs") {
+            library("bcprov-jdk15on", "org.bouncycastle:bcprov-jdk15on:1.70")
+            library("bcpkix-jdk15on", "org.bouncycastle:bcpkix-jdk15on:1.70")
+            library("nimbus-jose-jwt", "com.nimbusds:nimbus-jose-jwt:9.23")
+        }
+    }
+}

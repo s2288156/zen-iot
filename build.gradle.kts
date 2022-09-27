@@ -18,19 +18,5 @@ allprojects {
     apply(plugin = "idea")
     apply(plugin = "org.springframework.boot")
     apply(plugin = "io.spring.dependency-management")
-
-    repositories {
-        maven {
-            setUrl("https://maven.aliyun.com/repository/public/")
-        }
-        mavenCentral()
-    }
-
-    dependencyManagement {
-        dependencies {
-            dependency("org.bouncycastle:bcprov-jdk15on:1.70")
-            dependency("org.bouncycastle:bcpkix-jdk15on:1.70")
-        }
-    }
 }
 
