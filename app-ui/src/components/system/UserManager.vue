@@ -22,11 +22,11 @@
 </template>
 
 <script lang="ts" setup>
-import { getAccounts } from '@/api/account'
-import { PageQuery } from '@/utils/datas'
+import { getAccounts } from "@/api/account";
+import { PageQuery } from "@/utils/datas";
 
-const pageQuery = new PageQuery(0, 10)
-const tableData = getAccounts(pageQuery)
+const pageQuery = new PageQuery(0, 10);
+const tableData = getAccounts(pageQuery);
 </script>
 
 <style scoped lang="scss"></style>

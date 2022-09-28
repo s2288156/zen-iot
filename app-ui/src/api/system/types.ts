@@ -1,11 +1,11 @@
 export type AccountId = {
-  id: number
-}
+  id: number;
+};
 
 export type Account = {
-  accountId?: AccountId
-  username: string
-  password?: string
-  createTime?: string
-  updateTime?: string
-}
+  accountId?: AccountId;
+  username: string;
+  password?: string;
+  createTime?: string;
+  updateTime?: string;
+};

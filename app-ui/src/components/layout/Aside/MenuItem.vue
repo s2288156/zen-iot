@@ -22,7 +22,7 @@
 </template>
 
 <script lang="ts" setup>
-defineProps(['menuList'])
+defineProps(["menuList"]);
 </script>
 
 <style scoped lang="scss"></style>
