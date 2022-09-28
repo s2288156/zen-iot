@@ -26,14 +26,14 @@
     </el-table>
 
     <el-pagination
+      v-model:current-page="currentPage"
       background
       layout="prev, pager, next"
+      :page-size="accountDataPage.size"
+      :page-count="accountDataPage.totalPages"
       @prev-click="prevClick"
       @next-click="nextClick"
       @current-change="currentChange"
-      v-model:current-page="currentPage"
-      :page-size="accountDataPage.size"
-      :page-count="accountDataPage.totalPages"
     />
 
     <el-dialog v-model="dialogFormVisible" title="Add Account">
@@ -51,8 +51,8 @@
           prop="password"
         >
           <el-input
-            type="password"
             v-model="createAccountForm.password"
+            type="password"
             autocomplete="off"
           />
         </el-form-item>

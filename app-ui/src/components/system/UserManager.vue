@@ -1,7 +1,9 @@
 <template>
   <div class="app-container">
     <div class="filter-container">
-      <el-button type="primary" icon="EditPen" class="filter-item">新增</el-button>
+      <el-button type="primary" icon="EditPen" class="filter-item"
+        >新增</el-button
+      >
     </div>
 
     <el-table :data="tableData.pages" style="width: 100%">

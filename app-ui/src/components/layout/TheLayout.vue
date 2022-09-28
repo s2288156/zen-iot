@@ -1,14 +1,14 @@
 <template>
   <el-container class="layout">
     <el-aside width="200px">
-      <AsideMenu/>
+      <AsideMenu />
     </el-aside>
     <el-container>
       <el-header>
-        <TheHeader :title="headerContent"/>
+        <TheHeader :title="headerContent" />
       </el-header>
       <el-main>
-        <router-view @header-title="callBackTitle"/>
+        <router-view @header-title="callBackTitle" />
       </el-main>
     </el-container>
   </el-container>

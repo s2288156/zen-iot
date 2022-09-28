@@ -5,11 +5,11 @@
   <el-menu
     :default-active="defaultActive"
     class="menu"
+    router
     @open="handleOpen"
     @close="handleClose"
-    router
   >
-    <menu-item :menuList="menuList" />
+    <menu-item :menu-list="menuList" />
   </el-menu>
 </template>
 
@@ -34,8 +34,8 @@ const menuList = reactive([
     meta: {
       title: '首页',
       icon: 'HomeFilled',
-      roles: []
-    }
+      roles: [],
+    },
   },
   {
     path: '/system',
@@ -43,7 +43,7 @@ const menuList = reactive([
     meta: {
       title: '系统管理',
       icon: 'Setting',
-      roles: ['ROLE_ADMIN']
+      roles: ['ROLE_ADMIN'],
     },
     children: [
       {
@@ -52,8 +52,8 @@ const menuList = reactive([
         meta: {
           title: '用户管理',
           icon: 'User',
-          roles: ['ROLE_ADMIN']
-        }
+          roles: ['ROLE_ADMIN'],
+        },
       },
       {
         path: '/system/menu',
@@ -61,10 +61,10 @@ const menuList = reactive([
         meta: {
           title: '菜单管理',
           icon: 'Menu',
-          roles: ['ROLE_ADMIN']
-        }
-      }
-    ]
+          roles: ['ROLE_ADMIN'],
+        },
+      },
+    ],
   },
   {
     path: '/platform',
@@ -73,7 +73,7 @@ const menuList = reactive([
     meta: {
       title: '平台配置',
       icon: 'Platform',
-      roles: ['ROLE_ADMIN']
+      roles: ['ROLE_ADMIN'],
     },
     children: [
       {
@@ -83,8 +83,8 @@ const menuList = reactive([
         meta: {
           title: '设备管理',
           icon: 'Cpu',
-          roles: ['ROLE_ADMIN']
-        }
+          roles: ['ROLE_ADMIN'],
+        },
       },
       {
         path: '/platform/parent',
@@ -93,8 +93,8 @@ const menuList = reactive([
         meta: {
           title: 'parent',
           icon: 'Cpu',
-          roles: ['ROLE_ADMIN']
-        }
+          roles: ['ROLE_ADMIN'],
+        },
       },
       {
         path: '/platform/sub',
@@ -103,11 +103,11 @@ const menuList = reactive([
         meta: {
           title: 'sub',
           icon: 'Cpu',
-          roles: ['ROLE_ADMIN']
-        }
-      }
-    ]
-  }
+          roles: ['ROLE_ADMIN'],
+        },
+      },
+    ],
+  },
 ])
 
 const handleOpen = (key: string, keyPath: string[]) => {

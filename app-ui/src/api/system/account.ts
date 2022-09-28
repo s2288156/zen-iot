@@ -6,7 +6,7 @@ export function getAccounts(data: PageQuery) {
   return request({
     url: '/api/accounts',
     method: 'get',
-    params: data
+    params: data,
   })
 }
 
@@ -14,6 +14,6 @@ export function registerAccount(data: Account) {
   return request({
     url: '/api/account/register',
     method: 'post',
-    data: data
+    data: data,
   })
 }

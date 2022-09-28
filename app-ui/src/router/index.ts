@@ -17,10 +17,10 @@ const router = createRouter({
           meta: {
             title: '首页',
             icon: 'HomeFilled',
-            roles: []
-          }
-        }
-      ]
+            roles: [],
+          },
+        },
+      ],
     },
     {
       path: '/system',
@@ -29,7 +29,7 @@ const router = createRouter({
       meta: {
         title: '系统管理',
         icon: 'Setting',
-        roles: ['ROLE_ADMIN']
+        roles: ['ROLE_ADMIN'],
       },
       children: [
         {
@@ -39,8 +39,8 @@ const router = createRouter({
           meta: {
             title: '用户管理',
             icon: 'User',
-            roles: ['ROLE_ADMIN']
-          }
+            roles: ['ROLE_ADMIN'],
+          },
         },
         {
           path: '/system/menu',
@@ -49,10 +49,10 @@ const router = createRouter({
           meta: {
             title: '菜单管理',
             icon: 'Menu',
-            roles: ['ROLE_ADMIN']
-          }
-        }
-      ]
+            roles: ['ROLE_ADMIN'],
+          },
+        },
+      ],
     },
     {
       path: '/platform',
@@ -61,7 +61,7 @@ const router = createRouter({
       meta: {
         title: '平台配置',
         icon: 'Platform',
-        roles: ['ROLE_ADMIN']
+        roles: ['ROLE_ADMIN'],
       },
       children: [
         {
@@ -71,8 +71,8 @@ const router = createRouter({
           meta: {
             title: '设备管理',
             icon: 'Cpu',
-            roles: ['ROLE_ADMIN']
-          }
+            roles: ['ROLE_ADMIN'],
+          },
         },
         {
           path: '/platform/parent',
@@ -81,8 +81,8 @@ const router = createRouter({
           meta: {
             title: 'parent',
             icon: 'Cpu',
-            roles: ['ROLE_ADMIN']
-          }
+            roles: ['ROLE_ADMIN'],
+          },
         },
         {
           path: '/platform/sub',
@@ -91,12 +91,12 @@ const router = createRouter({
           meta: {
             title: 'sub',
             icon: 'Cpu',
-            roles: ['ROLE_ADMIN']
-          }
-        }
-      ]
-    }
-  ]
+            roles: ['ROLE_ADMIN'],
+          },
+        },
+      ],
+    },
+  ],
 })
 
 export default router
