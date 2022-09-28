@@ -14,109 +14,109 @@
 </template>
 
 <script lang="ts" setup>
-import MenuItem from "@/components/layout/Aside/MenuItem.vue";
-import ZenLogo from "@/assets/zen-logo.svg";
-import { computed, reactive } from "vue";
-import { useRoute } from "vue-router";
-import TheLayout from "@/components/layout/TheLayout.vue";
+import MenuItem from '@/components/layout/Aside/MenuItem.vue'
+import ZenLogo from '@/assets/zen-logo.svg'
+import { computed, reactive } from 'vue'
+import { useRoute } from 'vue-router'
+import TheLayout from '@/components/layout/TheLayout.vue'
 
-const route = useRoute();
+const route = useRoute()
 
 const defaultActive = computed(() => {
-  const { path } = route;
-  return path;
-});
+  const { path } = route
+  return path
+})
 
 const menuList = reactive([
   {
-    path: "/",
-    name: "Home",
+    path: '/',
+    name: 'Home',
     meta: {
-      title: "首页",
-      icon: "HomeFilled",
+      title: '首页',
+      icon: 'HomeFilled',
       roles: [],
     },
   },
   {
-    path: "/system",
-    name: "System",
+    path: '/system',
+    name: 'System',
     meta: {
-      title: "系统管理",
-      icon: "Setting",
-      roles: ["ROLE_ADMIN"],
+      title: '系统管理',
+      icon: 'Setting',
+      roles: ['ROLE_ADMIN'],
     },
     children: [
       {
-        path: "/system/user",
-        name: "User",
+        path: '/system/user',
+        name: 'User',
         meta: {
-          title: "用户管理",
-          icon: "User",
-          roles: ["ROLE_ADMIN"],
+          title: '用户管理',
+          icon: 'User',
+          roles: ['ROLE_ADMIN'],
         },
       },
       {
-        path: "/system/menu",
-        name: "Menu",
+        path: '/system/menu',
+        name: 'Menu',
         meta: {
-          title: "菜单管理",
-          icon: "Menu",
-          roles: ["ROLE_ADMIN"],
+          title: '菜单管理',
+          icon: 'Menu',
+          roles: ['ROLE_ADMIN'],
         },
       },
     ],
   },
   {
-    path: "/platform",
-    name: "Platform",
+    path: '/platform',
+    name: 'Platform',
     component: TheLayout,
     meta: {
-      title: "平台配置",
-      icon: "Platform",
-      roles: ["ROLE_ADMIN"],
+      title: '平台配置',
+      icon: 'Platform',
+      roles: ['ROLE_ADMIN'],
     },
     children: [
       {
-        path: "/platform/device",
-        name: "User",
-        component: () => import("@/views/platform/DeviceManager.vue"),
+        path: '/platform/device',
+        name: 'User',
+        component: () => import('@/views/platform/DeviceManager.vue'),
         meta: {
-          title: "设备管理",
-          icon: "Cpu",
-          roles: ["ROLE_ADMIN"],
+          title: '设备管理',
+          icon: 'Cpu',
+          roles: ['ROLE_ADMIN'],
         },
       },
       {
-        path: "/platform/parent",
-        name: "parent",
-        component: () => import("@/views/platform/TheParent.vue"),
+        path: '/platform/parent',
+        name: 'parent',
+        component: () => import('@/views/platform/TheParent.vue'),
         meta: {
-          title: "parent",
-          icon: "Cpu",
-          roles: ["ROLE_ADMIN"],
+          title: 'parent',
+          icon: 'Cpu',
+          roles: ['ROLE_ADMIN'],
         },
       },
       {
-        path: "/platform/sub",
-        name: "sub",
-        component: () => import("@/views/platform/TheSub.vue"),
+        path: '/platform/sub',
+        name: 'sub',
+        component: () => import('@/views/platform/TheSub.vue'),
         meta: {
-          title: "sub",
-          icon: "Cpu",
-          roles: ["ROLE_ADMIN"],
+          title: 'sub',
+          icon: 'Cpu',
+          roles: ['ROLE_ADMIN'],
         },
       },
     ],
   },
-]);
+])
 
 const handleOpen = (key: string, keyPath: string[]) => {
-  // console.log(key, keyPath)
-};
+  console.log(key, keyPath)
+}
 
 const handleClose = (key: string, keyPath: string[]) => {
-  // console.log(key, keyPath)
-};
+  console.log(key, keyPath)
+}
 </script>
 
 <style scoped lang="scss">

@@ -15,16 +15,16 @@
 </template>
 
 <script lang="ts" setup>
-import TheHeader from "@/components/layout/Header/TheHeader.vue";
-import AsideMenu from "@/components/layout/Aside/AsideMenu.vue";
-import { ref } from "vue";
+import TheHeader from '@/components/layout/Header/TheHeader.vue'
+import AsideMenu from '@/components/layout/Aside/AsideMenu.vue'
+import { ref } from 'vue'
 
-const headerContent = ref("");
+const headerContent = ref('')
 
 const callBackTitle = (title: string) => {
-  console.log("##################" + title);
-  headerContent.value = title;
-};
+  console.log('##################' + title)
+  headerContent.value = title
+}
 </script>
 
 <style scoped lang="scss">

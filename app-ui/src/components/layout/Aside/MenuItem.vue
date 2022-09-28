@@ -6,15 +6,15 @@
     >
       <template #title>
         <el-icon>
-          <component :is="menu.meta.icon"></component>
+          <component :is="menu.meta.icon" />
         </el-icon>
         <span>{{ menu.meta.title }}</span>
       </template>
-      <menu-item :menu-list="menu.children"></menu-item>
+      <menu-item :menu-list="menu.children" />
     </el-sub-menu>
     <el-menu-item v-else :index="menu.path">
       <el-icon>
-        <component :is="menu.meta.icon"></component>
+        <component :is="menu.meta.icon" />
       </el-icon>
       <span>{{ menu.meta.title }}</span>
     </el-menu-item>

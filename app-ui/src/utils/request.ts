@@ -1,7 +1,7 @@
-import axios from "axios";
+import axios from 'axios'
 
 const service = axios.create({
-  baseURL: "http://localhost:8088",
-});
+  baseURL: 'http://localhost:8088',
+})
 
-export default service;
+export default service

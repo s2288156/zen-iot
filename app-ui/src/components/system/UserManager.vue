@@ -1,9 +1,7 @@
 <template>
   <div class="app-container">
     <div class="filter-container">
-      <el-button type="primary" icon="EditPen" class="filter-item"
-        >新增</el-button
-      >
+      <el-button type="primary" icon="EditPen" class="filter-item">新增</el-button>
     </div>
 
     <el-table :data="tableData.pages" style="width: 100%">
@@ -22,11 +20,13 @@
 </template>
 
 <script lang="ts" setup>
-import { getAccounts } from "@/api/account";
-import { PageQuery } from "@/utils/datas";
-
-const pageQuery = new PageQuery(0, 10);
-const tableData = getAccounts(pageQuery);
+import { getAccounts } from '@/api/account'
+import type { PageQuery } from "@/api/global-types";
+const pageQuery: PageQuery = {
+  page: 0,
+  size: 10
+}
+const tableData = getAccounts(pageQuery)
 </script>
 
 <style scoped lang="scss"></style>
