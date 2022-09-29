@@ -22,7 +22,6 @@ import { ref } from 'vue'
 const headerContent = ref('')
 
 const callBackTitle = (title: string) => {
-  console.log('##################' + title)
   headerContent.value = title
 }
 </script>

@@ -111,11 +111,11 @@ const menuList = reactive([
 ])
 
 const handleOpen = (key: string, keyPath: string[]) => {
-  console.log(key, keyPath)
+  console.log('open', key, keyPath)
 }
 
 const handleClose = (key: string, keyPath: string[]) => {
-  console.log(key, keyPath)
+  console.log('close', key, keyPath)
 }
 </script>
 
