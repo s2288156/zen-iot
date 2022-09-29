@@ -5,10 +5,10 @@
     </el-aside>
     <el-container>
       <el-header>
-        <TheHeader :title="headerContent" />
+        <TheHeader />
       </el-header>
       <el-main>
-        <router-view @header-title="callBackTitle" />
+        <router-view />
       </el-main>
     </el-container>
   </el-container>
@@ -17,13 +17,6 @@
 <script lang="ts" setup>
 import TheHeader from '@/components/layout/Header/TheHeader.vue'
 import AsideMenu from '@/components/layout/Aside/AsideMenu.vue'
-import { ref } from 'vue'
-
-const headerContent = ref('')
-
-const callBackTitle = (title: string) => {
-  headerContent.value = title
-}
 </script>
 
 <style scoped lang="scss">

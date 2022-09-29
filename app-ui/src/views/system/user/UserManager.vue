@@ -14,7 +14,7 @@
         icon="RefreshRight"
         class="filter-item"
         @click="getAccountList()"
-      >刷新
+        >刷新
       </el-button>
     </div>
 
@@ -68,90 +68,82 @@
 </template>
 
 <script lang="ts" setup>
-import { getAccounts, registerAccount } from "@/api/system/account";
-import { defineEmits, reactive, ref } from "vue";
-import type { Account } from "@/api/system/types";
-import type { BaseDataPage, PageQuery } from "@/api/global-types";
-import type { FormRules } from "element-plus";
-import { useRoute } from "vue-router";
-
-
-const emit = defineEmits(["header-title"]);
-function emitPageTitle () {
-  emit("header-title", useRoute().meta.title);
-}
-emitPageTitle()
+import { getAccounts, registerAccount } from '@/api/system/account'
+import { reactive, ref } from 'vue'
+import type { Account } from '@/api/system/types'
+import type { BaseDataPage, PageQuery } from '@/api/global-types'
+import type { FormRules } from 'element-plus'
 
 const pageQuery: PageQuery = {
   page: 0,
-  size: 10
-};
+  size: 10,
+}
 const accountDataPage = ref<BaseDataPage<Account>>({
   data: [],
   size: 0,
-  totalPages: 0
-});
+  totalPages: 0,
+})
 
 const getAccountList = () => {
   getAccounts(pageQuery).then((response) => {
-    accountDataPage.value = response.data;
-  });
-};
-getAccountList();
+    accountDataPage.value = response.data
+  })
+}
+getAccountList()
 
-const currentPage = ref(1);
+const currentPage = ref(1)
 const prevClick = () => {
-  pageQuery.page -= 1;
-  getAccountList();
-};
+  pageQuery.page -= 1
+  getAccountList()
+}
 const nextClick = () => {
-  pageQuery.page += 1;
-  getAccountList();
-};
+  pageQuery.page += 1
+  getAccountList()
+}
 const currentChange = () => {
-  pageQuery.page = currentPage.value - 1;
-  getAccountList();
-};
+  pageQuery.page = currentPage.value - 1
+  getAccountList()
+}
 
 // dialog
-const dialogFormVisible = ref(false);
+const dialogFormVisible = ref(false)
 const createAccountForm = reactive<Account>({
-  username: "",
-  password: ""
-});
+  username: '',
+  password: '',
+})
 
 const resetAccountForm = () => {
-  dialogFormVisible.value = false;
-  createAccountForm.username = "";
-  createAccountForm.password = "";
-};
+  dialogFormVisible.value = false
+  createAccountForm.username = ''
+  createAccountForm.password = ''
+}
 
 const rules = reactive<FormRules>({
   username: [
     {
       required: true,
-      message: "Please input username!",
-      trigger: "blur"
-    }
+      message: 'Please input username!',
+      trigger: 'blur',
+    },
   ],
   password: [
     {
       required: true,
-      message: "Please input password!",
-      trigger: "blur"
-    }
-  ]
-});
-const formLabelWidth = "140px";
+      message: 'Please input password!',
+      trigger: 'blur',
+    },
+  ],
+})
+const formLabelWidth = '140px'
 
 const createAccount = () => {
   registerAccount(createAccountForm).then((resp) => {
     if (resp.status === 200) {
-      resetAccountForm();
-      getAccountList();
+      resetAccountForm()
+      getAccountList()
     }
-  });
-};
+  })
+}
 </script>
 
 <style scoped lang="scss">

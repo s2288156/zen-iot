@@ -1,21 +1,17 @@
 <template>
-  <el-page-header
-    :content="title"
-    @update-content="updateHeaderContent"
-    @back="goBack"
-  />
+  <el-page-header @back="goBack">
+    <template #content>
+      <span>{{ title }}</span>
+    </template>
+  </el-page-header>
 </template>
 
 <script lang="ts" setup>
 import { ref } from 'vue'
-defineProps({
-  title: String,
-})
-const content = ref('11')
+import { useRoute } from 'vue-router'
 
-function updateHeaderContent(data: string) {
-  content.value = data
-}
+const title = ref(useRoute().meta.title)
+
 const goBack = () => {
   console.log('go back')
 }
