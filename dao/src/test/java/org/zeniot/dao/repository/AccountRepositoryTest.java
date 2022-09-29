@@ -53,8 +53,10 @@ class AccountRepositoryTest {
 
     @Test
     void existsAccountEntityByUsername() {
-        List<RoleEntity> all = roleRepository.findAll();
-        log.warn("{}", all);
+        List<RoleEntity> allRule = roleRepository.findAll();
+        List<AccountEntity> allAccount = accountRepository.findAll();
+        log.warn("{}", allRule);
+        log.warn("{}", allAccount);
     }
 
 }
