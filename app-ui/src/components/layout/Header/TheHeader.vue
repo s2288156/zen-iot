@@ -1,6 +1,6 @@
 <template>
   <el-page-header @back="goBack">
-    <template #title>
+    <template #content>
       <span>{{ title }}</span>
     </template>
   </el-page-header>
