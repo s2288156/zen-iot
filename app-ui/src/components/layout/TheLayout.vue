@@ -8,7 +8,7 @@
         <TheHeader />
       </el-header>
       <el-main>
-        <router-view />
+        <TheMain/>
       </el-main>
     </el-container>
   </el-container>
@@ -17,7 +17,7 @@
 <script lang="ts" setup>
 import TheHeader from '@/components/layout/Header/TheHeader.vue'
 import AsideMenu from '@/components/layout/Aside/AsideMenu.vue'
-</script>
+import TheMain from "@/components/layout/Main/TheMain.vue";</script>
 
 <style scoped lang="scss">
 .layout {

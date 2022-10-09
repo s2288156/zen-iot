@@ -7,10 +7,12 @@
 </template>
 
 <script lang="ts" setup>
-import { ref } from 'vue'
-import { useRoute } from 'vue-router'
+import {computed} from 'vue'
+import {useRoute} from 'vue-router'
 
-const title = ref(useRoute().meta.title)
+const title = computed(() => {
+  return useRoute().meta.title
+})
 
 const goBack = () => {
   console.log('go back')
