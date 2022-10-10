@@ -1,6 +1,7 @@
 package org.zeniot.server.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.zeniot.dao.id.AccountId;
@@ -15,7 +16,7 @@ import org.zeniot.server.service.AccountService;
  */
 @RequestMapping("/api")
 @RestController
-public class AccountController {
+public class AccountController extends AbstractController {
 
     @Autowired
     private AccountService accountService;
@@ -29,6 +30,7 @@ public class AccountController {
         return RestResponse.success(accountService.registerAccount(account));
     }
 
+    @PreAuthorize("hasAnyAuthority(sd.role.ADMIN)")
     @DeleteMapping("/account/{id}")
     public RestResponse<Account> deleteAccount(@PathVariable Long id) {
         accountService.deleteAccount(id);

@@ -2,9 +2,7 @@ package org.zeniot.dao.model;
 
 import lombok.ToString;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Table;
+import javax.persistence.*;
 import java.util.Objects;
 
 /**
@@ -14,22 +12,23 @@ import java.util.Objects;
 @Entity
 @Table(name = "t_role")
 public class RoleEntity extends BaseEntity {
+    @Enumerated(EnumType.STRING)
     @Column(name = "role_name", nullable = false, length = 64)
-    private String roleName;
+    private RoleEnums roleName;
 
     public RoleEntity() {
     }
 
-    public RoleEntity(String roleName) {
-        this.roleName = roleName;
+    public RoleEntity(RoleEnums role) {
+        this.roleName = role;
     }
 
-    public String getRoleName() {
+    public RoleEnums getRoleName() {
         return roleName;
     }
 
-    public void setRoleName(String name) {
-        this.roleName = name;
+    public void setRoleName(RoleEnums roleName) {
+        this.roleName = roleName;
     }
 
     @Override

@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 import org.zeniot.dao.id.AccountId;
 import org.zeniot.dao.model.AccountEntity;
 import org.zeniot.dao.model.RoleEntity;
+import org.zeniot.dao.model.RoleEnums;
 import org.zeniot.dao.repository.AccountRepository;
 import org.zeniot.server.controller.response.PageResponse;
 import org.zeniot.server.dto.PageQuery;
@@ -26,7 +27,6 @@ import java.util.Set;
 @Service
 public class AccountServiceImpl implements AccountService {
 
-    public static final String DEFAULT_ROLE_ADMIN = "ADMIN";
     private final AccountRepository accountRepository;
     private final PasswordEncoder passwordEncoder;
 
@@ -41,7 +41,7 @@ public class AccountServiceImpl implements AccountService {
             throw new BizException("username existed!");
         }
         AccountEntity accountEntity = account.toEntity(passwordEncoder);
-        accountEntity.setRoles(Set.of(new RoleEntity(DEFAULT_ROLE_ADMIN)));
+        accountEntity.setRoles(Set.of(new RoleEntity(RoleEnums.GUEST)));
         accountRepository.save(accountEntity);
         return Account.simpleAccountFromEntity(accountEntity);
     }

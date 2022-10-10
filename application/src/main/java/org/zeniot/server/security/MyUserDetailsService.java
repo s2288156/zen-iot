@@ -31,7 +31,8 @@ public class MyUserDetailsService implements UserDetailsService {
         if (accountOptional.isPresent()) {
             AccountEntity accountEntity = accountOptional.get();
             Set<RoleEntity> roleEntities = accountEntity.getRoles();
-            List<SimpleGrantedAuthority> authorities= roleEntities.stream().map(rule -> new SimpleGrantedAuthority(rule.getRoleName()))
+            List<SimpleGrantedAuthority> authorities = roleEntities.stream()
+                    .map(rule -> new SimpleGrantedAuthority(rule.getRoleName().name()))
                     .collect(Collectors.toList());
             return User.builder()
                     .username(accountEntity.getUsername())
