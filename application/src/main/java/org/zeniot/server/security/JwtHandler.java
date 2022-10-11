@@ -12,12 +12,15 @@ import com.nimbusds.jwt.SignedJWT;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
 import java.text.ParseException;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
+import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -34,6 +37,7 @@ public class JwtHandler {
     private Long expiration;
 
     private static final String USERNAME = "username";
+    private static final String AUTHORITY = "authority";
 
     public String newToken(UserDetails userDetails) {
         return generateToken(generateClaims(userDetails));
@@ -63,6 +67,18 @@ public class JwtHandler {
         }
     }
 
+    public User getUserForToken(String token) {
+        try {
+            SignedJWT signedJWT = SignedJWT.parse(token);
+            String username = signedJWT.getJWTClaimsSet().getStringClaim(USERNAME);
+            //noinspection unchecked
+            Collection<GrantedAuthority> authorities = (Collection<GrantedAuthority>) signedJWT.getJWTClaimsSet().getClaim(AUTHORITY);
+            return new User(username, "", authorities);
+        } catch (ParseException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
     private String generateToken(JWTClaimsSet claims) {
         // 512-bit (64-byte) shared secret
         SignedJWT signedJWT = new SignedJWT(new JWSHeader(JWSAlgorithm.HS512), claims);
@@ -81,7 +97,7 @@ public class JwtHandler {
         Map<String, Object> claims = new HashMap<>();
         claims.put(JWTClaimNames.EXPIRATION_TIME, LocalDateTime.now().toEpochSecond(ZoneOffset.of("+8")) + expiration);
         claims.put(USERNAME, userDetails.getUsername());
-        claims.put("", userDetails.getAuthorities());
+        claims.put(AUTHORITY, userDetails.getAuthorities());
         try {
             return JWTClaimsSet.parse(claims);
         } catch (ParseException e) {
