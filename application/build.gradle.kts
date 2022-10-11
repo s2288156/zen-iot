@@ -1,14 +1,16 @@
 plugins {
-    java
+    `java-library`
 }
 
 dependencies {
-    implementation(project(":service"))
+    implementation(project(":api"))
     implementation(project(":common:mqtt"))
     implementation(project(":common:util"))
-    implementation(libs.nimbus.jose.jwt)
-    implementation("org.springframework.boot:spring-boot-starter-web")
-    implementation("org.springframework.boot:spring-boot-starter-actuator")
+    implementation(project(":common:data"))
+    api(libs.nimbus.jose.jwt)
+    api("org.springframework.boot:spring-boot-starter-web")
+    api("org.springframework.boot:spring-boot-starter-data-jpa")
+    api("org.springframework.boot:spring-boot-starter-actuator")
     compileOnly("org.projectlombok:lombok")
     annotationProcessor("org.projectlombok:lombok")
 

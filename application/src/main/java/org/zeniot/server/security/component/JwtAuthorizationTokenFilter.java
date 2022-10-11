@@ -3,11 +3,6 @@ package org.zeniot.server.security.component;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 import org.zeniot.server.security.JwtHandler;
@@ -27,8 +22,8 @@ public class JwtAuthorizationTokenFilter extends OncePerRequestFilter {
 
     @Autowired
     private JwtHandler jwtHandler;
-    @Autowired
-    private UserDetailsService userDetailsService;
+//    @Autowired
+//    private UserDetailsService userDetailsService;
 
     private static final String TOKEN_HEADER = "Authorization";
     private static final String TOKEN_HEADER_PREFIX = "Bearer ";
@@ -39,14 +34,14 @@ public class JwtAuthorizationTokenFilter extends OncePerRequestFilter {
         if (StringUtils.isNotBlank(tokenHeader) && StringUtils.startsWith(tokenHeader, TOKEN_HEADER_PREFIX)) {
             String token = StringUtils.substring(tokenHeader, TOKEN_HEADER_PREFIX.length());
             String username = jwtHandler.getUsernameForToken(token);
-            if (StringUtils.isNotBlank(username) && SecurityContextHolder.getContext().getAuthentication() != null) {
-                UserDetails userDetails = userDetailsService.loadUserByUsername(username);
-                if (jwtHandler.verifyToken(token, userDetails)) {
-                    UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
-                    authenticationToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-                    SecurityContextHolder.getContext().setAuthentication(authenticationToken);
-                }
-            }
+//            if (StringUtils.isNotBlank(username) && SecurityContextHolder.getContext().getAuthentication() != null) {
+//                UserDetails userDetails = userDetailsService.loadUserByUsername(username);
+//                if (jwtHandler.verifyToken(token, userDetails)) {
+//                    UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
+//                    authenticationToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+//                    SecurityContextHolder.getContext().setAuthentication(authenticationToken);
+//                }
+//            }
         }
         filterChain.doFilter(request, response);
     }

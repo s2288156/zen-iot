@@ -1,4 +1,4 @@
-package org.zeniot.dao.model;
+package org.zeniot.data.enums;
 
 /**
  * @author Wu.Chunyang

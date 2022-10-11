@@ -5,15 +5,15 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.zeniot.api.AccountService;
+import org.zeniot.common.exception.BizException;
 import org.zeniot.dao.model.AccountEntity;
 import org.zeniot.dao.model.RoleEntity;
-import org.zeniot.dao.model.RoleEnums;
 import org.zeniot.dao.repository.AccountRepository;
-import org.zeniot.service.api.AccountService;
-import org.zeniot.service.dto.account.Account;
-import org.zeniot.service.dto.core.PageQuery;
-import org.zeniot.service.dto.core.PageResponse;
-import org.zeniot.service.exception.BizException;
+import org.zeniot.data.enums.RoleEnums;
+import org.zeniot.dto.account.Account;
+import org.zeniot.dto.core.PageQuery;
+import org.zeniot.dto.core.PageResponse;
 
 import java.util.List;
 import java.util.Optional;
@@ -68,4 +68,11 @@ public class AccountServiceImpl implements AccountService {
                 .toList();
         return PageResponse.of(accounts, all.getSize(), totalPages, totalElements, all.hasNext());
     }
+
+    @Override
+    public Account findByUsername(String username) {
+        Optional<AccountEntity> accountOptional = accountRepository.findAccountByUsername(username);
+        return accountOptional.map(Account::fromEntity).orElse(null);
+    }
+
 }

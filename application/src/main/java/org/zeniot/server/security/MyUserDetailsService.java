@@ -7,13 +7,10 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
-import org.zeniot.dao.model.AccountEntity;
-import org.zeniot.dao.model.RoleEntity;
-import org.zeniot.dao.repository.AccountRepository;
+import org.zeniot.api.AccountService;
+import org.zeniot.dto.account.Account;
 
 import java.util.List;
-import java.util.Optional;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
@@ -23,20 +20,18 @@ import java.util.stream.Collectors;
 public class MyUserDetailsService implements UserDetailsService {
 
     @Autowired
-    private AccountRepository accountRepository;
+    private AccountService accountService;
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        Optional<AccountEntity> accountOptional = accountRepository.findAccountByUsername(username);
-        if (accountOptional.isPresent()) {
-            AccountEntity accountEntity = accountOptional.get();
-            Set<RoleEntity> roleEntities = accountEntity.getRoles();
-            List<SimpleGrantedAuthority> authorities = roleEntities.stream()
-                    .map(rule -> new SimpleGrantedAuthority(rule.getRoleName().name()))
+        Account account = accountService.findByUsername(username);
+        if (account != null) {
+            List<SimpleGrantedAuthority> authorities = account.getRoles().stream()
+                    .map(SimpleGrantedAuthority::new)
                     .collect(Collectors.toList());
             return User.builder()
-                    .username(accountEntity.getUsername())
-                    .password(accountEntity.getPassword())
+                    .username(account.getUsername())
+                    .password(account.getPassword())
                     .authorities(authorities)
                     .build();
         }

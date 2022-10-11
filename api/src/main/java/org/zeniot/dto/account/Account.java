@@ -1,4 +1,4 @@
-package org.zeniot.service.dto.account;
+package org.zeniot.dto.account;
 
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -12,21 +12,21 @@ import java.io.Serial;
 import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * @author Wu.Chunyang
  */
+@Getter
 @Setter(AccessLevel.PRIVATE)
 @ToString
 public class Account implements Serializable {
     @Serial
     private static final long serialVersionUID = -6536667040345207843L;
 
-    @Getter
     private Long accountId;
 
     @NotBlank
-    @Getter
     private String username;
 
     @NotBlank
@@ -34,10 +34,8 @@ public class Account implements Serializable {
 
     private Set<String> roles;
 
-    @Getter
     private LocalDateTime createTime;
 
-    @Getter
     private LocalDateTime updateTime;
 
     public AccountEntity toEntity(PasswordEncoder passwordEncoder) {
@@ -45,6 +43,18 @@ public class Account implements Serializable {
         accountEntity.setUsername(username);
         accountEntity.setPassword(passwordEncoder.encode(password));
         return accountEntity;
+    }
+
+    public static Account fromEntity(AccountEntity accountEntity) {
+        Account account = new Account();
+        account.setUsername(accountEntity.getUsername());
+        account.setPassword(accountEntity.getPassword());
+        account.setRoles(accountEntity.getRoles()
+                .stream()
+                .map(roleEntity -> roleEntity.getRoleName().name())
+                .collect(Collectors.toSet())
+        );
+        return account;
     }
 
     public static Account simpleAccountFromEntity(AccountEntity accountEntity) {

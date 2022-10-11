@@ -1,4 +1,4 @@
-package org.zeniot.service.exception;
+package org.zeniot.common.exception;
 
 /**
  * @author Wu.Chunyang

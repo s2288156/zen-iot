@@ -1,4 +1,4 @@
-package org.zeniot.server.config;
+package org.zeniot.config;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;

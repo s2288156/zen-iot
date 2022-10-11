@@ -1,4 +1,4 @@
-package org.zeniot.service.dto.core;
+package org.zeniot.dto.core;
 
 import lombok.Data;
 

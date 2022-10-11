@@ -1,6 +1,7 @@
 package org.zeniot.dao.model;
 
 import lombok.ToString;
+import org.zeniot.data.enums.RoleEnums;
 
 import javax.persistence.*;
 import java.util.Objects;

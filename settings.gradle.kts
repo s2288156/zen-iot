@@ -34,3 +34,7 @@ dependencyResolutionManagement {
     }
 }
 include("service")
+include("api")
+include("common:data")
+findProject(":common:data")?.name = "data"
+include("start")

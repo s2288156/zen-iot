@@ -1,12 +1,12 @@
-package org.zeniot.server.config;
+package org.zeniot.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
-import org.zeniot.service.dto.core.RestResponse;
-import org.zeniot.service.exception.BizException;
+import org.zeniot.common.exception.BizException;
+import org.zeniot.dto.core.RestResponse;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;

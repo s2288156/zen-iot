@@ -4,11 +4,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import org.zeniot.service.api.AccountService;
-import org.zeniot.service.dto.account.Account;
-import org.zeniot.service.dto.core.PageQuery;
-import org.zeniot.service.dto.core.PageResponse;
-import org.zeniot.service.dto.core.RestResponse;
+import org.zeniot.api.AccountService;
+import org.zeniot.dto.account.Account;
+import org.zeniot.dto.core.PageQuery;
+import org.zeniot.dto.core.PageResponse;
+import org.zeniot.dto.core.RestResponse;
 
 /**
  * @author Wu.Chunyang
