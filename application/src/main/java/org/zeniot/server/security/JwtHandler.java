@@ -81,6 +81,7 @@ public class JwtHandler {
         Map<String, Object> claims = new HashMap<>();
         claims.put(JWTClaimNames.EXPIRATION_TIME, LocalDateTime.now().toEpochSecond(ZoneOffset.of("+8")) + expiration);
         claims.put(USERNAME, userDetails.getUsername());
+        claims.put("", userDetails.getAuthorities());
         try {
             return JWTClaimsSet.parse(claims);
         } catch (ParseException e) {

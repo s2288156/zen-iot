@@ -1,4 +1,4 @@
-package org.zeniot.server.dto.account;
+package org.zeniot.service.dto.account;
 
 import lombok.AccessLevel;
 import lombok.Getter;

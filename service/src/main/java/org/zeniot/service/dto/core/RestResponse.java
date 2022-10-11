@@ -1,4 +1,4 @@
-package org.zeniot.server.controller.response;
+package org.zeniot.service.dto.core;
 
 import lombok.Getter;
 

@@ -6,7 +6,7 @@ import org.springframework.http.MediaType;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.stereotype.Component;
-import org.zeniot.server.controller.response.RestResponse;
+import org.zeniot.service.dto.core.RestResponse;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;

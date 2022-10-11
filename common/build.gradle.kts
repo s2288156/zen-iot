@@ -1,3 +1,2 @@
 plugins {
-    `java-library`
 }

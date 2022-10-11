@@ -1,8 +1,7 @@
-package org.zeniot.server.controller.response;
+package org.zeniot.service.dto.core;
 
 import lombok.Data;
 
-import java.util.Collections;
 import java.util.List;
 
 /**

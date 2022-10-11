@@ -1,9 +1,9 @@
-package org.zeniot.server.service;
+package org.zeniot.service.api;
 
 import org.zeniot.dao.id.AccountId;
-import org.zeniot.server.dto.PageQuery;
-import org.zeniot.server.dto.account.Account;
-import org.zeniot.server.controller.response.PageResponse;
+import org.zeniot.service.dto.account.Account;
+import org.zeniot.service.dto.core.PageQuery;
+import org.zeniot.service.dto.core.PageResponse;
 
 /**
  * @author Wu.Chunyang

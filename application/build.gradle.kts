@@ -3,12 +3,12 @@ plugins {
 }
 
 dependencies {
-    implementation(project(":dao"))
+    implementation(project(":service"))
     implementation(project(":common:mqtt"))
+    implementation(project(":common:util"))
     implementation(libs.nimbus.jose.jwt)
     implementation("org.springframework.boot:spring-boot-starter-web")
     implementation("org.springframework.boot:spring-boot-starter-actuator")
-    implementation("org.springframework.boot:spring-boot-starter-security")
     compileOnly("org.projectlombok:lombok")
     annotationProcessor("org.projectlombok:lombok")
 
@@ -21,10 +21,6 @@ dependencies {
 tasks.getByName<Test>("test") {
     useJUnitPlatform()
 }
-
-//tasks.compileJava {
-//    options.release.set(17)
-//}
 
 java {
     toolchain {

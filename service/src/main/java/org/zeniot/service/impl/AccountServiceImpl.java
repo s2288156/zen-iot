@@ -1,4 +1,4 @@
-package org.zeniot.server.service.impl;
+package org.zeniot.service.impl;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -10,11 +10,11 @@ import org.zeniot.dao.model.AccountEntity;
 import org.zeniot.dao.model.RoleEntity;
 import org.zeniot.dao.model.RoleEnums;
 import org.zeniot.dao.repository.AccountRepository;
-import org.zeniot.server.controller.response.PageResponse;
-import org.zeniot.server.dto.PageQuery;
-import org.zeniot.server.dto.account.Account;
-import org.zeniot.server.exception.BizException;
-import org.zeniot.server.service.AccountService;
+import org.zeniot.service.api.AccountService;
+import org.zeniot.service.dto.account.Account;
+import org.zeniot.service.dto.core.PageQuery;
+import org.zeniot.service.dto.core.PageResponse;
+import org.zeniot.service.exception.BizException;
 
 import java.util.List;
 import java.util.Optional;

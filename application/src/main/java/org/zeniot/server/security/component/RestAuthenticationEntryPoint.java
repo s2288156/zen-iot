@@ -5,7 +5,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.AuthenticationEntryPoint;
-import org.zeniot.server.controller.response.RestResponse;
+import org.zeniot.service.dto.core.RestResponse;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
