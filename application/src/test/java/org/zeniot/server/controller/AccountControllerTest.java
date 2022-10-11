@@ -6,7 +6,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.test.web.servlet.ResultActions;
 import org.zeniot.common.util.JacksonUtil;
-import org.zeniot.dao.id.AccountId;
 import org.zeniot.server.controller.request.TAccount;
 import org.zeniot.service.dto.account.Account;
 import org.zeniot.service.dto.core.PageQuery;
@@ -27,12 +26,12 @@ public class AccountControllerTest extends AbstractControllerTest {
     public static final String API_ACCOUNT = "/api/account/";
     TAccount admin;
 
-    private AccountId afterCleanAccountId;
+    private Long afterCleanAccountId;
 
     @AfterEach
     void tearDown() throws Exception {
         if (afterCleanAccountId != null) {
-            doDelete(API_ACCOUNT + afterCleanAccountId.getId());
+            doDelete(API_ACCOUNT + afterCleanAccountId);
         }
     }
 
@@ -42,7 +41,7 @@ public class AccountControllerTest extends AbstractControllerTest {
     }
 
     @Test
-    void test_query_account_list() throws Exception{
+    void test_query_account_list() throws Exception {
         TAccount.accountList().forEach(account -> {
             try {
                 doPost(API_ACCOUNT_REGISTER, account);
@@ -64,9 +63,9 @@ public class AccountControllerTest extends AbstractControllerTest {
         ResultActions resultActions = doPost(API_ACCOUNT_REGISTER, admin);
         Account account = extractAccount(resultActions);
         afterCleanAccountId = account.getAccountId();
-        doGet(API_ACCOUNT + account.getAccountId().getId())
+        doGet(API_ACCOUNT + account.getAccountId())
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.data.accountId.id").value(account.getAccountId().getId()));
+                .andExpect(jsonPath("$.data.accountId.id").value(account.getAccountId()));
     }
 
     @Test
@@ -82,10 +81,10 @@ public class AccountControllerTest extends AbstractControllerTest {
     void test_account_delete() throws Exception {
         ResultActions resultActions = doPost(API_ACCOUNT_REGISTER, admin);
         Account account = extractAccount(resultActions);
-        AccountId accountId = account.getAccountId();
-        doDelete(API_ACCOUNT + accountId.getId())
+        Long accountId = account.getAccountId();
+        doDelete(API_ACCOUNT + accountId)
                 .andExpect(status().isOk());
-        doGet(API_ACCOUNT + accountId.getId())
+        doGet(API_ACCOUNT + accountId)
                 .andExpect(jsonPath("$.data").isEmpty());
     }
 

@@ -1,11 +1,11 @@
 package org.zeniot.server.controller.request;
 
-import lombok.*;
-import org.zeniot.dao.id.AccountId;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
@@ -15,9 +15,10 @@ import java.util.Set;
 @NoArgsConstructor
 @Data
 public class TAccount implements Serializable {
+    @Serial
     private static final long serialVersionUID = -6536667040345207843L;
 
-    private AccountId accountId;
+    private Long accountId;
 
     private String username;
 

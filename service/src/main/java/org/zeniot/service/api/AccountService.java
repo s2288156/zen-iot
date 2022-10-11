@@ -1,6 +1,5 @@
 package org.zeniot.service.api;
 
-import org.zeniot.dao.id.AccountId;
 import org.zeniot.service.dto.account.Account;
 import org.zeniot.service.dto.core.PageQuery;
 import org.zeniot.service.dto.core.PageResponse;
@@ -13,7 +12,7 @@ public interface AccountService {
 
     void deleteAccount(Long id);
 
-    Account findById(AccountId accountId);
+    Account findById(Long accountId);
 
     PageResponse<Account> pageAll(PageQuery pageQuery);
 }

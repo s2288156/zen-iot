@@ -5,7 +5,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import org.zeniot.dao.id.AccountId;
 import org.zeniot.dao.model.AccountEntity;
 import org.zeniot.dao.model.RoleEntity;
 import org.zeniot.dao.model.RoleEnums;
@@ -52,8 +51,8 @@ public class AccountServiceImpl implements AccountService {
     }
 
     @Override
-    public Account findById(AccountId accountId) {
-        Optional<AccountEntity> accountEntityOptional = accountRepository.findById(accountId.getId());
+    public Account findById(Long accountId) {
+        Optional<AccountEntity> accountEntityOptional = accountRepository.findById(accountId);
         return accountEntityOptional.map(Account::simpleAccountFromEntity).orElse(null);
     }
 

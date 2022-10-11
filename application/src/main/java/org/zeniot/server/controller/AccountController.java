@@ -4,7 +4,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import org.zeniot.dao.id.AccountId;
 import org.zeniot.service.api.AccountService;
 import org.zeniot.service.dto.account.Account;
 import org.zeniot.service.dto.core.PageQuery;
@@ -39,7 +38,7 @@ public class AccountController extends AbstractController {
 
     @GetMapping("/account/{id}")
     public RestResponse<Account> findAccountById(@PathVariable Long id) {
-        Account account = accountService.findById(AccountId.of(id));
+        Account account = accountService.findById(id);
         return RestResponse.success(account);
     }
 
