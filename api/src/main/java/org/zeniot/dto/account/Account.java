@@ -24,7 +24,7 @@ public class Account implements Serializable {
     @Serial
     private static final long serialVersionUID = -6536667040345207843L;
 
-    private Long accountId;
+    private Long id;
 
     @NotBlank
     private String username;
@@ -59,7 +59,7 @@ public class Account implements Serializable {
 
     public static Account simpleAccountFromEntity(AccountEntity accountEntity) {
         Account account = new Account();
-        account.setAccountId(accountEntity.getId());
+        account.setId(accountEntity.getId());
         account.setUsername(accountEntity.getUsername());
         account.setCreateTime(accountEntity.getCreateTime());
         account.setUpdateTime(accountEntity.getUpdateTime());

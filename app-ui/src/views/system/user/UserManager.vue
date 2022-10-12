@@ -10,19 +10,25 @@
         新增
       </el-button>
       <el-button
-        type="info"
-        icon="RefreshRight"
-        class="filter-item"
-        @click="getAccountList()"
+          type="info"
+          icon="RefreshRight"
+          class="filter-item"
+          @click="loadAccountList()"
         >刷新
       </el-button>
     </div>
 
     <el-table :data="accountDataPage.data" style="width: 100%">
-      <el-table-column type="index" width="50" />
-      <el-table-column prop="username" label="Username" width="180" />
-      <el-table-column prop="createTime" label="CreateDate" width="180" />
-      <el-table-column prop="updateTime" label="UpdateDate" />
+      <el-table-column type="index" width="50"/>
+      <el-table-column prop="username" label="Username" width="180"/>
+      <el-table-column prop="createTime" label="CreateDate" width="180"/>
+      <el-table-column prop="updateTime" label="UpdateDate"/>
+      <el-table-column fixed="right" label="Operations" width="120">
+        <template #default="{ row, $index }">
+          <el-button link size="small" type="primary" @click="handleClick">Detail</el-button>
+          <el-button link size="small" type="primary" @click="handleDeleteAccount(row)">Delete</el-button>
+        </template>
+      </el-table-column>
     </el-table>
 
     <el-pagination
@@ -68,11 +74,11 @@
 </template>
 
 <script lang="ts" setup>
-import { getAccounts, registerAccount } from '@/api/system/account'
-import { reactive, ref } from 'vue'
-import type { Account } from '@/api/system/types'
-import type { BaseDataPage, PageQuery } from '@/api/global-types'
-import type { FormRules } from 'element-plus'
+import {deleteAccount, getAccounts, registerAccount} from '@/api/system/account'
+import {reactive, ref} from 'vue'
+import type {Account} from '@/api/system/types'
+import type {BaseDataPage, PageQuery} from '@/api/global-types'
+import type {FormRules} from 'element-plus'
 
 const pageQuery: PageQuery = {
   page: 0,
@@ -84,25 +90,39 @@ const accountDataPage = ref<BaseDataPage<Account>>({
   totalPages: 0,
 })
 
-const getAccountList = () => {
+const loadAccountList = () => {
   getAccounts(pageQuery).then((response) => {
     accountDataPage.value = response.data
   })
 }
-getAccountList()
+loadAccountList()
+
+const handleClick = () => {
+  console.log('click')
+}
+
+const handleDeleteAccount = (row: Account) => {
+  if (row.id != null) {
+    deleteAccount(row.id).then((response) => {
+      if (response.status === 200) {
+        loadAccountList();
+      }
+    })
+  }
+}
 
 const currentPage = ref(1)
 const prevClick = () => {
   pageQuery.page -= 1
-  getAccountList()
+  loadAccountList()
 }
 const nextClick = () => {
   pageQuery.page += 1
-  getAccountList()
+  loadAccountList()
 }
 const currentChange = () => {
   pageQuery.page = currentPage.value - 1
-  getAccountList()
+  loadAccountList()
 }
 
 // dialog
@@ -140,7 +160,7 @@ const createAccount = () => {
   registerAccount(createAccountForm).then((resp) => {
     if (resp.status === 200) {
       resetAccountForm()
-      getAccountList()
+      loadAccountList()
     }
   })
 }

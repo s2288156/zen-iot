@@ -1,5 +1,6 @@
 package org.zeniot.config;
 
+import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateTimeDeserializer;
 import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateTimeSerializer;
 import org.springframework.beans.factory.annotation.Value;
@@ -7,6 +8,7 @@ import org.springframework.boot.autoconfigure.jackson.Jackson2ObjectMapperBuilde
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import java.math.BigInteger;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
@@ -34,6 +36,8 @@ public class JacksonConfiguration {
         return builder -> {
             builder.serializerByType(LocalDateTime.class, localDateTimeSerializer());
             builder.deserializerByType(LocalDateTime.class, localDateTimeDeserializer());
+            builder.serializerByType(BigInteger.class, ToStringSerializer.instance);
+            builder.serializerByType(Long.class, ToStringSerializer.instance);
             builder.simpleDateFormat(pattern);
         };
     }

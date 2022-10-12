@@ -62,10 +62,10 @@ public class AccountControllerTest extends AbstractControllerTest {
     void test_query_account_by_id() throws Exception {
         ResultActions resultActions = doPost(API_ACCOUNT_REGISTER, admin);
         Account account = extractAccount(resultActions);
-        afterCleanAccountId = account.getAccountId();
-        doGet(API_ACCOUNT + account.getAccountId())
+        afterCleanAccountId = account.getId();
+        doGet(API_ACCOUNT + account.getId())
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.data.accountId.id").value(account.getAccountId()));
+                .andExpect(jsonPath("$.data.accountId.id").value(account.getId()));
     }
 
     @Test
@@ -74,14 +74,14 @@ public class AccountControllerTest extends AbstractControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data.username").value(admin.getUsername()));
         Account account = extractAccount(resultActions);
-        afterCleanAccountId = account.getAccountId();
+        afterCleanAccountId = account.getId();
     }
 
     @Test
     void test_account_delete() throws Exception {
         ResultActions resultActions = doPost(API_ACCOUNT_REGISTER, admin);
         Account account = extractAccount(resultActions);
-        Long accountId = account.getAccountId();
+        Long accountId = account.getId();
         doDelete(API_ACCOUNT + accountId)
                 .andExpect(status().isOk());
         doGet(API_ACCOUNT + accountId)

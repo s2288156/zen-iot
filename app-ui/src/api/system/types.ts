@@ -1,9 +1,5 @@
-export type AccountId = {
-  id: number
-}
-
 export type Account = {
-  accountId?: AccountId
+  id?: any
   username: string
   password?: string
   createTime?: string
