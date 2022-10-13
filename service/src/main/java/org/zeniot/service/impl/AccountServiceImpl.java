@@ -10,7 +10,8 @@ import org.zeniot.common.exception.BizException;
 import org.zeniot.dao.model.AccountEntity;
 import org.zeniot.dao.model.RoleEntity;
 import org.zeniot.dao.repository.AccountRepository;
-import org.zeniot.data.enums.RoleEnums;
+import org.zeniot.dao.repository.RoleRepository;
+import org.zeniot.data.enums.RoleEnum;
 import org.zeniot.dto.account.Account;
 import org.zeniot.dto.core.PageQuery;
 import org.zeniot.dto.core.PageResponse;
@@ -28,10 +29,14 @@ public class AccountServiceImpl implements AccountService {
 
     private final AccountRepository accountRepository;
     private final PasswordEncoder passwordEncoder;
+    private final RoleRepository roleRepository;
 
-    public AccountServiceImpl(AccountRepository accountRepository, PasswordEncoder passwordEncoder) {
+    public AccountServiceImpl(AccountRepository accountRepository,
+                              PasswordEncoder passwordEncoder,
+                              RoleRepository roleRepository) {
         this.accountRepository = accountRepository;
         this.passwordEncoder = passwordEncoder;
+        this.roleRepository = roleRepository;
     }
 
     @Override
@@ -39,8 +44,9 @@ public class AccountServiceImpl implements AccountService {
         if (accountRepository.existsAccountEntityByUsername(account.getUsername())) {
             throw new BizException("username existed!");
         }
+        Optional<RoleEntity> defaultRole = roleRepository.findByRoleName(RoleEnum.GUEST);
         AccountEntity accountEntity = account.toEntity(passwordEncoder);
-        accountEntity.setRoles(Set.of(new RoleEntity(RoleEnums.GUEST)));
+        defaultRole.ifPresent(roleEntity -> accountEntity.setRoles(Set.of(roleEntity)));
         accountRepository.save(accountEntity);
         return Account.simpleAccountFromEntity(accountEntity);
     }

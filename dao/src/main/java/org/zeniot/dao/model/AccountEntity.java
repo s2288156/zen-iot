@@ -17,7 +17,7 @@ public class AccountEntity extends BaseEntity {
     @Column(name = "pwd", nullable = false, length = 64)
     private String password;
 
-    @ManyToMany(fetch = FetchType.EAGER, cascade = {CascadeType.PERSIST, CascadeType.REFRESH})
+    @ManyToMany(fetch = FetchType.EAGER, cascade = {CascadeType.DETACH})
     @JoinTable(name = "t_account_role",
             joinColumns = @JoinColumn(name = "account_id", referencedColumnName = "id"),
             inverseJoinColumns = @JoinColumn(name = "role_id", referencedColumnName = "id"))

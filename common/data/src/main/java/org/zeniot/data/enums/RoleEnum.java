@@ -3,6 +3,6 @@ package org.zeniot.data.enums;
 /**
  * @author Wu.Chunyang
  */
-public enum RoleEnums {
+public enum RoleEnum {
     ADMIN, GUEST,
 }

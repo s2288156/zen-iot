@@ -1,7 +1,7 @@
 package org.zeniot.dao.model;
 
 import lombok.ToString;
-import org.zeniot.data.enums.RoleEnums;
+import org.zeniot.data.enums.RoleEnum;
 
 import javax.persistence.*;
 import java.util.Objects;
@@ -15,20 +15,20 @@ import java.util.Objects;
 public class RoleEntity extends BaseEntity {
     @Enumerated(EnumType.STRING)
     @Column(name = "role_name", nullable = false, length = 64)
-    private RoleEnums roleName;
+    private RoleEnum roleName;
 
     public RoleEntity() {
     }
 
-    public RoleEntity(RoleEnums role) {
+    public RoleEntity(RoleEnum role) {
         this.roleName = role;
     }
 
-    public RoleEnums getRoleName() {
+    public RoleEnum getRoleName() {
         return roleName;
     }
 
-    public void setRoleName(RoleEnums roleName) {
+    public void setRoleName(RoleEnum roleName) {
         this.roleName = roleName;
     }
 

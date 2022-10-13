@@ -79,7 +79,6 @@ const menuList = reactive([
       {
         path: '/platform/device',
         name: 'User',
-        component: () => import('@/views/platform/DeviceManager.vue'),
         meta: {
           title: '设备管理',
           icon: 'Cpu',
