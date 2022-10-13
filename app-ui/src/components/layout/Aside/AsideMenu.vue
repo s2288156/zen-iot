@@ -16,14 +16,14 @@
 <script lang="ts" setup>
 import MenuItem from '@/components/layout/Aside/MenuItem.vue'
 import ZenLogo from '@/assets/zen-logo.svg'
-import { computed, reactive } from 'vue'
-import { useRoute } from 'vue-router'
+import {computed, reactive} from 'vue'
+import {useRoute} from 'vue-router'
 import TheLayout from '@/components/layout/TheLayout.vue'
 
 const route = useRoute()
 
 const defaultActive = computed(() => {
-  const { path } = route
+  const {path} = route
   return path
 })
 
@@ -82,26 +82,6 @@ const menuList = reactive([
         component: () => import('@/views/platform/DeviceManager.vue'),
         meta: {
           title: '设备管理',
-          icon: 'Cpu',
-          roles: ['ROLE_ADMIN'],
-        },
-      },
-      {
-        path: '/platform/parent',
-        name: 'parent',
-        component: () => import('@/views/platform/TheParent.vue'),
-        meta: {
-          title: 'parent',
-          icon: 'Cpu',
-          roles: ['ROLE_ADMIN'],
-        },
-      },
-      {
-        path: '/platform/sub',
-        name: 'sub',
-        component: () => import('@/views/platform/TheSub.vue'),
-        meta: {
-          title: 'sub',
           icon: 'Cpu',
           roles: ['ROLE_ADMIN'],
         },
