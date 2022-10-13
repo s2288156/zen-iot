@@ -17,8 +17,7 @@
 import MenuItem from '@/components/layout/Aside/MenuItem.vue'
 import ZenLogo from '@/assets/zen-logo.svg'
 import {computed, reactive} from 'vue'
-import {useRoute} from 'vue-router'
-import TheLayout from '@/components/layout/TheLayout.vue'
+import {useRoute, useRouter} from 'vue-router'
 
 const route = useRoute()
 
@@ -26,6 +25,8 @@ const defaultActive = computed(() => {
   const {path} = route
   return path
 })
+
+console.log(JSON.stringify(useRouter().getRoutes()))
 
 const menuList = reactive([
   {
@@ -69,7 +70,6 @@ const menuList = reactive([
   {
     path: '/platform',
     name: 'Platform',
-    component: TheLayout,
     meta: {
       title: '平台配置',
       icon: 'Platform',

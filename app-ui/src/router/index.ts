@@ -1,6 +1,5 @@
 import {createRouter, createWebHistory} from 'vue-router'
 import TheLayout from '@/components/layout/TheLayout.vue'
-import TheHome from '@/views/home/TheHome.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -13,7 +12,7 @@ const router = createRouter({
         {
           path: '/home',
           name: 'Home',
-          component: TheHome,
+          component: () => import('@/views/home/TheHome.vue'),
           meta: {
             title: '首页',
             icon: 'HomeFilled',
