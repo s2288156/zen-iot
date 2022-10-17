@@ -1,13 +1,18 @@
 package org.zeniot.server.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.zeniot.api.AccountService;
 import org.zeniot.dto.account.Account;
 import org.zeniot.dto.core.PageQuery;
 import org.zeniot.dto.core.PageResponse;
-import org.zeniot.dto.core.RestResponse;
+import org.zeniot.dto.core.SingleResponse;
+import org.zeniot.server.security.JwtHandler;
+import org.zeniot.server.vo.UserToken;
 
 /**
  * @author Wu.Chunyang
@@ -18,27 +23,40 @@ public class AccountController extends AbstractController {
 
     @Autowired
     private AccountService accountService;
+    @Autowired
+    private UserDetailsService userDetailsService;
+    @Autowired
+    private JwtHandler jwtHandler;
+    @Autowired
+    private PasswordEncoder passwordEncoder;
 
-    public RestResponse<Account> login(Account account) {
-        return RestResponse.ok();
+    @PostMapping("/login")
+    public SingleResponse<UserToken> login(Account account) {
+        UserDetails user = userDetailsService.loadUserByUsername(account.getUsername());
+        boolean matches = passwordEncoder.matches(user.getPassword(), account.getPassword());
+        if (matches) {
+            String token = jwtHandler.newToken(user);
+            return SingleResponse.success(new UserToken(token));
+        }
+        return SingleResponse.failure("Login failed!");
     }
 
     @PostMapping("/account/register")
-    public RestResponse<Account> registerAccount(@Validated @RequestBody Account account) {
-        return RestResponse.success(accountService.registerAccount(account));
+    public SingleResponse<Account> registerAccount(@Validated @RequestBody Account account) {
+        return SingleResponse.success(accountService.registerAccount(account));
     }
 
     //    @PreAuthorize("hasAnyAuthority(sd.role.ADMIN)")
     @DeleteMapping("/account/{id}")
-    public RestResponse<Account> deleteAccount(@PathVariable Long id) {
+    public SingleResponse<Account> deleteAccount(@PathVariable Long id) {
         accountService.deleteAccount(id);
-        return RestResponse.ok();
+        return SingleResponse.ok();
     }
 
     @GetMapping("/account/{id}")
-    public RestResponse<Account> findAccountById(@PathVariable Long id) {
+    public SingleResponse<Account> findAccountById(@PathVariable Long id) {
         Account account = accountService.findById(id);
-        return RestResponse.success(account);
+        return SingleResponse.success(account);
     }
 
     @GetMapping("/accounts")

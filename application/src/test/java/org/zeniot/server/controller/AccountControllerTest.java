@@ -8,7 +8,7 @@ import org.springframework.test.web.servlet.ResultActions;
 import org.zeniot.common.util.JacksonUtil;
 import org.zeniot.dto.account.Account;
 import org.zeniot.dto.core.PageQuery;
-import org.zeniot.dto.core.RestResponse;
+import org.zeniot.dto.core.SingleResponse;
 import org.zeniot.server.controller.request.TAccount;
 
 import java.io.UnsupportedEncodingException;
@@ -89,7 +89,7 @@ public class AccountControllerTest extends AbstractControllerTest {
     }
 
     private Account extractAccount(ResultActions resultActions) throws UnsupportedEncodingException {
-        RestResponse response = getResponse(resultActions, RestResponse.class);
+        SingleResponse response = getResponse(resultActions, SingleResponse.class);
         return JacksonUtil.convertValue(response.getData(), Account.class);
     }
 }

@@ -1,6 +1,7 @@
 package org.zeniot.service.impl;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -27,17 +28,12 @@ import java.util.Set;
 @Service
 public class AccountServiceImpl implements AccountService {
 
-    private final AccountRepository accountRepository;
-    private final PasswordEncoder passwordEncoder;
-    private final RoleRepository roleRepository;
-
-    public AccountServiceImpl(AccountRepository accountRepository,
-                              PasswordEncoder passwordEncoder,
-                              RoleRepository roleRepository) {
-        this.accountRepository = accountRepository;
-        this.passwordEncoder = passwordEncoder;
-        this.roleRepository = roleRepository;
-    }
+    @Autowired
+    private AccountRepository accountRepository;
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+    @Autowired
+    private RoleRepository roleRepository;
 
     @Override
     public Account registerAccount(Account account) {

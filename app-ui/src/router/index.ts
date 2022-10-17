@@ -9,8 +9,7 @@ const router = createRouter({
       name: 'Login',
       component: () => import('@/views/login/TheLogin.vue'),
       meta: {
-        title: '登录',
-        icon: 'Cpu'
+        title: '登录'
       },
     },
     {

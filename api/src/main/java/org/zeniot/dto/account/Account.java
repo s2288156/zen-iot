@@ -6,10 +6,9 @@ import lombok.Setter;
 import lombok.ToString;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.zeniot.dao.model.AccountEntity;
+import org.zeniot.data.DTO;
 
 import javax.validation.constraints.NotBlank;
-import java.io.Serial;
-import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -20,9 +19,7 @@ import java.util.stream.Collectors;
 @Getter
 @Setter(AccessLevel.PRIVATE)
 @ToString
-public class Account implements Serializable {
-    @Serial
-    private static final long serialVersionUID = -6536667040345207843L;
+public class Account extends DTO {
 
     private Long id;
 
