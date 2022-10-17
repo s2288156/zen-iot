@@ -29,9 +29,10 @@
 <script lang="ts" setup>
 import {reactive, ref} from 'vue'
 import type {FormInstance, FormRules} from 'element-plus'
+import {useRouter} from "vue-router";
 
+const userRouter = useRouter()
 const ruleFormRef = ref<FormInstance>()
-
 
 const ruleForm = reactive({
   username: '',
@@ -52,6 +53,7 @@ const handleLogin = (formEl: FormInstance | undefined) => {
   formEl.validate((valid) => {
     if (valid) {
       console.log('submit!')
+      userRouter.push({path: '/home'})
     } else {
       console.log('error submit!')
       return false
