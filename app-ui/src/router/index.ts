@@ -17,12 +17,10 @@ const router = createRouter({
             title: '首页',
             icon: 'HomeFilled',
             roles: [],
+            isMenuRoot: true
           },
         },
       ],
-      meta: {
-        isMenuRoot: true
-      }
     },
     {
       path: '/system',
