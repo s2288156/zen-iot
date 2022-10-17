@@ -20,6 +20,9 @@ const router = createRouter({
           },
         },
       ],
+      meta: {
+        isMenuRoot: true
+      }
     },
     {
       path: '/system',
@@ -29,6 +32,7 @@ const router = createRouter({
         title: '系统管理',
         icon: 'Setting',
         roles: ['ROLE_ADMIN'],
+        isMenuRoot: true
       },
       children: [
         {
@@ -61,6 +65,7 @@ const router = createRouter({
         title: '平台配置',
         icon: 'Platform',
         roles: ['ROLE_ADMIN'],
+        isMenuRoot: true
       },
       children: [
         {

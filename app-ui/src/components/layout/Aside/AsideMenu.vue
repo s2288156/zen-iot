@@ -19,75 +19,20 @@ import ZenLogo from '@/assets/zen-logo.svg'
 import {computed, reactive} from 'vue'
 import {useRoute, useRouter} from 'vue-router'
 
-const route = useRoute()
-
 const defaultActive = computed(() => {
-  const {path} = route
+  const {path} = useRoute()
   return path
 })
 
-console.log(JSON.stringify(useRouter().getRoutes()))
+let routerMenuList: any[] = []
 
-const menuList = reactive([
-  {
-    path: '/',
-    name: 'Home',
-    meta: {
-      title: '首页',
-      icon: 'HomeFilled',
-      roles: [],
-    },
-  },
-  {
-    path: '/system',
-    name: 'System',
-    meta: {
-      title: '系统管理',
-      icon: 'Setting',
-      roles: ['ROLE_ADMIN'],
-    },
-    children: [
-      {
-        path: '/system/user',
-        name: 'User',
-        meta: {
-          title: '用户管理',
-          icon: 'User',
-          roles: ['ROLE_ADMIN'],
-        },
-      },
-      {
-        path: '/system/menu',
-        name: 'Menu',
-        meta: {
-          title: '菜单管理',
-          icon: 'Menu',
-          roles: ['ROLE_ADMIN'],
-        },
-      },
-    ],
-  },
-  {
-    path: '/platform',
-    name: 'Platform',
-    meta: {
-      title: '平台配置',
-      icon: 'Platform',
-      roles: ['ROLE_ADMIN'],
-    },
-    children: [
-      {
-        path: '/platform/device',
-        name: 'User',
-        meta: {
-          title: '设备管理',
-          icon: 'Cpu',
-          roles: ['ROLE_ADMIN'],
-        },
-      },
-    ],
-  },
-])
+useRouter().getRoutes().forEach(route => {
+  if (route.meta.isMenuRoot) {
+    routerMenuList.push(route)
+  }
+})
+
+const menuList = reactive(routerMenuList)
 
 const handleOpen = (key: string, keyPath: string[]) => {
   console.log('open', key, keyPath)
