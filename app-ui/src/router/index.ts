@@ -5,6 +5,15 @@ const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
     {
+      path: '/login',
+      name: 'Login',
+      component: () => import('@/views/login/TheLogin.vue'),
+      meta: {
+        title: '登录',
+        icon: 'Cpu'
+      },
+    },
+    {
       path: '/',
       component: TheLayout,
       redirect: '/home',
@@ -75,7 +84,7 @@ const router = createRouter({
             icon: 'Cpu',
             roles: ['ROLE_ADMIN'],
           },
-        },
+        }
       ],
     },
   ],
