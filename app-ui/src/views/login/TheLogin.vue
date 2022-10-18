@@ -2,7 +2,7 @@
   <div class="login-container">
     <el-form
         ref="ruleFormRef"
-        :model="ruleForm"
+        :model="loginForm"
         :rules="rules"
         class="login-form"
         status-icon
@@ -13,10 +13,11 @@
       </div>
 
       <el-form-item prop="username">
-        <el-input v-model="ruleForm.username" autocomplete="off" placeholder="Username" prefix-icon="User"/>
+        <el-input v-model="loginForm.username" autocomplete="off" placeholder="Username" prefix-icon="User"/>
       </el-form-item>
-      <el-form-item prop="pass">
-        <el-input v-model="ruleForm.pass" autocomplete="off" placeholder="Password" prefix-icon="Lock" type="password"/>
+      <el-form-item prop="password">
+        <el-input v-model="loginForm.password" autocomplete="off" placeholder="Password" prefix-icon="Lock"
+                  type="password"/>
       </el-form-item>
       <el-form-item>
         <el-button style="width:100%;margin-bottom:30px;" type="primary" @click="handleLogin(ruleFormRef)">Login
@@ -30,20 +31,22 @@
 import {reactive, ref} from 'vue'
 import type {FormInstance, FormRules} from 'element-plus'
 import {useRouter} from "vue-router";
+import type {Account} from "@/api/system/types";
+import {login} from "@/api/system/account";
 
 const userRouter = useRouter()
 const ruleFormRef = ref<FormInstance>()
 
-const ruleForm = reactive({
+const loginForm: Account = reactive({
   username: '',
-  pass: '',
+  password: '',
 })
 
 const rules = reactive<FormRules>({
   username: [
     {required: true, message: 'Please input Activity username', trigger: 'blur'}
   ],
-  pass: [
+  password: [
     {required: true, message: 'Please input Activity password', trigger: 'blur'}
   ]
 })
@@ -53,7 +56,12 @@ const handleLogin = (formEl: FormInstance | undefined) => {
   formEl.validate((valid) => {
     if (valid) {
       console.log('submit!')
-      userRouter.push({path: '/home'})
+      login(loginForm).then(resp => {
+        if (resp.data) {
+          console.log(resp.data)
+          userRouter.push({path: '/home'})
+        }
+      })
     } else {
       console.log('error submit!')
       return false

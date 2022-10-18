@@ -12,10 +12,10 @@ import org.zeniot.dao.model.AccountEntity;
 import org.zeniot.dao.model.RoleEntity;
 import org.zeniot.dao.repository.AccountRepository;
 import org.zeniot.dao.repository.RoleRepository;
+import org.zeniot.data.PageQuery;
+import org.zeniot.data.PageResponse;
 import org.zeniot.data.enums.RoleEnum;
 import org.zeniot.dto.account.Account;
-import org.zeniot.dto.core.PageQuery;
-import org.zeniot.dto.core.PageResponse;
 
 import java.util.List;
 import java.util.Optional;

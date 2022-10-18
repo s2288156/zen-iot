@@ -6,9 +6,9 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.test.web.servlet.ResultActions;
 import org.zeniot.common.util.JacksonUtil;
+import org.zeniot.data.PageQuery;
+import org.zeniot.data.SingleResponse;
 import org.zeniot.dto.account.Account;
-import org.zeniot.dto.core.PageQuery;
-import org.zeniot.dto.core.SingleResponse;
 import org.zeniot.server.controller.request.TAccount;
 
 import java.io.UnsupportedEncodingException;

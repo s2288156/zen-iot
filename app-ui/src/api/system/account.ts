@@ -24,3 +24,11 @@ export function deleteAccount(id: number) {
     method: 'delete'
   })
 }
+
+export function login(data: Account) {
+  return request({
+    url: '/api/login',
+    method: 'post',
+    data: data
+  })
+}

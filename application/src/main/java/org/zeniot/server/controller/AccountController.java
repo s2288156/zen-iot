@@ -7,10 +7,10 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.zeniot.api.AccountService;
+import org.zeniot.data.PageQuery;
+import org.zeniot.data.PageResponse;
+import org.zeniot.data.SingleResponse;
 import org.zeniot.dto.account.Account;
-import org.zeniot.dto.core.PageQuery;
-import org.zeniot.dto.core.PageResponse;
-import org.zeniot.dto.core.SingleResponse;
 import org.zeniot.server.security.JwtHandler;
 import org.zeniot.server.vo.UserToken;
 
@@ -31,9 +31,9 @@ public class AccountController extends AbstractController {
     private PasswordEncoder passwordEncoder;
 
     @PostMapping("/login")
-    public SingleResponse<UserToken> login(Account account) {
+    public SingleResponse<UserToken> login(@RequestBody Account account) {
         UserDetails user = userDetailsService.loadUserByUsername(account.getUsername());
-        boolean matches = passwordEncoder.matches(user.getPassword(), account.getPassword());
+        boolean matches = passwordEncoder.matches(account.getPassword(), user.getPassword());
         if (matches) {
             String token = jwtHandler.newToken(user);
             return SingleResponse.success(new UserToken(token));

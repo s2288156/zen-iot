@@ -6,7 +6,7 @@ import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.zeniot.common.exception.BizException;
-import org.zeniot.dto.core.SingleResponse;
+import org.zeniot.data.SingleResponse;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
