@@ -56,9 +56,9 @@ const handleLogin = (formEl: FormInstance | undefined) => {
   formEl.validate((valid) => {
     if (valid) {
       console.log('submit!')
-      login(loginForm).then(resp => {
-        if (resp.data) {
-          console.log(resp.data)
+      login(loginForm).then(rsp => {
+        console.log(rsp)
+        if (rsp) {
           userRouter.push({path: '/home'})
         }
       })

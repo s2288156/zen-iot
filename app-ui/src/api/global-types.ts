@@ -8,3 +8,8 @@ export type PageQuery = {
   page: number
   size: number
 }
+
+export type RestResponse = {
+  success: boolean
+  msg: string
+}

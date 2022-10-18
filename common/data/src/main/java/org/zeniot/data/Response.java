@@ -1,8 +1,11 @@
 package org.zeniot.data;
 
+import lombok.Data;
+
 /**
  * @author Wu.Chunyang
  */
+@Data
 public class Response extends DTO {
     private boolean success;
     private String msg;
