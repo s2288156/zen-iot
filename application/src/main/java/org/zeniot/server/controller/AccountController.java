@@ -33,12 +33,15 @@ public class AccountController extends AbstractController {
     @PostMapping("/login")
     public SingleResponse<UserToken> login(@RequestBody Account account) {
         UserDetails user = userDetailsService.loadUserByUsername(account.getUsername());
+        if (user == null) {
+            return SingleResponse.failure("用户名不存在");
+        }
         boolean matches = passwordEncoder.matches(account.getPassword(), user.getPassword());
         if (matches) {
             String token = jwtHandler.newToken(user);
             return SingleResponse.success(new UserToken(token));
         }
-        return SingleResponse.failure("Login failed!");
+        return SingleResponse.failure("Login failed.");
     }
 
     @PostMapping("/account/register")
