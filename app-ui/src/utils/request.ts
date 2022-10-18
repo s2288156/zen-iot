@@ -11,14 +11,13 @@ service.interceptors.response.use(
     response => {
         const rsp: RestResponse = response.data
         if (!rsp.success) {
-            console.log(rsp, '@@@')
             ElMessage({
                 showClose: true,
                 message: rsp.msg,
                 type: 'error',
             })
         } else {
-            return rsp
+            return response
         }
     }
 )
