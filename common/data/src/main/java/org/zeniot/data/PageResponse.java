@@ -8,7 +8,7 @@ import java.util.List;
  * @author Wu.Chunyang
  */
 @Data
-public class PageResponse<T> {
+public class PageResponse<T> extends Response {
 
     private final List<T> data;
     private final int size;
@@ -17,6 +17,7 @@ public class PageResponse<T> {
     private final boolean hasNext;
 
     private PageResponse(List<T> data, int size, int totalPages, long totalElements, boolean hasNext) {
+        super(true);
         this.data = data;
         this.size = size;
         this.totalPages = totalPages;
@@ -24,7 +25,7 @@ public class PageResponse<T> {
         this.hasNext = hasNext;
     }
 
-    public static <T> PageResponse<T> of(List<T> data, int size, int totalPages, long totalElements, boolean hasNext) {
+    public static <T> PageResponse<T> ok(List<T> data, int size, int totalPages, long totalElements, boolean hasNext) {
         return new PageResponse<>(data, size, totalPages, totalElements, hasNext);
     }
 }

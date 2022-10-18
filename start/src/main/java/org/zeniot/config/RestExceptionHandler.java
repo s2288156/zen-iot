@@ -20,7 +20,7 @@ public class RestExceptionHandler {
 
     @ExceptionHandler(BizException.class)
     public void handle(BizException bizException, HttpServletResponse response) throws IOException {
-        SingleResponse<Object> ok = SingleResponse.ok(bizException.getMessage());
+        SingleResponse<Object> ok = SingleResponse.success(bizException.getMessage());
         response.setCharacterEncoding(StandardCharsets.UTF_8.name());
         response.setContentType(MediaType.APPLICATION_JSON_VALUE);
         response.setStatus(HttpStatus.FORBIDDEN.value());

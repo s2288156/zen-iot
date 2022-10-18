@@ -68,7 +68,7 @@ public class AccountServiceImpl implements AccountService {
                 .stream()
                 .map(Account::simpleAccountFromEntity)
                 .toList();
-        return PageResponse.of(accounts, all.getSize(), totalPages, totalElements, all.hasNext());
+        return PageResponse.ok(accounts, all.getSize(), totalPages, totalElements, all.hasNext());
     }
 
     @Override

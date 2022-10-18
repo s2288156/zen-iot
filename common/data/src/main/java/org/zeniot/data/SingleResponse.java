@@ -9,27 +9,32 @@ import lombok.Getter;
 public class SingleResponse<T> extends Response {
     private T data;
 
-    private SingleResponse(String msg) {
-        super(msg);
+    public SingleResponse(boolean success) {
+        super(success);
     }
 
-    private SingleResponse(T data) {
+    public SingleResponse(boolean success, T data) {
+        super(success);
         this.data = data;
     }
 
-    public static <T> SingleResponse<T> ok() {
-        return new SingleResponse<>("Ok!");
+    public SingleResponse(boolean success, String msg) {
+        super(success, msg);
     }
 
-    public static <T> SingleResponse<T> ok(String msg) {
-        return new SingleResponse<>(msg);
+    public static <T> SingleResponse<T> success() {
+        return new SingleResponse<>(true);
+    }
+
+    public static <T> SingleResponse<T> success(String msg) {
+        return new SingleResponse<>(true, msg);
     }
 
     public static <T> SingleResponse<T> success(T data) {
-        return new SingleResponse<>(data);
+        return new SingleResponse<>(true, data);
     }
 
     public static <T> SingleResponse<T> failure(String msg) {
-        return new SingleResponse<>(msg);
+        return new SingleResponse<>(false, msg);
     }
 }

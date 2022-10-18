@@ -21,7 +21,7 @@ import java.nio.charset.StandardCharsets;
 public class RestAuthenticationSuccessHandler implements AuthenticationSuccessHandler {
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException, ServletException {
-        SingleResponse<Object> ok = SingleResponse.ok("Login Success!");
+        SingleResponse<Object> ok = SingleResponse.success("Login Success!");
         response.setCharacterEncoding(StandardCharsets.UTF_8.name());
         response.setContentType(MediaType.APPLICATION_JSON_VALUE);
         response.setStatus(HttpStatus.FORBIDDEN.value());

@@ -50,7 +50,7 @@ public class AccountController extends AbstractController {
     @DeleteMapping("/account/{id}")
     public SingleResponse<Account> deleteAccount(@PathVariable Long id) {
         accountService.deleteAccount(id);
-        return SingleResponse.ok();
+        return SingleResponse.success();
     }
 
     @GetMapping("/account/{id}")
