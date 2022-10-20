@@ -7,18 +7,22 @@ export const useUserStore = defineStore({
   state: () => ({
     counter: 0,
   }),
-  getters: {
-    doubleCount: (state) => state.counter * 2,
-  },
+  getters: {},
   actions: {
     login(loginForm: Account) {
-      localStorage.setItem("", "")
       return new Promise((resolve, reject) => {
         login(loginForm).then(resp => {
+          localStorage.setItem("UserAuthentication", resp.data.data.token)
           resolve(resp.data)
         }).catch(error => {
           reject(error)
         })
+      })
+    },
+    logout() {
+      return new Promise((resolve, reject) => {
+        localStorage.clear()
+        resolve(null)
       })
     },
   },
