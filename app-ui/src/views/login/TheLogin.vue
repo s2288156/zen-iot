@@ -32,8 +32,9 @@ import {reactive, ref} from 'vue'
 import type {FormInstance, FormRules} from 'element-plus'
 import {useRouter} from "vue-router";
 import type {Account} from "@/api/system/types";
-import {login} from "@/api/system/account";
+import {useUserStore} from "@/stores/user";
 
+const userStore = useUserStore()
 const userRouter = useRouter()
 const ruleFormRef = ref<FormInstance>()
 
@@ -55,9 +56,13 @@ const handleLogin = (formEl: FormInstance | undefined) => {
   if (!formEl) return
   formEl.validate((valid) => {
     if (valid) {
-      login(loginForm).then(() => {
-        userRouter.push({path: '/home'})
-      })
+      userStore.login(loginForm)
+          .then(() => {
+            userRouter.push({path: '/home'})
+          })
+          .catch(() => {
+            console.log('login error')
+          })
     } else {
       console.log('error submit!')
       return false

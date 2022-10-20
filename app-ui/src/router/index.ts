@@ -59,7 +59,17 @@ const router = createRouter({
             title: '菜单管理',
             icon: 'Menu',
             roles: ['ROLE_ADMIN'],
-          },
+          }
+        },
+        {
+          path: '/system/pinia',
+          name: 'Pinia',
+          component: () => import('@/views/system/PiniaDemo.vue'),
+          meta: {
+            title: 'Pinia',
+            icon: 'Menu',
+            roles: ['ROLE_ADMIN'],
+          }
         },
       ],
     },
