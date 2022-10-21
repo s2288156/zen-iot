@@ -8,6 +8,7 @@ import lombok.Data;
 @Data
 public class Response extends DTO {
     private boolean success;
+    private String code;
     private String msg;
 
     protected Response() {

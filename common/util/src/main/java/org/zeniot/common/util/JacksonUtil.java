@@ -2,6 +2,7 @@ package org.zeniot.common.util;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.io.IOException;
@@ -18,6 +19,10 @@ public class JacksonUtil {
     }
 
     public static <T> T convertValue(Object fromValue, Class<T> toValueType) {
+        return OBJECT_MAPPER.convertValue(fromValue, toValueType);
+    }
+
+    public static <T> T convertValue(Object fromValue, TypeReference<T> toValueType) {
         return OBJECT_MAPPER.convertValue(fromValue, toValueType);
     }
 

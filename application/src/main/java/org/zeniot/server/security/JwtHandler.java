@@ -1,5 +1,6 @@
 package org.zeniot.server.security;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.nimbusds.jose.JWSAlgorithm;
 import com.nimbusds.jose.JWSHeader;
 import com.nimbusds.jose.JWSSigner;
@@ -13,17 +14,17 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
+import org.zeniot.common.util.JacksonUtil;
 
 import java.text.ParseException;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
-import java.util.Collection;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * @author Wu.Chunyang
@@ -71,8 +72,10 @@ public class JwtHandler {
         try {
             SignedJWT signedJWT = SignedJWT.parse(token);
             String username = signedJWT.getJWTClaimsSet().getStringClaim(USERNAME);
+            List<String> strings = JacksonUtil.convertValue(signedJWT.getJWTClaimsSet().getClaim(AUTHORITY), new TypeReference<>() {
+            });
             //noinspection unchecked
-            Collection<GrantedAuthority> authorities = (Collection<GrantedAuthority>) signedJWT.getJWTClaimsSet().getClaim(AUTHORITY);
+            Collection<GrantedAuthority> authorities = strings.stream().map(SimpleGrantedAuthority::new).collect(Collectors.toSet());
             return new User(username, "", authorities);
         } catch (ParseException e) {
             throw new RuntimeException(e);
@@ -97,7 +100,7 @@ public class JwtHandler {
         Map<String, Object> claims = new HashMap<>();
         claims.put(JWTClaimNames.EXPIRATION_TIME, LocalDateTime.now().toEpochSecond(ZoneOffset.of("+8")) + expiration);
         claims.put(USERNAME, userDetails.getUsername());
-        claims.put(AUTHORITY, userDetails.getAuthorities());
+        claims.put(AUTHORITY, userDetails.getAuthorities().stream().map(GrantedAuthority::getAuthority).collect(Collectors.toSet()));
         try {
             return JWTClaimsSet.parse(claims);
         } catch (ParseException e) {
