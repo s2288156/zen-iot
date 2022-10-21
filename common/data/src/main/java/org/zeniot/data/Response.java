@@ -8,7 +8,8 @@ import lombok.Data;
 @Data
 public class Response extends DTO {
     private boolean success;
-    private String code;
+    // TODO: 10/21/2022 支持BizEx
+    private int code;
     private String msg;
 
     protected Response() {

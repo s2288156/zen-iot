@@ -1,10 +1,7 @@
 package org.zeniot.server.security;
 
 import com.fasterxml.jackson.core.type.TypeReference;
-import com.nimbusds.jose.JWSAlgorithm;
-import com.nimbusds.jose.JWSHeader;
-import com.nimbusds.jose.JWSSigner;
-import com.nimbusds.jose.JWSVerifier;
+import com.nimbusds.jose.*;
 import com.nimbusds.jose.crypto.MACSigner;
 import com.nimbusds.jose.crypto.MACVerifier;
 import com.nimbusds.jwt.JWTClaimNames;
@@ -18,6 +15,8 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
+import org.zeniot.common.exception.BizException;
+import org.zeniot.common.exception.ErrorCodeEnum;
 import org.zeniot.common.util.JacksonUtil;
 
 import java.text.ParseException;
@@ -50,13 +49,20 @@ public class JwtHandler {
             SignedJWT signedJWT = SignedJWT.parse(token);
             String username = (String) signedJWT.getJWTClaimsSet().getClaim("username");
             Date expirationTime = signedJWT.getJWTClaimsSet().getExpirationTime();
-            return signedJWT.verify(verifier)
-                    && StringUtils.equals(username, userDetails.getUsername())
-                    && expirationTime.after(new Date());
-        } catch (Exception e) {
-            log.error("Token verify error: ", e);
+            if (!signedJWT.verify(verifier)) {
+                throw new BizException("Token verify failure!", ErrorCodeEnum.AUTHENTICATION);
+            }
+            if (!StringUtils.equals(username, userDetails.getUsername())) {
+                throw new BizException("Token verify failure!", ErrorCodeEnum.AUTHENTICATION);
+            }
+            if (!expirationTime.after(new Date())) {
+                throw new BizException("Token expired!", ErrorCodeEnum.JWT_TOKEN_EXPIRED);
+            }
+            return true;
+        } catch (JOSEException | ParseException e) {
+            log.error("Token verify error: {}", e.getLocalizedMessage());
+            throw new BizException("Unknown error!", ErrorCodeEnum.AUTHENTICATION);
         }
-        return false;
     }
 
     public String getUsernameForToken(String token) {

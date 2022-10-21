@@ -37,4 +37,5 @@ public class SingleResponse<T> extends Response {
     public static <T> SingleResponse<T> failure(String msg) {
         return new SingleResponse<>(false, msg);
     }
+
 }
