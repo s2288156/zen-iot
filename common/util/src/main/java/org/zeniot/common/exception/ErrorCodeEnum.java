@@ -14,7 +14,7 @@ public enum ErrorCodeEnum {
         this.code = code;
     }
 
-    protected int getCode() {
+    public int getCode() {
         return code;
     }
 }
