@@ -13,7 +13,7 @@ import org.springframework.security.web.authentication.WebAuthenticationDetailsS
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 import org.zeniot.common.exception.BizException;
-import org.zeniot.data.SingleResponse;
+import org.zeniot.data.Response;
 import org.zeniot.server.security.JwtHandler;
 
 import javax.servlet.FilterChain;
@@ -32,8 +32,6 @@ public class JwtAuthorizationTokenFilter extends OncePerRequestFilter {
 
     @Autowired
     private JwtHandler jwtHandler;
-//    @Autowired
-//    private UserDetailsService userDetailsService;
 
     private static final String TOKEN_HEADER = "Authorization";
     private static final String TOKEN_HEADER_PREFIX = "Bearer ";
@@ -52,12 +50,11 @@ public class JwtAuthorizationTokenFilter extends OncePerRequestFilter {
                         SecurityContextHolder.getContext().setAuthentication(authenticationToken);
                     }
                 } catch (BizException e) {
-                    // TODO: 10/21/2022 处理异常返回对象封装
-                    SingleResponse<Object> failure = SingleResponse.failure("Authentication Failure!22222");
+                    Response failureResponse = Response.failure(e);
                     response.setCharacterEncoding(StandardCharsets.UTF_8.name());
                     response.setContentType(MediaType.APPLICATION_JSON_VALUE);
                     response.setStatus(HttpStatus.FORBIDDEN.value());
-                    response.getWriter().println(new ObjectMapper().writeValueAsString(failure));
+                    response.getWriter().println(new ObjectMapper().writeValueAsString(failureResponse));
                     return;
                 }
             }

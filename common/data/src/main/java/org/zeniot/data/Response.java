@@ -1,6 +1,7 @@
 package org.zeniot.data;
 
 import lombok.Data;
+import org.zeniot.common.exception.BizException;
 
 /**
  * @author Wu.Chunyang
@@ -8,7 +9,6 @@ import lombok.Data;
 @Data
 public class Response extends DTO {
     private boolean success;
-    // TODO: 10/21/2022 支持BizEx
     private int code;
     private String msg;
 
@@ -24,7 +24,13 @@ public class Response extends DTO {
         this.msg = msg;
     }
 
-    public static Response fail(String msg) {
-        return new Response(false, msg);
+    protected Response(boolean success, int code, String msg) {
+        this.success = success;
+        this.code = code;
+        this.msg = msg;
+    }
+
+    public static Response failure(BizException ex) {
+        return new Response(false, ex.getErrorCode(), ex.getMessage());
     }
 }
