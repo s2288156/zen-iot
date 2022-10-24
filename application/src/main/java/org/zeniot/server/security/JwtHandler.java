@@ -43,7 +43,7 @@ public class JwtHandler {
         return generateToken(generateClaims(userDetails));
     }
 
-    public boolean verifyToken(String token, UserDetails userDetails) {
+    public boolean verifyToken(String token, UserDetails userDetails) throws BizException {
         try {
             JWSVerifier verifier = new MACVerifier(key.getBytes());
             SignedJWT signedJWT = SignedJWT.parse(token);
@@ -53,7 +53,7 @@ public class JwtHandler {
                 throw new BizException("Token verify failure!", ErrorCodeEnum.AUTHENTICATION);
             }
             if (!StringUtils.equals(username, userDetails.getUsername())) {
-                throw new BizException("Token verify failure!", ErrorCodeEnum.AUTHENTICATION);
+                throw new BizException("Username failure!", ErrorCodeEnum.AUTHENTICATION);
             }
             if (!expirationTime.after(new Date())) {
                 throw new BizException("Token expired!", ErrorCodeEnum.JWT_TOKEN_EXPIRED);
