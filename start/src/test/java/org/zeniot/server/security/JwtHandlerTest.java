@@ -7,7 +7,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.zeniot.server.AbstractBootTest;
+import org.zeniot.common.exception.BizException;
 
 import java.util.Collections;
 import java.util.concurrent.TimeUnit;
@@ -18,7 +18,7 @@ import static org.junit.jupiter.api.Assertions.*;
  * @author Wu.Chunyang
  */
 @Slf4j
-class JwtHandlerTest extends AbstractBootTest {
+class JwtHandlerTest {
 
     private UserDetails admin;
     private UserDetails guest;
@@ -49,15 +49,17 @@ class JwtHandlerTest extends AbstractBootTest {
     }
 
     @Test
-    void test_verifyToken_when_success() throws InterruptedException {
+    void test_verifyToken_when_success() {
         String adminToken = jwtHandler.newToken(admin);
         String guestToken = jwtHandler.newToken(guest);
         assertTrue(jwtHandler.verifyToken(adminToken, admin));
         assertTrue(jwtHandler.verifyToken(guestToken, guest));
-
-//        assertFalse(jwtHandler.verifyToken(adminToken, guest));
-//        TimeUnit.SECONDS.sleep(3);
-//        assertFalse(jwtHandler.verifyToken(adminToken, admin));
     }
 
+    @Test
+    void test_verifyToken_when_fail_username() {
+        String adminToken = jwtHandler.newToken(admin);
+        BizException bizException = assertThrows(BizException.class, () -> jwtHandler.verifyToken(adminToken, guest));
+        assertEquals("Username failure!", bizException.getMessage());
+    }
 }
