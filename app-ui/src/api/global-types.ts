@@ -12,4 +12,5 @@ export type PageQuery = {
 export type RestResponse = {
   success: boolean
   msg: string
+  code: number
 }

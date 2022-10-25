@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -39,7 +40,8 @@ public class JwtAuthorizationTokenFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
         String tokenHeader = request.getHeader(TOKEN_HEADER);
-        if (StringUtils.isNotBlank(tokenHeader) && StringUtils.startsWith(tokenHeader, TOKEN_HEADER_PREFIX)) {
+        log.warn("method: {}, token: {}", request.getMethod(), tokenHeader);
+        if (!HttpMethod.OPTIONS.matches(request.getMethod()) && StringUtils.isNotBlank(tokenHeader) && StringUtils.startsWith(tokenHeader, TOKEN_HEADER_PREFIX)) {
             String token = StringUtils.substring(tokenHeader, TOKEN_HEADER_PREFIX.length());
             User user = jwtHandler.getUserForToken(token);
             if (user != null && SecurityContextHolder.getContext().getAuthentication() == null) {

@@ -36,8 +36,8 @@ public class JwtHandler {
     @Value("${secret.expiration}")
     private Long expiration;
 
-    private static final String USERNAME = "username";
-    private static final String AUTHORITY = "authority";
+    private static final String CLAIM_USERNAME = "username";
+    private static final String CLAIM_AUTHORITY = "authority";
 
     public String newToken(UserDetails userDetails) {
         return generateToken(generateClaims(userDetails));
@@ -68,7 +68,7 @@ public class JwtHandler {
     public String getUsernameForToken(String token) {
         try {
             SignedJWT signedJWT = SignedJWT.parse(token);
-            return signedJWT.getJWTClaimsSet().getStringClaim(USERNAME);
+            return signedJWT.getJWTClaimsSet().getStringClaim(CLAIM_USERNAME);
         } catch (ParseException e) {
             throw new RuntimeException(e);
         }
@@ -77,8 +77,8 @@ public class JwtHandler {
     public User getUserForToken(String token) {
         try {
             SignedJWT signedJWT = SignedJWT.parse(token);
-            String username = signedJWT.getJWTClaimsSet().getStringClaim(USERNAME);
-            List<String> strings = JacksonUtil.convertValue(signedJWT.getJWTClaimsSet().getClaim(AUTHORITY), new TypeReference<>() {
+            String username = signedJWT.getJWTClaimsSet().getStringClaim(CLAIM_USERNAME);
+            List<String> strings = JacksonUtil.convertValue(signedJWT.getJWTClaimsSet().getClaim(CLAIM_AUTHORITY), new TypeReference<>() {
             });
             //noinspection unchecked
             Collection<GrantedAuthority> authorities = strings.stream().map(SimpleGrantedAuthority::new).collect(Collectors.toSet());
@@ -105,8 +105,8 @@ public class JwtHandler {
     private JWTClaimsSet generateClaims(UserDetails userDetails) {
         Map<String, Object> claims = new HashMap<>();
         claims.put(JWTClaimNames.EXPIRATION_TIME, LocalDateTime.now().toEpochSecond(ZoneOffset.of("+8")) + expiration);
-        claims.put(USERNAME, userDetails.getUsername());
-        claims.put(AUTHORITY, userDetails.getAuthorities().stream().map(GrantedAuthority::getAuthority).collect(Collectors.toSet()));
+        claims.put(CLAIM_USERNAME, userDetails.getUsername());
+        claims.put(CLAIM_AUTHORITY, userDetails.getAuthorities().stream().map(GrantedAuthority::getAuthority).collect(Collectors.toSet()));
         try {
             return JWTClaimsSet.parse(claims);
         } catch (ParseException e) {

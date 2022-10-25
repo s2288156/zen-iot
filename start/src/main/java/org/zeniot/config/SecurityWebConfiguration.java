@@ -3,6 +3,7 @@ package org.zeniot.config;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -34,19 +35,20 @@ public class SecurityWebConfiguration {
         http.authorizeRequests()
                 .and()
                 .authorizeRequests()
-//                .antMatchers("/api/**").permitAll()
                 .antMatchers("/api/login").permitAll()
+                .antMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                 .anyRequest().authenticated()
                 .and()
-                .exceptionHandling()
-                .authenticationEntryPoint(authenticationEntryPoint())
-                .and()
+//                .exceptionHandling()
+//                .authenticationEntryPoint(authenticationEntryPoint())
+//                .and()
                 .csrf().disable()
                 .formLogin().disable()
+                .cors().disable()
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 .and()
-                .addFilterBefore(jwtAuthorizationTokenFilter, UsernamePasswordAuthenticationFilter.class);
-        http.addFilterBefore(corsFilter(), UsernamePasswordAuthenticationFilter.class);
+                .addFilterBefore(jwtAuthorizationTokenFilter, UsernamePasswordAuthenticationFilter.class)
+                .addFilterBefore(corsFilter(), JwtAuthorizationTokenFilter.class);
         return http.build();
     }
 

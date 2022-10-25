@@ -19,7 +19,7 @@ import java.nio.charset.StandardCharsets;
 public class RestAuthenticationEntryPoint implements AuthenticationEntryPoint {
     @Override
     public void commence(HttpServletRequest request, HttpServletResponse response, AuthenticationException authException) throws IOException, ServletException {
-        SingleResponse<Object> failure = SingleResponse.failure("Authentication Failure!");
+        SingleResponse<Object> failure = SingleResponse.failure("Authentication Failure!!!");
         response.setCharacterEncoding(StandardCharsets.UTF_8.name());
         response.setContentType(MediaType.APPLICATION_JSON_VALUE);
         response.setStatus(HttpStatus.FORBIDDEN.value());

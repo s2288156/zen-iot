@@ -7,12 +7,14 @@ export const useUserStore = defineStore({
   state: () => ({
     counter: 0,
   }),
-  getters: {},
+  getters: {
+    getToken: () => localStorage.getItem('UserAuthentication')
+  },
   actions: {
     login(loginForm: Account) {
       return new Promise((resolve, reject) => {
         login(loginForm).then(resp => {
-          localStorage.setItem("UserAuthentication", resp.data.data.token)
+          localStorage.setItem('UserAuthentication', resp.data.data.token)
           resolve(resp.data)
         }).catch(error => {
           reject(error)
