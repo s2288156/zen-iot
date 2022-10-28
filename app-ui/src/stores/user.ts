@@ -2,20 +2,20 @@ import {defineStore} from 'pinia'
 import type {Account} from "@/api/system/types";
 import {login} from "@/api/system/account";
 
+const TOKEN_KEY = 'UserAuthentication'
+
 export const useUserStore = defineStore({
   id: 'user',
   state: () => ({
-    counter: 0,
+    token: ''
   }),
-  getters: {
-    getToken: () => localStorage.getItem('UserAuthentication')
-  },
+  getters: {},
   actions: {
     login(loginForm: Account) {
       return new Promise((resolve, reject) => {
         login(loginForm).then(resp => {
-          localStorage.setItem('UserAuthentication', resp.data.data.token)
-          resolve(resp.data)
+          localStorage.setItem(TOKEN_KEY, resp.data.data.token)
+          resolve(resp.data.data)
         }).catch(error => {
           reject(error)
         })
@@ -27,8 +27,8 @@ export const useUserStore = defineStore({
         resolve(null)
       })
     },
-    cleanToken() {
-      localStorage.clear()
-    },
+    getToken() {
+      return localStorage.getItem(TOKEN_KEY)
+    }
   },
 })

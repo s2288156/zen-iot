@@ -54,7 +54,7 @@ public class JwtAuthorizationTokenFilter extends OncePerRequestFilter {
                     Response failureResponse = Response.failure(e);
                     response.setCharacterEncoding(StandardCharsets.UTF_8.name());
                     response.setContentType(MediaType.APPLICATION_JSON_VALUE);
-                    response.setStatus(HttpStatus.FORBIDDEN.value());
+                    response.setStatus(HttpStatus.OK.value());
                     response.getWriter().println(new ObjectMapper().writeValueAsString(failureResponse));
                     return;
                 }

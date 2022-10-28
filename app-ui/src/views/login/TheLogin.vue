@@ -58,7 +58,8 @@ const handleLogin = (formEl: FormInstance | undefined) => {
     if (valid) {
       userStore.login(loginForm)
           .then(() => {
-            userRouter.push({path: '/home'})
+            userRouter.push({path: '/home'});
+            console.log('login success router to home')
           })
           .catch(() => {
             console.log('login error')

@@ -4,10 +4,19 @@
 
 <script lang="ts" setup>
 
-import {ref} from "vue";
-import {useRoute} from "vue-router";
+import {ref} from "vue"
+import {useRoute, useRouter} from "vue-router"
+import {useUserStore} from "@/stores/user";
 
-const key = ref(useRoute().path)
+const store = useUserStore();
+const router = useRouter();
+
+const key = ref(useRoute().path);
+
+if (!store.getToken()) {
+  router.push({path: '/login'})
+}
+
 
 </script>
 

@@ -2,6 +2,9 @@ import axios from 'axios'
 import type {RestResponse} from "@/api/global-types";
 import {ElMessage, ElMessageBox} from "element-plus";
 import {useUserStore} from "@/stores/user";
+import {useRouter} from "vue-router";
+
+const router = useRouter();
 
 const service = axios.create({
   baseURL: 'http://localhost:8088',
@@ -10,9 +13,9 @@ const service = axios.create({
 
 service.interceptors.request.use(
   config => {
-    if (useUserStore().getToken && config.url !== '/api/login') {
+    if (useUserStore().getToken() && config.url !== '/api/login') {
       config.headers = {
-        'Authorization': 'Bearer ' + useUserStore().getToken
+        'Authorization': 'Bearer ' + useUserStore().getToken()
       }
     }
     return config
@@ -38,14 +41,16 @@ service.interceptors.response.use(
           cancelButtonText: 'Cancel',
           type: 'warning'
         }).then(() => {
-          alert(rsp.msg)
+          useUserStore().logout().then(() => {
+            location.reload()
+          })
         })
       }
       return Promise.reject(new Error(rsp.msg || 'Error'));
     } else {
-            return response
-        }
+      return response
     }
+  }
 )
 
 export default service
