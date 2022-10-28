@@ -21,7 +21,7 @@ server:
 secret:
   key: "UiTXuwC4pHqsLoHGimE1aZ686FAdKDz1BPVL2JMzTsYv8Y6YJHpJnKrjtK23XqMS"
   #  expiration: 2592000 # 30 * 24 * 60 * 60 s  -- 30天
-  expiration: 30 # 30 * 24 * 60 * 60 s  -- 30天
+  expiration: 30 # 30 s  -- 30秒
 
 transport:
   mqtt:

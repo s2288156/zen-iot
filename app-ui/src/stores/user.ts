@@ -27,5 +27,8 @@ export const useUserStore = defineStore({
         resolve(null)
       })
     },
+    cleanToken() {
+      localStorage.clear()
+    },
   },
 })

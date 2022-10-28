@@ -30,5 +30,5 @@ export function login(data: Account) {
     url: '/api/login',
     method: 'post',
     data: data
-  })
+  });
 }

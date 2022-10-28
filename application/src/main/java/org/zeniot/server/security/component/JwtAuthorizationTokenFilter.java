@@ -40,7 +40,6 @@ public class JwtAuthorizationTokenFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
         String tokenHeader = request.getHeader(TOKEN_HEADER);
-        log.warn("method: {}, token: {}", request.getMethod(), tokenHeader);
         if (!HttpMethod.OPTIONS.matches(request.getMethod()) && StringUtils.isNotBlank(tokenHeader) && StringUtils.startsWith(tokenHeader, TOKEN_HEADER_PREFIX)) {
             String token = StringUtils.substring(tokenHeader, TOKEN_HEADER_PREFIX.length());
             User user = jwtHandler.getUserForToken(token);
