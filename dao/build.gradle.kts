@@ -6,6 +6,7 @@ dependencies {
     api(project(":common:data"))
     api("org.springframework.boot:spring-boot-starter-data-jpa")
     api("org.springframework.boot:spring-boot-starter-validation")
+    api(libs.hibernate.types)
     runtimeOnly("org.postgresql:postgresql")
     runtimeOnly("org.flywaydb:flyway-core")
 

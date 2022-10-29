@@ -8,16 +8,7 @@
  */
 
 rootProject.name = "zen-iot"
-include("application")
-include("dao")
-include("common")
-include("common:util")
-findProject(":common:util")?.name = "util"
-//include("app-ui")
-include("common:mqtt")
-findProject(":common:mqtt")?.name = "mqtt"
 
-enableFeaturePreview("VERSION_CATALOGS")
 dependencyResolutionManagement {
     repositories {
         maven {
@@ -30,9 +21,18 @@ dependencyResolutionManagement {
             library("bcprov-jdk15on", "org.bouncycastle:bcprov-jdk15on:1.70")
             library("bcpkix-jdk15on", "org.bouncycastle:bcpkix-jdk15on:1.70")
             library("nimbus-jose-jwt", "com.nimbusds:nimbus-jose-jwt:9.23")
+            library("hibernate-types", "com.vladmihalcea:hibernate-types-52:2.20.0")
         }
     }
 }
+include("application")
+include("dao")
+include("common")
+include("common:util")
+findProject(":common:util")?.name = "util"
+//include("app-ui")
+include("common:mqtt")
+findProject(":common:mqtt")?.name = "mqtt"
 include("service")
 include("api")
 include("common:data")

@@ -1,6 +1,10 @@
 package org.zeniot.dao.model;
 
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+import lombok.Setter;
 import lombok.ToString;
+import org.hibernate.Hibernate;
 import org.zeniot.data.enums.RoleEnum;
 
 import javax.persistence.*;
@@ -9,6 +13,8 @@ import java.util.Objects;
 /**
  * @author Wu.Chunyang
  */
+@Getter
+@Setter
 @ToString(callSuper = true)
 @Entity
 @Table(name = "t_role")
@@ -24,24 +30,16 @@ public class RoleEntity extends BaseEntity {
         this.roleName = role;
     }
 
-    public RoleEnum getRoleName() {
-        return roleName;
-    }
-
-    public void setRoleName(RoleEnum roleName) {
-        this.roleName = roleName;
-    }
-
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof RoleEntity)) return false;
-        RoleEntity roleEntity = (RoleEntity) o;
-        return Objects.equals(roleName, roleEntity.roleName);
+        if (o == null || Hibernate.getClass(this) != Hibernate.getClass(o)) return false;
+        RoleEntity that = (RoleEntity) o;
+        return getId() != null && Objects.equals(getId(), that.getId());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(roleName);
+        return getClass().hashCode();
     }
 }
