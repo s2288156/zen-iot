@@ -1,12 +1,14 @@
 package org.zeniot.data;
 
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 import java.util.List;
 
 /**
  * @author Wu.Chunyang
  */
+@EqualsAndHashCode(callSuper = true)
 @Data
 public class PageResponse<T> extends Response {
 

@@ -1,11 +1,13 @@
 package org.zeniot.data;
 
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import org.zeniot.common.exception.BizException;
 
 /**
  * @author Wu.Chunyang
  */
+@EqualsAndHashCode(callSuper = true)
 @Data
 public class Response extends DTO {
     private boolean success;

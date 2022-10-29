@@ -43,6 +43,7 @@ class JwtHandlerTest {
         String adminToken = jwtHandler.newToken(admin);
         String username = jwtHandler.getUsernameForToken(adminToken);
         assertEquals(admin.getUsername(), username);
+        log.info("{}", adminToken);
     }
 
     @Test

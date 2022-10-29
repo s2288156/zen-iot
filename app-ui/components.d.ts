@@ -31,13 +31,11 @@ declare module '@vue/runtime-core' {
     ElTable: typeof import('element-plus/es')['ElTable']
     ElTableColumn: typeof import('element-plus/es')['ElTableColumn']
     MenuItem: typeof import('./src/components/layout/Aside/MenuItem.vue')['default']
-    MenuManager: typeof import('./src/components/system/MenuManager.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']
     TheHeader: typeof import('./src/components/layout/Header/TheHeader.vue')['default']
     TheHome: typeof import('./src/components/home/TheHome.vue')['default']
     TheLayout: typeof import('./src/components/layout/TheLayout.vue')['default']
     TheMain: typeof import('./src/components/layout/Main/TheMain.vue')['default']
-    UserManager: typeof import('./src/components/system/UserManager.vue')['default']
   }
 }
