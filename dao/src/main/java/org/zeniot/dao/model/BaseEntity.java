@@ -1,20 +1,27 @@
 package org.zeniot.dao.model;
 
+import com.vladmihalcea.hibernate.type.json.JsonType;
+import lombok.Getter;
+import lombok.Setter;
 import lombok.ToString;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.GenericGenerator;
+import org.hibernate.annotations.TypeDef;
 import org.hibernate.annotations.UpdateTimestamp;
-import org.springframework.data.annotation.CreatedDate;
 
-import javax.persistence.*;
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.PastOrPresent;
+import javax.persistence.Column;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
+import javax.persistence.MappedSuperclass;
 import java.time.LocalDateTime;
 
 /**
  * @author s2288
  */
+@Getter
+@Setter
 @ToString
+@TypeDef(name = "jsonp", typeClass = JsonType.class)
 @MappedSuperclass
 public class BaseEntity {
     @Id
@@ -23,38 +30,12 @@ public class BaseEntity {
     @Column(name = "id", nullable = false)
     private Long id;
 
-//    @PastOrPresent
     @CreationTimestamp
     @Column(name = "create_time", nullable = false)
     private LocalDateTime createTime;
 
     @UpdateTimestamp
-//    @PastOrPresent
     @Column(name = "update_time", nullable = false)
     private LocalDateTime updateTime;
-
-    public void setUpdateTime(LocalDateTime updateTime) {
-        this.updateTime = updateTime;
-    }
-
-    public LocalDateTime getUpdateTime() {
-        return updateTime;
-    }
-
-    public LocalDateTime getCreateTime() {
-        return createTime;
-    }
-
-    public void setCreateTime(LocalDateTime createTime) {
-        this.createTime = createTime;
-    }
-
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
 
 }

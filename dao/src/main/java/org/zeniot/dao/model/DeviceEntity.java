@@ -3,8 +3,6 @@ package org.zeniot.dao.model;
 import com.fasterxml.jackson.databind.JsonNode;
 import lombok.*;
 import org.hibernate.annotations.Type;
-import org.hibernate.annotations.TypeDef;
-import org.hibernate.annotations.TypeDefs;
 import org.zeniot.data.enums.DeviceStatusEnum;
 import org.zeniot.data.enums.DeviceTransportTypeEnum;
 
