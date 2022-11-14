@@ -62,13 +62,11 @@ public class AccountServiceImpl implements AccountService {
     public PageResponse<Account> pageAll(PageQuery pageQuery) {
         PageRequest pageable = PageRequest.of(pageQuery.getPage(), pageQuery.getSize());
         Page<AccountEntity> all = accountRepository.findAll(pageable);
-        int totalPages = all.getTotalPages();
-        long totalElements = all.getTotalElements();
         List<Account> accounts = all.getContent()
                 .stream()
                 .map(Account::simpleAccountFromEntity)
                 .toList();
-        return PageResponse.ok(accounts, all.getSize(), totalPages, totalElements, all.hasNext());
+        return PageResponse.ok(accounts, all);
     }
 
     @Override
