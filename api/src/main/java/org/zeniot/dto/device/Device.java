@@ -5,6 +5,7 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
+import org.zeniot.dao.model.DeviceEntity;
 import org.zeniot.data.DTO;
 import org.zeniot.data.enums.DeviceStatusEnum;
 import org.zeniot.data.enums.DeviceTransportTypeEnum;
@@ -24,4 +25,12 @@ public class Device extends DTO {
     private JsonNode transportConfig;
 
     private DeviceStatusEnum status;
+
+    public static Device fromEntity(DeviceEntity entity) {
+        Device device = new Device();
+        device.setName(entity.getName());
+        device.setStatus(entity.getStatus());
+        device.setTransportType(entity.getTransportType());
+        return device;
+    }
 }

@@ -3,7 +3,6 @@ package org.zeniot.service.impl;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.zeniot.api.AccountService;
@@ -60,8 +59,7 @@ public class AccountServiceImpl implements AccountService {
 
     @Override
     public PageResponse<Account> pageAll(PageQuery pageQuery) {
-        PageRequest pageable = PageRequest.of(pageQuery.getPage(), pageQuery.getSize());
-        Page<AccountEntity> all = accountRepository.findAll(pageable);
+        Page<AccountEntity> all = accountRepository.findAll(pageQuery.toPageable());
         List<Account> accounts = all.getContent()
                 .stream()
                 .map(Account::simpleAccountFromEntity)
