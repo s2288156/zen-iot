@@ -9,4 +9,6 @@ import org.zeniot.dto.device.Device;
  */
 public interface DeviceService {
     PageResponse<Device> findDevices(PageQuery pageQuery);
+
+    Device saveDevice(Device device);
 }

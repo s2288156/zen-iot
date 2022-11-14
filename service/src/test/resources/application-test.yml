@@ -1,0 +1,20 @@
+spring:
+  application:
+    name: zen-iot
+  jpa:
+    hibernate:
+      ddl-auto: none
+    open-in-view: false
+    show-sql: true
+  datasource:
+    url: jdbc:h2:~/h2/test;database_to_upper=false;MODE=PostgreSQL
+    driver-class-name: org.h2.Driver
+    username: test
+    password: 123123
+  flyway:
+    enabled: true
+
+secret:
+  key: "UiTXuwC4pHqsLoHGimE1aZ686FAdKDz1BPVL2JMzTsYv8Y6YJHpJnKrjtK23XqMS"
+  #  expiration: 2592000 # 30 * 24 * 60 * 60 s
+  expiration: 2 # 2s

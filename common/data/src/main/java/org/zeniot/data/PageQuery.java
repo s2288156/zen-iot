@@ -3,7 +3,6 @@ package org.zeniot.data;
 import lombok.AccessLevel;
 import lombok.Data;
 import lombok.Getter;
-import lombok.Setter;
 import org.springframework.data.domain.PageRequest;
 
 import javax.validation.constraints.NotNull;
@@ -12,7 +11,6 @@ import javax.validation.constraints.NotNull;
  * @author Wu.Chunyang
  */
 @Getter(AccessLevel.PRIVATE)
-@Setter(AccessLevel.PRIVATE)
 @Data
 public class PageQuery {
     @NotNull

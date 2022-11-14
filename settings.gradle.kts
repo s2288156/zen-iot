@@ -22,6 +22,8 @@ dependencyResolutionManagement {
             library("bcpkix-jdk15on", "org.bouncycastle:bcpkix-jdk15on:1.70")
             library("nimbus-jose-jwt", "com.nimbusds:nimbus-jose-jwt:9.23")
             library("hibernate-types", "com.vladmihalcea:hibernate-types-52:2.20.0")
+            library("mapstruct", "org.mapstruct:mapstruct:1.5.3.Final")
+            library("mapstruct-processor", "org.mapstruct:mapstruct-processor:1.5.3.Final")
         }
     }
 }
@@ -30,7 +32,6 @@ include("dao")
 include("common")
 include("common:util")
 findProject(":common:util")?.name = "util"
-//include("app-ui")
 include("common:mqtt")
 findProject(":common:mqtt")?.name = "mqtt"
 include("service")
