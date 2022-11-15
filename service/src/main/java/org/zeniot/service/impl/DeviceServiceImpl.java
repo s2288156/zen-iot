@@ -26,19 +26,17 @@ public class DeviceServiceImpl implements DeviceService {
     @Override
     public PageResponse<Device> findDevices(PageQuery pageQuery) {
         Page<DeviceEntity> page = deviceRepository.findAll(pageQuery.toPageable());
-        List<Device> devices = page.getContent()
-                .stream()
+        List<Device> devices = page.getContent().stream()
                 .map(entity -> mapper.entityToDevice(entity))
                 .toList();
         return PageResponse.ok(devices, page);
     }
 
     @Override
-    public Device saveDevice(Device device) {
+    public boolean saveDevice(Device device) {
         DeviceEntity deviceEntity = mapper.deviceToEntity(device);
         deviceRepository.save(deviceEntity);
-        return null;
+        return true;
     }
-
 
 }
