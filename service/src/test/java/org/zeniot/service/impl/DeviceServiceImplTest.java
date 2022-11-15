@@ -28,21 +28,16 @@ class DeviceServiceImplTest extends AbstractBootTest {
     @Autowired
     private DeviceRepository deviceRepository;
 
-    private Device d1;
-    private Device d2;
+    private Device d1, d2;
 
     @BeforeEach
     void setUp() {
         deviceRepository.deleteAll();
         d1 = Device.builder()
-                .name("d1")
-                .status(DeviceStatusEnum.ENABLE)
-                .transportType(DeviceTransportTypeEnum.MQTT)
+                .name("d1").status(DeviceStatusEnum.ENABLE).transportType(DeviceTransportTypeEnum.MQTT)
                 .build();
         d2 = Device.builder()
-                .name("d2")
-                .status(DeviceStatusEnum.ENABLE)
-                .transportType(DeviceTransportTypeEnum.MQTT)
+                .name("d2").status(DeviceStatusEnum.DISABLE).transportType(DeviceTransportTypeEnum.MQTT)
                 .build();
     }
 
@@ -50,22 +45,28 @@ class DeviceServiceImplTest extends AbstractBootTest {
     void test_findDevices() {
         deviceService.saveDevice(d1);
         deviceService.saveDevice(d2);
-        PageQuery pageQuery = new PageQuery();
-        pageQuery.setPage(0);
-        pageQuery.setSize(5);
+        PageQuery pageQuery = new PageQuery(0, 5);
         PageResponse<Device> devices = deviceService.findDevices(pageQuery);
         assertEquals(2, devices.getTotalElements());
     }
 
     @Test
     void test_saveDevice() {
-        assertTrue(deviceService.saveDevice(d1));
+        assertNotNull(deviceService.saveDevice(d1));
         List<DeviceEntity> all = deviceRepository.findAll();
         assertNotNull(all);
         assertEquals(1, all.size());
 
-        assertTrue(deviceService.saveDevice(d2));
+        assertNotNull(deviceService.saveDevice(d2));
         all = deviceRepository.findAll();
         assertEquals(2, all.size());
+    }
+
+    @Test
+    void test_deleteDevice() {
+        Long id1 = deviceService.saveDevice(d1);
+        assertEquals(1, deviceRepository.findAll().size());
+        assertTrue(deviceService.deleteDevice(id1));
+        assertEquals(0, deviceRepository.findAll().size());
     }
 }

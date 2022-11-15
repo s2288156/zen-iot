@@ -10,5 +10,7 @@ import org.zeniot.dto.device.Device;
 public interface DeviceService {
     PageResponse<Device> findDevices(PageQuery pageQuery);
 
-    boolean saveDevice(Device device);
+    Long saveDevice(Device device);
+
+    boolean deleteDevice(Long id);
 }

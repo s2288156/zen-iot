@@ -33,9 +33,15 @@ public class DeviceServiceImpl implements DeviceService {
     }
 
     @Override
-    public boolean saveDevice(Device device) {
+    public Long saveDevice(Device device) {
         DeviceEntity deviceEntity = mapper.deviceToEntity(device);
         deviceRepository.save(deviceEntity);
+        return deviceEntity.getId();
+    }
+
+    @Override
+    public boolean deleteDevice(Long id) {
+        deviceRepository.deleteById(id);
         return true;
     }
 

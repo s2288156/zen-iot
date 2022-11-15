@@ -3,6 +3,7 @@ package org.zeniot.data;
 import lombok.AccessLevel;
 import lombok.Data;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 
 import javax.validation.constraints.NotNull;
@@ -10,6 +11,7 @@ import javax.validation.constraints.NotNull;
 /**
  * @author Wu.Chunyang
  */
+@NoArgsConstructor
 @Getter(AccessLevel.PRIVATE)
 @Data
 public class PageQuery {
@@ -19,6 +21,11 @@ public class PageQuery {
     private Integer size;
     private Boolean asc;
     private String orderBy;
+
+    public PageQuery(Integer page, Integer size) {
+        this.page = page;
+        this.size = size;
+    }
 
     public PageRequest toPageable() {
         return PageRequest.of(page, size);
