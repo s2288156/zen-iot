@@ -1,6 +1,5 @@
 plugins {
     `java-library`
-//    alias(libs.plugins.mapstruct)
 }
 
 dependencies {
@@ -11,10 +10,4 @@ dependencies {
     compileOnly("org.projectlombok:lombok")
     annotationProcessor("org.projectlombok:lombok")
     annotationProcessor(libs.mapstruct.processor)
-}
-
-java {
-    toolchain {
-        languageVersion.set(JavaLanguageVersion.of(17))
-    }
 }
