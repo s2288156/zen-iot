@@ -16,8 +16,7 @@ import org.zeniot.dto.device.Device;
 
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * @author Wu.Chunyang
@@ -60,12 +59,13 @@ class DeviceServiceImplTest extends AbstractBootTest {
 
     @Test
     void test_saveDevice() {
-        deviceService.saveDevice(d1);
+        assertTrue(deviceService.saveDevice(d1));
         List<DeviceEntity> all = deviceRepository.findAll();
         assertNotNull(all);
         assertEquals(1, all.size());
 
-        deviceService.saveDevice(d2);
+        assertTrue(deviceService.saveDevice(d2));
+        all = deviceRepository.findAll();
         assertEquals(2, all.size());
     }
 }
