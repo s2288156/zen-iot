@@ -44,7 +44,7 @@ const router = createRouter({
         {
           path: '/system/user',
           name: 'User',
-          component: () => import('@/views/system/user/UserManager.vue'),
+          component: () => import('@/views/system/user/index.vue'),
           meta: {
             title: '用户管理',
             icon: 'User',
@@ -87,7 +87,7 @@ const router = createRouter({
         {
           path: '/platform/device',
           name: 'Device',
-          component: () => import('@/views/platform/DeviceManager.vue'),
+          component: () => import('@/views/platform/device/index.vue'),
           meta: {
             title: '设备管理',
             icon: 'Cpu',

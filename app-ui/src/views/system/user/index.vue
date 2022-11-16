@@ -2,10 +2,10 @@
   <div class="app-container">
     <div class="filter-container">
       <el-button
-        type="primary"
-        icon="EditPen"
-        class="filter-item"
-        @click="dialogFormVisible = !dialogFormVisible"
+          class="filter-item"
+          icon="EditPen"
+          type="primary"
+          @click="dialogFormVisible = !dialogFormVisible"
       >
         新增
       </el-button>
@@ -14,7 +14,7 @@
           icon="RefreshRight"
           class="filter-item"
           @click="loadAccountList()"
-        >刷新
+      >刷新
       </el-button>
     </div>
 
@@ -32,41 +32,41 @@
     </el-table>
 
     <el-pagination
-      v-model:current-page="currentPage"
-      background
-      layout="prev, pager, next"
-      :page-size="accountDataPage.size"
-      :page-count="accountDataPage.totalPages"
-      @prev-click="prevClick"
-      @next-click="nextClick"
-      @current-change="currentChange"
+        v-model:current-page="currentPage"
+        :page-count="accountDataPage.totalPages"
+        :page-size="accountDataPage.size"
+        background
+        layout="prev, pager, next"
+        @prev-click="prevClick"
+        @next-click="nextClick"
+        @current-change="currentChange"
     />
 
     <el-dialog v-model="dialogFormVisible" title="Add Account">
       <el-form :model="createAccountForm" :rules="rules" status-icon>
         <el-form-item
-          label="Username"
-          :label-width="formLabelWidth"
-          prop="username"
+            label="Username"
+            label-width="140px"
+            prop="username"
         >
-          <el-input v-model="createAccountForm.username" autocomplete="off" />
+          <el-input v-model="createAccountForm.username" autocomplete="off"/>
         </el-form-item>
         <el-form-item
-          label="Password"
-          :label-width="formLabelWidth"
-          prop="password"
+            label="Password"
+            label-width="140px"
+            prop="password"
         >
           <el-input
-            v-model="createAccountForm.password"
-            type="password"
-            autocomplete="off"
+              v-model="createAccountForm.password"
+              autocomplete="off"
+              type="password"
           />
         </el-form-item>
       </el-form>
       <template #footer>
         <span class="dialog-footer">
           <el-button @click="resetAccountForm">Cancel</el-button>
-          <el-button type="primary" @click="createAccount">Confirm</el-button>
+          <el-button type="primary" @click="handleCreateAccount">Confirm</el-button>
         </span>
       </template>
     </el-dialog>
@@ -74,11 +74,12 @@
 </template>
 
 <script lang="ts" setup>
-import {deleteAccount, getAccounts, registerAccount} from '@/api/system/account'
+import {deleteAccount, getAccounts, registerAccount} from '@/api/account-apis'
 import {reactive, ref} from 'vue'
-import type {Account} from '@/api/system/types'
+import type {Account} from '@/api/types'
 import type {BaseDataPage, PageQuery} from '@/api/global-types'
 import type {FormRules} from 'element-plus'
+import {ElMessage} from "element-plus";
 
 const pageQuery: PageQuery = {
   page: 0,
@@ -98,7 +99,11 @@ const loadAccountList = () => {
 loadAccountList()
 
 const handleClick = () => {
-  console.log('click')
+  ElMessage({
+    showClose: true,
+    message: 'Detail Click',
+    type: 'info',
+  })
 }
 
 const handleDeleteAccount = (row: Account) => {
@@ -139,24 +144,11 @@ const resetAccountForm = () => {
 }
 
 const rules = reactive<FormRules>({
-  username: [
-    {
-      required: true,
-      message: 'Please input username!',
-      trigger: 'blur',
-    },
-  ],
-  password: [
-    {
-      required: true,
-      message: 'Please input password!',
-      trigger: 'blur',
-    },
-  ],
+  username: [{required: true, message: 'Please input username!', trigger: 'blur'}],
+  password: [{required: true, message: 'Please input password!', trigger: 'blur'}],
 })
-const formLabelWidth = '140px'
 
-const createAccount = () => {
+const handleCreateAccount = () => {
   registerAccount(createAccountForm).then((resp) => {
     if (resp.status === 200) {
       resetAccountForm()
@@ -167,9 +159,4 @@ const createAccount = () => {
 </script>
 
 <style scoped lang="scss">
-.my-header {
-  display: flex;
-  flex-direction: row;
-  justify-content: space-between;
-}
 </style>

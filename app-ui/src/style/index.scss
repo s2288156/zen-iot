@@ -12,3 +12,9 @@
     margin-bottom: 10px;
   }
 }
+
+.dialog-header {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+}
