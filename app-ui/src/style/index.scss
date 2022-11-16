@@ -11,6 +11,11 @@
     vertical-align: middle;
     margin-bottom: 10px;
   }
+
+}
+
+.select {
+  direction: rtl;
 }
 
 .dialog-header {
@@ -18,3 +23,4 @@
   flex-direction: row;
   justify-content: space-between;
 }
+

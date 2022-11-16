@@ -11,7 +11,12 @@ export type Device = {
   name: string
   transportType: string
   transportConfig?: string
-  status: string
+  status?: string
   createTime?: string
   updateTime?: string
+}
+
+export type DeviceCommon = {
+  transportTypes: string[]
+  statuses: string[]
 }

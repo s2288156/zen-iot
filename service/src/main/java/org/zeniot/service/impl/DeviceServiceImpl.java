@@ -8,6 +8,7 @@ import org.zeniot.dao.model.DeviceEntity;
 import org.zeniot.dao.repository.DeviceRepository;
 import org.zeniot.data.PageQuery;
 import org.zeniot.data.PageResponse;
+import org.zeniot.data.enums.DeviceStatusEnum;
 import org.zeniot.dto.device.Device;
 import org.zeniot.mapper.DeviceMapper;
 
@@ -34,6 +35,9 @@ public class DeviceServiceImpl implements DeviceService {
 
     @Override
     public Device saveDevice(Device device) {
+        if (device.getId() == null) {
+            device.setStatus(DeviceStatusEnum.DISABLE);
+        }
         DeviceEntity deviceEntity = mapper.deviceToEntity(device);
         deviceRepository.save(deviceEntity);
         return mapper.entityToDevice(deviceEntity);

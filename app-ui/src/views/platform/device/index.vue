@@ -45,13 +45,17 @@
     <el-dialog v-model="dialogFormVisible" title="Add Device">
       <el-form :model="createDeviceForm" :rules="rules" status-icon>
         <el-form-item label="Name" label-width="140px" prop="name">
-          <el-input v-model="createDeviceForm.name" autocomplete="off"/>
+          <el-input v-model="createDeviceForm.name"/>
         </el-form-item>
         <el-form-item label="Transport Type" label-width="140px" prop="transportType">
-          <el-input v-model="createDeviceForm.transportType" autocomplete="off"/>
-        </el-form-item>
-        <el-form-item label="Status" label-width="140px" prop="status">
-          <el-input v-model="createDeviceForm.status" autocomplete="off"/>
+          <el-select v-model="createDeviceForm.transportType" placeholder="Transport Type">
+            <el-option
+                v-for="item in deviceCommonData.transportTypes"
+                :key="item"
+                :label="item"
+                :value="item"
+            />
+          </el-select>
         </el-form-item>
       </el-form>
       <template #footer>
@@ -66,11 +70,11 @@
 
 <script lang="ts" setup>
 import {reactive, ref} from 'vue'
-import type {Device} from '@/api/types'
+import type {Device, DeviceCommon} from '@/api/types'
 import type {BaseDataPage, PageQuery} from '@/api/global-types'
 import type {FormRules} from 'element-plus'
 import {ElMessage} from "element-plus";
-import {deleteDevice, getDevices, saveDevice} from "@/api/device-apis";
+import {deleteDevice, getDeviceCommon, getDevices, saveDevice} from "@/api/device-apis";
 
 const pageQuery: PageQuery = {
   page: 0,
@@ -82,11 +86,20 @@ const devices = ref<BaseDataPage<Device>>({
   totalPages: 0,
 })
 
+const deviceCommonData = ref<DeviceCommon>({statuses: [], transportTypes: []});
+
 const loadDeviceList = () => {
   getDevices(pageQuery).then((response) => {
     devices.value = response.data
   })
 }
+const loadDeviceCommon = () => {
+  getDeviceCommon().then((resp) => {
+    deviceCommonData.value = resp.data.data
+  })
+}
+
+loadDeviceCommon()
 loadDeviceList()
 
 const handleClick = () => {
@@ -124,19 +137,17 @@ const currentChange = () => {
 // dialog
 const dialogFormVisible = ref(false)
 let createDeviceForm = reactive<Device>({
-  name: "", status: "", transportType: ""
+  name: "", transportType: ""
 })
 
 const resetDeviceForm = () => {
   dialogFormVisible.value = false
-  createDeviceForm = reactive<Device>({
-    name: "", status: "", transportType: ""
-  })
+  createDeviceForm.name = ''
+  createDeviceForm.transportType = ''
 }
 
 const rules = reactive<FormRules>({
   name: [{required: true, message: 'Please input name!', trigger: 'blur'}],
-  status: [{required: true, message: 'Please input status!', trigger: 'blur'}],
   transportType: [{required: true, message: 'Please input transportType!', trigger: 'blur'}],
 })
 

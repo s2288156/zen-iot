@@ -24,6 +24,7 @@ public class Device extends DTO {
 
     private JsonNode transportConfig;
 
+    @Setter
     private DeviceStatusEnum status;
 
 }
