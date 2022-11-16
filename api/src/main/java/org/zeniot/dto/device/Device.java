@@ -15,6 +15,9 @@ import org.zeniot.data.enums.DeviceTransportTypeEnum;
 @ToString
 public class Device extends DTO {
 
+    @Setter
+    private Long id;
+
     private String name;
 
     private DeviceTransportTypeEnum transportType;

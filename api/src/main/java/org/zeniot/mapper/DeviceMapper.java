@@ -16,7 +16,6 @@ public interface DeviceMapper {
     Device entityToDevice(DeviceEntity entity);
 
     @Mapping(target = "updateTime", ignore = true)
-    @Mapping(target = "id", ignore = true)
     @Mapping(target = "createTime", ignore = true)
     DeviceEntity deviceToEntity(Device device);
 }

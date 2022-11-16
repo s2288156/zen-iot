@@ -33,10 +33,10 @@ public class DeviceServiceImpl implements DeviceService {
     }
 
     @Override
-    public Long saveDevice(Device device) {
+    public Device saveDevice(Device device) {
         DeviceEntity deviceEntity = mapper.deviceToEntity(device);
         deviceRepository.save(deviceEntity);
-        return deviceEntity.getId();
+        return mapper.entityToDevice(deviceEntity);
     }
 
     @Override

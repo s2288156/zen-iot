@@ -64,9 +64,9 @@ class DeviceServiceImplTest extends AbstractBootTest {
 
     @Test
     void test_deleteDevice() {
-        Long id1 = deviceService.saveDevice(d1);
+        Device device1 = deviceService.saveDevice(d1);
         assertEquals(1, deviceRepository.findAll().size());
-        assertTrue(deviceService.deleteDevice(id1));
+        assertTrue(deviceService.deleteDevice(device1.getId()));
         assertEquals(0, deviceRepository.findAll().size());
     }
 }
