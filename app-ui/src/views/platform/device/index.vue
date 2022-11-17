@@ -64,7 +64,7 @@
       </el-form>
       <template #footer>
         <span class="dialog-footer">
-          <el-button @click="resetDeviceForm">Cancel</el-button>
+          <el-button @click="resetDeviceForm(ruleFormRef)">Cancel</el-button>
           <el-button type="primary" @click="handleCreateDevice(ruleFormRef)">Confirm</el-button>
         </span>
       </template>
@@ -148,19 +148,22 @@ const getStatusTag = (row: Device) => {
 
 // dialog
 const dialogFormVisible = ref(false)
+const ruleFormRef = ref<FormInstance>()
+
 let createDeviceForm = reactive<Device>({
   name: "", transportType: ""
 })
 
-const resetDeviceForm = () => {
+const resetDeviceForm = (formEl: FormInstance) => {
+  formEl.resetFields()
   dialogFormVisible.value = false
   createDeviceForm.name = ''
   createDeviceForm.transportType = ''
 }
-const ruleFormRef = ref<FormInstance>()
+
 const rules = reactive<FormRules>({
-  name: [{required: true, message: 'Please input name!', trigger: 'change'}],
-  transportType: [{required: true, message: 'Please input transportType!', trigger: 'change'}],
+  name: [{required: true, message: 'Please input name!', trigger: 'blur'}],
+  transportType: [{required: true, message: 'Please input transportType!', trigger: 'blur'}],
 })
 
 const handleCreateDevice = async (formEl: FormInstance) => {
@@ -169,7 +172,7 @@ const handleCreateDevice = async (formEl: FormInstance) => {
     if (valid) {
       saveDevice(createDeviceForm).then((resp) => {
         if (resp.status === 200) {
-          resetDeviceForm()
+          resetDeviceForm(formEl)
           loadDeviceList()
         }
       })
