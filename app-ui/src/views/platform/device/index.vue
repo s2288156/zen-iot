@@ -47,7 +47,7 @@
     />
 
     <el-dialog v-model="dialogFormVisible" title="Add Device">
-      <el-form :model="createDeviceForm" :rules="rules" status-icon>
+      <el-form ref="ruleFormRef" :model="createDeviceForm" :rules="rules" status-icon>
         <el-form-item label="Name" label-width="140px" prop="name">
           <el-input v-model="createDeviceForm.name"/>
         </el-form-item>
@@ -65,7 +65,7 @@
       <template #footer>
         <span class="dialog-footer">
           <el-button @click="resetDeviceForm">Cancel</el-button>
-          <el-button type="primary" @click="handleCreateDevice">Confirm</el-button>
+          <el-button type="primary" @click="handleCreateDevice(ruleFormRef)">Confirm</el-button>
         </span>
       </template>
     </el-dialog>
@@ -76,7 +76,7 @@
 import {reactive, ref} from 'vue'
 import type {Device, DeviceCommon} from '@/api/types'
 import type {BaseDataPage, PageQuery} from '@/api/global-types'
-import type {FormRules} from 'element-plus'
+import type {FormInstance, FormRules} from 'element-plus'
 import {ElMessage} from "element-plus";
 import {deleteDevice, getDeviceCommon, getDevices, saveDevice} from "@/api/device-apis";
 
@@ -157,19 +157,25 @@ const resetDeviceForm = () => {
   createDeviceForm.name = ''
   createDeviceForm.transportType = ''
 }
-
+const ruleFormRef = ref<FormInstance>()
 const rules = reactive<FormRules>({
-  name: [{required: true, message: 'Please input name!', trigger: 'blur'}],
-  transportType: [{required: true, message: 'Please input transportType!', trigger: 'blur'}],
+  name: [{required: true, message: 'Please input name!', trigger: 'change'}],
+  transportType: [{required: true, message: 'Please input transportType!', trigger: 'change'}],
 })
 
-const handleCreateDevice = () => {
-  saveDevice(createDeviceForm).then((resp) => {
-    if (resp.status === 200) {
-      resetDeviceForm()
-      loadDeviceList()
+const handleCreateDevice = async (formEl: FormInstance) => {
+  if (!formEl) return
+  await formEl.validate((valid, fields) => {
+    if (valid) {
+      saveDevice(createDeviceForm).then((resp) => {
+        if (resp.status === 200) {
+          resetDeviceForm()
+          loadDeviceList()
+        }
+      })
     }
   })
+
 }
 </script>
 
