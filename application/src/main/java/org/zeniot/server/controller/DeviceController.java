@@ -33,4 +33,10 @@ public class DeviceController extends AbstractController {
         return SingleResponse.success(DeviceCommonData.create());
     }
 
+    @DeleteMapping("/device/{id}")
+    public SingleResponse<Device> deleteDevice(@PathVariable Long id) {
+        deviceService.deleteDevice(id);
+        return SingleResponse.success();
+    }
+
 }

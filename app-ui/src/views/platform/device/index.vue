@@ -22,7 +22,11 @@
       <el-table-column type="index" width="50"/>
       <el-table-column label="name" prop="name" width="180"/>
       <el-table-column label="transportType" prop="transportType" width="180"/>
-      <el-table-column label="status" prop="status"/>
+      <el-table-column label="status">
+        <template #default="{ row }">
+          <el-tag :type="getStatusTag(row)">{{ row.status }}</el-tag>
+        </template>
+      </el-table-column>
       <el-table-column fixed="right" label="Operations" width="120">
         <template #default="{ row, $index }">
           <el-button link size="small" type="primary" @click="handleClick">Detail</el-button>
@@ -132,6 +136,14 @@ const nextClick = () => {
 const currentChange = () => {
   pageQuery.page = currentPage.value - 1
   loadDeviceList()
+}
+
+const getStatusTag = (row: Device) => {
+  if (row.status === 'DISABLE') {
+    return 'info'
+  } else if (row.status === 'ENABLE') {
+    return 'success'
+  }
 }
 
 // dialog

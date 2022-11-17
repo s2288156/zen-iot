@@ -27,7 +27,7 @@ export function saveDevice(data: Device) {
 
 export function deleteDevice(id: number) {
   return request({
-    url: '/api/account/' + id,
+    url: '/api/device/' + id,
     method: 'delete'
   })
 }
