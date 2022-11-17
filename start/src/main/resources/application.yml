@@ -16,6 +16,8 @@ spring:
     date-format: yyyy-MM-dd HH:mm:ss
     time-zone: GMT+8
     default-property-inclusion: non_null
+    deserialization:
+      read-unknown-enum-values-as-null: true
 server:
   port: 8088
 secret:

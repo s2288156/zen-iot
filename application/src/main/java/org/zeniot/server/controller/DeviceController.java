@@ -1,6 +1,7 @@
 package org.zeniot.server.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.zeniot.api.DeviceService;
 import org.zeniot.data.PageQuery;
@@ -19,12 +20,12 @@ public class DeviceController extends AbstractController {
     private DeviceService deviceService;
 
     @PostMapping("/device")
-    public SingleResponse<Device> saveDevice(@RequestBody Device device) {
+    public SingleResponse<Device> saveDevice(@Validated @RequestBody Device device) {
         return SingleResponse.success(deviceService.saveDevice(device));
     }
 
     @GetMapping("/devices")
-    public PageResponse<Device> getDevices(PageQuery pageQuery) {
+    public PageResponse<Device> getDevices(@Validated PageQuery pageQuery) {
         return deviceService.findDevices(pageQuery);
     }
 

@@ -52,7 +52,7 @@
           <el-input v-model="createDeviceForm.name"/>
         </el-form-item>
         <el-form-item label="Transport Type" label-width="140px" prop="transportType">
-          <el-select v-model="createDeviceForm.transportType" placeholder="Transport Type">
+          <el-select v-model="createDeviceForm.transportType" clearable placeholder="Transport Type">
             <el-option
                 v-for="item in deviceCommonData.transportTypes"
                 :key="item"
