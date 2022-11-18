@@ -24,18 +24,21 @@ dependencyResolutionManagement {
             library("hibernate-types", "com.vladmihalcea:hibernate-types-52:2.20.0")
             library("mapstruct", "org.mapstruct:mapstruct:1.5.3.Final")
             library("mapstruct-processor", "org.mapstruct:mapstruct-processor:1.5.3.Final")
+            library("j2mod", "com.ghgande:j2mod:3.1.1")
         }
     }
 }
 include("application")
 include("dao")
+include("service")
+include("api")
+include("start")
 include("common")
 include("common:util")
 findProject(":common:util")?.name = "util"
 include("common:mqtt")
 findProject(":common:mqtt")?.name = "mqtt"
-include("service")
-include("api")
+include("common:modbus")
+findProject(":common:modbus")?.name = "modbus"
 include("common:data")
 findProject(":common:data")?.name = "data"
-include("start")
