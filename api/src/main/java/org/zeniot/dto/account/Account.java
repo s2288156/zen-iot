@@ -6,7 +6,7 @@ import lombok.Setter;
 import lombok.ToString;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.zeniot.dao.model.AccountEntity;
-import org.zeniot.data.DTO;
+import org.zeniot.data.base.DTO;
 
 import javax.validation.constraints.NotBlank;
 import java.time.LocalDateTime;

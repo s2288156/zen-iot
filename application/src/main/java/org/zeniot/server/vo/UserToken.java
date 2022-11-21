@@ -2,7 +2,7 @@ package org.zeniot.server.vo;
 
 import lombok.Getter;
 import lombok.Setter;
-import org.zeniot.data.DTO;
+import org.zeniot.data.base.DTO;
 
 /**
  * @author Wu.Chunyang

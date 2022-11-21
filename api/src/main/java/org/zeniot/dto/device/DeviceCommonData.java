@@ -1,7 +1,7 @@
 package org.zeniot.dto.device;
 
 import lombok.Data;
-import org.zeniot.data.DTO;
+import org.zeniot.data.base.DTO;
 import org.zeniot.data.enums.DeviceStatusEnum;
 import org.zeniot.data.enums.DeviceTransportTypeEnum;
 

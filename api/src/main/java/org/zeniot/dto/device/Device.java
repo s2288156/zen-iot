@@ -2,7 +2,7 @@ package org.zeniot.dto.device;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import lombok.*;
-import org.zeniot.data.DTO;
+import org.zeniot.data.base.DTO;
 import org.zeniot.data.enums.DeviceStatusEnum;
 import org.zeniot.data.enums.DeviceTransportTypeEnum;
 

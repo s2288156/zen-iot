@@ -7,6 +7,7 @@ import org.zeniot.api.DeviceService;
 import org.zeniot.data.PageQuery;
 import org.zeniot.data.PageResponse;
 import org.zeniot.data.SingleResponse;
+import org.zeniot.data.command.DeviceStatusSwitchCmd;
 import org.zeniot.dto.device.Device;
 import org.zeniot.dto.device.DeviceCommonData;
 
@@ -40,4 +41,9 @@ public class DeviceController extends AbstractController {
         return SingleResponse.success();
     }
 
+    @PostMapping("/device/switch")
+    public SingleResponse<?> switchStatus(@Validated @RequestBody DeviceStatusSwitchCmd cmd) {
+
+        return SingleResponse.success();
+    }
 }

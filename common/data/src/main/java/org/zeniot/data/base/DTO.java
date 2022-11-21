@@ -1,4 +1,4 @@
-package org.zeniot.data;
+package org.zeniot.data.base;
 
 import java.io.Serial;
 import java.io.Serializable;
