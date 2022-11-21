@@ -5,6 +5,7 @@ plugins {
 dependencies {
     api(project(":dao"))
     api(project(":api"))
+    api(project(":common:modbus"))
     compileOnly("org.projectlombok:lombok")
     annotationProcessor("org.projectlombok:lombok")
 

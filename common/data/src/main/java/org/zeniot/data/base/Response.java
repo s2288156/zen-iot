@@ -1,9 +1,8 @@
-package org.zeniot.data;
+package org.zeniot.data.base;
 
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import org.zeniot.common.exception.BizException;
-import org.zeniot.data.base.DTO;
 
 /**
  * @author Wu.Chunyang

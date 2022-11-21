@@ -14,7 +14,7 @@ import org.springframework.security.web.authentication.WebAuthenticationDetailsS
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 import org.zeniot.common.exception.BizException;
-import org.zeniot.data.Response;
+import org.zeniot.data.base.Response;
 import org.zeniot.server.security.JwtHandler;
 
 import javax.servlet.FilterChain;

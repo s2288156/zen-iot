@@ -6,8 +6,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.test.web.servlet.ResultActions;
 import org.zeniot.common.util.JacksonUtil;
-import org.zeniot.data.PageQuery;
-import org.zeniot.data.SingleResponse;
+import org.zeniot.data.base.PageQuery;
+import org.zeniot.data.base.SingleResponse;
 import org.zeniot.dto.account.Account;
 import org.zeniot.server.controller.request.TAccount;
 

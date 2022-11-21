@@ -1,7 +1,7 @@
 package org.zeniot.api;
 
-import org.zeniot.data.PageQuery;
-import org.zeniot.data.PageResponse;
+import org.zeniot.data.base.PageQuery;
+import org.zeniot.data.base.PageResponse;
 import org.zeniot.dto.device.Device;
 
 /**
