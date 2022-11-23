@@ -6,6 +6,7 @@ dependencies {
     implementation(project(":common:util"))
     implementation(libs.bcprov.jdk15on)
     implementation(libs.bcpkix.jdk15on)
+    implementation(libs.netty.all)
 
     compileOnly("org.projectlombok:lombok")
     annotationProcessor("org.projectlombok:lombok")

@@ -25,6 +25,7 @@ dependencyResolutionManagement {
             library("mapstruct", "org.mapstruct:mapstruct:1.5.3.Final")
             library("mapstruct-processor", "org.mapstruct:mapstruct-processor:1.5.3.Final")
             library("j2mod", "com.ghgande:j2mod:3.1.1")
+            library("netty-all", "io.netty:netty-all:4.1.85.Final")
         }
     }
 }
