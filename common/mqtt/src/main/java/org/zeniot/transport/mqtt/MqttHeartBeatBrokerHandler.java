@@ -8,6 +8,7 @@ import io.netty.handler.timeout.IdleState;
 import io.netty.handler.timeout.IdleStateEvent;
 import io.netty.util.ReferenceCountUtil;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 
 import java.nio.charset.StandardCharsets;
 
@@ -27,9 +28,11 @@ public class MqttHeartBeatBrokerHandler extends ChannelInboundHandlerAdapter {
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) {
         MqttMessage mqttMessage = (MqttMessage) msg;
-        log.info("Receive MQTT message: {}", mqttMessage.fixedHeader().messageType());
+        // log.info("Receive MQTT message: {}", mqttMessage);
         switch (mqttMessage.fixedHeader().messageType()) {
             case CONNECT -> {
+                MqttConnectMessage connectMsg = (MqttConnectMessage) msg;
+                log.info("username: {}, password: {}", connectMsg.payload().userName(), StringUtils.toEncodedString(connectMsg.payload().passwordInBytes(), StandardCharsets.UTF_8));
                 MqttFixedHeader connackFixedHeader = new MqttFixedHeader(MqttMessageType.CONNACK, false, AT_MOST_ONCE, false, 0);
                 MqttConnAckVariableHeader mqttConnAckVariableHeader = new MqttConnAckVariableHeader(MqttConnectReturnCode.CONNECTION_ACCEPTED, false);
                 MqttConnAckMessage connack = new MqttConnAckMessage(connackFixedHeader, mqttConnAckVariableHeader);
@@ -37,7 +40,8 @@ public class MqttHeartBeatBrokerHandler extends ChannelInboundHandlerAdapter {
             }
             case PUBLISH -> {
                 MqttPublishMessage publishMsg = (MqttPublishMessage) msg;
-                log.info("{}", publishMsg.payload().toString(StandardCharsets.UTF_8));
+                log.info("topic: {}, payload: {}", publishMsg.variableHeader().topicName(), publishMsg.payload().toString(StandardCharsets.UTF_8));
+
                 if (publishMsg.variableHeader().packetId() > 0) {
                     MqttFixedHeader pubAckFixedHeader = new MqttFixedHeader(MqttMessageType.PUBACK, false, AT_MOST_ONCE, false, 0);
                     MqttMessageIdVariableHeader idVariableHeader = MqttMessageIdVariableHeader.from(publishMsg.variableHeader().packetId());
