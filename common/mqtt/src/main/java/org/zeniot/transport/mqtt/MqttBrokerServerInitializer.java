@@ -12,15 +12,20 @@ import io.netty.handler.codec.mqtt.MqttDecoder;
 import io.netty.handler.codec.mqtt.MqttEncoder;
 import io.netty.handler.timeout.IdleStateHandler;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Component;
 
+import javax.annotation.PostConstruct;
 import java.util.concurrent.TimeUnit;
 
 /**
  * @author Wu.Chunyang
  */
+@Component
 @Slf4j
-public class MqttHeartBeatBroker {
-    public static void main(String[] args) throws InterruptedException {
+public class MqttBrokerServerInitializer {
+
+    @PostConstruct
+    public void init() throws InterruptedException {
         EventLoopGroup boosGroup = new NioEventLoopGroup(1);
         EventLoopGroup workerGroup = new NioEventLoopGroup();
 
@@ -40,13 +45,12 @@ public class MqttHeartBeatBroker {
             });
 
             ChannelFuture f = b.bind(1883).sync();
-            log.info("Broker initiated...");
+            log.info("MQTT broker initiated... ");
 
             f.channel().closeFuture().sync();
         } finally {
             workerGroup.shutdownGracefully();
             boosGroup.shutdownGracefully();
         }
-
     }
 }
