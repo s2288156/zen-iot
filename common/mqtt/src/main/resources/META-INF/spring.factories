@@ -1,2 +1,2 @@
-org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
-org.zeniot.mqtt.MqttAutoConfiguration
+#org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
+#

@@ -10,7 +10,10 @@ import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.handler.codec.mqtt.MqttDecoder;
 import io.netty.handler.codec.mqtt.MqttEncoder;
+import io.netty.handler.timeout.IdleStateHandler;
 import lombok.extern.slf4j.Slf4j;
+
+import java.util.concurrent.TimeUnit;
 
 /**
  * @author Wu.Chunyang
@@ -31,7 +34,7 @@ public class MqttHeartBeatBroker {
                 protected void initChannel(SocketChannel ch) {
                     ch.pipeline().addLast("encoder", MqttEncoder.INSTANCE);
                     ch.pipeline().addLast("decoder", new MqttDecoder());
-                    // ch.pipeline().addLast("heartBeatHandler", new IdleStateHandler(45, 0, 0, TimeUnit.SECONDS));
+                    ch.pipeline().addLast("heartBeatHandler", new IdleStateHandler(45, 0, 0, TimeUnit.SECONDS));
                     ch.pipeline().addLast("handler", MqttHeartBeatBrokerHandler.INSTANCE);
                 }
             });

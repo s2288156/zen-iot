@@ -28,11 +28,13 @@ public class MqttHeartBeatBrokerHandler extends ChannelInboundHandlerAdapter {
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) {
         MqttMessage mqttMessage = (MqttMessage) msg;
-        // log.info("Receive MQTT message: {}", mqttMessage);
+        log.debug("Receive MQTT message: {}", mqttMessage);
         switch (mqttMessage.fixedHeader().messageType()) {
             case CONNECT -> {
                 MqttConnectMessage connectMsg = (MqttConnectMessage) msg;
-                log.info("username: {}, password: {}", connectMsg.payload().userName(), StringUtils.toEncodedString(connectMsg.payload().passwordInBytes(), StandardCharsets.UTF_8));
+                if (StringUtils.isNotBlank(connectMsg.payload().userName())) {
+                    log.info("username: {}, password: {}", connectMsg.payload().userName(), StringUtils.toEncodedString(connectMsg.payload().passwordInBytes(), StandardCharsets.UTF_8));
+                }
                 MqttFixedHeader connackFixedHeader = new MqttFixedHeader(MqttMessageType.CONNACK, false, AT_MOST_ONCE, false, 0);
                 MqttConnAckVariableHeader mqttConnAckVariableHeader = new MqttConnAckVariableHeader(MqttConnectReturnCode.CONNECTION_ACCEPTED, false);
                 MqttConnAckMessage connack = new MqttConnAckMessage(connackFixedHeader, mqttConnAckVariableHeader);
@@ -50,7 +52,9 @@ public class MqttHeartBeatBrokerHandler extends ChannelInboundHandlerAdapter {
                 }
             }
             case SUBSCRIBE -> {
-
+                MqttSubscribeMessage subscribeMsg = (MqttSubscribeMessage) msg;
+                MqttFixedHeader subAckFixedHeader = new MqttFixedHeader(MqttMessageType.SUBACK, false, AT_MOST_ONCE, false, 0);
+                // MqttSubAckMessage mqttSubAckMessage = new MqttSubAckMessage(subAckFixedHeader,);
             }
             case PINGREQ -> {
                 MqttFixedHeader pingReqFixedHeader = new MqttFixedHeader(MqttMessageType.PINGRESP, false, AT_MOST_ONCE, false, 0);
