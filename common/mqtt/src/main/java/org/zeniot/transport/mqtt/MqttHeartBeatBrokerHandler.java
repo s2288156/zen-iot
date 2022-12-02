@@ -9,6 +9,7 @@ import io.netty.handler.timeout.IdleStateEvent;
 import io.netty.util.ReferenceCountUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.zeniot.transport.mqtt.service.MqttTransportService;
 
 import java.nio.charset.StandardCharsets;
 
@@ -20,9 +21,14 @@ import static io.netty.handler.codec.mqtt.MqttQoS.AT_MOST_ONCE;
 @Slf4j
 @ChannelHandler.Sharable
 public class MqttHeartBeatBrokerHandler extends ChannelInboundHandlerAdapter {
-    public static final MqttHeartBeatBrokerHandler INSTANCE = new MqttHeartBeatBrokerHandler();
+
+    private MqttTransportService mqttTransportService;
 
     private MqttHeartBeatBrokerHandler() {
+    }
+
+    public MqttHeartBeatBrokerHandler(MqttTransportService mqttTransportService) {
+        this.mqttTransportService = mqttTransportService;
     }
 
     @Override
@@ -43,7 +49,7 @@ public class MqttHeartBeatBrokerHandler extends ChannelInboundHandlerAdapter {
             case PUBLISH -> {
                 MqttPublishMessage publishMsg = (MqttPublishMessage) msg;
 
-                log.info("topic: {}, payload: {}", publishMsg.variableHeader().topicName(), publishMsg.payload().toString(StandardCharsets.UTF_8));
+                mqttTransportService.receiveMsg(publishMsg.variableHeader().topicName(), publishMsg.payload().toString(StandardCharsets.UTF_8));
 
                 if (publishMsg.variableHeader().packetId() > 0) {
                     MqttFixedHeader pubAckFixedHeader = new MqttFixedHeader(MqttMessageType.PUBACK, false, AT_MOST_ONCE, false, 0);

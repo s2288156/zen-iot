@@ -12,7 +12,9 @@ import io.netty.handler.codec.mqtt.MqttDecoder;
 import io.netty.handler.codec.mqtt.MqttEncoder;
 import io.netty.handler.timeout.IdleStateHandler;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.zeniot.transport.mqtt.service.MqttTransportService;
 
 import javax.annotation.PostConstruct;
 import java.util.concurrent.TimeUnit;
@@ -23,6 +25,9 @@ import java.util.concurrent.TimeUnit;
 @Component
 @Slf4j
 public class MqttBrokerServerInitializer {
+
+    @Autowired
+    private MqttTransportService mqttTransportService;
 
     @PostConstruct
     public void init() throws InterruptedException {
@@ -40,7 +45,7 @@ public class MqttBrokerServerInitializer {
                     ch.pipeline().addLast("encoder", MqttEncoder.INSTANCE);
                     ch.pipeline().addLast("decoder", new MqttDecoder());
                     ch.pipeline().addLast("heartBeatHandler", new IdleStateHandler(45, 0, 0, TimeUnit.SECONDS));
-                    ch.pipeline().addLast("handler", MqttHeartBeatBrokerHandler.INSTANCE);
+                    ch.pipeline().addLast("handler", new MqttHeartBeatBrokerHandler(mqttTransportService));
                 }
             });
 
