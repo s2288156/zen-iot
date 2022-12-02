@@ -4,6 +4,7 @@ plugins {
 
 dependencies {
     implementation(project(":common:util"))
+    implementation(project(":common:data"))
     implementation(libs.bcprov.jdk15on)
     implementation(libs.bcpkix.jdk15on)
     implementation(libs.netty.all)

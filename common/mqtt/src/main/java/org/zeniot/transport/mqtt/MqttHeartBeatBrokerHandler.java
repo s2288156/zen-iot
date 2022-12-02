@@ -42,6 +42,7 @@ public class MqttHeartBeatBrokerHandler extends ChannelInboundHandlerAdapter {
             }
             case PUBLISH -> {
                 MqttPublishMessage publishMsg = (MqttPublishMessage) msg;
+
                 log.info("topic: {}, payload: {}", publishMsg.variableHeader().topicName(), publishMsg.payload().toString(StandardCharsets.UTF_8));
 
                 if (publishMsg.variableHeader().packetId() > 0) {
