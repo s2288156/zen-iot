@@ -1,13 +1,13 @@
 package org.zeniot.dto.device;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.*;
 import org.zeniot.data.base.DTO;
 import org.zeniot.data.enums.DeviceStatusEnum;
 import org.zeniot.data.enums.DeviceTransportTypeEnum;
 
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotNull;
 
 /**
  * @author Wu.Chunyang

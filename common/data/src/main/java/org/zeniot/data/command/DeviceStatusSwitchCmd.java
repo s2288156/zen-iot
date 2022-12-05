@@ -1,12 +1,12 @@
 package org.zeniot.data.command;
 
+import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import org.zeniot.data.base.Cmd;
 import org.zeniot.data.base.HasId;
 import org.zeniot.data.enums.DeviceStatusEnum;
 
-import javax.validation.constraints.NotNull;
 
 /**
  * @author Wu.Chunyang

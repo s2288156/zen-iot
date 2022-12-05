@@ -1,5 +1,6 @@
 package org.zeniot.dto.account;
 
+import jakarta.validation.constraints.NotBlank;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
@@ -8,7 +9,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.zeniot.dao.model.AccountEntity;
 import org.zeniot.data.base.DTO;
 
-import javax.validation.constraints.NotBlank;
 import java.time.LocalDateTime;
 import java.util.Set;
 import java.util.stream.Collectors;

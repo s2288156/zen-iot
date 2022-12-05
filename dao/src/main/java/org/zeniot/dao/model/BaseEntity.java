@@ -1,18 +1,16 @@
 package org.zeniot.dao.model;
 
-import com.vladmihalcea.hibernate.type.json.JsonType;
+import jakarta.persistence.Column;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.Id;
+import jakarta.persistence.MappedSuperclass;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.GenericGenerator;
-import org.hibernate.annotations.TypeDef;
 import org.hibernate.annotations.UpdateTimestamp;
 
-import javax.persistence.Column;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import javax.persistence.MappedSuperclass;
 import java.time.LocalDateTime;
 
 /**
@@ -21,7 +19,6 @@ import java.time.LocalDateTime;
 @Getter
 @Setter
 @ToString
-@TypeDef(name = "jsonp", typeClass = JsonType.class)
 @MappedSuperclass
 public class BaseEntity {
     @Id

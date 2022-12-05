@@ -1,12 +1,11 @@
 package org.zeniot.data.base;
 
+import jakarta.validation.constraints.NotNull;
 import lombok.AccessLevel;
 import lombok.Data;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.springframework.data.domain.PageRequest;
-
-import javax.validation.constraints.NotNull;
 
 /**
  * @author Wu.Chunyang

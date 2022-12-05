@@ -1,8 +1,8 @@
 package org.zeniot.dao.model;
 
+import jakarta.persistence.*;
 import lombok.ToString;
 
-import javax.persistence.*;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
@@ -11,6 +11,7 @@ import java.util.Set;
 @Entity
 @Table(name = "t_account")
 public class AccountEntity extends BaseEntity {
+
     @Column(name = "username", nullable = false, length = 32)
     private String username;
 

@@ -21,7 +21,6 @@ dependencyResolutionManagement {
             library("bcprov-jdk15on", "org.bouncycastle:bcprov-jdk15on:1.70")
             library("bcpkix-jdk15on", "org.bouncycastle:bcpkix-jdk15on:1.70")
             library("nimbus-jose-jwt", "com.nimbusds:nimbus-jose-jwt:9.23")
-            library("hibernate-types", "com.vladmihalcea:hibernate-types-52:2.20.0")
             library("mapstruct", "org.mapstruct:mapstruct:1.5.3.Final")
             library("mapstruct-processor", "org.mapstruct:mapstruct-processor:1.5.3.Final")
             library("j2mod", "com.ghgande:j2mod:3.1.1")
@@ -43,3 +42,5 @@ include("common:modbus")
 findProject(":common:modbus")?.name = "modbus"
 include("common:data")
 findProject(":common:data")?.name = "data"
+include("common:trasnport-api")
+findProject(":common:trasnport-api")?.name = "trasnport-api"

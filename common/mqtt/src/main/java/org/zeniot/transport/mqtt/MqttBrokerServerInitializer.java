@@ -16,7 +16,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.zeniot.transport.mqtt.service.MqttTransportService;
 
-import javax.annotation.PostConstruct;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -29,7 +28,7 @@ public class MqttBrokerServerInitializer {
     @Autowired
     private MqttTransportService mqttTransportService;
 
-    @PostConstruct
+    // @PostConstruct
     public void init() throws InterruptedException {
         EventLoopGroup boosGroup = new NioEventLoopGroup(1);
         EventLoopGroup workerGroup = new NioEventLoopGroup();

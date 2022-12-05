@@ -1,12 +1,12 @@
 package org.zeniot.dao.model;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import jakarta.persistence.*;
 import lombok.*;
-import org.hibernate.annotations.Type;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 import org.zeniot.data.enums.DeviceStatusEnum;
 import org.zeniot.data.enums.DeviceTransportTypeEnum;
-
-import javax.persistence.*;
 
 @AllArgsConstructor
 @NoArgsConstructor
@@ -24,7 +24,7 @@ public class DeviceEntity extends BaseEntity {
     @Column(name = "transport_type")
     private DeviceTransportTypeEnum transportType;
 
-    @Type(type = "jsonp")
+    @JdbcTypeCode(SqlTypes.JSON)
     @Column(name = "transport_config")
     private JsonNode transportConfig;
 
