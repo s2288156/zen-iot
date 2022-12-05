@@ -11,6 +11,8 @@ import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.handler.codec.mqtt.MqttDecoder;
 import io.netty.handler.codec.mqtt.MqttEncoder;
 import io.netty.handler.timeout.IdleStateHandler;
+import jakarta.annotation.PostConstruct;
+import jakarta.annotation.PreDestroy;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -28,12 +30,14 @@ public class MqttBrokerServerInitializer {
     @Autowired
     private MqttTransportService mqttTransportService;
 
-    // @PostConstruct
-    public void init() throws InterruptedException {
-        EventLoopGroup boosGroup = new NioEventLoopGroup(1);
-        EventLoopGroup workerGroup = new NioEventLoopGroup();
+    private EventLoopGroup boosGroup = new NioEventLoopGroup(1);
+    private EventLoopGroup workerGroup = new NioEventLoopGroup();
+    private ChannelFuture channelFuture;
 
-        try {
+    @PostConstruct
+    public void init() {
+
+        new Thread(() -> {
             ServerBootstrap b = new ServerBootstrap();
             b.group(boosGroup, workerGroup);
             b.option(ChannelOption.SO_BACKLOG, 1024);
@@ -48,10 +52,20 @@ public class MqttBrokerServerInitializer {
                 }
             });
 
-            ChannelFuture f = b.bind(1883).sync();
+            try {
+                channelFuture = b.bind(1883).sync();
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
             log.info("MQTT broker initiated... ");
+        }).start();
 
-            f.channel().closeFuture().sync();
+    }
+
+    @PreDestroy
+    public void shutdown() throws InterruptedException {
+        try {
+            channelFuture.channel().close().sync();
         } finally {
             workerGroup.shutdownGracefully();
             boosGroup.shutdownGracefully();
