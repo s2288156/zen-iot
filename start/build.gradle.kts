@@ -1,5 +1,6 @@
 plugins {
     id("java")
+    id("org.graalvm.buildtools.native") version "0.9.18"
 }
 
 dependencies {
@@ -16,11 +17,7 @@ dependencies {
     testRuntimeOnly("com.h2database:h2")
 }
 
-java {
-    toolchain {
-        languageVersion.set(JavaLanguageVersion.of(17))
-    }
-}
+java.sourceCompatibility = JavaVersion.VERSION_17
 
 tasks.getByName<Test>("test") {
     useJUnitPlatform()
