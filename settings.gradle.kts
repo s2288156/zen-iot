@@ -42,5 +42,5 @@ include("common:modbus")
 findProject(":common:modbus")?.name = "modbus"
 include("common:data")
 findProject(":common:data")?.name = "data"
-include("common:trasnport-api")
-findProject(":common:trasnport-api")?.name = "trasnport-api"
+include("common:transport-api")
+findProject(":common:transport-api")?.name = "transport-api"

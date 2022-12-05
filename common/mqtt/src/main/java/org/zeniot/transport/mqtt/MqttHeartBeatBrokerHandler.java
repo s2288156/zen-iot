@@ -9,7 +9,7 @@ import io.netty.handler.timeout.IdleStateEvent;
 import io.netty.util.ReferenceCountUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.zeniot.transport.mqtt.service.MqttTransportService;
+import org.zeniot.transport.api.MqttTransportService;
 
 import java.nio.charset.StandardCharsets;
 

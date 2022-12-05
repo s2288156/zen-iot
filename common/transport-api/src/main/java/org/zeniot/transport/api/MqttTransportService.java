@@ -1,4 +1,4 @@
-package org.zeniot.transport.mqtt.service;
+package org.zeniot.transport.api;
 
 /**
  * @author Wu.Chunyang

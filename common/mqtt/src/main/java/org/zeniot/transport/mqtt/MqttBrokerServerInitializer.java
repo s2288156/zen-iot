@@ -16,7 +16,7 @@ import jakarta.annotation.PreDestroy;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.zeniot.transport.mqtt.service.MqttTransportService;
+import org.zeniot.transport.api.MqttTransportService;
 
 import java.util.concurrent.TimeUnit;
 
