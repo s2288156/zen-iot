@@ -5,7 +5,7 @@ CREATE TABLE t_device
     update_time      timestamp   NOT NULL,
     "name"           varchar(64) NOT NULL,
     transport_type   varchar(32) NOT NULL, -- 协议类型：MQTT, MODBUS
-    transport_config jsonb       NULL,
+    transport_config json       NULL,
     status           varchar(32) NOT NULL, -- 设备状态: DISABLE, ENABLE
     CONSTRAINT t_device_pkey PRIMARY KEY (id)
 );
