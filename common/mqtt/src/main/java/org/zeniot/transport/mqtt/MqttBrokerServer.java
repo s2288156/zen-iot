@@ -23,18 +23,22 @@ import java.util.concurrent.TimeUnit;
 /**
  * @author Wu.Chunyang
  */
-@Component
 @Slf4j
-public class MqttBrokerServerInitializer {
+public class MqttBrokerServer {
 
-    @Autowired
     private MqttTransportService mqttTransportService;
 
     private EventLoopGroup boosGroup = new NioEventLoopGroup(1);
     private EventLoopGroup workerGroup = new NioEventLoopGroup();
     private ChannelFuture channelFuture;
 
-    @PostConstruct
+    private MqttBrokerServer() {
+    }
+
+    public MqttBrokerServer(MqttTransportService mqttTransportService) {
+        this.mqttTransportService = mqttTransportService;
+    }
+
     public void init() {
 
         new Thread(() -> {
@@ -62,7 +66,6 @@ public class MqttBrokerServerInitializer {
 
     }
 
-    @PreDestroy
     public void shutdown() throws InterruptedException {
         try {
             channelFuture.channel().close().sync();
