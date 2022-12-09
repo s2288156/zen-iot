@@ -2,7 +2,7 @@ package org.zeniot.api;
 
 import org.zeniot.data.base.PageQuery;
 import org.zeniot.data.base.PageResponse;
-import org.zeniot.dto.device.Device;
+import org.zeniot.data.domain.device.Device;
 
 /**
  * @author Wu.Chunyang

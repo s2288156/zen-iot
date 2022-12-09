@@ -1,7 +1,7 @@
 package org.zeniot.transport.modbus;
 
 import com.ghgande.j2mod.modbus.io.ModbusTransaction;
-import org.zeniot.data.device.ModbusAttribute;
+import org.zeniot.data.domain.device.ModbusAttribute;
 
 import java.util.List;
 

@@ -14,7 +14,8 @@ import org.zeniot.dao.repository.RoleRepository;
 import org.zeniot.data.base.PageQuery;
 import org.zeniot.data.base.PageResponse;
 import org.zeniot.data.enums.RoleEnum;
-import org.zeniot.dto.account.Account;
+import org.zeniot.data.domain.account.Account;
+import org.zeniot.service.mapper.AccountMapper;
 
 import java.util.List;
 import java.util.Optional;
@@ -33,6 +34,8 @@ public class AccountServiceImpl implements AccountService {
     private PasswordEncoder passwordEncoder;
     @Autowired
     private RoleRepository roleRepository;
+    @Autowired
+    private AccountMapper accountMapper;
 
     @Override
     public Account registerAccount(Account account) {
@@ -40,10 +43,10 @@ public class AccountServiceImpl implements AccountService {
             throw new BizException("username existed!");
         }
         Optional<RoleEntity> defaultRole = roleRepository.findByRoleName(RoleEnum.GUEST);
-        AccountEntity accountEntity = account.toEntity(passwordEncoder);
-        defaultRole.ifPresent(roleEntity -> accountEntity.setRoles(Set.of(roleEntity)));
+        AccountEntity accountEntity = AccountEntity.toEntity(passwordEncoder, account);
+        defaultRole.ifPresent(roleEntity -> accountEntity.setRoleEntities(Set.of(roleEntity)));
         accountRepository.save(accountEntity);
-        return Account.simpleAccountFromEntity(accountEntity);
+        return accountMapper.entityToSimpleAccount(accountEntity);
     }
 
     @Override
@@ -54,7 +57,7 @@ public class AccountServiceImpl implements AccountService {
     @Override
     public Account findById(Long accountId) {
         Optional<AccountEntity> accountEntityOptional = accountRepository.findById(accountId);
-        return accountEntityOptional.map(Account::simpleAccountFromEntity).orElse(null);
+        return accountEntityOptional.map(accountMapper::entityToSimpleAccount).orElse(null);
     }
 
     @Override
@@ -62,7 +65,7 @@ public class AccountServiceImpl implements AccountService {
         Page<AccountEntity> all = accountRepository.findAll(pageQuery.toPageable());
         List<Account> accounts = all.getContent()
                 .stream()
-                .map(Account::simpleAccountFromEntity)
+                .map(accountMapper::entityToSimpleAccount)
                 .toList();
         return PageResponse.ok(accounts, all);
     }
@@ -70,7 +73,7 @@ public class AccountServiceImpl implements AccountService {
     @Override
     public Account findByUsername(String username) {
         Optional<AccountEntity> accountOptional = accountRepository.findAccountByUsername(username);
-        return accountOptional.map(Account::fromEntity).orElse(null);
+        return accountOptional.map(AccountEntity::toAccount).orElse(null);
     }
 
 }

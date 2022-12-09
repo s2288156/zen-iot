@@ -10,9 +10,9 @@ import org.zeniot.api.AccountService;
 import org.zeniot.data.base.PageQuery;
 import org.zeniot.data.base.PageResponse;
 import org.zeniot.data.base.SingleResponse;
-import org.zeniot.dto.account.Account;
+import org.zeniot.data.domain.account.Account;
 import org.zeniot.server.security.JwtHandler;
-import org.zeniot.server.vo.UserToken;
+import org.zeniot.data.vo.UserToken;
 
 /**
  * @author Wu.Chunyang

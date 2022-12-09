@@ -8,8 +8,8 @@ import org.zeniot.data.base.PageQuery;
 import org.zeniot.data.base.PageResponse;
 import org.zeniot.data.base.SingleResponse;
 import org.zeniot.data.command.DeviceStatusSwitchCmd;
-import org.zeniot.dto.device.Device;
-import org.zeniot.dto.device.DeviceCommonData;
+import org.zeniot.data.domain.device.Device;
+import org.zeniot.data.domain.device.DeviceCommonData;
 
 /**
  * @author Wu.Chunyang

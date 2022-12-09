@@ -12,7 +12,7 @@ import org.zeniot.data.base.PageQuery;
 import org.zeniot.data.base.PageResponse;
 import org.zeniot.data.enums.DeviceStatusEnum;
 import org.zeniot.data.enums.DeviceTransportTypeEnum;
-import org.zeniot.dto.device.Device;
+import org.zeniot.data.domain.device.Device;
 
 import java.util.List;
 

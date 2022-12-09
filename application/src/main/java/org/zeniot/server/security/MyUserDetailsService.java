@@ -8,7 +8,7 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.zeniot.api.AccountService;
-import org.zeniot.dto.account.Account;
+import org.zeniot.data.domain.account.Account;
 
 import java.util.List;
 import java.util.stream.Collectors;

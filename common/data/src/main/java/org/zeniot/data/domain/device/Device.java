@@ -1,4 +1,4 @@
-package org.zeniot.dto.device;
+package org.zeniot.data.domain.device;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import jakarta.validation.constraints.NotBlank;

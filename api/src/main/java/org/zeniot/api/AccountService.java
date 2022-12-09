@@ -2,7 +2,7 @@ package org.zeniot.api;
 
 import org.zeniot.data.base.PageQuery;
 import org.zeniot.data.base.PageResponse;
-import org.zeniot.dto.account.Account;
+import org.zeniot.data.domain.account.Account;
 
 /**
  * @author Wu.Chunyang

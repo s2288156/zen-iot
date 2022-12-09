@@ -1,4 +1,4 @@
-package org.zeniot.dto.device;
+package org.zeniot.data.domain.device;
 
 import lombok.Data;
 import org.zeniot.data.base.DTO;

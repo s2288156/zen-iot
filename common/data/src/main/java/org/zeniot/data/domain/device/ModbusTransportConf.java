@@ -1,4 +1,4 @@
-package org.zeniot.data.device;
+package org.zeniot.data.domain.device;
 
 import java.util.List;
 

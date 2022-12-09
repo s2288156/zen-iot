@@ -8,9 +8,9 @@ import org.zeniot.dao.model.DeviceEntity;
 import org.zeniot.dao.repository.DeviceRepository;
 import org.zeniot.data.base.PageQuery;
 import org.zeniot.data.base.PageResponse;
+import org.zeniot.data.domain.device.Device;
 import org.zeniot.data.enums.DeviceStatusEnum;
-import org.zeniot.dto.device.Device;
-import org.zeniot.mapper.DeviceMapper;
+import org.zeniot.service.mapper.DeviceMapper;
 
 import java.util.List;
 

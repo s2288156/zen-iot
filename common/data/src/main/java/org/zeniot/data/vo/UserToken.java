@@ -1,4 +1,4 @@
-package org.zeniot.server.vo;
+package org.zeniot.data.vo;
 
 import lombok.Getter;
 import lombok.Setter;

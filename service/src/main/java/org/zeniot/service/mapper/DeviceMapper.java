@@ -1,16 +1,15 @@
-package org.zeniot.mapper;
+package org.zeniot.service.mapper;
 
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
+import org.mapstruct.MappingConstants;
 import org.zeniot.dao.model.DeviceEntity;
-import org.zeniot.dto.device.Device;
-
-import static org.mapstruct.MappingConstants.ComponentModel.SPRING;
+import org.zeniot.data.domain.device.Device;
 
 /**
  * @author Wu.Chunyang
  */
-@Mapper(componentModel = SPRING)
+@Mapper(componentModel = MappingConstants.ComponentModel.SPRING)
 public interface DeviceMapper {
 
     Device entityToDevice(DeviceEntity entity);

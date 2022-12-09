@@ -8,7 +8,7 @@ import org.springframework.test.web.servlet.ResultActions;
 import org.zeniot.common.util.JacksonUtil;
 import org.zeniot.data.base.PageQuery;
 import org.zeniot.data.base.SingleResponse;
-import org.zeniot.dto.account.Account;
+import org.zeniot.data.domain.account.Account;
 import org.zeniot.server.controller.request.TAccount;
 
 import java.io.UnsupportedEncodingException;

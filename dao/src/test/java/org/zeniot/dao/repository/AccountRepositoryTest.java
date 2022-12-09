@@ -35,7 +35,7 @@ class AccountRepositoryTest {
         AccountEntity admin = new AccountEntity();
         admin.setUsername("admin");
         admin.setPassword("123123");
-        admin.setRoles(Set.of(allRole.get(0)));
+        admin.setRoleEntities(Set.of(allRole.get(0)));
         accountRepository.save(admin);
     }
 
