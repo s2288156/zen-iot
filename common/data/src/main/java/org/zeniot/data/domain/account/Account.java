@@ -2,7 +2,6 @@ package org.zeniot.data.domain.account;
 
 import jakarta.validation.constraints.NotBlank;
 import lombok.Getter;
-import lombok.Setter;
 import lombok.ToString;
 import org.zeniot.data.base.DTO;
 
