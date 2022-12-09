@@ -27,7 +27,7 @@ public class AccountEntity extends BaseEntity {
     @JoinTable(name = "t_account_role",
             joinColumns = @JoinColumn(name = "account_id", referencedColumnName = "id"),
             inverseJoinColumns = @JoinColumn(name = "role_id", referencedColumnName = "id"))
-    private Set<RoleEntity> roleEntities = new LinkedHashSet<>();
+    private Set<RoleEntity> roles = new LinkedHashSet<>();
 
     public static AccountEntity toEntity(PasswordEncoder encoder, Account account) {
         AccountEntity accountEntity = new AccountEntity();
@@ -37,14 +37,10 @@ public class AccountEntity extends BaseEntity {
     }
 
     public Account toAccount() {
-        Account account = new Account();
-        account.setUsername(this.getUsername());
-        account.setPassword(this.getPassword());
-        account.setRoles(roleEntities
+        Set<String> roleNames = roles
                 .stream()
                 .map(roleEntity -> roleEntity.getRoleName().name())
-                .collect(Collectors.toSet())
-        );
-        return account;
+                .collect(Collectors.toSet());
+        return new Account(this.username, this.password, roleNames);
     }
 }

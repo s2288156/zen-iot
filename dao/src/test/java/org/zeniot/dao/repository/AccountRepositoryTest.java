@@ -35,7 +35,7 @@ class AccountRepositoryTest {
         AccountEntity admin = new AccountEntity();
         admin.setUsername("admin");
         admin.setPassword("123123");
-        admin.setRoleEntities(Set.of(allRole.get(0)));
+        admin.setRoles(Set.of(allRole.get(0)));
         accountRepository.save(admin);
     }
 
@@ -48,7 +48,7 @@ class AccountRepositoryTest {
     void findAccountByUsername() {
         Optional<AccountEntity> account = accountRepository.findAccountByUsername("admin");
         assertTrue(account.isPresent());
-        assertEquals(1, account.get().getRoleEntities().size());
+        assertEquals(1, account.get().getRoles().size());
     }
 
     @Test

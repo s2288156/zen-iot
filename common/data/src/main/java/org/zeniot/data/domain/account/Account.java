@@ -13,7 +13,6 @@ import java.util.Set;
  * @author Wu.Chunyang
  */
 @Getter
-@Setter
 @ToString
 public class Account extends DTO {
 
@@ -31,4 +30,9 @@ public class Account extends DTO {
 
     private LocalDateTime updateTime;
 
+    public Account(String username, String password, Set<String> roles) {
+        this.username = username;
+        this.password = password;
+        this.roles = roles;
+    }
 }

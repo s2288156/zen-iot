@@ -44,7 +44,7 @@ public class AccountServiceImpl implements AccountService {
         }
         Optional<RoleEntity> defaultRole = roleRepository.findByRoleName(RoleEnum.GUEST);
         AccountEntity accountEntity = AccountEntity.toEntity(passwordEncoder, account);
-        defaultRole.ifPresent(roleEntity -> accountEntity.setRoleEntities(Set.of(roleEntity)));
+        defaultRole.ifPresent(roleEntity -> accountEntity.setRoles(Set.of(roleEntity)));
         accountRepository.save(accountEntity);
         return accountMapper.entityToSimpleAccount(accountEntity);
     }
