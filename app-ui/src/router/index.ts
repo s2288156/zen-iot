@@ -96,6 +96,29 @@ const router = createRouter({
         }
       ],
     },
+    {
+      path: '/simulator',
+      name: 'Simulator',
+      component: TheLayout,
+      meta: {
+        title: '仿真平台',
+        icon: 'Box',
+        roles: ['ROLE_ADMIN'],
+        isMenuRoot: true
+      },
+      children: [
+        {
+          path: '/simulator/device',
+          name: 'Simulator Device',
+          component: () => import('@/views/simulator/device/index.vue'),
+          meta: {
+            title: '仿真设备管理',
+            icon: 'Cpu',
+            roles: ['ROLE_ADMIN'],
+          },
+        }
+      ],
+    },
   ],
 })
 
