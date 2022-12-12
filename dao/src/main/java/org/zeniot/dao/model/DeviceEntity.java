@@ -6,7 +6,7 @@ import lombok.*;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
 import org.zeniot.data.enums.DeviceStatusEnum;
-import org.zeniot.data.enums.DeviceTransportTypeEnum;
+import org.zeniot.data.enums.TransportTypeEnum;
 
 @AllArgsConstructor
 @NoArgsConstructor
@@ -22,7 +22,7 @@ public class DeviceEntity extends BaseEntity {
 
     @Enumerated(EnumType.STRING)
     @Column(name = "transport_type")
-    private DeviceTransportTypeEnum transportType;
+    private TransportTypeEnum transportType;
 
     @JdbcTypeCode(SqlTypes.JSON)
     @Column(name = "transport_config")

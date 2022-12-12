@@ -3,7 +3,7 @@ package org.zeniot.data.domain.device;
 import lombok.Data;
 import org.zeniot.data.base.DTO;
 import org.zeniot.data.enums.DeviceStatusEnum;
-import org.zeniot.data.enums.DeviceTransportTypeEnum;
+import org.zeniot.data.enums.TransportTypeEnum;
 
 import java.util.List;
 
@@ -12,7 +12,7 @@ import java.util.List;
  */
 @Data
 public class DeviceCommonData extends DTO {
-    private List<DeviceTransportTypeEnum> transportTypes;
+    private List<TransportTypeEnum> transportTypes;
     private List<DeviceStatusEnum> statuses;
 
     private DeviceCommonData() {
@@ -20,7 +20,7 @@ public class DeviceCommonData extends DTO {
 
     public static DeviceCommonData create() {
         DeviceCommonData deviceCommonData = new DeviceCommonData();
-        deviceCommonData.setTransportTypes(List.of(DeviceTransportTypeEnum.values()));
+        deviceCommonData.setTransportTypes(List.of(TransportTypeEnum.values()));
         deviceCommonData.setStatuses(List.of(DeviceStatusEnum.values()));
         return deviceCommonData;
     }

@@ -6,7 +6,7 @@ import jakarta.validation.constraints.NotNull;
 import lombok.*;
 import org.zeniot.data.base.DTO;
 import org.zeniot.data.enums.DeviceStatusEnum;
-import org.zeniot.data.enums.DeviceTransportTypeEnum;
+import org.zeniot.data.enums.TransportTypeEnum;
 
 
 /**
@@ -25,7 +25,7 @@ public class Device extends DTO {
     private String name;
 
     @NotNull(message = "Transport Type不能为空")
-    private DeviceTransportTypeEnum transportType;
+    private TransportTypeEnum transportType;
 
     private JsonNode transportConfig;
 

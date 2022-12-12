@@ -1,5 +1,5 @@
 package org.zeniot.data.enums;
 
-public enum DeviceTransportTypeEnum {
+public enum TransportTypeEnum {
     MODBUS, MQTT
 }

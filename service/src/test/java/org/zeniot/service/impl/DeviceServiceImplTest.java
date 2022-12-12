@@ -11,7 +11,7 @@ import org.zeniot.dao.repository.DeviceRepository;
 import org.zeniot.data.base.PageQuery;
 import org.zeniot.data.base.PageResponse;
 import org.zeniot.data.enums.DeviceStatusEnum;
-import org.zeniot.data.enums.DeviceTransportTypeEnum;
+import org.zeniot.data.enums.TransportTypeEnum;
 import org.zeniot.data.domain.device.Device;
 
 import java.util.List;
@@ -34,10 +34,10 @@ class DeviceServiceImplTest extends AbstractBootTest {
     void setUp() {
         deviceRepository.deleteAll();
         d1 = Device.builder()
-                .name("d1").status(DeviceStatusEnum.ENABLE).transportType(DeviceTransportTypeEnum.MQTT)
+                .name("d1").status(DeviceStatusEnum.ENABLE).transportType(TransportTypeEnum.MQTT)
                 .build();
         d2 = Device.builder()
-                .name("d2").status(DeviceStatusEnum.DISABLE).transportType(DeviceTransportTypeEnum.MQTT)
+                .name("d2").status(DeviceStatusEnum.DISABLE).transportType(TransportTypeEnum.MQTT)
                 .build();
     }
 

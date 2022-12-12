@@ -1,12 +1,12 @@
 package org.zeniot.dao.model;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
+import org.zeniot.data.enums.SimulatorStatusEnum;
+import org.zeniot.data.enums.TransportTypeEnum;
 
 @AllArgsConstructor
 @NoArgsConstructor
@@ -19,7 +19,15 @@ public class SimulatorEntity extends BaseEntity {
     @Column(name = "`name`")
     private String name;
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "transport_type")
+    private TransportTypeEnum transportType;
+
     @JdbcTypeCode(SqlTypes.JSON)
-    @Column(name = "config_info")
-    private JsonNode configInfo;
+    @Column(name = "transport_config")
+    private JsonNode transportConfig;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "status")
+    private SimulatorStatusEnum status;
 }

@@ -13,12 +13,12 @@
           class="filter-item"
           icon="RefreshRight"
           type="info"
-          @click="loadDeviceList()"
+          @click="loadSimulatorList()"
       >刷新
       </el-button>
     </div>
 
-    <el-table :data="devices.data" style="width: 100%">
+    <el-table :data="simulators.data" style="width: 100%">
       <el-table-column type="index" width="50"/>
       <el-table-column label="name" prop="name" width="180"/>
       <el-table-column label="transportType" prop="transportType" width="180"/>
@@ -30,15 +30,15 @@
       <el-table-column fixed="right" label="Operations" width="120">
         <template #default="{ row, $index }">
           <el-button link size="small" type="primary" @click="handleClick">Detail</el-button>
-          <el-button link size="small" type="primary" @click="handleDeleteDevice(row)">Delete</el-button>
+          <el-button link size="small" type="primary" @click="handleDeleteSimulator(row)">Delete</el-button>
         </template>
       </el-table-column>
     </el-table>
 
     <el-pagination
         v-model:current-page="currentPage"
-        :page-count="devices.totalPages"
-        :page-size="devices.size"
+        :page-count="simulators.totalPages"
+        :page-size="simulators.size"
         background
         layout="prev, pager, next"
         @prev-click="prevClick"
@@ -47,12 +47,12 @@
     />
 
     <el-dialog v-model="dialogFormVisible" title="Add Device">
-      <el-form ref="ruleFormRef" :model="createDeviceForm" :rules="rules" status-icon>
+      <el-form ref="ruleFormRef" :model="createSimulatorForm" :rules="rules" status-icon>
         <el-form-item label="Name" label-width="140px" prop="name">
-          <el-input v-model="createDeviceForm.name"/>
+          <el-input v-model="createSimulatorForm.name"/>
         </el-form-item>
         <el-form-item label="Transport Type" label-width="140px" prop="transportType">
-          <el-select v-model="createDeviceForm.transportType" clearable placeholder="Transport Type">
+          <el-select v-model="createSimulatorForm.transportType" clearable placeholder="Transport Type">
             <el-option
                 v-for="item in deviceCommonData.transportTypes"
                 :key="item"
@@ -65,7 +65,7 @@
       <template #footer>
         <span class="dialog-footer">
           <el-button @click="resetDeviceForm(ruleFormRef)">Cancel</el-button>
-          <el-button type="primary" @click="handleCreateDevice(ruleFormRef)">Confirm</el-button>
+          <el-button type="primary" @click="handleCreateSimulator(ruleFormRef)">Confirm</el-button>
         </span>
       </template>
     </el-dialog>
@@ -74,37 +74,29 @@
 
 <script lang="ts" setup>
 import {reactive, ref} from 'vue'
-import type {Device, DeviceCommon} from '@/api/types'
 import type {BaseDataPage, PageQuery} from '@/api/global-types'
 import type {FormInstance, FormRules} from 'element-plus'
 import {ElMessage} from "element-plus";
-import {deleteDevice, getDeviceCommon, getDevices, saveDevice} from "@/api/device-apis";
+import type {Simulator} from "@/api/types";
+import {deleteSimulator, getSimulators, saveSimulator} from "@/api/simulator-apis";
 
 const pageQuery: PageQuery = {
   page: 0,
   size: 10,
 }
-const devices = ref<BaseDataPage<Device>>({
+const simulators = ref<BaseDataPage<Simulator>>({
   data: [],
   size: 0,
   totalPages: 0,
 })
 
-const deviceCommonData = ref<DeviceCommon>({statuses: [], transportTypes: []});
 
-const loadDeviceList = () => {
-  getDevices(pageQuery).then((response) => {
-    devices.value = response.data
+const loadSimulatorList = () => {
+  getSimulators(pageQuery).then((response) => {
+    simulators.value = response.data
   })
 }
-const loadDeviceCommon = () => {
-  getDeviceCommon().then((resp) => {
-    deviceCommonData.value = resp.data.data
-  })
-}
-
-loadDeviceCommon()
-loadDeviceList()
+loadSimulatorList()
 
 const handleClick = () => {
   ElMessage({
@@ -114,11 +106,11 @@ const handleClick = () => {
   })
 }
 
-const handleDeleteDevice = (row: Device) => {
+const handleDeleteSimulator = (row: Simulator) => {
   if (row.id != null) {
-    deleteDevice(row.id).then((response) => {
+    deleteSimulator(row.id).then((response) => {
       if (response.status === 200) {
-        loadDeviceList();
+        loadSimulatorList();
       }
     })
   }
@@ -127,18 +119,18 @@ const handleDeleteDevice = (row: Device) => {
 const currentPage = ref(1)
 const prevClick = () => {
   pageQuery.page -= 1
-  loadDeviceList()
+  loadSimulatorList()
 }
 const nextClick = () => {
   pageQuery.page += 1
-  loadDeviceList()
+  loadSimulatorList()
 }
 const currentChange = () => {
   pageQuery.page = currentPage.value - 1
-  loadDeviceList()
+  loadSimulatorList()
 }
 
-const getStatusTag = (row: Device) => {
+const getStatusTag = (row: Simulator) => {
   if (row.status === 'DISABLE') {
     return 'info'
   } else if (row.status === 'ENABLE') {
@@ -150,15 +142,15 @@ const getStatusTag = (row: Device) => {
 const dialogFormVisible = ref(false)
 const ruleFormRef = ref<FormInstance>()
 
-let createDeviceForm = reactive<Device>({
+let createSimulatorForm = reactive<Simulator>({
   name: "", transportType: ""
 })
 
 const resetDeviceForm = (formEl: FormInstance) => {
   formEl.resetFields()
   dialogFormVisible.value = false
-  createDeviceForm.name = ''
-  createDeviceForm.transportType = ''
+  createSimulatorForm.name = ''
+  createSimulatorForm.transportType = ''
 }
 
 const rules = reactive<FormRules>({
@@ -166,14 +158,14 @@ const rules = reactive<FormRules>({
   transportType: [{required: true, message: 'Please input transportType!', trigger: 'blur'}],
 })
 
-const handleCreateDevice = async (formEl: FormInstance) => {
+const handleCreateSimulator = async (formEl: FormInstance) => {
   if (!formEl) return
   await formEl.validate((valid, fields) => {
     if (valid) {
-      saveDevice(createDeviceForm).then((resp) => {
+      saveSimulator(createSimulatorForm).then((resp) => {
         if (resp.status === 200) {
           resetDeviceForm(formEl)
-          loadDeviceList()
+          loadSimulatorList()
         }
       })
     }

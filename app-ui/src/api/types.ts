@@ -20,3 +20,11 @@ export type DeviceCommon = {
   transportTypes: string[]
   statuses: string[]
 }
+
+export type Simulator = {
+  id?: any
+  name: string
+  transportType: string
+  transportConfig?: string
+  status?: string
+}
