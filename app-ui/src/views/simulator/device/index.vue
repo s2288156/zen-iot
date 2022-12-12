@@ -77,8 +77,9 @@ import {reactive, ref} from 'vue'
 import type {BaseDataPage, PageQuery} from '@/api/global-types'
 import type {FormInstance, FormRules} from 'element-plus'
 import {ElMessage} from "element-plus";
-import type {Simulator} from "@/api/types";
+import type {DeviceCommon, Simulator} from "@/api/types";
 import {deleteSimulator, getSimulators, saveSimulator} from "@/api/simulator-apis";
+import {getDeviceCommon} from "@/api/device-apis";
 
 const pageQuery: PageQuery = {
   page: 0,
@@ -90,12 +91,19 @@ const simulators = ref<BaseDataPage<Simulator>>({
   totalPages: 0,
 })
 
-
+const deviceCommonData = ref<DeviceCommon>({statuses: [], transportTypes: []});
 const loadSimulatorList = () => {
   getSimulators(pageQuery).then((response) => {
     simulators.value = response.data
   })
 }
+const loadDeviceCommon = () => {
+  getDeviceCommon().then((resp) => {
+    deviceCommonData.value = resp.data.data
+  })
+}
+
+loadDeviceCommon()
 loadSimulatorList()
 
 const handleClick = () => {

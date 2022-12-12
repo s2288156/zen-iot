@@ -2,9 +2,6 @@ import axios from 'axios'
 import type {RestResponse} from "@/api/global-types";
 import {ElMessage, ElMessageBox} from "element-plus";
 import {useUserStore} from "@/stores/user";
-import {useRouter} from "vue-router";
-
-const router = useRouter();
 
 const service = axios.create({
   baseURL: 'http://localhost:8088',

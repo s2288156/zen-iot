@@ -9,6 +9,7 @@ import org.zeniot.dao.repository.SimulatorRepository;
 import org.zeniot.data.base.PageQuery;
 import org.zeniot.data.base.PageResponse;
 import org.zeniot.data.domain.simulator.Simulator;
+import org.zeniot.data.enums.SimulatorStatusEnum;
 import org.zeniot.service.mapper.SimulatorMapper;
 
 import java.util.List;
@@ -34,6 +35,9 @@ public class SimulatorServiceImpl implements SimulatorService {
 
     @Override
     public Simulator saveSimulator(Simulator simulator) {
+        if (simulator.getId() == null) {
+            simulator.setStatus(SimulatorStatusEnum.DISABLE);
+        }
         SimulatorEntity save = simulatorRepository.save(simulatorMapper.toEntity(simulator));
         simulator.setId(save.getId());
         return simulator;

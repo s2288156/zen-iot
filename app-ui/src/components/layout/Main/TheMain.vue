@@ -5,11 +5,11 @@
 <script lang="ts" setup>
 
 import {ref} from "vue"
-import {useRoute, useRouter} from "vue-router"
+import {useRoute} from "vue-router"
+import router from "@/router";
 import {useUserStore} from "@/stores/user";
 
 const store = useUserStore();
-const router = useRouter();
 
 const key = ref(useRoute().path);
 

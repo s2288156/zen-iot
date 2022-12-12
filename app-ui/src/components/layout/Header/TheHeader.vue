@@ -26,11 +26,11 @@
 
 <script lang="ts" setup>
 import {computed} from 'vue'
-import {useRoute, useRouter} from 'vue-router'
+import {useRoute} from 'vue-router'
 import {useUserStore} from "@/stores/user";
+import router from "@/router";
 
 const userStore = useUserStore();
-const router = useRouter();
 
 const title = computed(() => {
   return useRoute().meta.title
