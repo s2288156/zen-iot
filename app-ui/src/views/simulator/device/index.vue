@@ -81,10 +81,7 @@ import type {DeviceCommon, Simulator} from "@/api/types";
 import {deleteSimulator, getSimulators, saveSimulator} from "@/api/simulator-apis";
 import {getDeviceCommon} from "@/api/device-apis";
 
-const pageQuery: PageQuery = {
-  page: 0,
-  size: 10,
-}
+const pageQuery: PageQuery = {page: 0, size: 10}
 const simulators = ref<BaseDataPage<Simulator>>({
   data: [],
   size: 0,

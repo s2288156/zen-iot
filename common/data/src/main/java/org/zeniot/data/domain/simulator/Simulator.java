@@ -6,6 +6,7 @@ import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 import lombok.Setter;
 import org.zeniot.data.base.DTO;
+import org.zeniot.data.domain.transport.TransportConfig;
 import org.zeniot.data.enums.SimulatorStatusEnum;
 import org.zeniot.data.enums.TransportTypeEnum;
 
@@ -23,7 +24,7 @@ public class Simulator extends DTO {
     @NotNull(message = "Transport Type不能为空")
     private TransportTypeEnum transportType;
 
-    private JsonNode transportConfig;
+    private TransportConfig transportConfig;
 
     @Setter
     private SimulatorStatusEnum status;
