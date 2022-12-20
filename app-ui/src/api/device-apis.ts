@@ -1,5 +1,5 @@
 import request from '@/utils/request'
-import type {Device} from '@/api/types'
+import type {Device} from '@/api/data/types'
 import type {PageQuery} from '@/api/global-types'
 
 export function getDeviceCommon() {

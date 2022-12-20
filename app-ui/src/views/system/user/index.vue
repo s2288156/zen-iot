@@ -76,7 +76,7 @@
 <script lang="ts" setup>
 import {deleteAccount, getAccounts, registerAccount} from '@/api/account-apis'
 import {reactive, ref} from 'vue'
-import type {Account} from '@/api/types'
+import type {Account} from '@/api/data/types'
 import type {BaseDataPage, PageQuery} from '@/api/global-types'
 import type {FormRules} from 'element-plus'
 import {ElMessage} from "element-plus";

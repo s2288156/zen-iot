@@ -1,5 +1,5 @@
 import request from '@/utils/request'
-import type {Account} from '@/api/types'
+import type {Account} from '@/api/data/types'
 import type {PageQuery} from '@/api/global-types'
 
 export function getAccounts(data: PageQuery) {

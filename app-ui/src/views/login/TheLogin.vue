@@ -31,7 +31,7 @@
 import {reactive, ref} from 'vue'
 import type {FormInstance, FormRules} from 'element-plus'
 import {useRouter} from "vue-router";
-import type {Account} from "@/api/types";
+import type {Account} from "@/api/data/types";
 import {useUserStore} from "@/stores/user";
 
 const userStore = useUserStore()

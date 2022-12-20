@@ -74,7 +74,7 @@
 
 <script lang="ts" setup>
 import {reactive, ref} from 'vue'
-import type {Device, DeviceCommon} from '@/api/types'
+import type {Device, DeviceCommon} from '@/api/data/types'
 import type {BaseDataPage, PageQuery} from '@/api/global-types'
 import type {FormInstance, FormRules} from 'element-plus'
 import {ElMessage} from "element-plus";

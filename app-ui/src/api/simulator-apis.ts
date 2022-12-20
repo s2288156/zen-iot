@@ -1,5 +1,5 @@
 import request from '@/utils/request'
-import type {Simulator} from '@/api/types'
+import type {Simulator} from '@/api/data/types'
 import type {PageQuery} from '@/api/global-types'
 
 export function getSimulators(data: PageQuery) {

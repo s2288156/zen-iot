@@ -1,5 +1,5 @@
 import {defineStore} from 'pinia'
-import type {Account} from "@/api/types";
+import type {Account} from "@/api/data/types";
 import {login} from "@/api/account-apis";
 
 const TOKEN_KEY = 'UserAuthentication'

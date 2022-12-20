@@ -47,11 +47,11 @@
     />
 
     <el-dialog v-model="dialogFormVisible" title="Add Device">
-      <el-form ref="ruleFormRef" :model="createSimulatorForm" :rules="rules" status-icon>
-        <el-form-item label="Name" label-width="140px" prop="name">
+      <el-form label-width="140px" ref="ruleFormRef" :model="createSimulatorForm" :rules="rules" status-icon>
+        <el-form-item label="Name" prop="name">
           <el-input v-model="createSimulatorForm.name"/>
         </el-form-item>
-        <el-form-item label="Transport Type" label-width="140px" prop="transportType">
+        <el-form-item label="Transport Type" prop="transportType">
           <el-select v-model="createSimulatorForm.transportType" clearable placeholder="Transport Type">
             <el-option
                 v-for="item in deviceCommonData.transportTypes"
@@ -61,6 +61,23 @@
             />
           </el-select>
         </el-form-item>
+        <el-form-item label="Timeseries Topic" prop="saveTimeseriesTopic">
+          <el-input v-model="createSimulatorForm.transportConfig.saveTimeseriesTopic"/>
+        </el-form-item>
+        <el-form-item label="Period" prop="period">
+          <el-input v-model="createSimulatorForm.transportConfig.period"/>
+        </el-form-item>
+        <el-form-item label="Time Unit" prop="timeUnit">
+          <el-select v-model="createSimulatorForm.transportConfig.timeUnit" placeholder="Time Unit">
+            <el-option
+                v-for="index in TimeUnit"
+                :key="index"
+                :label="index"
+                :value="TimeUnit[index]"
+            />
+          </el-select>
+        </el-form-item>
+
       </el-form>
       <template #footer>
         <span class="dialog-footer">
@@ -77,9 +94,10 @@ import {reactive, ref} from 'vue'
 import type {BaseDataPage, PageQuery} from '@/api/global-types'
 import type {FormInstance, FormRules} from 'element-plus'
 import {ElMessage} from "element-plus";
-import type {DeviceCommon, Simulator} from "@/api/types";
+import type {DeviceCommon, Simulator} from "@/api/data/types";
 import {deleteSimulator, getSimulators, saveSimulator} from "@/api/simulator-apis";
 import {getDeviceCommon} from "@/api/device-apis";
+import {TimeUnit, TransportType} from "@/api/data/enums";
 
 const pageQuery: PageQuery = {page: 0, size: 10}
 const simulators = ref<BaseDataPage<Simulator>>({
@@ -148,14 +166,20 @@ const dialogFormVisible = ref(false)
 const ruleFormRef = ref<FormInstance>()
 
 let createSimulatorForm = reactive<Simulator>({
-  name: "", transportType: ""
+  name: "",
+  transportType: TransportType.DEFAULT,
+  transportConfig: {
+    saveTimeseriesTopic: "/save/timeseries",
+    period: 10,
+    timeUnit: TimeUnit[TimeUnit.SECONDS]
+  }
 })
 
 const resetDeviceForm = (formEl: FormInstance) => {
   formEl.resetFields()
   dialogFormVisible.value = false
   createSimulatorForm.name = ''
-  createSimulatorForm.transportType = ''
+  createSimulatorForm.transportType = TransportType.DEFAULT
 }
 
 const rules = reactive<FormRules>({

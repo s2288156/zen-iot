@@ -1,3 +1,5 @@
+import type {TransportType, TimeUnit} from "@/api/data/enums";
+
 export type Account = {
   id?: any
   username: string
@@ -24,7 +26,13 @@ export type DeviceCommon = {
 export type Simulator = {
   id?: any
   name: string
-  transportType: string
-  transportConfig?: string
+  transportType: TransportType
+  transportConfig?: TransportConfig
   status?: string
+}
+
+export type TransportConfig = {
+  saveTimeseriesTopic: string
+  period: number
+  timeUnit: string
 }
