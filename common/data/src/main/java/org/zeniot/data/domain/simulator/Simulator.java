@@ -5,7 +5,9 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 import lombok.Setter;
+import org.zeniot.common.util.JacksonUtil;
 import org.zeniot.data.base.DTO;
+import org.zeniot.data.domain.transport.MqttTransportConfig;
 import org.zeniot.data.domain.transport.TransportConfig;
 import org.zeniot.data.enums.SimulatorStatusEnum;
 import org.zeniot.data.enums.TransportTypeEnum;
@@ -28,4 +30,5 @@ public class Simulator extends DTO {
 
     @Setter
     private SimulatorStatusEnum status;
+
 }

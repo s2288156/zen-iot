@@ -70,10 +70,10 @@
         <el-form-item label="Time Unit" prop="timeUnit">
           <el-select v-model="createSimulatorForm.transportConfig.timeUnit" placeholder="Time Unit">
             <el-option
-                v-for="index in TimeUnit"
-                :key="index"
-                :label="index"
-                :value="TimeUnit[index]"
+                v-for="item in deviceCommonData.timeUnit"
+                :key="item"
+                :label="item"
+                :value="item"
             />
           </el-select>
         </el-form-item>
@@ -106,7 +106,7 @@ const simulators = ref<BaseDataPage<Simulator>>({
   totalPages: 0,
 })
 
-const deviceCommonData = ref<DeviceCommon>({statuses: [], transportTypes: []});
+const deviceCommonData = ref<DeviceCommon>({timeUnit: [], statuses: [], transportTypes: []});
 const loadSimulatorList = () => {
   getSimulators(pageQuery).then((response) => {
     simulators.value = response.data
@@ -167,9 +167,10 @@ const ruleFormRef = ref<FormInstance>()
 
 let createSimulatorForm = reactive<Simulator>({
   name: "",
-  transportType: TransportType.DEFAULT,
+  transportType: TransportType[TransportType.DEFAULT],
   transportConfig: {
-    saveTimeseriesTopic: "/save/timeseries",
+    type: TransportType[TransportType.DEFAULT],
+    saveTimeseriesTopic: '/save/timeseries',
     period: 10,
     timeUnit: TimeUnit[TimeUnit.SECONDS]
   }
@@ -179,7 +180,7 @@ const resetDeviceForm = (formEl: FormInstance) => {
   formEl.resetFields()
   dialogFormVisible.value = false
   createSimulatorForm.name = ''
-  createSimulatorForm.transportType = TransportType.DEFAULT
+  createSimulatorForm.transportType = TransportType[TransportType.DEFAULT]
 }
 
 const rules = reactive<FormRules>({
@@ -191,6 +192,7 @@ const handleCreateSimulator = async (formEl: FormInstance) => {
   if (!formEl) return
   await formEl.validate((valid, fields) => {
     if (valid) {
+      createSimulatorForm.transportConfig.type = createSimulatorForm.transportType
       saveSimulator(createSimulatorForm).then((resp) => {
         if (resp.status === 200) {
           resetDeviceForm(formEl)

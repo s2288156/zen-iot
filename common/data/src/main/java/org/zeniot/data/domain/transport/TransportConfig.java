@@ -1,5 +1,6 @@
 package org.zeniot.data.domain.transport;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import org.zeniot.data.enums.TransportTypeEnum;
@@ -18,6 +19,7 @@ import java.io.Serializable;
 })
 public interface TransportConfig extends Serializable {
 
+    @JsonIgnore
     TransportTypeEnum getType();
 
 }
