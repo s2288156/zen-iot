@@ -1,6 +1,5 @@
 package org.zeniot.server.controller;
 
-import com.fasterxml.jackson.core.type.TypeReference;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -11,7 +10,6 @@ import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import org.zeniot.common.util.JacksonUtil;
 
-import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -63,11 +61,7 @@ public class AbstractControllerTest {
     }
 
     protected <T> T getResponse(ResultActions resultActions, Class<T> responseClass) throws UnsupportedEncodingException {
-        return JacksonUtil.fromString(resultActions.andReturn().getResponse().getContentAsString(), responseClass);
+        return JacksonUtil.convertValue(resultActions.andReturn().getResponse().getContentAsString(), responseClass);
     }
 
-    protected <T> T getResponse(ResultActions resultActions, TypeReference<T> responseType) throws IOException {
-        byte[] content = resultActions.andReturn().getResponse().getContentAsByteArray();
-        return JacksonUtil.OBJECT_MAPPER.readerFor(responseType).readValue(content);
-    }
 }

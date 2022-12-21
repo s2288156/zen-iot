@@ -17,9 +17,10 @@ import java.io.Serializable;
 @JsonSubTypes({
         @JsonSubTypes.Type(value = MqttTransportConfig.class, name = "MQTT")
 })
-public interface TransportConfig extends Serializable {
+public abstract class TransportConfig implements Serializable {
+    private static final long serialVersionUID = 5258055912570433780L;
 
     @JsonIgnore
-    TransportTypeEnum getType();
+    abstract TransportTypeEnum getType();
 
 }

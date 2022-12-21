@@ -6,14 +6,12 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 
-import java.io.IOException;
-
 /**
  * @author Wu.Chunyang
  */
 @Slf4j
 public class JacksonUtil {
-    public static final ObjectMapper OBJECT_MAPPER;
+    private static final ObjectMapper OBJECT_MAPPER;
 
     static {
         OBJECT_MAPPER = new ObjectMapper();
@@ -58,12 +56,4 @@ public class JacksonUtil {
         }
     }
 
-    public static <T> T fromString(String string, Class<T> clazz) {
-        try {
-            return string != null ? OBJECT_MAPPER.readValue(string, clazz) : null;
-        } catch (IOException e) {
-            throw new IllegalArgumentException("The given string value: "
-                    + string + " cannot be transformed to Json object", e);
-        }
-    }
 }
