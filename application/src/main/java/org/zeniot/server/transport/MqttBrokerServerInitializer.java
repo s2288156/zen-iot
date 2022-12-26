@@ -4,7 +4,7 @@ import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.zeniot.transport.api.MqttTransportService;
+import org.zeniot.transport.api.MqttBrokerService;
 import org.zeniot.transport.mqtt.MqttBrokerServer;
 
 /**
@@ -14,13 +14,13 @@ import org.zeniot.transport.mqtt.MqttBrokerServer;
 public class MqttBrokerServerInitializer {
 
     @Autowired
-    private MqttTransportService mqttTransportService;
+    private MqttBrokerService mqttBrokerService;
 
     MqttBrokerServer mqttBrokerServer;
 
     @PostConstruct
     public void init() {
-        mqttBrokerServer = new MqttBrokerServer(mqttTransportService);
+        mqttBrokerServer = new MqttBrokerServer(mqttBrokerService);
         mqttBrokerServer.init();
     }
 

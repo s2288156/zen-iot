@@ -11,12 +11,8 @@ import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.handler.codec.mqtt.MqttDecoder;
 import io.netty.handler.codec.mqtt.MqttEncoder;
 import io.netty.handler.timeout.IdleStateHandler;
-import jakarta.annotation.PostConstruct;
-import jakarta.annotation.PreDestroy;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-import org.zeniot.transport.api.MqttTransportService;
+import org.zeniot.transport.api.MqttBrokerService;
 
 import java.util.concurrent.TimeUnit;
 
@@ -26,7 +22,7 @@ import java.util.concurrent.TimeUnit;
 @Slf4j
 public class MqttBrokerServer {
 
-    private MqttTransportService mqttTransportService;
+    private MqttBrokerService mqttBrokerService;
 
     private EventLoopGroup boosGroup = new NioEventLoopGroup(1);
     private EventLoopGroup workerGroup = new NioEventLoopGroup();
@@ -35,8 +31,8 @@ public class MqttBrokerServer {
     private MqttBrokerServer() {
     }
 
-    public MqttBrokerServer(MqttTransportService mqttTransportService) {
-        this.mqttTransportService = mqttTransportService;
+    public MqttBrokerServer(MqttBrokerService mqttBrokerService) {
+        this.mqttBrokerService = mqttBrokerService;
     }
 
     public void init() {
@@ -52,7 +48,7 @@ public class MqttBrokerServer {
                     ch.pipeline().addLast("encoder", MqttEncoder.INSTANCE);
                     ch.pipeline().addLast("decoder", new MqttDecoder());
                     ch.pipeline().addLast("heartBeatHandler", new IdleStateHandler(45, 0, 0, TimeUnit.SECONDS));
-                    ch.pipeline().addLast("handler", new MqttHeartBeatBrokerHandler(mqttTransportService));
+                    ch.pipeline().addLast("handler", new MqttHeartBeatBrokerHandler(mqttBrokerService));
                 }
             });
 

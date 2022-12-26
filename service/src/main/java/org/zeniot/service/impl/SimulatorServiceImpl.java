@@ -67,7 +67,11 @@ public class SimulatorServiceImpl implements SimulatorService {
         oldSimulator.setStatus(powerCmd.getSimulatorStatus());
         simulatorRepository.save(oldSimulator);
         // TODO: 12/26/2022 关闭或启用设备
-
+        if (powerCmd.getSimulatorStatus() == SimulatorStatusEnum.ENABLE) {
+            simulatorManagement.enableSimulator(simulatorMapper.entityToSimulator(oldSimulator));
+        } else {
+            simulatorManagement.disableSimulator(simulatorMapper.entityToSimulator(oldSimulator));
+        }
         return simulatorMapper.entityToSimulator(oldSimulator);
     }
 }

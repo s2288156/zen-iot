@@ -2,14 +2,14 @@ package org.zeniot.transport.mqtt.service;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import org.zeniot.transport.api.MqttTransportService;
+import org.zeniot.transport.api.MqttBrokerService;
 
 /**
  * @author Wu.Chunyang
  */
 @Slf4j
 @Service
-class DefaultMqttTransportService implements MqttTransportService {
+class DefaultMqttBrokerService implements MqttBrokerService {
 
     @Override
     public void receiveMsg(String topic, String payload) {

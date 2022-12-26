@@ -9,7 +9,7 @@ import io.netty.handler.timeout.IdleStateEvent;
 import io.netty.util.ReferenceCountUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.zeniot.transport.api.MqttTransportService;
+import org.zeniot.transport.api.MqttBrokerService;
 
 import java.nio.charset.StandardCharsets;
 
@@ -22,13 +22,13 @@ import static io.netty.handler.codec.mqtt.MqttQoS.AT_MOST_ONCE;
 @ChannelHandler.Sharable
 public class MqttHeartBeatBrokerHandler extends ChannelInboundHandlerAdapter {
 
-    private MqttTransportService mqttTransportService;
+    private MqttBrokerService mqttBrokerService;
 
     private MqttHeartBeatBrokerHandler() {
     }
 
-    public MqttHeartBeatBrokerHandler(MqttTransportService mqttTransportService) {
-        this.mqttTransportService = mqttTransportService;
+    public MqttHeartBeatBrokerHandler(MqttBrokerService mqttBrokerService) {
+        this.mqttBrokerService = mqttBrokerService;
     }
 
     @Override
@@ -49,7 +49,7 @@ public class MqttHeartBeatBrokerHandler extends ChannelInboundHandlerAdapter {
             case PUBLISH -> {
                 MqttPublishMessage publishMsg = (MqttPublishMessage) msg;
 
-                mqttTransportService.receiveMsg(publishMsg.variableHeader().topicName(), publishMsg.payload().toString(StandardCharsets.UTF_8));
+                mqttBrokerService.receiveMsg(publishMsg.variableHeader().topicName(), publishMsg.payload().toString(StandardCharsets.UTF_8));
 
                 if (publishMsg.variableHeader().packetId() > 0) {
                     MqttFixedHeader pubAckFixedHeader = new MqttFixedHeader(MqttMessageType.PUBACK, false, AT_MOST_ONCE, false, 0);
