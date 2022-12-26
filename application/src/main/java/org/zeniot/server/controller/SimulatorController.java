@@ -6,6 +6,7 @@ import org.zeniot.api.SimulatorService;
 import org.zeniot.data.base.PageQuery;
 import org.zeniot.data.base.PageResponse;
 import org.zeniot.data.base.SingleResponse;
+import org.zeniot.data.command.SimulatorSwitchPowerCmd;
 import org.zeniot.data.domain.simulator.Simulator;
 
 import java.util.concurrent.TimeUnit;
@@ -36,6 +37,12 @@ public class SimulatorController extends AbstractController {
     @DeleteMapping("/simulator/{id}")
     public SingleResponse<Simulator> deleteSimulator(@PathVariable Long id) {
         simulatorService.deleteSimulator(id);
+        return SingleResponse.success();
+    }
+
+    @PostMapping("/simulator/switch")
+    public SingleResponse<?> powerSwitch(@RequestBody @Validated SimulatorSwitchPowerCmd switchPowerCmd) {
+
         return SingleResponse.success();
     }
 
