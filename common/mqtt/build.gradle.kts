@@ -4,7 +4,6 @@ plugins {
 
 dependencies {
     implementation(project(":common:util"))
-    implementation(project(":common:data"))
     implementation(project(":common:transport-api"))
     implementation(libs.bcprov.jdk15on)
     implementation(libs.bcpkix.jdk15on)

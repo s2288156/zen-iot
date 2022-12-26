@@ -14,6 +14,7 @@ import org.zeniot.data.command.SimulatorSwitchPowerCmd;
 import org.zeniot.data.domain.simulator.Simulator;
 import org.zeniot.data.enums.SimulatorStatusEnum;
 import org.zeniot.service.mapper.SimulatorMapper;
+import org.zeniot.transport.api.SimulatorManagement;
 
 import java.util.List;
 
@@ -27,6 +28,8 @@ public class SimulatorServiceImpl implements SimulatorService {
     private SimulatorRepository simulatorRepository;
     @Autowired
     private SimulatorMapper simulatorMapper;
+    @Autowired
+    private SimulatorManagement simulatorManagement;
 
     @Override
     public PageResponse<Simulator> findSimulators(PageQuery pageQuery) {

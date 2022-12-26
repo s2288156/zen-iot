@@ -5,7 +5,7 @@ plugins {
 dependencies {
     api(project(":dao"))
     api(project(":api"))
-    api(project(":common:modbus"))
+    api(project(":common:transport-api"))
     compileOnly("org.projectlombok:lombok")
     annotationProcessor("org.projectlombok:lombok")
     implementation(libs.mapstruct)
