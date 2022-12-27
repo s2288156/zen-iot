@@ -15,7 +15,7 @@ import org.zeniot.common.util.JacksonUtil;
 import org.zeniot.data.domain.simulator.Simulator;
 import org.zeniot.data.domain.transport.MqttTransportConfig;
 
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
 
 /**
  * @author Wu.Chunyang
@@ -41,8 +41,8 @@ public class MqttClient {
 
     private EventLoopGroup workerGroup = new NioEventLoopGroup();
 
-    public void init() {
-        new Thread(() -> {
+    public boolean connect() {
+        FutureTask<Boolean> task = new FutureTask<>(() -> {
             Bootstrap b = new Bootstrap();
             b.group(workerGroup);
             b.channel(NioSocketChannel.class);
@@ -61,11 +61,22 @@ public class MqttClient {
                 log.info("[{}] Client connected", CLIENT_ID);
                 f.channel().closeFuture().sync();
             } catch (InterruptedException e) {
-                shutdown();
                 log.error("mqtt client start fail");
+                shutdown();
+                return false;
             }
-        }).start();
+            return true;
+        });
+
+        new Thread(task).start();
+        try {
+            return task.get(10, TimeUnit.SECONDS);
+        } catch (InterruptedException | ExecutionException | TimeoutException e) {
+            log.error("[{}] mqtt client connect error: {}", CLIENT_ID, e);
+            return false;
+        }
     }
+
 
     public void shutdown() {
         workerGroup.shutdownGracefully();
