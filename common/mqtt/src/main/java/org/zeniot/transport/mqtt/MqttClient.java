@@ -22,6 +22,14 @@ import java.util.concurrent.*;
  */
 @Slf4j
 public class MqttClient {
+    private static final String HOST = System.getProperty("host", "127.0.0.1");
+    private static final int PORT = Integer.parseInt(System.getProperty("port", "1883"));
+    private final String CLIENT_ID;
+    private final String USER_NAME;
+    private static final String PASSWORD = System.getProperty("password", "guest");
+    private EventLoopGroup workerGroup = new NioEventLoopGroup();
+    private boolean isConnected = false;
+
     private MqttClient(String clientId, String userName) {
         CLIENT_ID = clientId;
         USER_NAME = userName;
@@ -33,16 +41,8 @@ public class MqttClient {
         USER_NAME = simulator.getName();
     }
 
-    private static final String HOST = System.getProperty("host", "127.0.0.1");
-    private static final int PORT = Integer.parseInt(System.getProperty("port", "1883"));
-    private final String CLIENT_ID;
-    private final String USER_NAME;
-    private static final String PASSWORD = System.getProperty("password", "guest");
-
-    private EventLoopGroup workerGroup = new NioEventLoopGroup();
-
     public boolean connect() {
-        FutureTask<Boolean> task = new FutureTask<>(() -> {
+        Thread thread = new Thread(() -> {
             Bootstrap b = new Bootstrap();
             b.group(workerGroup);
             b.channel(NioSocketChannel.class);
@@ -59,21 +59,30 @@ public class MqttClient {
             try {
                 ChannelFuture f = b.connect(HOST, PORT).sync();
                 log.info("[{}] Client connected", CLIENT_ID);
+                this.isConnected = true;
                 f.channel().closeFuture().sync();
             } catch (InterruptedException e) {
                 log.error("mqtt client start fail");
                 shutdown();
-                return false;
             }
-            return true;
-        });
 
-        new Thread(task).start();
-        try {
-            return task.get(10, TimeUnit.SECONDS);
-        } catch (InterruptedException | ExecutionException | TimeoutException e) {
-            log.error("[{}] mqtt client connect error: {}", CLIENT_ID, e);
+        });
+        thread.start();
+        int i = 0;
+        int max = 50;
+        while (!isConnected || i < max) {
+            i++;
+            try {
+                TimeUnit.MILLISECONDS.sleep(100);
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+        }
+        if (i == max) {
+            shutdown();
             return false;
+        } else {
+            return true;
         }
     }
 

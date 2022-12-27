@@ -42,7 +42,7 @@ public class SimulatorController extends AbstractController {
 
     @PostMapping("/simulator/switch")
     public SingleResponse<?> powerSwitch(@RequestBody @Validated SimulatorSwitchPowerCmd switchPowerCmd) {
-
+        simulatorService.switchSimulatorPower(switchPowerCmd);
         return SingleResponse.success();
     }
 
