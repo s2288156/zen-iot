@@ -11,6 +11,9 @@ import io.netty.handler.codec.mqtt.MqttDecoder;
 import io.netty.handler.codec.mqtt.MqttEncoder;
 import io.netty.handler.timeout.IdleStateHandler;
 import lombok.extern.slf4j.Slf4j;
+import org.zeniot.common.util.JacksonUtil;
+import org.zeniot.data.domain.simulator.Simulator;
+import org.zeniot.data.domain.transport.MqttTransportConfig;
 
 import java.util.concurrent.TimeUnit;
 
@@ -19,39 +22,53 @@ import java.util.concurrent.TimeUnit;
  */
 @Slf4j
 public class MqttClient {
-    private MqttClient() {
+    private MqttClient(String clientId, String userName) {
+        CLIENT_ID = clientId;
+        USER_NAME = userName;
+    }
+
+    public MqttClient(Simulator simulator) {
+        MqttTransportConfig mqttTransportConfig = JacksonUtil.convertValue(simulator.getTransportConfig(), MqttTransportConfig.class);
+        CLIENT_ID = String.valueOf(simulator.getId());
+        USER_NAME = simulator.getName();
     }
 
     private static final String HOST = System.getProperty("host", "127.0.0.1");
     private static final int PORT = Integer.parseInt(System.getProperty("port", "1883"));
-    private static final String CLIENT_ID = System.getProperty("clientId", "guestClient");
-    private static final String USER_NAME = System.getProperty("userName", "guest");
+    private final String CLIENT_ID;
+    private final String USER_NAME;
     private static final String PASSWORD = System.getProperty("password", "guest");
 
     private EventLoopGroup workerGroup = new NioEventLoopGroup();
 
-    public void init() throws Exception {
+    public void init() {
+        new Thread(() -> {
+            Bootstrap b = new Bootstrap();
+            b.group(workerGroup);
+            b.channel(NioSocketChannel.class);
+            b.handler(new ChannelInitializer<SocketChannel>() {
+                @Override
+                protected void initChannel(SocketChannel ch) {
+                    ch.pipeline().addLast("encoder", MqttEncoder.INSTANCE);
+                    ch.pipeline().addLast("decoder", new MqttDecoder());
+                    ch.pipeline().addLast("heartBeatHandler", new IdleStateHandler(0, 20, 0, TimeUnit.SECONDS));
+                    ch.pipeline().addLast("handler", new MqttClientHandler(CLIENT_ID, USER_NAME, PASSWORD));
+                }
+            });
 
-        Bootstrap b = new Bootstrap();
-        b.group(workerGroup);
-        b.channel(NioSocketChannel.class);
-        b.handler(new ChannelInitializer<SocketChannel>() {
-            @Override
-            protected void initChannel(SocketChannel ch) {
-                ch.pipeline().addLast("encoder", MqttEncoder.INSTANCE);
-                ch.pipeline().addLast("decoder", new MqttDecoder());
-                ch.pipeline().addLast("heartBeatHandler", new IdleStateHandler(0, 20, 0, TimeUnit.SECONDS));
-                ch.pipeline().addLast("handler", new MqttClientHandler(CLIENT_ID, USER_NAME, PASSWORD));
+            try {
+                ChannelFuture f = b.connect(HOST, PORT).sync();
+                log.info("[{}] Client connected", CLIENT_ID);
+                f.channel().closeFuture().sync();
+            } catch (InterruptedException e) {
+                shutdown();
+                log.error("mqtt client start fail");
             }
-        });
-
-        ChannelFuture f = b.connect(HOST, PORT).sync();
-        log.info("[{}] Client connected", CLIENT_ID);
-        f.channel().closeFuture().sync();
-
+        }).start();
     }
 
     public void shutdown() {
         workerGroup.shutdownGracefully();
+        log.info("shutdown mqtt client");
     }
 }
