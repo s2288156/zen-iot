@@ -6,7 +6,7 @@ import org.zeniot.data.domain.simulator.Simulator;
  * @author Wu.Chunyang
  */
 public interface SimulatorManagement {
-    boolean enableSimulator(Simulator simulator);
+    void enableSimulator(Simulator simulator);
 
-    boolean disableSimulator(Simulator simulator);
+    void disableSimulator(Simulator simulator);
 }

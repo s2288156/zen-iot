@@ -15,7 +15,7 @@ import org.zeniot.common.util.JacksonUtil;
 import org.zeniot.data.domain.simulator.Simulator;
 import org.zeniot.data.domain.transport.MqttTransportConfig;
 
-import java.util.concurrent.*;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @author Wu.Chunyang
@@ -39,6 +39,10 @@ public class MqttClient {
         MqttTransportConfig mqttTransportConfig = JacksonUtil.convertValue(simulator.getTransportConfig(), MqttTransportConfig.class);
         CLIENT_ID = String.valueOf(simulator.getId());
         USER_NAME = simulator.getName();
+    }
+
+    public boolean isConnected() {
+        return isConnected;
     }
 
     public boolean connect() {
@@ -68,27 +72,34 @@ public class MqttClient {
 
         });
         thread.start();
-        int i = 0;
-        int max = 50;
-        while (!isConnected || i < max) {
+        if (confirmConnect()) {
+            return true;
+        } else {
+            return false;
+        }
+
+    }
+
+    private boolean confirmConnect() {
+        int i = 0, max = 50;
+        while (!isConnected && i < max) {
             i++;
             try {
                 TimeUnit.MILLISECONDS.sleep(100);
             } catch (InterruptedException e) {
-                throw new RuntimeException(e);
+                return false;
             }
         }
         if (i == max) {
-            shutdown();
             return false;
-        } else {
-            return true;
         }
+        return true;
     }
 
 
     public void shutdown() {
         workerGroup.shutdownGracefully();
-        log.info("shutdown mqtt client");
+        this.isConnected = false;
+        log.info("shutdown mqtt client, clientId = {}, username = {}", CLIENT_ID, USER_NAME);
     }
 }
