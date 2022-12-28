@@ -1,7 +1,8 @@
-package org.zeniot.transport.mqtt;
+package org.zeniot.transport.mqtt.client;
 
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.ChannelFuture;
+import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
@@ -29,6 +30,7 @@ public class MqttClient {
     private static final String PASSWORD = System.getProperty("password", "guest");
     private EventLoopGroup workerGroup = new NioEventLoopGroup();
     private boolean isConnected = false;
+    private ChannelHandlerContext ctx;
 
     private MqttClient(String clientId, String userName) {
         CLIENT_ID = clientId;

@@ -1,13 +1,11 @@
 package org.zeniot.server.transport;
 
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.zeniot.common.exception.BizException;
 import org.zeniot.data.domain.simulator.Simulator;
-import org.zeniot.transport.api.MqttBrokerService;
 import org.zeniot.transport.api.SimulatorManagement;
-import org.zeniot.transport.mqtt.MqttClient;
+import org.zeniot.transport.mqtt.client.MqttClient;
 
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
