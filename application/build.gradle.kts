@@ -2,6 +2,8 @@ plugins {
     `java-library`
 }
 
+java.sourceCompatibility = JavaVersion.VERSION_17
+
 dependencies {
     implementation(project(":api"))
     implementation(project(":common:mqtt"))
@@ -13,10 +15,4 @@ dependencies {
     api("org.springframework.boot:spring-boot-starter-actuator")
     compileOnly("org.projectlombok:lombok")
     annotationProcessor("org.projectlombok:lombok")
-}
-
-java {
-    toolchain {
-        languageVersion.set(JavaLanguageVersion.of(17))
-    }
 }
