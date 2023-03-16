@@ -25,3 +25,9 @@ export function deleteSimulator(id: string) {
   })
 }
 
+export function switchSimulatorStatus(id: string) {
+  return request({
+    url: '/api/simulator/switch/' + id,
+    method: 'post',
+  })
+}

@@ -6,10 +6,7 @@ import org.zeniot.api.SimulatorService;
 import org.zeniot.data.base.PageQuery;
 import org.zeniot.data.base.PageResponse;
 import org.zeniot.data.base.SingleResponse;
-import org.zeniot.data.command.SimulatorSwitchPowerCmd;
 import org.zeniot.data.domain.simulator.Simulator;
-
-import java.util.concurrent.TimeUnit;
 
 /**
  * @author Wu.Chunyang
@@ -40,10 +37,9 @@ public class SimulatorController extends AbstractController {
         return SingleResponse.success();
     }
 
-    @PostMapping("/simulator/switch")
-    public SingleResponse<?> powerSwitch(@RequestBody @Validated SimulatorSwitchPowerCmd switchPowerCmd) {
-        simulatorService.switchSimulatorPower(switchPowerCmd);
-        return SingleResponse.success();
+    @PostMapping("/simulator/switch/{id}")
+    public SingleResponse<Simulator> powerSwitch(@PathVariable Long id) {
+        return SingleResponse.success(simulatorService.switchSimulatorPower(id));
     }
 
 }

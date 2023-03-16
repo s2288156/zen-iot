@@ -10,7 +10,6 @@ import org.zeniot.dao.model.SimulatorEntity;
 import org.zeniot.dao.repository.SimulatorRepository;
 import org.zeniot.data.base.PageQuery;
 import org.zeniot.data.base.PageResponse;
-import org.zeniot.data.command.SimulatorSwitchPowerCmd;
 import org.zeniot.data.domain.simulator.Simulator;
 import org.zeniot.data.enums.SimulatorStatusEnum;
 import org.zeniot.service.mapper.SimulatorMapper;
@@ -57,16 +56,14 @@ public class SimulatorServiceImpl implements SimulatorService {
 
     @Transactional(rollbackFor = Exception.class)
     @Override
-    public Simulator switchSimulatorPower(SimulatorSwitchPowerCmd powerCmd) {
-        SimulatorEntity oldSimulator = simulatorRepository.findById(powerCmd.getId())
+    public Simulator switchSimulatorPower(Long id) {
+        SimulatorEntity oldSimulator = simulatorRepository.findById(id)
                 .orElseThrow(() -> new BizException("Simulator not exist."));
-        if (oldSimulator.getStatus() == powerCmd.getSimulatorStatus()) {
-            return simulatorMapper.entityToSimulator(oldSimulator);
-        }
+
         // 更新设备状态，添加事务
-        oldSimulator.setStatus(powerCmd.getSimulatorStatus());
+        oldSimulator.setStatus(oldSimulator.getStatus().reverse());
         simulatorRepository.save(oldSimulator);
-        if (powerCmd.getSimulatorStatus() == SimulatorStatusEnum.ENABLE) {
+        if (oldSimulator.getStatus() == SimulatorStatusEnum.ENABLE) {
             simulatorManagement.enableSimulator(simulatorMapper.entityToSimulator(oldSimulator));
         } else {
             simulatorManagement.disableSimulator(simulatorMapper.entityToSimulator(oldSimulator));

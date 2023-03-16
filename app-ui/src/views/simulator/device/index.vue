@@ -27,10 +27,13 @@
           <el-tag :type="getStatusTag(row)">{{ row.status }}</el-tag>
         </template>
       </el-table-column>
-      <el-table-column fixed="right" label="Operations" width="120">
+      <el-table-column fixed="right" label="Operations" width="240">
         <template #default="{ row, $index }">
-          <el-button link size="small" type="primary" @click="handleClick">Detail</el-button>
-          <el-button link size="small" type="primary" @click="handleDeleteSimulator(row)">Delete</el-button>
+          <el-button size="small" type="primary" @click="handleSimulatorPowerSwitch(row.id)">
+            {{ row.status === 'DISABLE' ? 'Enable' : 'Disable' }}
+          </el-button>
+          <el-button size="small" type="info" @click="handleDetail">Detail</el-button>
+          <el-button size="small" type="danger" @click="handleDeleteSimulator(row)">Delete</el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -95,7 +98,7 @@ import type {BaseDataPage, PageQuery} from '@/api/global-types'
 import type {FormInstance, FormRules} from 'element-plus'
 import {ElMessage} from "element-plus";
 import type {DeviceCommon, Simulator} from "@/api/data/types";
-import {deleteSimulator, getSimulators, saveSimulator} from "@/api/simulator-apis";
+import {deleteSimulator, getSimulators, saveSimulator, switchSimulatorStatus} from "@/api/simulator-apis";
 import {getDeviceCommon} from "@/api/device-apis";
 import {TimeUnit, TransportType} from "@/api/data/enums";
 
@@ -112,6 +115,7 @@ const loadSimulatorList = () => {
     simulators.value = response.data
   })
 }
+
 const loadDeviceCommon = () => {
   getDeviceCommon().then((resp) => {
     deviceCommonData.value = resp.data.data
@@ -121,7 +125,7 @@ const loadDeviceCommon = () => {
 loadDeviceCommon()
 loadSimulatorList()
 
-const handleClick = () => {
+const handleDetail = () => {
   ElMessage({
     showClose: true,
     message: 'Detail Click',
@@ -137,6 +141,21 @@ const handleDeleteSimulator = (row: Simulator) => {
       }
     })
   }
+}
+
+const handleSimulatorPowerSwitch = (id: string) => {
+  switchSimulatorStatus(id).then((resp) => {
+    if (resp.status === 200) {
+      resp.data.data.status
+      ElMessage({
+        showClose: true,
+        message: resp.data.data.status + ' Success!',
+        type: 'info',
+      })
+      loadSimulatorList();
+    }
+  })
+
 }
 
 const currentPage = ref(1)

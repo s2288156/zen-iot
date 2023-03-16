@@ -2,7 +2,6 @@ package org.zeniot.api;
 
 import org.zeniot.data.base.PageQuery;
 import org.zeniot.data.base.PageResponse;
-import org.zeniot.data.command.SimulatorSwitchPowerCmd;
 import org.zeniot.data.domain.simulator.Simulator;
 
 /**
@@ -15,5 +14,5 @@ public interface SimulatorService {
 
     boolean deleteSimulator(Long id);
 
-    Simulator switchSimulatorPower(SimulatorSwitchPowerCmd powerCmd);
+    Simulator switchSimulatorPower(Long id);
 }
