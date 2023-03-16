@@ -17,12 +17,12 @@ public interface SimulatorMapper {
     Simulator entityToSimulator(SimulatorEntity entity);
 
     @AfterMapping
-    default void finishSimulatorEntity(@MappingTarget SimulatorEntity entity, Simulator simulator) {
+    default void afterToEntity(@MappingTarget SimulatorEntity entity, Simulator simulator) {
         entity.setTransportConfig(JacksonUtil.convertValue(simulator.getTransportConfig(), JsonNode.class));
     }
 
     @AfterMapping
-    default void finishSimulator(@MappingTarget Simulator simulator, SimulatorEntity entity) {
+    default void afterToDto(@MappingTarget Simulator simulator, SimulatorEntity entity) {
         simulator.setTransportConfig(JacksonUtil.convertValue(entity.getTransportConfig(), TransportConfig.class));
     }
 

@@ -5,7 +5,7 @@ import jakarta.annotation.PreDestroy;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.zeniot.transport.api.MqttBrokerService;
-import org.zeniot.transport.mqtt.MqttBrokerServer;
+import org.zeniot.transport.mqtt.broker.MqttBrokerServer;
 
 /**
  * @author Wu.Chunyang

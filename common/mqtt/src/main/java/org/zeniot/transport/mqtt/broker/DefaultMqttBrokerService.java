@@ -1,4 +1,4 @@
-package org.zeniot.transport.mqtt.service;
+package org.zeniot.transport.mqtt.broker;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;

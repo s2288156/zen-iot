@@ -1,4 +1,4 @@
-package org.zeniot.transport.mqtt;
+package org.zeniot.transport.mqtt.broker;
 
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
@@ -23,9 +23,6 @@ import static io.netty.handler.codec.mqtt.MqttQoS.AT_MOST_ONCE;
 public class MqttHeartBeatBrokerHandler extends ChannelInboundHandlerAdapter {
 
     private MqttBrokerService mqttBrokerService;
-
-    private MqttHeartBeatBrokerHandler() {
-    }
 
     public MqttHeartBeatBrokerHandler(MqttBrokerService mqttBrokerService) {
         this.mqttBrokerService = mqttBrokerService;

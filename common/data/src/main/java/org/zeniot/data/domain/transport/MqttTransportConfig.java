@@ -11,13 +11,17 @@ import java.util.concurrent.TimeUnit;
  */
 @EqualsAndHashCode(callSuper = true)
 @Data
-public class MqttTransportConfig extends TransportConfig {
+public class MqttTransportConfig extends TransportConfig implements Transport {
 
     private String saveTimeseriesTopic;
 
     private long period;
 
     private TimeUnit timeUnit;
+
+    private String host;
+
+    private int port;
 
     @Override
     public TransportTypeEnum getType() {

@@ -3,11 +3,13 @@ package org.zeniot.transport.mqtt.client;
 import io.netty.buffer.ByteBufInputStream;
 import io.netty.buffer.ByteBufUtil;
 import io.netty.buffer.Unpooled;
+import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.handler.codec.mqtt.*;
 import io.netty.util.ReferenceCountUtil;
 import lombok.extern.slf4j.Slf4j;
+import org.zeniot.data.domain.transport.MqttTransportConfig;
 
 import java.nio.charset.StandardCharsets;
 import java.util.concurrent.Executors;
@@ -19,6 +21,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  * @author Wu.Chunyang
  */
 @Slf4j
+@ChannelHandler.Sharable
 public class MqttClientHandler extends ChannelInboundHandlerAdapter {
 
     private final String clientId;
@@ -27,6 +30,13 @@ public class MqttClientHandler extends ChannelInboundHandlerAdapter {
 
     private ScheduledExecutorService executorService;
     private AtomicInteger packetId = new AtomicInteger();
+
+    public MqttClientHandler(String clientId, String userName, String password, MqttTransportConfig mqttTransportConfig) {
+        this.clientId = clientId;
+        this.userName = userName;
+        this.password = password.getBytes(StandardCharsets.UTF_8);
+        executorService = Executors.newSingleThreadScheduledExecutor();
+    }
 
     public MqttClientHandler(String clientId, String userName, String password) {
         this.clientId = clientId;

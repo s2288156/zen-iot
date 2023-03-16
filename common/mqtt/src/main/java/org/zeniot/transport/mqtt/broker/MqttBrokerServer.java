@@ -1,4 +1,4 @@
-package org.zeniot.transport.mqtt;
+package org.zeniot.transport.mqtt.broker;
 
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.ChannelFuture;
@@ -28,37 +28,32 @@ public class MqttBrokerServer {
     private EventLoopGroup workerGroup = new NioEventLoopGroup();
     private ChannelFuture channelFuture;
 
-    private MqttBrokerServer() {
-    }
-
     public MqttBrokerServer(MqttBrokerService mqttBrokerService) {
         this.mqttBrokerService = mqttBrokerService;
     }
 
     public void init() {
 
-        new Thread(() -> {
-            ServerBootstrap b = new ServerBootstrap();
-            b.group(boosGroup, workerGroup);
-            b.option(ChannelOption.SO_BACKLOG, 1024);
-            b.channel(NioServerSocketChannel.class);
-            b.childHandler(new ChannelInitializer<SocketChannel>() {
-                @Override
-                protected void initChannel(SocketChannel ch) {
-                    ch.pipeline().addLast("encoder", MqttEncoder.INSTANCE);
-                    ch.pipeline().addLast("decoder", new MqttDecoder());
-                    ch.pipeline().addLast("heartBeatHandler", new IdleStateHandler(45, 0, 0, TimeUnit.SECONDS));
-                    ch.pipeline().addLast("handler", new MqttHeartBeatBrokerHandler(mqttBrokerService));
-                }
-            });
-
-            try {
-                channelFuture = b.bind(1883).sync();
-            } catch (InterruptedException e) {
-                throw new RuntimeException(e);
+        ServerBootstrap b = new ServerBootstrap();
+        b.group(boosGroup, workerGroup);
+        b.option(ChannelOption.SO_BACKLOG, 1024);
+        b.channel(NioServerSocketChannel.class);
+        b.childHandler(new ChannelInitializer<SocketChannel>() {
+            @Override
+            protected void initChannel(SocketChannel ch) {
+                ch.pipeline().addLast("encoder", MqttEncoder.INSTANCE);
+                ch.pipeline().addLast("decoder", new MqttDecoder());
+                ch.pipeline().addLast("heartBeatHandler", new IdleStateHandler(45, 0, 0, TimeUnit.SECONDS));
+                ch.pipeline().addLast("handler", new MqttHeartBeatBrokerHandler(mqttBrokerService));
             }
-            log.info("MQTT broker initiated... ");
-        }).start();
+        });
+
+        try {
+            channelFuture = b.bind(1883).sync();
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+        log.info("MQTT broker initiated... ");
 
     }
 
