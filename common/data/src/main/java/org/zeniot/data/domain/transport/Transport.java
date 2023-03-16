@@ -10,5 +10,5 @@ public interface Transport {
 
     int getPort();
 
-    int setPort(int port);
+    void setPort(int port);
 }

@@ -27,4 +27,24 @@ public class MqttTransportConfig extends TransportConfig implements Transport {
     public TransportTypeEnum getType() {
         return TransportTypeEnum.MQTT;
     }
+
+    @Override
+    public String getHost() {
+        return host;
+    }
+
+    @Override
+    public void setHost(String host) {
+        this.host = host;
+    }
+
+    @Override
+    public int getPort() {
+        return port;
+    }
+
+    @Override
+    public void setPort(int port) {
+        this.port = port;
+    }
 }
