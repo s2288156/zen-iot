@@ -64,7 +64,7 @@ const router = createRouter({
         {
           path: '/system/pinia',
           name: 'Pinia',
-          component: () => import('@/views/system/PiniaDemo.vue'),
+          component: () => import('@/views/system/demo/PiniaDemo.vue'),
           meta: {
             title: 'Pinia',
             icon: 'Menu',
