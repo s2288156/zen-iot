@@ -29,7 +29,7 @@
       </el-table-column>
       <el-table-column fixed="right" label="Operations" width="240">
         <template #default="{ row, $index }">
-          <el-button size="small" type="primary" @click="handleSimulatorPowerSwitch(row.id)">
+          <el-button size="small" type="primary" @click="handleSimulatorPowerSwitch(row)">
             {{ row.status === 'DISABLE' ? 'Enable' : 'Disable' }}
           </el-button>
           <el-button size="small" type="info" @click="handleDetail">Detail</el-button>
@@ -143,16 +143,15 @@ const handleDeleteSimulator = (row: Simulator) => {
   }
 }
 
-const handleSimulatorPowerSwitch = (id: string) => {
-  switchSimulatorStatus(id).then((resp) => {
+const handleSimulatorPowerSwitch = (row: Simulator) => {
+  switchSimulatorStatus(row.id).then((resp) => {
     if (resp.status === 200) {
-      resp.data.data.status
+      row.status = resp.data.data.status
       ElMessage({
         showClose: true,
         message: resp.data.data.status + ' Success!',
-        type: 'info',
+        type: 'success',
       })
-      loadSimulatorList();
     }
   })
 
