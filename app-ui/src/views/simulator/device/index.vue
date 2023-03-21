@@ -5,7 +5,7 @@
           class="filter-item"
           icon="EditPen"
           type="primary"
-          @click="dialogFormVisible = !dialogFormVisible"
+          @click="openModal()"
       >
         新增
       </el-button>
@@ -48,59 +48,18 @@
         @next-click="nextClick"
         @current-change="currentChange"
     />
-
-    <el-dialog v-model="dialogFormVisible" title="Add Device">
-      <el-form label-width="140px" ref="ruleFormRef" :model="createSimulatorForm" :rules="rules" status-icon>
-        <el-form-item label="Name" prop="name">
-          <el-input v-model="createSimulatorForm.name"/>
-        </el-form-item>
-        <el-form-item label="Transport Type" prop="transportType">
-          <el-select v-model="createSimulatorForm.transportType" clearable placeholder="Transport Type">
-            <el-option
-                v-for="item in deviceCommonData.transportTypes"
-                :key="item"
-                :label="item"
-                :value="item"
-            />
-          </el-select>
-        </el-form-item>
-        <el-form-item label="Timeseries Topic" prop="saveTimeseriesTopic">
-          <el-input v-model="createSimulatorForm.transportConfig.saveTimeseriesTopic"/>
-        </el-form-item>
-        <el-form-item label="Period" prop="period">
-          <el-input v-model="createSimulatorForm.transportConfig.period"/>
-        </el-form-item>
-        <el-form-item label="Time Unit" prop="timeUnit">
-          <el-select v-model="createSimulatorForm.transportConfig.timeUnit" placeholder="Time Unit">
-            <el-option
-                v-for="item in deviceCommonData.timeUnit"
-                :key="item"
-                :label="item"
-                :value="item"
-            />
-          </el-select>
-        </el-form-item>
-
-      </el-form>
-      <template #footer>
-        <span class="dialog-footer">
-          <el-button @click="resetDeviceForm(ruleFormRef)">Cancel</el-button>
-          <el-button type="primary" @click="handleCreateSimulator(ruleFormRef)">Confirm</el-button>
-        </span>
-      </template>
-    </el-dialog>
+    <SimulatorDialog ref="addSimulator"/>
   </div>
 </template>
 
 <script lang="ts" setup>
-import {reactive, ref} from 'vue'
+import {ref} from 'vue'
 import type {BaseDataPage, PageQuery} from '@/api/global-types'
-import type {FormInstance, FormRules} from 'element-plus'
 import {ElMessage} from "element-plus";
-import type {DeviceCommon, Simulator} from "@/api/data/types";
-import {deleteSimulator, getSimulators, saveSimulator, switchSimulatorStatus} from "@/api/simulator-apis";
-import {getDeviceCommon} from "@/api/device-apis";
-import {TimeUnit, TransportType} from "@/api/data/enums";
+import type {Simulator} from "@/api/data/types";
+import {deleteSimulator, getSimulators, switchSimulatorStatus} from "@/api/simulator-apis";
+import SimulatorDialog from "./SimulatorDialog.vue";
+
 
 const pageQuery: PageQuery = {page: 0, size: 10}
 const simulators = ref<BaseDataPage<Simulator>>({
@@ -108,21 +67,17 @@ const simulators = ref<BaseDataPage<Simulator>>({
   size: 0,
   totalPages: 0,
 })
+const addSimulator = ref<InstanceType<typeof SimulatorDialog> | null>(null)
+const openModal = () => {
+  addSimulator.value.open()
+}
 
-const deviceCommonData = ref<DeviceCommon>({timeUnit: [], statuses: [], transportTypes: []});
 const loadSimulatorList = () => {
   getSimulators(pageQuery).then((response) => {
     simulators.value = response.data
   })
 }
 
-const loadDeviceCommon = () => {
-  getDeviceCommon().then((resp) => {
-    deviceCommonData.value = resp.data.data
-  })
-}
-
-loadDeviceCommon()
 loadSimulatorList()
 
 const handleDetail = () => {
@@ -179,48 +134,6 @@ const getStatusTag = (row: Simulator) => {
   }
 }
 
-// dialog
-const dialogFormVisible = ref(false)
-const ruleFormRef = ref<FormInstance>()
-
-let createSimulatorForm = reactive<Simulator>({
-  name: "",
-  transportType: TransportType[TransportType.DEFAULT],
-  transportConfig: {
-    type: TransportType[TransportType.DEFAULT],
-    saveTimeseriesTopic: '/save/timeseries',
-    period: 10,
-    timeUnit: TimeUnit[TimeUnit.SECONDS]
-  }
-})
-
-const resetDeviceForm = (formEl: FormInstance) => {
-  formEl.resetFields()
-  dialogFormVisible.value = false
-  createSimulatorForm.name = ''
-  createSimulatorForm.transportType = TransportType[TransportType.DEFAULT]
-}
-
-const rules = reactive<FormRules>({
-  name: [{required: true, message: 'Please input name!', trigger: 'blur'}],
-  transportType: [{required: true, message: 'Please input transportType!', trigger: 'blur'}],
-})
-
-const handleCreateSimulator = async (formEl: FormInstance) => {
-  if (!formEl) return
-  await formEl.validate((valid, fields) => {
-    if (valid) {
-      createSimulatorForm.transportConfig.type = createSimulatorForm.transportType
-      saveSimulator(createSimulatorForm).then((resp) => {
-        if (resp.status === 200) {
-          resetDeviceForm(formEl)
-          loadSimulatorList()
-        }
-      })
-    }
-  })
-
-}
 </script>
 
 <style lang="scss" scoped>
