@@ -11,7 +11,7 @@ import java.util.concurrent.TimeUnit;
  */
 @EqualsAndHashCode(callSuper = true)
 @Data
-public class MqttTransportConfig extends TransportConfig implements Transport {
+public class SimulatorMqttTransportConfig extends SimulatorTransportConfig implements Transport {
 
     private String saveTimeseriesTopic;
 

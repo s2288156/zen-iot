@@ -15,9 +15,9 @@ import java.io.Serializable;
         property = "type"
 )
 @JsonSubTypes({
-        @JsonSubTypes.Type(value = MqttTransportConfig.class, name = "MQTT")
+        @JsonSubTypes.Type(value = SimulatorMqttTransportConfig.class, name = "MQTT")
 })
-public abstract class TransportConfig implements Serializable {
+public abstract class SimulatorTransportConfig implements Serializable {
     private static final long serialVersionUID = 5258055912570433780L;
 
     @JsonIgnore

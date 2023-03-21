@@ -6,7 +6,7 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.Setter;
 import org.zeniot.data.base.DTO;
-import org.zeniot.data.domain.transport.TransportConfig;
+import org.zeniot.data.domain.transport.SimulatorTransportConfig;
 import org.zeniot.data.enums.SimulatorStatusEnum;
 import org.zeniot.data.enums.TransportTypeEnum;
 
@@ -25,7 +25,7 @@ public class Simulator extends DTO {
     @NotNull(message = "Transport Type不能为空")
     private TransportTypeEnum transportType;
 
-    private TransportConfig transportConfig;
+    private SimulatorTransportConfig transportConfig;
 
     @Setter
     private SimulatorStatusEnum status;

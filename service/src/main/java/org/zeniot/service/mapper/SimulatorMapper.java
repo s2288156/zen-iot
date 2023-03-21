@@ -5,7 +5,7 @@ import org.mapstruct.*;
 import org.zeniot.common.util.JacksonUtil;
 import org.zeniot.dao.model.SimulatorEntity;
 import org.zeniot.data.domain.simulator.Simulator;
-import org.zeniot.data.domain.transport.TransportConfig;
+import org.zeniot.data.domain.transport.SimulatorTransportConfig;
 
 /**
  * @author Wu.Chunyang
@@ -23,7 +23,7 @@ public interface SimulatorMapper {
 
     @AfterMapping
     default void afterToDto(@MappingTarget Simulator simulator, SimulatorEntity entity) {
-        simulator.setTransportConfig(JacksonUtil.convertValue(entity.getTransportConfig(), TransportConfig.class));
+        simulator.setTransportConfig(JacksonUtil.convertValue(entity.getTransportConfig(), SimulatorTransportConfig.class));
     }
 
     @Mapping(target = "transportConfig", ignore = true)

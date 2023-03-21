@@ -11,7 +11,7 @@ import io.netty.handler.timeout.IdleStateHandler;
 import lombok.extern.slf4j.Slf4j;
 import org.zeniot.common.util.JacksonUtil;
 import org.zeniot.data.domain.simulator.Simulator;
-import org.zeniot.data.domain.transport.MqttTransportConfig;
+import org.zeniot.data.domain.transport.SimulatorMqttTransportConfig;
 
 import java.util.concurrent.TimeUnit;
 
@@ -31,7 +31,7 @@ public class MqttClient {
     private MqttClientHandler mqttClientHandler;
 
     public MqttClient(Simulator simulator) {
-        MqttTransportConfig mqttTransportConfig = JacksonUtil.convertValue(simulator.getTransportConfig(), MqttTransportConfig.class);
+        SimulatorMqttTransportConfig mqttTransportConfig = JacksonUtil.convertValue(simulator.getTransportConfig(), SimulatorMqttTransportConfig.class);
         clientId = String.valueOf(simulator.getId());
         name = simulator.getName();
         mqttClientHandler = new MqttClientHandler(clientId, name, password, mqttTransportConfig);
