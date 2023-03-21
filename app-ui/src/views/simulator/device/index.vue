@@ -48,7 +48,7 @@
         @next-click="nextClick"
         @current-change="currentChange"
     />
-    <SimulatorDialog ref="addSimulator"/>
+    <AddSimulator ref="addSimulator"/>
   </div>
 </template>
 
@@ -58,7 +58,7 @@ import type {BaseDataPage, PageQuery} from '@/api/global-types'
 import {ElMessage} from "element-plus";
 import type {Simulator} from "@/api/data/types";
 import {deleteSimulator, getSimulators, switchSimulatorStatus} from "@/api/simulator-apis";
-import SimulatorDialog from "./SimulatorDialog.vue";
+import AddSimulator from "./AddSimulator.vue";
 
 
 const pageQuery: PageQuery = {page: 0, size: 10}
@@ -67,7 +67,7 @@ const simulators = ref<BaseDataPage<Simulator>>({
   size: 0,
   totalPages: 0,
 })
-const addSimulator = ref<InstanceType<typeof SimulatorDialog> | null>(null)
+const addSimulator = ref<InstanceType<typeof AddSimulator> | null>(null)
 const openModal = () => {
   addSimulator.value.open()
 }
