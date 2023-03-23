@@ -7,6 +7,8 @@ import org.zeniot.data.base.PageQuery;
 import org.zeniot.data.base.PageResponse;
 import org.zeniot.data.base.SingleResponse;
 import org.zeniot.data.domain.simulator.Simulator;
+import org.zeniot.data.domain.simulator.transport.SimulatorTransportConfig;
+import org.zeniot.data.enums.TransportTypeEnum;
 
 /**
  * @author Wu.Chunyang
@@ -40,6 +42,11 @@ public class SimulatorController extends AbstractController {
     @PostMapping("/simulator/switch/{id}")
     public SingleResponse<Simulator> powerSwitch(@PathVariable Long id) {
         return SingleResponse.success(simulatorService.switchSimulatorPower(id));
+    }
+
+    @GetMapping("/simulator/defaultConfig")
+    public SingleResponse<SimulatorTransportConfig> defaultTransportConfig(TransportTypeEnum transportType) {
+        return SingleResponse.success(simulatorService.defaultTransportConfig(transportType));
     }
 
 }

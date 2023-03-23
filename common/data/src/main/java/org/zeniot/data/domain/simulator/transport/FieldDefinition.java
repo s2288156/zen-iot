@@ -1,10 +1,12 @@
 package org.zeniot.data.domain.simulator.transport;
 
+import lombok.Data;
 import org.zeniot.data.enums.FieldTypeEnum;
 
 /**
  * @author Wu.Chunyang
  */
+@Data
 public class FieldDefinition {
 
     private String name;

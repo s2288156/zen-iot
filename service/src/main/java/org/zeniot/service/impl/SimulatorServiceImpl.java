@@ -11,7 +11,10 @@ import org.zeniot.dao.repository.SimulatorRepository;
 import org.zeniot.data.base.PageQuery;
 import org.zeniot.data.base.PageResponse;
 import org.zeniot.data.domain.simulator.Simulator;
+import org.zeniot.data.domain.simulator.transport.SimulatorMqttTransportConfig;
+import org.zeniot.data.domain.simulator.transport.SimulatorTransportConfig;
 import org.zeniot.data.enums.SimulatorStatusEnum;
+import org.zeniot.data.enums.TransportTypeEnum;
 import org.zeniot.service.mapper.SimulatorMapper;
 import org.zeniot.transport.api.SimulatorManagement;
 
@@ -69,5 +72,14 @@ public class SimulatorServiceImpl implements SimulatorService {
             simulatorManagement.disableSimulator(simulatorMapper.entityToSimulator(oldSimulator));
         }
         return simulatorMapper.entityToSimulator(oldSimulator);
+    }
+
+    @Override
+    public SimulatorTransportConfig defaultTransportConfig(TransportTypeEnum transportType) {
+        SimulatorTransportConfig config = null;
+        switch (transportType) {
+            case MQTT -> config = SimulatorMqttTransportConfig.newDefault();
+        }
+        return config;
     }
 }
