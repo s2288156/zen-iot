@@ -19,21 +19,21 @@ export type Device = {
 }
 
 export type DeviceCommon = {
-  transportTypes: string[]
-  statuses: string[]
-  timeUnit: string[]
+  transportTypes?: string[]
+  statuses?: string[]
+  timeUnit?: string[]
 }
 
 export type Simulator = {
   id?: any
-  name: string
-  transportType: string
+  name?: string
+  transportType?: string
   transportConfig: TransportConfig
   status?: string
 }
 
 export type TransportConfig = {
-  type: string
+  type?: string
   saveTimeseriesTopic?: string
   period?: number
   timeUnit?: string

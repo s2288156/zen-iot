@@ -14,8 +14,8 @@ export const useUserStore = defineStore({
     login(loginForm: Account) {
       return new Promise((resolve, reject) => {
         login(loginForm).then(resp => {
-          localStorage.setItem(TOKEN_KEY, resp.data.data.token)
-          resolve(resp.data.data)
+          localStorage.setItem(TOKEN_KEY, resp.data.token)
+          resolve(resp.data)
         }).catch(error => {
           reject(error)
         })

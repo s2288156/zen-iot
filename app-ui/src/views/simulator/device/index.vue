@@ -62,7 +62,7 @@ import AddSimulator from "./AddSimulator.vue";
 
 
 const pageQuery: PageQuery = {page: 0, size: 10}
-const simulators = ref<BaseDataPage<Simulator>>({
+const simulators = ref<BaseDataPage<Simulator> | any>({
   data: [],
   size: 0,
   totalPages: 0,
@@ -74,7 +74,7 @@ const openModal = () => {
 
 const loadSimulatorList = () => {
   getSimulators(pageQuery).then((response) => {
-    simulators.value = response.data
+    simulators.value = response
   })
 }
 
@@ -90,24 +90,20 @@ const handleDetail = () => {
 
 const handleDeleteSimulator = (row: Simulator) => {
   if (row.id != null) {
-    deleteSimulator(row.id).then((response) => {
-      if (response.status === 200) {
-        loadSimulatorList();
-      }
+    deleteSimulator(row.id).then(() => {
+      loadSimulatorList();
     })
   }
 }
 
 const handleSimulatorPowerSwitch = (row: Simulator) => {
   switchSimulatorStatus(row.id).then((resp) => {
-    if (resp.status === 200) {
-      row.status = resp.data.data.status
-      ElMessage({
-        showClose: true,
-        message: resp.data.data.status + ' Success!',
-        type: 'success',
-      })
-    }
+    row.status = resp.data.status
+    ElMessage({
+      showClose: true,
+      message: resp.data.status + ' Success!',
+      type: 'success',
+    })
   })
 
 }

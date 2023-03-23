@@ -50,29 +50,27 @@ import {saveSimulator} from "@/api/simulator-apis";
 import {getDeviceCommon} from "@/api/device-apis";
 
 const visible = ref(false)
-const deviceCommonData = ref<DeviceCommon>({timeUnit: [], statuses: [], transportTypes: []});
+const deviceCommonData = ref<DeviceCommon>({});
 const ruleFormRef = ref<FormInstance>()
 
 const loadDeviceCommon = () => {
   getDeviceCommon().then((resp) => {
-    deviceCommonData.value = resp.data.data
+    deviceCommonData.value = resp.data
   })
 }
 
 let createSimulatorForm = reactive<Simulator>({
-  name: "",
-  transportType: TransportType[TransportType.DEFAULT],
+  transportType: TransportType[TransportType.MQTT],
   transportConfig: {
-    type: TransportType[TransportType.DEFAULT],
-    saveTimeseriesTopic: '/save/timeseries',
-    period: 10,
+    type: TransportType[TransportType.MQTT],
+    saveTimeseriesTopic: '',
+    period: 1,
     timeUnit: TimeUnit[TimeUnit.SECONDS]
   }
 })
 
 const resetDeviceForm = (formEl: FormInstance) => {
   formEl.resetFields()
-  // dialogFormVisible.value = false
   createSimulatorForm.name = ''
   createSimulatorForm.transportType = TransportType[TransportType.DEFAULT]
 }
@@ -87,10 +85,8 @@ const handleCreateSimulator = async (formEl: FormInstance) => {
   await formEl.validate((valid, fields) => {
     if (valid) {
       createSimulatorForm.transportConfig.type = createSimulatorForm.transportType
-      saveSimulator(createSimulatorForm).then((resp) => {
-        if (resp.status === 200) {
-          resetDeviceForm(formEl)
-        }
+      saveSimulator(createSimulatorForm).then(() => {
+        resetDeviceForm(formEl)
       })
     }
   })

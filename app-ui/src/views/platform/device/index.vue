@@ -99,7 +99,7 @@ const loadDeviceList = () => {
 }
 const loadDeviceCommon = () => {
   getDeviceCommon().then((resp) => {
-    deviceCommonData.value = resp.data.data
+    deviceCommonData.value = resp.data
   })
 }
 
