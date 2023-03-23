@@ -31,3 +31,13 @@ export function switchSimulatorStatus(id: string) {
     method: 'post',
   })
 }
+
+export function defaultTransportConfig(transportType: string) {
+  return request({
+    url: '/api/simulator/defaultConfig',
+    method: 'get',
+    params: {
+      transportType: transportType
+    }
+  })
+}

@@ -22,7 +22,7 @@ public class DeviceCommonData extends DTO {
 
     public static DeviceCommonData create() {
         DeviceCommonData deviceCommonData = new DeviceCommonData();
-        deviceCommonData.setTransportTypes(List.of(TransportTypeEnum.values()));
+        deviceCommonData.setTransportTypes(List.of(TransportTypeEnum.MQTT));
         deviceCommonData.setStatuses(List.of(DeviceStatusEnum.values()));
         deviceCommonData.setTimeUnit(List.of(TimeUnit.MILLISECONDS.name(), TimeUnit.SECONDS.name()));
         return deviceCommonData;

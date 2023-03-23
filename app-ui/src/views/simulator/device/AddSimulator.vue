@@ -5,7 +5,7 @@
         <el-input v-model="createSimulatorForm.name"/>
       </el-form-item>
       <el-form-item label="Transport Type" prop="transportType">
-        <el-select v-model="createSimulatorForm.transportType" clearable placeholder="Transport Type">
+        <el-select v-model="createSimulatorForm.transportType" @change="selectTransportTypeChange" placeholder="Transport Type">
           <el-option
               v-for="item in deviceCommonData.transportTypes"
               :key="item"
@@ -46,7 +46,7 @@ import {reactive, ref} from "vue";
 import type {FormInstance, FormRules} from "element-plus";
 import type {DeviceCommon, Simulator} from "@/api/data/types";
 import {TimeUnit, TransportType} from "@/api/data/enums";
-import {saveSimulator} from "@/api/simulator-apis";
+import {defaultTransportConfig, saveSimulator} from "@/api/simulator-apis";
 import {getDeviceCommon} from "@/api/device-apis";
 
 const visible = ref(false)
@@ -69,10 +69,20 @@ let createSimulatorForm = reactive<Simulator>({
   }
 })
 
+const selectTransportTypeChange = () => {
+  queryDefaultTransportConfig(createSimulatorForm.transportType || '');
+}
+
+const queryDefaultTransportConfig = (transportType: string) => {
+  defaultTransportConfig(transportType).then((resp) => {
+    createSimulatorForm.transportConfig = resp.data
+  })
+}
 const resetDeviceForm = (formEl: FormInstance) => {
   formEl.resetFields()
   createSimulatorForm.name = ''
-  createSimulatorForm.transportType = TransportType[TransportType.DEFAULT]
+  createSimulatorForm.transportType = TransportType[TransportType.MQTT]
+  visible.value = false
 }
 
 const rules = reactive<FormRules>({
@@ -95,6 +105,7 @@ const handleCreateSimulator = async (formEl: FormInstance) => {
 const open = () => {
   visible.value = true
   loadDeviceCommon()
+  queryDefaultTransportConfig(TransportType[TransportType.MQTT])
 }
 
 defineExpose({
