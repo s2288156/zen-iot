@@ -1,9 +1,11 @@
-package org.zeniot.data.domain.transport;
+package org.zeniot.data.domain.simulator.transport;
 
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import org.zeniot.data.domain.transport.Transport;
 import org.zeniot.data.enums.TransportTypeEnum;
 
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -18,6 +20,8 @@ public class SimulatorMqttTransportConfig extends SimulatorTransportConfig imple
     private long period;
 
     private TimeUnit timeUnit;
+
+    private List<FieldDefinition> timeseriesFields;
 
     private String host;
 

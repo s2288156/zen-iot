@@ -5,7 +5,7 @@ import org.mapstruct.*;
 import org.zeniot.common.util.JacksonUtil;
 import org.zeniot.dao.model.SimulatorEntity;
 import org.zeniot.data.domain.simulator.Simulator;
-import org.zeniot.data.domain.transport.SimulatorTransportConfig;
+import org.zeniot.data.domain.simulator.transport.SimulatorTransportConfig;
 
 /**
  * @author Wu.Chunyang

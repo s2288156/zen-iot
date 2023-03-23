@@ -11,7 +11,7 @@ import io.netty.handler.timeout.IdleStateHandler;
 import lombok.extern.slf4j.Slf4j;
 import org.zeniot.common.util.JacksonUtil;
 import org.zeniot.data.domain.simulator.Simulator;
-import org.zeniot.data.domain.transport.SimulatorMqttTransportConfig;
+import org.zeniot.data.domain.simulator.transport.SimulatorMqttTransportConfig;
 
 import java.util.concurrent.TimeUnit;
 

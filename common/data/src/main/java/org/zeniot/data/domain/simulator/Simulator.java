@@ -6,7 +6,7 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.Setter;
 import org.zeniot.data.base.DTO;
-import org.zeniot.data.domain.transport.SimulatorTransportConfig;
+import org.zeniot.data.domain.simulator.transport.SimulatorTransportConfig;
 import org.zeniot.data.enums.SimulatorStatusEnum;
 import org.zeniot.data.enums.TransportTypeEnum;
 

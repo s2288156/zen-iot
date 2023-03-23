@@ -1,4 +1,4 @@
-package org.zeniot.data.domain.transport;
+package org.zeniot.data.domain.simulator.transport;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonSubTypes;

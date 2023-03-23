@@ -7,12 +7,11 @@ import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.handler.codec.mqtt.*;
 import io.netty.util.ReferenceCountUtil;
 import lombok.extern.slf4j.Slf4j;
-import org.zeniot.data.domain.transport.SimulatorMqttTransportConfig;
+import org.zeniot.data.domain.simulator.transport.SimulatorMqttTransportConfig;
 
 import java.nio.charset.StandardCharsets;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -61,7 +60,7 @@ public class MqttClientHandler extends ChannelInboundHandlerAdapter {
             String payload = "hahah" + packetId.get();
             MqttPublishMessage publishMessage = new MqttPublishMessage(publishFixedHeader, publishVariableHeader, Unpooled.wrappedBuffer(payload.getBytes(StandardCharsets.UTF_8)));
             ctx.writeAndFlush(publishMessage);
-        }, 3, 3, TimeUnit.SECONDS);
+        }, 0, transportConfig.getPeriod(), transportConfig.getTimeUnit());
     }
 
     @Override
