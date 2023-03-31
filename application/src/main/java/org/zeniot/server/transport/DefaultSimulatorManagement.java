@@ -17,7 +17,7 @@ import java.util.concurrent.ConcurrentMap;
 @Component
 public class DefaultSimulatorManagement implements SimulatorManagement {
 
-    private final ConcurrentMap<Long, MqttClient> simulators = new ConcurrentHashMap();
+    private final ConcurrentMap<Long, MqttClient> simulators = new ConcurrentHashMap<>();
 
     @Override
     public void enableSimulator(Simulator simulator) {

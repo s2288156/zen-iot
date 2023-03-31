@@ -22,10 +22,10 @@ import java.util.concurrent.TimeUnit;
 @Slf4j
 public class MqttBrokerServer {
 
-    private MqttBrokerService mqttBrokerService;
+    private final MqttBrokerService mqttBrokerService;
 
-    private EventLoopGroup boosGroup = new NioEventLoopGroup(1);
-    private EventLoopGroup workerGroup = new NioEventLoopGroup();
+    private final EventLoopGroup boosGroup = new NioEventLoopGroup(1);
+    private final EventLoopGroup workerGroup = new NioEventLoopGroup();
     private ChannelFuture channelFuture;
 
     public MqttBrokerServer(MqttBrokerService mqttBrokerService) {

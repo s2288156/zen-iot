@@ -28,7 +28,7 @@ public class MqttClient {
     private EventLoopGroup workerGroup = new NioEventLoopGroup();
     private boolean isConnected = false;
     private Channel channel;
-    private MqttClientHandler mqttClientHandler;
+    private final MqttClientHandler mqttClientHandler;
 
     public MqttClient(Simulator simulator) {
         SimulatorMqttTransportConfig mqttTransportConfig = JacksonUtil.convertValue(simulator.getTransportConfig(), SimulatorMqttTransportConfig.class);
