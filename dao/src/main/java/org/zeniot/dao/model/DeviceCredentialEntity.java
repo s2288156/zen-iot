@@ -24,7 +24,7 @@ public class DeviceCredentialEntity extends BaseEntity {
     private Long deviceId;
 
     @ToString.Exclude
-    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToOne
     @JoinColumn(name = "device_id", insertable = false, updatable = false)
     private DeviceEntity deviceEntity;
 
