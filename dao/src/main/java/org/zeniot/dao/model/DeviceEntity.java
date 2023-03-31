@@ -2,14 +2,14 @@ package org.zeniot.dao.model;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import jakarta.persistence.*;
-import lombok.*;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.ToString;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
 import org.zeniot.data.enums.DeviceStatusEnum;
 import org.zeniot.data.enums.TransportTypeEnum;
 
-@AllArgsConstructor
-@NoArgsConstructor
 @Getter
 @Setter
 @ToString
@@ -31,5 +31,8 @@ public class DeviceEntity extends BaseEntity {
     @Enumerated(EnumType.STRING)
     @Column(name = "status")
     private DeviceStatusEnum status;
+
+    @OneToOne(mappedBy = "deviceEntity", orphanRemoval = true)
+    private DeviceCredentialEntity deviceCredentialEntity;
 
 }
