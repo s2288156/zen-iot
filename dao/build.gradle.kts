@@ -1,5 +1,6 @@
 plugins {
     `java-library`
+    jacoco
 }
 dependencies {
     api(project(":common:util"))
@@ -17,7 +18,18 @@ dependencies {
     testRuntimeOnly("com.h2database:h2")
 }
 
-tasks.getByName<Test>("test") {
+tasks.test {
     useJUnitPlatform()
+    finalizedBy(tasks.jacocoTestReport)
 }
 
+tasks.jacocoTestReport {
+    reports {
+        html.outputLocation.set(layout.buildDirectory.dir("jacocoHtml"))
+    }
+}
+
+jacoco {
+    toolVersion = "0.8.8"
+    reportsDirectory.set(layout.buildDirectory.dir("$buildDir/reports/jacoco"))
+}
