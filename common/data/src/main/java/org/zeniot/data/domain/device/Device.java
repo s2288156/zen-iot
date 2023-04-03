@@ -1,10 +1,10 @@
 package org.zeniot.data.domain.device;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
 import org.zeniot.data.base.DTO;
+import org.zeniot.data.domain.device.transport.DeviceTransportConfig;
 import org.zeniot.data.enums.DeviceStatusEnum;
 import org.zeniot.data.enums.TransportTypeEnum;
 
@@ -27,9 +27,11 @@ public class Device extends DTO {
     @NotNull(message = "Transport Type不能为空")
     private TransportTypeEnum transportType;
 
-    private JsonNode transportConfig;
+    @Setter
+    private DeviceTransportConfig transportConfig;
 
     @Setter
+    @NotNull
     private DeviceStatusEnum status;
 
 }

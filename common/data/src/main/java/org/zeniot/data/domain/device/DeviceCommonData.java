@@ -2,6 +2,7 @@ package org.zeniot.data.domain.device;
 
 import lombok.Data;
 import org.zeniot.data.base.DTO;
+import org.zeniot.data.enums.DeviceCredentialTypeEnum;
 import org.zeniot.data.enums.DeviceStatusEnum;
 import org.zeniot.data.enums.TransportTypeEnum;
 
@@ -15,7 +16,8 @@ import java.util.concurrent.TimeUnit;
 public class DeviceCommonData extends DTO {
     private List<TransportTypeEnum> transportTypes;
     private List<DeviceStatusEnum> statuses;
-    private List<String> timeUnit;
+    private List<TimeUnit> timeUnit;
+    private List<DeviceCredentialTypeEnum> credentialTypes;
 
     private DeviceCommonData() {
     }
@@ -24,7 +26,9 @@ public class DeviceCommonData extends DTO {
         DeviceCommonData deviceCommonData = new DeviceCommonData();
         deviceCommonData.setTransportTypes(List.of(TransportTypeEnum.MQTT));
         deviceCommonData.setStatuses(List.of(DeviceStatusEnum.values()));
-        deviceCommonData.setTimeUnit(List.of(TimeUnit.MILLISECONDS.name(), TimeUnit.SECONDS.name()));
+        deviceCommonData.setTimeUnit(List.of(TimeUnit.MILLISECONDS, TimeUnit.SECONDS));
+        deviceCommonData.setCredentialTypes(List.of(DeviceCredentialTypeEnum.ACCESS_TOKEN, DeviceCredentialTypeEnum.MQTT_BASE));
+
         return deviceCommonData;
     }
 }
