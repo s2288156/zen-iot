@@ -2,6 +2,7 @@ package org.zeniot.data.domain.account;
 
 import jakarta.validation.constraints.NotBlank;
 import lombok.Getter;
+import lombok.Setter;
 import lombok.ToString;
 import org.zeniot.data.base.DTO;
 
@@ -11,6 +12,7 @@ import java.util.Set;
 /**
  * @author Wu.Chunyang
  */
+@Setter
 @Getter
 @ToString
 public class Account extends DTO {
