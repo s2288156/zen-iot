@@ -1,17 +1,12 @@
 package org.zeniot.server.controller;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import org.zeniot.api.AccountService;
 import org.zeniot.data.base.PageQuery;
 import org.zeniot.data.base.PageResponse;
 import org.zeniot.data.base.SingleResponse;
 import org.zeniot.data.domain.account.Account;
-import org.zeniot.server.security.JwtHandler;
 import org.zeniot.data.vo.UserToken;
 
 /**
@@ -20,15 +15,6 @@ import org.zeniot.data.vo.UserToken;
 @RequestMapping("/api")
 @RestController
 public class AccountController extends AbstractController {
-
-    @Autowired
-    private AccountService accountService;
-    @Autowired
-    private UserDetailsService userDetailsService;
-    @Autowired
-    private JwtHandler jwtHandler;
-    @Autowired
-    private PasswordEncoder passwordEncoder;
 
     @PostMapping("/login")
     public SingleResponse<UserToken> login(@RequestBody Account account) {

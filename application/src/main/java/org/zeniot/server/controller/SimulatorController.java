@@ -2,7 +2,6 @@ package org.zeniot.server.controller;
 
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import org.zeniot.api.SimulatorService;
 import org.zeniot.data.base.PageQuery;
 import org.zeniot.data.base.PageResponse;
 import org.zeniot.data.base.SingleResponse;
@@ -16,12 +15,6 @@ import org.zeniot.data.enums.TransportTypeEnum;
 @RequestMapping("/api")
 @RestController
 public class SimulatorController extends AbstractController {
-
-    private final SimulatorService simulatorService;
-
-    public SimulatorController(SimulatorService simulatorService) {
-        this.simulatorService = simulatorService;
-    }
 
     @PostMapping("/simulator")
     public SingleResponse<Simulator> saveSimulator(@RequestBody @Validated Simulator simulator) {
