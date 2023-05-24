@@ -88,7 +88,7 @@ const pageQuery: PageQuery = {
 const accountDataPage = ref<BaseDataPage<Account>>({
   data: [],
   size: 0,
-  totalPages: 0,
+  totalPages: 0
 })
 
 const loadAccountList = () => {

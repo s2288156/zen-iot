@@ -11,9 +11,7 @@ const service = axios.create({
 service.interceptors.request.use(
   config => {
     if (useUserStore().getToken() && config.url !== '/api/login') {
-      config.headers = {
-        'Authorization': 'Bearer ' + useUserStore().getToken()
-      }
+      config.headers.setAuthorization('Bearer ' + useUserStore().getToken())
     }
     return config
   },
@@ -45,7 +43,7 @@ service.interceptors.response.use(
       }
       return Promise.reject(new Error(rsp.msg || 'Error'));
     } else {
-      return response.data
+      return response
     }
   }
 )

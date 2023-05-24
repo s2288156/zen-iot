@@ -74,7 +74,7 @@ const openModal = () => {
 
 const loadSimulatorList = () => {
   getSimulators(pageQuery).then((response) => {
-    simulators.value = response
+    simulators.value = response.data
   })
 }
 
