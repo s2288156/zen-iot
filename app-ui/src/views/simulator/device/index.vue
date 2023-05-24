@@ -98,10 +98,10 @@ const handleDeleteSimulator = (row: Simulator) => {
 
 const handleSimulatorPowerSwitch = (row: Simulator) => {
   switchSimulatorStatus(row.id).then((resp) => {
-    row.status = resp.data.data.status
+    row.status = resp.data.status
     ElMessage({
       showClose: true,
-      message: resp.data.data.status + ' Success!',
+      message: resp.data.status + ' Success!',
       type: 'success',
     })
   })

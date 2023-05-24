@@ -31,7 +31,6 @@ public class Device extends DTO {
     private DeviceTransportConfig transportConfig;
 
     @Setter
-    @NotNull
     private DeviceStatusEnum status;
 
 }
