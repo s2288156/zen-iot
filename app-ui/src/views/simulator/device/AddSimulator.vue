@@ -65,7 +65,8 @@ let createSimulatorForm = reactive<Simulator>({
     type: TransportType[TransportType.MQTT],
     saveTimeseriesTopic: '',
     period: 1,
-    timeUnit: TimeUnit[TimeUnit.SECONDS]
+    timeUnit: TimeUnit[TimeUnit.SECONDS],
+    timeseriesFields: []
   }
 })
 

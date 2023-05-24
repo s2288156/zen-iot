@@ -16,11 +16,11 @@ public class FieldDefinition {
     /**
      * field value origin
      */
-    private String origin;
+    private String valueOrigin;
 
     /**
      * field value bound
      */
-    private String bound;
+    private String valueBound;
 
 }

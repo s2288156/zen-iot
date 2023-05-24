@@ -58,8 +58,8 @@ public class SimulatorMqttTransportConfig extends SimulatorTransportConfig imple
         FieldDefinition fieldDefinition = new FieldDefinition();
         fieldDefinition.setFieldType(FieldTypeEnum.INTEGER);
         fieldDefinition.setName("temperature");
-        fieldDefinition.setOrigin("1");
-        fieldDefinition.setBound("100");
+        fieldDefinition.setValueOrigin("1");
+        fieldDefinition.setValueBound("100");
         SimulatorMqttTransportConfig config = new SimulatorMqttTransportConfig();
         config.setSaveTimeseriesTopic("save/timeseries");
         config.setPeriod(1);

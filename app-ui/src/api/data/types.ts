@@ -37,4 +37,12 @@ export type TransportConfig = {
   saveTimeseriesTopic?: string
   period?: number
   timeUnit?: string
+  timeseriesFields: SimulatorJsonFieldDefine[]
+}
+
+export type SimulatorJsonFieldDefine = {
+  name: string
+  fieldType: string
+  valueOrigin: string
+  valueBound: string
 }

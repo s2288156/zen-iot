@@ -69,6 +69,7 @@ public class MqttClient {
     public void shutdown() {
         workerGroup.shutdownGracefully();
         this.isConnected = false;
+        mqttClientHandler.destroy();
         log.info("shutdown mqtt client, clientId = {}, name = {}", clientId, name);
     }
 }

@@ -25,9 +25,9 @@ public class MqttClientHandler extends ChannelInboundHandlerAdapter {
     private final String userName;
     private final byte[] password;
 
-    private ScheduledExecutorService executorService;
-    private AtomicInteger packetId = new AtomicInteger();
-    private SimulatorMqttTransportConfig transportConfig;
+    private final ScheduledExecutorService executorService;
+    private final AtomicInteger packetId = new AtomicInteger();
+    private final SimulatorMqttTransportConfig transportConfig;
 
     public MqttClientHandler(String clientId, String userName, String password, SimulatorMqttTransportConfig mqttTransportConfig) {
         this.clientId = clientId;
@@ -68,5 +68,9 @@ public class MqttClientHandler extends ChannelInboundHandlerAdapter {
         cause.printStackTrace();
         log.error("simulator mqtt client [{}] error: ", clientId, cause);
         ctx.close();
+    }
+
+    public void destroy() {
+        this.executorService.shutdown();
     }
 }

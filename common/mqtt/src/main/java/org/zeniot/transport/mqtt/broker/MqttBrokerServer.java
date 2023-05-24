@@ -53,7 +53,7 @@ public class MqttBrokerServer {
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
         }
-        log.info("MQTT broker initiated... ");
+        log.info("MQTT broker [{}] initiated... ", 1883);
 
     }
 
