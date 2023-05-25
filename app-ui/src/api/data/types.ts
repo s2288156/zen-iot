@@ -22,6 +22,7 @@ export type DeviceCommon = {
   transportTypes?: string[]
   statuses?: string[]
   timeUnit?: string[]
+  fieldTypes?: string[]
 }
 
 export type Simulator = {

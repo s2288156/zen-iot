@@ -30,7 +30,37 @@
           />
         </el-select>
       </el-form-item>
-
+      <el-form-item label="Timeseries Fields" prop="timeseriesFields">
+        <el-table :data="createSimulatorForm.transportConfig.timeseriesFields" stripe style="width: 100%">
+          <el-table-column prop="name" label="Name" width="180">
+            <template #default="scope">
+              <el-input v-model="scope.row.name"></el-input>
+            </template>
+          </el-table-column>
+          <el-table-column prop="fieldType" label="Field Type" width="180">
+            <template #default="scope">
+              <el-select v-model="scope.row.fieldType">
+                <el-option
+                  v-for="item in deviceCommonData.fieldTypes"
+                  :key="item"
+                  :label="item"
+                  :value="item"
+                />
+              </el-select>
+            </template>
+          </el-table-column>
+          <el-table-column prop="valueOrigin" label="Value Origin">
+            <template #default="scope">
+              <el-input v-model="scope.row.valueOrigin"></el-input>
+            </template>
+          </el-table-column>
+          <el-table-column prop="valueBound" label="Value Bound">
+            <template #default="scope">
+              <el-input v-model="scope.row.valueBound"></el-input>
+            </template>
+          </el-table-column>
+        </el-table>
+      </el-form-item>
     </el-form>
     <template #footer>
         <span class="dialog-footer">
