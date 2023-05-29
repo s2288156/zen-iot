@@ -48,7 +48,7 @@
         @next-click="nextClick"
         @current-change="currentChange"
     />
-    <AddSimulator ref="addSimulator"/>
+    <AddSimulator ref="addSimulator" @refresh="loadSimulatorList"/>
   </div>
 </template>
 
