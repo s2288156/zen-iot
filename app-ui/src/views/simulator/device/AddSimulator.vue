@@ -42,7 +42,7 @@
           <el-table-column prop="valueBound" label="Value Bound">
             <template #header="scope">
               Value Bound
-              <el-link type="primary" @click="add">+</el-link>
+              <el-link v-show="!formDisabled" type="primary" @click="add">+</el-link>
             </template>
             <template #default="scope">
               <el-input v-model="scope.row.valueBound"></el-input>
