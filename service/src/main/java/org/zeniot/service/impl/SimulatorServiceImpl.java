@@ -52,24 +52,23 @@ public class SimulatorServiceImpl implements SimulatorService {
     }
 
     @Override
-    public boolean deleteSimulator(Long id) {
+    public void deleteSimulator(Long id) {
         simulatorRepository.deleteById(id);
-        return true;
     }
 
     @Transactional(rollbackFor = Exception.class)
     @Override
-    public Simulator switchSimulatorPower(Long id) {
+    public Simulator switchSimulatorPower(Long id, SimulatorStatusEnum toStatus) {
         SimulatorEntity oldSimulator = simulatorRepository.findById(id)
                 .orElseThrow(() -> new BizException("Simulator not exist."));
-
-        // 更新设备状态，添加事务
-        oldSimulator.setStatus(oldSimulator.getStatus().reverse());
-        simulatorRepository.save(oldSimulator);
-        if (oldSimulator.getStatus() == SimulatorStatusEnum.ENABLE) {
-            simulatorManagement.enableSimulator(simulatorMapper.entityToSimulator(oldSimulator));
-        } else {
-            simulatorManagement.disableSimulator(simulatorMapper.entityToSimulator(oldSimulator));
+        if (oldSimulator.getStatus() != toStatus) {
+            oldSimulator.setStatus(toStatus);
+            simulatorRepository.save(oldSimulator);
+            if (oldSimulator.getStatus() == SimulatorStatusEnum.ENABLE) {
+                simulatorManagement.enableSimulator(simulatorMapper.entityToSimulator(oldSimulator));
+            } else {
+                simulatorManagement.disableSimulator(simulatorMapper.entityToSimulator(oldSimulator));
+            }
         }
         return simulatorMapper.entityToSimulator(oldSimulator);
     }

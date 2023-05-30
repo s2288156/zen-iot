@@ -5,7 +5,6 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import org.zeniot.data.base.Cmd;
 import org.zeniot.data.base.HasId;
-import org.zeniot.data.enums.DeviceStatusEnum;
 import org.zeniot.data.enums.SimulatorStatusEnum;
 
 
@@ -20,6 +19,6 @@ public class SimulatorSwitchPowerCmd extends Cmd implements HasId {
     private Long id;
 
     @NotNull
-    private SimulatorStatusEnum simulatorStatus;
+    private SimulatorStatusEnum status;
 
 }

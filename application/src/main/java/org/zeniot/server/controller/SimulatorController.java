@@ -5,6 +5,7 @@ import org.springframework.web.bind.annotation.*;
 import org.zeniot.data.base.PageQuery;
 import org.zeniot.data.base.PageResponse;
 import org.zeniot.data.base.SingleResponse;
+import org.zeniot.data.command.SimulatorSwitchPowerCmd;
 import org.zeniot.data.domain.simulator.Simulator;
 import org.zeniot.data.domain.simulator.transport.SimulatorTransportConfig;
 import org.zeniot.data.enums.TransportTypeEnum;
@@ -32,9 +33,9 @@ public class SimulatorController extends AbstractController {
         return SingleResponse.success();
     }
 
-    @PostMapping("/simulator/switch/{id}")
-    public SingleResponse<Simulator> powerSwitch(@PathVariable Long id) {
-        return SingleResponse.success(simulatorService.switchSimulatorPower(id));
+    @PostMapping("/simulator/switch")
+    public SingleResponse<Simulator> simulatorPowerSwitch(@Validated SimulatorSwitchPowerCmd cmd) {
+        return SingleResponse.success(simulatorService.switchSimulatorPower(cmd.getId(), cmd.getStatus()));
     }
 
     @GetMapping("/simulator/defaultConfig")

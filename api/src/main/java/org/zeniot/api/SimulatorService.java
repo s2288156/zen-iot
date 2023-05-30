@@ -4,6 +4,7 @@ import org.zeniot.data.base.PageQuery;
 import org.zeniot.data.base.PageResponse;
 import org.zeniot.data.domain.simulator.Simulator;
 import org.zeniot.data.domain.simulator.transport.SimulatorTransportConfig;
+import org.zeniot.data.enums.SimulatorStatusEnum;
 import org.zeniot.data.enums.TransportTypeEnum;
 
 /**
@@ -14,9 +15,9 @@ public interface SimulatorService {
 
     Simulator saveSimulator(Simulator simulator);
 
-    boolean deleteSimulator(Long id);
+    void deleteSimulator(Long id);
 
-    Simulator switchSimulatorPower(Long id);
+    Simulator switchSimulatorPower(Long id, SimulatorStatusEnum toStatus);
 
     SimulatorTransportConfig defaultTransportConfig(TransportTypeEnum transportType);
 }

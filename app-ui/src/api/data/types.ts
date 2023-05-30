@@ -29,7 +29,7 @@ export type Simulator = {
   id?: any
   name?: string
   transportType?: string
-  transportConfig: TransportConfig
+  transportConfig?: TransportConfig
   status?: string
 }
 

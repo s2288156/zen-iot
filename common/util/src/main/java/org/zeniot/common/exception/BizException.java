@@ -1,9 +1,12 @@
 package org.zeniot.common.exception;
 
+import java.io.Serial;
+
 /**
  * @author Wu.Chunyang
  */
 public class BizException extends RuntimeException{
+    @Serial
     private static final long serialVersionUID = -4429158831713664835L;
 
     private int errorCode;

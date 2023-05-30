@@ -97,7 +97,7 @@ const handleDeleteSimulator = (row: Simulator) => {
 }
 
 const handleSimulatorPowerSwitch = (row: Simulator) => {
-  switchSimulatorStatus(row.id).then((resp) => {
+  switchSimulatorStatus(row.id, row.status === 'ENABLE' ? 'DISABLE' : 'ENABLE').then((resp) => {
     row.status = resp.data.status
     ElMessage({
       showClose: true,
