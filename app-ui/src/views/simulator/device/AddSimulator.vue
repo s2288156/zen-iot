@@ -1,6 +1,6 @@
 <template>
   <el-dialog v-model="visible" title="Add Simulator">
-    <el-form label-width="140px" ref="ruleFormRef" :model="createSimulatorForm" :rules="rules" status-icon>
+    <el-form :disabled="formDisabled" label-width="140px" ref="ruleFormRef" :model="createSimulatorForm" :rules="rules" status-icon>
       <el-form-item label="Name" prop="name">
         <el-input v-model="createSimulatorForm.name" />
       </el-form-item>
@@ -70,6 +70,7 @@ import { getDeviceCommon } from '@/api/device-apis'
 import { SimulatorJsonFieldDefine } from '@/api/data/types'
 
 const visible = ref(false)
+const formDisabled = ref(false)
 const deviceCommonData = ref<DeviceCommon>({})
 const ruleFormRef = ref<FormInstance>()
 
@@ -105,6 +106,7 @@ const selectTransportTypeChange = () => {
 
 const queryDefaultTransportConfig = (transportType: string) => {
   defaultTransportConfig(transportType).then(resp => {
+    createSimulatorForm.name = ''
     createSimulatorForm.transportConfig = resp.data
     defaultTimeseriesField.fieldType = createSimulatorForm.transportConfig.timeseriesFields[0].fieldType
     defaultTimeseriesField.name = createSimulatorForm.transportConfig.timeseriesFields[0].name
@@ -149,12 +151,20 @@ const add = () => {
 
 const open = () => {
   visible.value = true
+  formDisabled.value = false
   loadDeviceCommon()
   queryDefaultTransportConfig(TransportType[TransportType.MQTT])
 }
 
+const openDetail = (simulator: Simulator) => {
+  visible.value = true
+  formDisabled.value = true
+  loadDeviceCommon()
+  Object.assign(createSimulatorForm, simulator)
+}
+
 defineExpose({
-  open
+  open, openDetail
 })
 </script>
 
