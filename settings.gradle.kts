@@ -44,3 +44,4 @@ include("common:data")
 findProject(":common:data")?.name = "data"
 include("common:transport-api")
 findProject(":common:transport-api")?.name = "transport-api"
+include("tools")
