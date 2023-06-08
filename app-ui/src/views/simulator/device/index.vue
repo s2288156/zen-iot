@@ -16,11 +16,11 @@
       </el-table-column>
       <el-table-column fixed="right" label="Operations" width="300">
         <template #default="{ row, $index }">
-          <el-button size="small" type="primary" @click="handleSimulatorPowerSwitch(row)">
+          <el-button size="small" type="success" @click="handleSimulatorPowerSwitch(row)">
             {{ row.status === 'DISABLE' ? 'Enable' : 'Disable' }}
           </el-button>
           <el-button size="small" type="info" @click="openDetailModal(row)">Detail</el-button>
-          <el-button size="small" type='primary' @click="openEditModal(row)">Edit</el-button>
+          <el-button :disabled="allowEdit(row)" size="small" type='primary' @click="openEditModal(row)">Edit</el-button>
           <el-button size="small" type="danger" @click="handleDeleteSimulator(row)">Delete</el-button>
         </template>
       </el-table-column>
@@ -63,6 +63,9 @@ const openDetailModal = (simulator: Simulator) => {
 }
 const openEditModal = (simulator: Simulator) => {
   simulatorDetail.value.openEdit(simulator)
+}
+const allowEdit = (simulator: Simulator) => {
+  return simulator.status === 'ENABLE'
 }
 
 const loadSimulatorList = () => {
