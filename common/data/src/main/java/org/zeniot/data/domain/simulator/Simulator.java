@@ -10,6 +10,8 @@ import org.zeniot.data.domain.simulator.transport.SimulatorTransportConfig;
 import org.zeniot.data.enums.SimulatorStatusEnum;
 import org.zeniot.data.enums.TransportTypeEnum;
 
+import java.time.LocalDateTime;
+
 /**
  * @author Wu.Chunyang
  */
@@ -30,4 +32,7 @@ public class Simulator extends DTO {
     @Setter
     private SimulatorStatusEnum status;
 
+    private LocalDateTime createTime;
+
+    private LocalDateTime updateTime;
 }

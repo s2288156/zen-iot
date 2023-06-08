@@ -1,7 +1,7 @@
 <template>
   <div class="app-container">
     <div class="filter-container">
-      <el-button class="filter-item" icon="EditPen" type="primary" @click="openModal()">新增</el-button>
+      <el-button class="filter-item" icon="EditPen" type="primary" @click="openAddModal()">新增</el-button>
       <el-button class="filter-item" icon="RefreshRight" type="info" @click="loadSimulatorList()">刷新</el-button>
     </div>
 
@@ -14,12 +14,13 @@
           <el-tag :type="getStatusTag(row)">{{ row.status }}</el-tag>
         </template>
       </el-table-column>
-      <el-table-column fixed="right" label="Operations" width="240">
+      <el-table-column fixed="right" label="Operations" width="300">
         <template #default="{ row, $index }">
           <el-button size="small" type="primary" @click="handleSimulatorPowerSwitch(row)">
             {{ row.status === 'DISABLE' ? 'Enable' : 'Disable' }}
           </el-button>
           <el-button size="small" type="info" @click="openDetailModal(row)">Detail</el-button>
+          <el-button size="small" type='primary' @click="openEditModal(row)">Edit</el-button>
           <el-button size="small" type="danger" @click="handleDeleteSimulator(row)">Delete</el-button>
         </template>
       </el-table-column>
@@ -35,7 +36,7 @@
       @next-click="nextClick"
       @current-change="currentChange"
     />
-    <AddSimulator ref="addSimulator" @refresh="loadSimulatorList" />
+    <SimulatorDetail ref='simulatorDetail' @refresh="loadSimulatorList" />
   </div>
 </template>
 
@@ -45,7 +46,7 @@ import type { BaseDataPage, PageQuery } from '@/api/global-types'
 import { ElMessage } from 'element-plus'
 import type { Simulator } from '@/api/data/types'
 import { deleteSimulator, getSimulators, switchSimulatorStatus } from '@/api/simulator-apis'
-import AddSimulator from './AddSimulator.vue'
+import SimulatorDetail from './SimulatorDetail.vue'
 
 const pageQuery: PageQuery = { page: 0, size: 10 }
 const simulators = ref<BaseDataPage<Simulator> | any>({
@@ -53,12 +54,15 @@ const simulators = ref<BaseDataPage<Simulator> | any>({
   size: 0,
   totalPages: 0
 })
-const addSimulator = ref<InstanceType<typeof AddSimulator> | null>(null)
-const openModal = () => {
-  addSimulator.value.open()
+const simulatorDetail = ref<InstanceType<typeof SimulatorDetail> | null>(null)
+const openAddModal = () => {
+  simulatorDetail.value.openAdd()
 }
 const openDetailModal = (simulator: Simulator) => {
-  addSimulator.value.openDetail(simulator)
+  simulatorDetail.value.openDetail(simulator)
+}
+const openEditModal = (simulator: Simulator) => {
+  simulatorDetail.value.openEdit(simulator)
 }
 
 const loadSimulatorList = () => {

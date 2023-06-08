@@ -1,5 +1,6 @@
 <template>
   <el-dialog v-model="visible" title="Add Simulator">
+    <p>{{createSimulatorForm}}</p>
     <el-form :disabled="formDisabled" label-width="140px" ref="ruleFormRef" :model="createSimulatorForm" :rules="rules" status-icon>
       <el-form-item label="Name" prop="name">
         <el-input v-model="createSimulatorForm.name" />
@@ -149,7 +150,7 @@ const add = () => {
   createSimulatorForm.transportConfig.timeseriesFields.push(oneFieldDefine)
 }
 
-const open = () => {
+const openAdd = () => {
   visible.value = true
   formDisabled.value = false
   loadDeviceCommon()
@@ -163,8 +164,19 @@ const openDetail = (simulator: Simulator) => {
   Object.assign(createSimulatorForm, simulator)
 }
 
+const openEdit = (simulator: Simulator) => {
+  visible.value = true
+  formDisabled.value = false
+  loadDeviceCommon()
+  console.log(simulator)
+  Object.assign(createSimulatorForm, simulator)
+  Object.assign(createSimulatorForm.id, simulator.id)
+  Object.assign(createSimulatorForm.name, simulator.name)
+  Object.assign(createSimulatorForm.status, simulator.status)
+}
+
 defineExpose({
-  open, openDetail
+  openAdd, openDetail, openEdit
 })
 </script>
 

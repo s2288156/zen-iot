@@ -31,6 +31,8 @@ export type Simulator = {
   transportType?: string
   transportConfig?: TransportConfig
   status?: string
+  createTime?: string
+  updateTime?: string
 }
 
 export type TransportConfig = {

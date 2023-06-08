@@ -62,9 +62,8 @@ public class MqttClientHandler extends ChannelInboundHandlerAdapter {
             MqttPublishVariableHeader publishVariableHeader = new MqttPublishVariableHeader(transportConfig.getSaveTimeseriesTopic(), packetId.incrementAndGet());
 
             ObjectNode payloadJsonNode = JacksonUtil.newObjectNode();
-            transportConfig.getTimeseriesFields().forEach(fieldDefinition -> {
-                payloadJsonNode.put(fieldDefinition.getName(), fieldDefinition.nextRandomValue());
-            });
+            transportConfig.getTimeseriesFields()
+                    .forEach(fieldDefinition -> payloadJsonNode.put(fieldDefinition.getName(), fieldDefinition.nextRandomValue()));
             MqttPublishMessage publishMessage = new MqttPublishMessage(
                     publishFixedHeader,
                     publishVariableHeader,

@@ -27,7 +27,6 @@ public interface SimulatorMapper {
     }
 
     @Mapping(target = "transportConfig", ignore = true)
-    @Mapping(target = "createTime", ignore = true)
     @Mapping(target = "updateTime", ignore = true)
     SimulatorEntity toEntity(Simulator simulator);
 
