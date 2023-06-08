@@ -1,5 +1,6 @@
 package org.zeniot.transport.mqtt.client;
 
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
@@ -7,9 +8,12 @@ import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.handler.codec.mqtt.*;
 import io.netty.util.ReferenceCountUtil;
 import lombok.extern.slf4j.Slf4j;
+import org.zeniot.common.util.JacksonUtil;
 import org.zeniot.data.domain.simulator.transport.SimulatorMqttTransportConfig;
+import org.zeniot.data.enums.FieldTypeEnum;
 
 import java.nio.charset.StandardCharsets;
+import java.util.Random;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -55,10 +59,17 @@ public class MqttClientHandler extends ChannelInboundHandlerAdapter {
         executorService.scheduleAtFixedRate(() -> {
 
             MqttFixedHeader publishFixedHeader = new MqttFixedHeader(MqttMessageType.PUBLISH, false, MqttQoS.AT_MOST_ONCE, false, 0);
-            MqttPublishVariableHeader publishVariableHeader = new MqttPublishVariableHeader("test/a", packetId.incrementAndGet());
+            MqttPublishVariableHeader publishVariableHeader = new MqttPublishVariableHeader(transportConfig.getSaveTimeseriesTopic(), packetId.incrementAndGet());
 
-            String payload = "hahah" + packetId.get();
-            MqttPublishMessage publishMessage = new MqttPublishMessage(publishFixedHeader, publishVariableHeader, Unpooled.wrappedBuffer(payload.getBytes(StandardCharsets.UTF_8)));
+            ObjectNode payloadJsonNode = JacksonUtil.newObjectNode();
+            transportConfig.getTimeseriesFields().forEach(fieldDefinition -> {
+                payloadJsonNode.put(fieldDefinition.getName(), fieldDefinition.nextRandomValue());
+            });
+            MqttPublishMessage publishMessage = new MqttPublishMessage(
+                    publishFixedHeader,
+                    publishVariableHeader,
+                    Unpooled.wrappedBuffer(JacksonUtil.toString(payloadJsonNode).getBytes(StandardCharsets.UTF_8))
+            );
             ctx.writeAndFlush(publishMessage);
         }, 0, transportConfig.getPeriod(), transportConfig.getTimeUnit());
     }

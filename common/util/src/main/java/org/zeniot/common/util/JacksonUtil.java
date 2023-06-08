@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -16,6 +17,10 @@ public class JacksonUtil {
     static {
         OBJECT_MAPPER = new ObjectMapper();
         OBJECT_MAPPER.setSerializationInclusion(JsonInclude.Include.NON_NULL);
+    }
+
+    public static ObjectNode newObjectNode() {
+        return OBJECT_MAPPER.createObjectNode();
     }
 
     /**
