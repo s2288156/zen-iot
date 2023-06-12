@@ -46,3 +46,7 @@ include("common:transport-api")
 findProject(":common:transport-api")?.name = "transport-api"
 include("tools")
 include("workflow")
+include("workflow:workflow-api")
+findProject(":workflow:workflow-api")?.name = "workflow-api"
+include("workflow:workflow-engine")
+findProject(":workflow:workflow-engine")?.name = "workflow-engine"
