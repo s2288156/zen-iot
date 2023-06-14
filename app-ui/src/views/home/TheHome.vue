@@ -1,14 +1,8 @@
-<template>
-  <h1>Home</h1>
-  <div id="myChart" style="height: 600px"></div>
-</template>
-
 <script lang="ts" setup>
 import * as echarts from 'echarts'
-import { onMounted, ref } from 'vue'
-import { ECBasicOption } from 'echarts/types/src/util/types'
+import { onMounted } from 'vue'
 
-const option = ref<ECBasicOption>({
+const option = {
   title: {
     text: 'Basic Graph'
   },
@@ -98,20 +92,25 @@ const option = ref<ECBasicOption>({
       }
     }
   ]
-})
+}
 let myChart
 
 onMounted(() => {
   myChart = echarts.init(document.getElementById('myChart'))
-  myChart.setOption(option.value)
+  myChart.setOption(option)
   window.onresize = function () {
     myChart.resize()
   }
 })
 setTimeout(() => {
-  option.value.title.text = 'Hahahaa'
-  myChart.setOption(option.value)
+  option.title.text = 'Hahahaa'
+  myChart.setOption(option)
 }, 3000)
 </script>
+
+<template>
+  <h1>Home</h1>
+  <div id="myChart" style="height: 600px"></div>
+</template>
 
 <style scoped lang="scss"></style>

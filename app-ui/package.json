@@ -10,6 +10,8 @@
     "lint": "eslint . --ext .vue,.js,.jsx,.cjs,.mjs,.ts,.tsx,.cts,.mts --fix --ignore-path .gitignore"
   },
   "dependencies": {
+    "@logicflow/core": "^1.2.8",
+    "@logicflow/extension": "^1.2.8",
     "axios": "^1.4.0",
     "echarts": "^5.4.2",
     "element-plus": "^2.3.5",

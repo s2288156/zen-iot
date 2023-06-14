@@ -2,7 +2,7 @@ import {createRouter, createWebHistory} from 'vue-router'
 import TheLayout from '@/components/layout/TheLayout.vue'
 
 const router = createRouter({
-  history: createWebHistory(import.meta.env.BASE_URL),
+  history: createWebHistory(),
   routes: [
     {
       path: '/login',
@@ -90,6 +90,16 @@ const router = createRouter({
           component: () => import('@/views/platform/device/index.vue'),
           meta: {
             title: '设备管理',
+            icon: 'Cpu',
+            roles: ['ROLE_ADMIN'],
+          },
+        },
+        {
+          path: '/platform/rulechain',
+          name: 'RuleChain',
+          component: () => import('@/views/platform/rulechain/index.vue'),
+          meta: {
+            title: '规则链',
             icon: 'Cpu',
             roles: ['ROLE_ADMIN'],
           },
