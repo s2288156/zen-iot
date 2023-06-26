@@ -9,7 +9,21 @@ let lf
 onMounted(() => {
   lf = new LogicFlow({
     container: container.value,
-    grid: true
+    grid: true,
+    keyboard: {
+      enabled: true,
+      shortcuts: [
+        {
+          keys: ['backspace', 'delete'],
+          callback: () => {
+            const elements = lf.getSelectElements(true)
+            lf.clearSelectElements()
+            elements.edges.forEach(edge => lf.deleteEdge(edge.id))
+            elements.nodes.forEach(node => lf.deleteNode(node.id))
+          }
+        }
+      ]
+    }
   })
   lf.render()
 })
@@ -18,94 +32,98 @@ const init = () => {
   lf.render({
     nodes: [
       {
-        id: "node_id_1",
-        type: "rect",
+        id: 'node_id_1',
+        type: 'rect',
         x: 100,
         y: 100,
-        text: { x: 100, y: 100, value: "节点1" },
-        properties: {},
+        text: { x: 100, y: 100, value: '节点1' },
+        properties: {}
       },
       {
-        id: "node_id_2",
-        type: "circle",
+        id: 'node_id_2',
+        type: 'circle',
         x: 200,
         y: 300,
-        text: { x: 300, y: 300, value: "节点2" },
-        properties: {},
+        text: { x: 300, y: 300, value: '节点2' },
+        properties: {}
       },
       {
-        id: "node_id_3",
-        type: "ellipse",
+        id: 'node_id_3',
+        type: 'ellipse',
         x: 300,
         y: 100,
-        text: { x: 300, y: 100, value: "ellipse" },
-        properties: {},
+        text: { x: 300, y: 100, value: 'ellipse' },
+        properties: {}
       },
       {
-        id: "node_id_4",
-        type: "polygon",
+        id: 'node_id_4',
+        type: 'polygon',
         x: 400,
         y: 100,
-        text: { x: 400, y: 100, value: "polygon" },
-        properties: {},
+        text: { x: 400, y: 100, value: 'polygon' },
+        properties: {}
       },
       {
-        id: "node_id_5",
-        type: "diamond",
+        id: 'node_id_5',
+        type: 'diamond',
         x: 500,
         y: 100,
-        text: { x: 500, y: 100, value: "diamond" },
-        properties: {},
+        text: { x: 500, y: 100, value: 'diamond' },
+        properties: {}
       },
       {
-        id: "node_id_6",
-        type: "text",
+        id: 'node_id_6',
+        type: 'text',
         x: 600,
         y: 100,
-        text: { x: 600, y: 100, value: "text" },
-        properties: {},
+        text: { x: 600, y: 100, value: 'text' },
+        properties: {}
       },
       {
-        id: "node_id_7",
-        type: "html",
+        id: 'node_id_7',
+        type: 'html',
         x: 700,
         y: 100,
-        text: { x: 700, y: 100, value: "html" },
-        properties: {},
-      },
+        text: { x: 700, y: 100, value: 'html' },
+        properties: {}
+      }
     ],
     edges: [
       {
-        id: "edge_id",
-        type: "polyline",
-        sourceNodeId: "node_id_1",
-        targetNodeId: "node_id_2",
-        text: { x: 139, y: 200, value: "连线" },
+        id: 'edge_id',
+        type: 'polyline',
+        sourceNodeId: 'node_id_1',
+        targetNodeId: 'node_id_2',
+        text: { x: 139, y: 200, value: '连线' },
         startPoint: { x: 100, y: 140 },
         endPoint: { x: 200, y: 250 },
         pointsList: [
           { x: 100, y: 140 },
           { x: 100, y: 200 },
           { x: 200, y: 200 },
-          { x: 200, y: 250 },
+          { x: 200, y: 250 }
         ],
-        properties: {},
-      },
+        properties: {}
+      }
     ]
   })
 }
-
 </script>
 
 <template>
-  <el-button @click="init" type="primary">init</el-button>
-  <div class="container" ref="container">
-  </div>
+  <el-row>
+    <el-col :span="20">
+      <div class="container" ref="container"></div>
+    </el-col>
+    <el-col :span="4">
+      <el-button @click="init" type="primary">init</el-button>
+    </el-col>
+  </el-row>
 </template>
 
 <style scoped lang="scss">
 .container {
-  width: 1500px;
-  height: 800px;
+  width: 1000px;
+  height: 600px;
 }
 </style>
