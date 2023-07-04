@@ -1,6 +1,12 @@
 rootProject.name = "zen-iot"
 
 dependencyResolutionManagement {
+    repositories {
+        maven {
+            setUrl("https://maven.aliyun.com/repository/public/")
+        }
+        mavenCentral()
+    }
     versionCatalogs {
         create("libs") {
             library("bcprov-jdk15on", "org.bouncycastle:bcprov-jdk15on:1.70")
