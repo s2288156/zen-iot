@@ -1,5 +1,6 @@
 {
   "singleQuote": true,
+  "jsxSingleQuote": false,
   "semi": false,
   "quoteProps": "as-needed",
   "printWidth": 200,
@@ -8,11 +9,14 @@
   "tabWidth": 2,
   "bracketSpacing": true,
   "arrowParens": "avoid",
-  "htmlWhitespaceSensitivity": "ignore",
+  "htmlWhitespaceSensitivity": "strict",
   "javascript.format.insertSpaceBeforeFunctionParenthesis": true,
   "files.insertFinalNewline": true,
   "useTabs": false,
   "endOfLine": "auto",
   "ignorePath": ".ignore",
-  "trailingComma": "none"
+  "trailingComma": "none",
+  "insertPragma": false,
+  "requirePragma": false,
+  "proseWrap": "never"
 }

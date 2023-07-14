@@ -111,11 +111,9 @@ const init = () => {
 </script>
 
 <template>
-  <el-row>
-    <el-col :span="20">
-      <div class="container" ref="container"></div>
-    </el-col>
-    <el-col :span="4">
+  <el-row class="container">
+    <el-col class="container-item" :span="20"></el-col>
+    <el-col class="container-item" :span="4">
       <el-button @click="init" type="primary">init</el-button>
     </el-col>
   </el-row>
@@ -123,7 +121,11 @@ const init = () => {
 
 <style scoped lang="scss">
 .container {
-  width: 1000px;
-  height: 600px;
+  display: flex;
+  width: 1300px;
+  height: 800px;
+}
+.container-item {
+  display: flex;
 }
 </style>
