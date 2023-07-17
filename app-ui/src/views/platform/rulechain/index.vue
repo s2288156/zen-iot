@@ -3,6 +3,7 @@ import LogicFlow from '@logicflow/core'
 import '@logicflow/core/dist/style/index.css'
 import { onMounted, ref } from 'vue'
 import { DndPanel, SelectionSelect } from '@logicflow/extension'
+import '@logicflow/extension/lib/style/index.css'
 
 const container = ref(null)
 let lf
@@ -161,12 +162,8 @@ const init = () => {
 
 <style scoped lang="scss">
 .flow-main {
-  display: flex;
-  width: 1600px;
-  height: 850px;
+  width: 100%;
+  height: 100%;
 }
 
-.flow-menu {
-  display: flex;
-}
 </style>
