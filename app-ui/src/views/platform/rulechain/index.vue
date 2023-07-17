@@ -2,15 +2,18 @@
 import LogicFlow from '@logicflow/core'
 import '@logicflow/core/dist/style/index.css'
 import { onMounted, ref } from 'vue'
-import { DndPanel, SelectionSelect } from '@logicflow/extension'
+import { Control, DndPanel, MiniMap, SelectionSelect } from '@logicflow/extension'
 import '@logicflow/extension/lib/style/index.css'
 
 const container = ref(null)
-let lf
+let lf: LogicFlow
 
 onMounted(() => {
   LogicFlow.use(DndPanel)
   LogicFlow.use(SelectionSelect)
+  LogicFlow.use(Control)
+  // todo: 默认不显示，暂不开启显示，后续实现
+  LogicFlow.use(MiniMap)
   lf = new LogicFlow({
     container: container.value,
     grid: true,
@@ -71,7 +74,7 @@ onMounted(() => {
     }
   ])
   lf.render()
-  // init()
+  // lf.extension.miniMap.show(0, 600)
 })
 
 const init = () => {
