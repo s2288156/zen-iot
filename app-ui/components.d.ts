@@ -39,6 +39,7 @@ declare module '@vue/runtime-core' {
     ElTableColumn: typeof import('element-plus/es')['ElTableColumn']
     ElTag: typeof import('element-plus/es')['ElTag']
     MenuItem: typeof import('./src/components/layout/Aside/MenuItem.vue')['default']
+    NodeSetting: typeof import('./src/components/flow/NodePalette.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']
     TheHeader: typeof import('./src/components/layout/Header/TheHeader.vue')['default']

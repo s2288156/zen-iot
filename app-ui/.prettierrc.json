@@ -1,7 +1,7 @@
 {
   "singleQuote": true,
   "jsxSingleQuote": false,
-  "semi": false,
+  "semi": true,
   "quoteProps": "as-needed",
   "printWidth": 200,
   "eslintIntegration": true,
