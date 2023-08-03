@@ -1,116 +1,378 @@
 <script setup lang="ts">
-import LogicFlow from '@logicflow/core';
-import '@logicflow/core/dist/style/index.css';
-import { onMounted, ref } from 'vue';
-import { Control, DndPanel, MiniMap, SelectionSelect } from '@logicflow/extension';
-import '@logicflow/extension/lib/style/index.css';
-import { NodePanel } from '@/components/plugins/NodePanel';
-
-const container = ref(null);
-let lf: LogicFlow;
-
+import G6 from '@antv/g6';
+import { onMounted } from 'vue';
+const data = {
+  // 点集
+  nodes: [
+    {
+      id: 'node1', // String，该节点存在则必须，节点的唯一标识
+      x: 100, // Number，可选，节点位置的 x 值
+      y: 200 // Number，可选，节点位置的 y 值
+    },
+    {
+      id: 'node2', // String，该节点存在则必须，节点的唯一标识
+      x: 300, // Number，可选，节点位置的 x 值
+      y: 200 // Number，可选，节点位置的 y 值
+    }
+  ],
+  // 边集
+  edges: [
+    {
+      source: 'node1', // String，必须，起始点 id
+      target: 'node2', // String，必须，目标点 id
+      label: '我是连线'
+    }
+  ]
+};
+const data1 = {
+  nodes: [
+    {
+      id: '0',
+      label: 'n0',
+      class: 'c0',
+      x: 1000,
+      y: -100
+    },
+    {
+      id: '1',
+      label: 'n1',
+      class: 'c0',
+      x: 300,
+      y: -10
+    },
+    {
+      id: '2',
+      label: 'n2',
+      class: 'c0',
+      x: 10,
+      y: 10
+    },
+    {
+      id: '3',
+      label: 'n3',
+      class: 'c0',
+      x: 320,
+      y: -100
+    },
+    {
+      id: '4',
+      label: 'n4',
+      class: 'c0',
+      x: 100,
+      y: 900
+    },
+    {
+      id: '5',
+      label: 'n5',
+      class: 'c0',
+      x: 120,
+      y: 213
+    },
+    {
+      id: '6',
+      label: 'n6',
+      class: 'c1',
+      x: 543,
+      y: 12
+    },
+    {
+      id: '7',
+      label: 'n7',
+      class: 'c1',
+      x: 543,
+      y: -100
+    },
+    {
+      id: '8',
+      label: 'n8',
+      class: 'c1',
+      x: 1,
+      y: 0
+    },
+    {
+      id: '9',
+      label: 'n9',
+      class: 'c1',
+      x: 0,
+      y: -222
+    },
+    {
+      id: '10',
+      label: 'n10',
+      class: 'c1',
+      x: 435,
+      y: 69
+    },
+    {
+      id: '11',
+      label: 'n11',
+      class: 'c1',
+      x: 23,
+      y: 10
+    },
+    {
+      id: '12',
+      label: 'n12',
+      class: 'c1',
+      x: -129,
+      y: 39
+    },
+    {
+      id: '13',
+      label: 'n13',
+      class: 'c2',
+      x: 234,
+      y: 843
+    },
+    {
+      id: '14',
+      label: 'n14',
+      class: 'c2',
+      x: -301,
+      y: 129
+    },
+    {
+      id: '15',
+      label: 'n15',
+      class: 'c2',
+      x: -20,
+      y: -76
+    },
+    {
+      id: '16',
+      label: 'n16',
+      class: 'c2',
+      x: 1220,
+      y: -34
+    },
+    {
+      id: '17',
+      label: 'n17',
+      class: 'c2',
+      x: -10,
+      y: 954
+    },
+    {
+      id: '18',
+      label: 'n18',
+      class: 'c2',
+      x: 492,
+      y: 123
+    },
+    {
+      id: '19',
+      label: 'n19',
+      class: 'c2',
+      x: 123,
+      y: -241
+    }
+  ],
+  edges: [
+    {
+      source: '0',
+      target: '1',
+      label: 'e0-1',
+      weight: 1
+    },
+    {
+      source: '0',
+      target: '2',
+      label: 'e0-2',
+      weight: 2
+    },
+    {
+      source: '0',
+      target: '3',
+      label: 'e0-3',
+      weight: 3
+    },
+    {
+      source: '0',
+      target: '4',
+      label: 'e0-4',
+      weight: 1.4
+    },
+    {
+      source: '0',
+      target: '5',
+      label: 'e0-5',
+      weight: 2
+    },
+    {
+      source: '0',
+      target: '7',
+      label: 'e0-7',
+      weight: 2
+    },
+    {
+      source: '0',
+      target: '8',
+      label: 'e0-8',
+      weight: 2
+    },
+    {
+      source: '0',
+      target: '9',
+      label: 'e0-9',
+      weight: 1.3
+    },
+    {
+      source: '0',
+      target: '10',
+      label: 'e0-10',
+      weight: 1.5
+    },
+    {
+      source: '0',
+      target: '11',
+      label: 'e0-11',
+      weight: 1
+    },
+    {
+      source: '0',
+      target: '13',
+      label: 'e0-13',
+      weight: 10
+    },
+    {
+      source: '0',
+      target: '14',
+      label: 'e0-14',
+      weight: 2
+    },
+    {
+      source: '0',
+      target: '15',
+      label: 'e0-15',
+      weight: 0.5
+    },
+    {
+      source: '0',
+      target: '16',
+      label: 'e0-16',
+      weight: 0.8
+    },
+    {
+      source: '2',
+      target: '3',
+      label: 'e2-3',
+      weight: 1
+    },
+    {
+      source: '4',
+      target: '5',
+      label: 'e4-5',
+      weight: 1.4
+    },
+    {
+      source: '4',
+      target: '6',
+      label: 'e4-6',
+      weight: 2.1
+    },
+    {
+      source: '5',
+      target: '6',
+      label: 'e5-6',
+      weight: 1.9
+    },
+    {
+      source: '7',
+      target: '13',
+      label: 'e7-13',
+      weight: 0.5
+    },
+    {
+      source: '8',
+      target: '14',
+      label: 'e8-14',
+      weight: 0.8
+    },
+    {
+      source: '9',
+      target: '10',
+      label: 'e9-10',
+      weight: 0.2
+    },
+    {
+      source: '10',
+      target: '14',
+      label: 'e10-14',
+      weight: 1
+    },
+    {
+      source: '10',
+      target: '12',
+      label: 'e10-12',
+      weight: 1.2
+    },
+    {
+      source: '11',
+      target: '14',
+      label: 'e11-14',
+      weight: 1.2
+    },
+    {
+      source: '12',
+      target: '13',
+      label: 'e12-13',
+      weight: 2.1
+    },
+    {
+      source: '16',
+      target: '17',
+      label: 'e16-17',
+      weight: 2.5
+    },
+    {
+      source: '16',
+      target: '18',
+      label: 'e16-18',
+      weight: 3
+    },
+    {
+      source: '17',
+      target: '18',
+      label: 'e17-18',
+      weight: 2.6
+    },
+    {
+      source: '18',
+      target: '19',
+      label: 'e18-19',
+      weight: 1.6
+    }
+  ]
+};
+let graph;
 onMounted(() => {
-  LogicFlow.use(DndPanel);
-  LogicFlow.use(SelectionSelect);
-  LogicFlow.use(Control);
-  // todo: 默认不显示，暂不开启显示，后续实现
-  LogicFlow.use(MiniMap);
-  LogicFlow.use(NodePanel);
-  lf = new LogicFlow({
-    container: container.value,
-    grid: true,
-    keyboard: {
-      enabled: true,
-      shortcuts: [
-        {
-          keys: ['backspace', 'delete'],
-          callback: () => {
-            const elements = lf.getSelectElements(true);
-            lf.clearSelectElements();
-            elements.edges.forEach(edge => lf.deleteEdge(edge.id));
-            elements.nodes.forEach(node => lf.deleteNode(node.id));
-          }
+  graph = new G6.Graph({
+    container: 'mountNode',
+    width: 1200,
+    height: 800,
+    fitView: true,
+    fitViewPadding: [20, 40, 50, 20],
+    defaultNode: {
+      size: 30,
+      style: {
+        fill: 'steelblue',
+        stroke: '#666',
+        lineWidth: 1
+      },
+      labelCfg: {
+        style: {
+          fill: '#fff'
         }
-      ]
+      }
     }
   });
-  lf.extension.dndPanel.setPatternItems([
-    {
-      label: 'Debug',
-      icon: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABQAAAAUCAYAAAH6ji2bAAAABGdBTUEAALGPC/xhBQAAAOVJREFUOBGtVMENwzAIjKP++2026ETdpv10iy7WFbqFyyW6GBywLCv5gI+Dw2Bluj1znuSjhb99Gkn6QILDY2imo60p8nsnc9bEo3+QJ+AKHfMdZHnl78wyTnyHZD53Zzx73MRSgYvnqgCUHj6gwdck7Zsp1VOrz0Uz8NbKunzAW+Gu4fYW28bUYutYlzSa7B84Fh7d1kjLwhcSdYAYrdkMQVpsBr5XgDGuXwQfQr0y9zwLda+DUYXLaGKdd2ZTtvbolaO87pdo24hP7ov16N0zArH1ur3iwJpXxm+v7oAJNR4JEP8DoAuSFEkYH7cAAAAASUVORK5CYII=',
-      callback: () => {
-        console.log(lf.getGraphData());
-      }
-    },
-    {
-      label: '选区',
-      icon: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABQAAAAUCAYAAAH6ji2bAAAABGdBTUEAALGPC/xhBQAAAOVJREFUOBGtVMENwzAIjKP++2026ETdpv10iy7WFbqFyyW6GBywLCv5gI+Dw2Bluj1znuSjhb99Gkn6QILDY2imo60p8nsnc9bEo3+QJ+AKHfMdZHnl78wyTnyHZD53Zzx73MRSgYvnqgCUHj6gwdck7Zsp1VOrz0Uz8NbKunzAW+Gu4fYW28bUYutYlzSa7B84Fh7d1kjLwhcSdYAYrdkMQVpsBr5XgDGuXwQfQr0y9zwLda+DUYXLaGKdd2ZTtvbolaO87pdo24hP7ov16N0zArH1ur3iwJpXxm+v7oAJNR4JEP8DoAuSFEkYH7cAAAAASUVORK5CYII=',
-      callback: () => {
-        lf.extension.selectionSelect.openSelectionSelect();
-        lf.once('selection:selected', () => {
-          lf.extension.selectionSelect.closeSelectionSelect();
-        });
-      }
-    },
-    {
-      type: 'circle',
-      text: '开始',
-      label: '开始节点',
-      icon: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABQAAAAUCAYAAAH6ji2bAAAABGdBTUEAALGPC/xhBQAAAnBJREFUOBGdVL1rU1EcPfdGBddmaZLiEhdx1MHZQXApraCzQ7GKLgoRBxMfcRELuihWKcXFRcEWF8HBf0DdDCKYRZpnl7p0svLe9Zzbd29eQhTbC8nv+9zf130AT63jvooOGS8Vf9Nt5zxba7sXQwODfkWpkbjTQfCGUd9gIp3uuPP8bZ946g56dYQvnBg+b1HB8VIQmMFrazKcKSvFW2dQTxJnJdQ77urmXWOMBCmXM2Rke4S7UAW+/8ywwFoewmBps2tu7mbTdp8VMOkIRAkKfrVawalJTtIliclFbaOBqa0M2xImHeVIfd/nKAfVq/LGnPss5Kh00VEdSzfwnBXPUpmykNss4lUI9C1ga+8PNrBD5YeqRY2Zz8PhjooIbfJXjowvQJBqkmEkVnktWhwu2SM7SMx7Cj0N9IC0oQXRo8xwAGzQms+xrB/nNSUWVveI48ayrFGyC2+E2C+aWrZHXvOuz+CiV6iycWe1Rd1Q6+QUG07nb5SbPrL4426d+9E1axKjY3AoRrlEeSQo2Eu0T6BWAAr6COhTcWjRaYfKG5csnvytvUr/WY4rrPMB53Uo7jZRjXaG6/CFfNMaXEu75nG47X+oepU7PKJvvzGDY1YLSKHJrK7vFUwXKkaxwhCW3u+sDFMVrIju54RYYbFKpALZAo7sB6wcKyyrd+aBMryMT2gPyD6GsQoRFkGHr14TthZni9ck0z+Pnmee460mHXbRAypKNy3nuMdrWgVKj8YVV8E7PSzp1BZ9SJnJAsXdryw/h5ctboUVi4AFiCd+lQaYMw5z3LGTBKjLQOeUF35k89f58Vv/tGh+l+PE/wG0rgfIUbZK5AAAAABJRU5ErkJggg=='
-    },
-    {
-      type: 'rect',
-      label: '用户任务',
-      icon: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABMAAAATCAYAAAEFVwZaAAAABGdBTUEAALGPC/xhBQAAAqlJREFUOBF9VM9rE0EUfrMJNUKLihGbpLGtaCOIR8VjQMGDePCgCCIiCNqzCAp2MyYUCXhUtF5E0D+g1t48qAd7CCLqQUQKEWkStcEfVGlLdp/fm3aW2QQdyLzf33zz5m2IsAZ9XhDpyaaIZkTS4ASzK41TFao88GuJ3hsr2pAbipHxuSYyKRugagICGANkfFnNh3HeE2N0b3nN2cgnpcictw5veJIzxmDamSlxxQZicq/mflxhbaH8BLRbuRwNtZp0JAhoplVRUdzmCe/vO27wFuuA3S5qXruGdboy5/PRGFsbFGKo/haRtQHIrM83bVeTrOgNhZReWaYGnE4aUQgTJNvijJFF4jQ8BxJE5xfKatZWmZcTQ+BVgh7s8SgPlCkcec4mGTmieTP4xd7PcpIEg1TX6gdeLW8rTVMVLVvb7ctXoH0Cydl2QOPJBG21STE5OsnbweVYzAnD3A7PVILuY0yiiyDwSm2g441r6rMSgp6iK42yqroI2QoXeJVeA+YeZSa47gZdXaZWQKTrG93rukk/l2Al6Kzh5AZEl7dDQy+JjgFahQjRopSxPbrbvK7GRe9ePWBo1wcU7sYrFZtavXALwGw/7Dnc50urrHJuTPSoO2IMV3gUQGNg87IbSOIY9BpiT9HV7FCZ94nPXb3MSnwHn/FFFE1vG6DTby+r31KAkUktB3Qf6ikUPWxW1BkXSPQeMHHiW0+HAd2GelJsZz1OJegCxqzl+CLVHa/IibuHeJ1HAKzhuDR+ymNaRFM+4jU6UWKXorRmbyqkq/D76FffevwdCp+jN3UAN/C9JRVTDuOxC/oh+EdMnqIOrlYteKSfadVRGLJFJPSB/ti/6K8f0CNymg/iH2gO/f0DwE0yjAFO6l8JaR5j0VPwPwfaYHqOqrCI319WzwhwzNW/aQAAAABJRU5ErkJggg==',
-      className: 'important-node'
-    },
-    {
-      type: 'rect',
-      label: '系统任务',
-      icon: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABMAAAATCAYAAAEFVwZaAAAABGdBTUEAALGPC/xhBQAAAqlJREFUOBF9VM9rE0EUfrMJNUKLihGbpLGtaCOIR8VjQMGDePCgCCIiCNqzCAp2MyYUCXhUtF5E0D+g1t48qAd7CCLqQUQKEWkStcEfVGlLdp/fm3aW2QQdyLzf33zz5m2IsAZ9XhDpyaaIZkTS4ASzK41TFao88GuJ3hsr2pAbipHxuSYyKRugagICGANkfFnNh3HeE2N0b3nN2cgnpcictw5veJIzxmDamSlxxQZicq/mflxhbaH8BLRbuRwNtZp0JAhoplVRUdzmCe/vO27wFuuA3S5qXruGdboy5/PRGFsbFGKo/haRtQHIrM83bVeTrOgNhZReWaYGnE4aUQgTJNvijJFF4jQ8BxJE5xfKatZWmZcTQ+BVgh7s8SgPlCkcec4mGTmieTP4xd7PcpIEg1TX6gdeLW8rTVMVLVvb7ctXoH0Cydl2QOPJBG21STE5OsnbweVYzAnD3A7PVILuY0yiiyDwSm2g441r6rMSgp6iK42yqroI2QoXeJVeA+YeZSa47gZdXaZWQKTrG93rukk/l2Al6Kzh5AZEl7dDQy+JjgFahQjRopSxPbrbvK7GRe9ePWBo1wcU7sYrFZtavXALwGw/7Dnc50urrHJuTPSoO2IMV3gUQGNg87IbSOIY9BpiT9HV7FCZ94nPXb3MSnwHn/FFFE1vG6DTby+r31KAkUktB3Qf6ikUPWxW1BkXSPQeMHHiW0+HAd2GelJsZz1OJegCxqzl+CLVHa/IibuHeJ1HAKzhuDR+ymNaRFM+4jU6UWKXorRmbyqkq/D76FffevwdCp+jN3UAN/C9JRVTDuOxC/oh+EdMnqIOrlYteKSfadVRGLJFJPSB/ti/6K8f0CNymg/iH2gO/f0DwE0yjAFO6l8JaR5j0VPwPwfaYHqOqrCI319WzwhwzNW/aQAAAABJRU5ErkJggg==',
-      className: 'import_icon'
-    },
-    {
-      type: 'diamond',
-      label: '条件判断',
-      icon: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABUAAAAVCAYAAAHeEJUAAAAABGdBTUEAALGPC/xhBQAAAvVJREFUOBGNVEFrE0EU/mY3bQoiFlOkaUJrQUQoWMGePLX24EH0IIoHKQiCV0G8iE1covgLiqA/QTzVm1JPogc9tIJYFaQtlhQxqYjSpunu+L7JvmUTU3AgmTfvffPNN++9WSA1DO182f6xwILzD5btfAoQmwL5KJEwiQyVbSVZ0IgRyV6PTpIJ81E5ZvqfHQR0HUOBHW4L5Et2kQ6Zf7iAOhTFAA8s0pEP7AXO1uAA52SbqGk6h/6J45LaLhO64ByfcUzM39V7ZiAdS2yCePPEIQYvTUHqM/n7dgQNfBKWPjpF4ISk8q3J4nB11qw6X8l+FsF3EhlkEMfrjIer3wJTLwS2aCNcj4DbGxXTw00JmAuO+Ni6bBxVUCvS5d9aa04+so4pHW5jLTywuXAL7jJ+D06sl82Sgl2JuVBQn498zkc2bGKxULHjCnSMadBKYDYYHAtsby1EQ5lNGrQd4Y3v4Zo0XdGEmDno46yCM9Tk+RiJmUYHS/aXHPNTcjxcbTFna000PFJHIVZ5lFRqRpJWk9/+QtlOUYJj9HG5pVFEU7zqIYDVsw2s+AJaD8wTd2umgSCCyUxgGsS1Y6TBwXQQTFuZaHcd8gAGioE90hlsY+wMcs30RduYtxanjMGal8H5dMW67dmT1JFtYUEe8LiQLRsPZ6IIc7A4J5tqco3T0pnv/4u0kyzrYUq7gASuEyI8VXKvB9Odytv6jS/PNaZBln0nioJG/AVQRZvApOdhjj3Jt8QC8Im09SafwdBdvIpztpxWxpeKCC+EsFdS8DCyuCn2munFpL7ctHKp+Xc5cMybeIyMAN33SPL3ZR9QV1XVwLyzHm6Iv0/yeUuUb7PPlZC4D4HZkeu6dpF4v9j9MreGtMbxMMRLIcjJic9yHi7WQ3yVKzZVWUr5UrViJvn1FfUlwe/KYVfYyWRLSGNu16hR01U9IacajXPei0wx/5BqgInvJN+MMNtNme7ReU9SBbgntovn0kKHpFg7UogZvaZiOue/q1SBo9ktHzQAAAAASUVORK5CYII='
-    },
-    {
-      type: 'circle',
-      text: '结束',
-      label: '结束节点',
-      icon: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABQAAAAUCAYAAAH6ji2bAAAABGdBTUEAALGPC/xhBQAAA1BJREFUOBFtVE1IVUEYPXOf+tq40Y3vPcmFIdSjIorWoRG0ERWUgnb5FwVhYQSl72oUoZAboxKNFtWiwKRN0M+jpfSzqJAQclHo001tKkjl3emc8V69igP3znzfnO/M9zcDcKT67azmjYWTwl9Vn7Vumeqzj1DVb6cleQY4oAVnIOPb+mKAGxQmKI5CWNJ2aLPatxWa3aB9K7/fB+/Z0jUF6TmMlFLQqrkECWQzOZxYGjTlOl8eeKaIY5yHnFn486xBustDjWT6dG7pmjHOJd+33t0iitTPkK6tEvjxq4h2MozQ6WFSX/LkDUGfFwfhEZj1Auz/U4pyAi5Sznd7uKzznXeVHlI/Aywmk6j7fsUsEuCGADrWARXXwjxWQsUbIupDHJI7kF5dRktg0eN81IbiZXiTESic50iwS+t1oJgL83jAiBupLDCQqwziaWSoAFSeIR3P5Xv5az00wyIn35QRYTwdSYbz8pH8fxUUAtxnFvYmEmgI0wYXUXcCCSpeEVpXlsRhBnCEATxWylL9+EKCAYhe1NGstUa6356kS9NVvt3DU2fd+Wtbm/+lSbylJqsqkSm9CRhvoJVlvKPvF1RKY/FcPn5j4UfIMLn8D4UYb54BNsilTDXKnF4CfTobA0FpoW/LSp306wkXM+XaOJhZaFkcNM82ASNAWMrhrUbRfmyeI1FvRBTpN06WKxa9BK0o2E4Pd3zfBBEwPsv9sQBnmLVbLEIZ/Xe9LYwJu/Er17W6HYVBc7vmuk0xUQ+pqxdom5Fnp55SiytXLPYoMXNM4u4SNSCFWnrVIzKG3EGyMXo6n/BQOe+bX3FClY4PwydVhthOZ9NnS+ntiLh0fxtlUJHAuGaFoVmttpVMeum0p3WEXbcll94l1wM/gZ0Ccczop77VvN2I7TlsZCsuXf1WHvWEhjO8DPtyOVg2/mvK9QqboEth+7pD6NUQC1HN/TwvydGBARi9MZSzLE4b8Ru3XhX2PBxf8E1er2A6516o0w4sIA+lwURhAON82Kwe2iDAC1Watq4XHaGQ7skLcFOtI5lDxuM2gZe6WFIotPAhbaeYlU4to5cuarF1QrcZ/lwrLaCJl66JBocYZnrNlvm2+MBCTmUymPrYZVbjdlr/BxlMjmNmNI3SAAAAAElFTkSuQmCC'
-    }
-  ]);
-  lf.render();
-  // lf.extension.miniMap.show(0, 600)
+  graph.data(data1);
+  graph.render();
 });
 </script>
 
 <template>
-  <div class="flow-main" ref="container">
-    <div class="flow-left-side">side1111111111111</div>
-  </div>
+  <div id="mountNode"></div>
 </template>
 
-<style scoped lang="scss">
-.flow-left-side {
-  float: right;
-  clear: both;
-  width: 100px;
-  height: 100px;
-  background-color: red;
-  position: absolute;
-}
-.flow-main {
-  width: 100%;
-  height: 100%;
-  clear: both;
-}
-.node-panel {
-  width: 30px;
-  height: 30px;
-  background-color: gray;
-  position: absolute;
-}
-</style>
+<style scoped lang="scss"></style>
