@@ -350,8 +350,12 @@ onMounted(() => {
     container: 'mountNode',
     width: 1200,
     height: 800,
-    fitView: true,
-    fitViewPadding: [20, 40, 50, 20],
+    layout: {
+      type: 'force',
+      preventOverlap: true
+    },
+    // fitView: true,
+    // fitViewPadding: [20, 40, 50, 20],
     defaultNode: {
       size: 30,
       style: {
