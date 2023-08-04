@@ -10,7 +10,7 @@
     "lint": "eslint . --ext .vue,.js,.jsx,.cjs,.mjs,.ts,.tsx,.cts,.mts --fix --ignore-path .gitignore"
   },
   "dependencies": {
-    "@antv/g6": "^4.8.20",
+    "@antv/x6": "^2.13.1",
     "@logicflow/core": "^1.2.8",
     "@logicflow/extension": "^1.2.8",
     "axios": "^1.4.0",
