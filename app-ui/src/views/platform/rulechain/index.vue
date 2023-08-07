@@ -1,7 +1,12 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue';
 import { Graph } from '@antv/x6';
+import { Dnd } from '@antv/x6-plugin-dnd';
+import { Stencil } from '@antv/x6-plugin-stencil';
+import { Rect } from '@antv/x6/lib/shape';
+
 let graph;
+let stencil;
 const data = {
   // 节点
   nodes: [
@@ -49,9 +54,10 @@ const data = {
   ]
 };
 onMounted(() => {
+  let container = document.getElementById('container');
   graph = new Graph({
-    container: document.getElementById('container'),
-    width: 800,
+    container: container,
+    width: 1200,
     height: 600,
     background: {
       color: '#fffbe6'
@@ -68,29 +74,23 @@ onMounted(() => {
     panning: true
   });
   graph.fromJSON(data);
+  stencil = new Stencil({
+    target: graph,
+    groups: [{ name: 'group1' }],
+
+  });
+  container.appendChild(stencil.container);
+  let rect = new Rect({
+    label: 'a',
+    width: 80,
+    height: 40
+  });
+  stencil.load([rect], 'group1');
 });
-const zoomVal = ref();
-const translateY = ref();
-const zoom = () => {
-  graph.zoom(zoomVal.value);
-};
-const translate = () => {
-  graph.translate(80, translateY.value);
-};
 </script>
 
 <template>
   <div id="container"></div>
-  <div>
-    <div>
-      <el-input v-model="zoomVal"></el-input>
-      <el-button @click="zoom">zoom</el-button>
-    </div>
-    <div>
-      <el-input v-model="translateY"></el-input>
-      <el-button @click="translate">translate</el-button>
-    </div>
-  </div>
 </template>
 
 <style scoped lang="scss"></style>

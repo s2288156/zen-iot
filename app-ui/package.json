@@ -11,8 +11,8 @@
   },
   "dependencies": {
     "@antv/x6": "^2.13.1",
-    "@logicflow/core": "^1.2.8",
-    "@logicflow/extension": "^1.2.8",
+    "@antv/x6-plugin-dnd": "^2.0.6",
+    "@antv/x6-plugin-stencil": "^2.1.4",
     "axios": "^1.4.0",
     "echarts": "^5.4.2",
     "element-plus": "^2.3.5",
