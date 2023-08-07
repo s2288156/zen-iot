@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted, ref } from 'vue'
+import { onMounted, ref } from 'vue';
 import { Graph } from '@antv/x6';
 let graph;
 const data = {
@@ -19,7 +19,25 @@ const data = {
       y: 180, // Number，必选，节点位置的 y 值
       width: 80, // Number，可选，节点大小的 width 值
       height: 40, // Number，可选，节点大小的 height 值
-      label: 'world' // String，节点标签
+      label: 'world', // String，节点标签
+      ports: {
+        groups: {
+          group1: {
+            attrs: {
+              circle: {
+                r: 3,
+                stroke: '#31d0c6',
+                fill: '#fff'
+              }
+            }
+          }
+        },
+        items: [
+          { id: 'port1', group: 'group1' },
+          { id: 'port2', group: 'group1' },
+          { id: 'port3', group: 'group1' }
+        ]
+      }
     }
   ],
   // 边
@@ -39,8 +57,13 @@ onMounted(() => {
       color: '#fffbe6'
     },
     grid: {
-      size: 10,
-      visible: true
+      type: 'dot',
+      size: 20,
+      visible: true,
+      args: {
+        color: 'red',
+        thickness: 2
+      }
     },
     panning: true
   });
@@ -60,11 +83,11 @@ const translate = () => {
   <div id="container"></div>
   <div>
     <div>
-      <el-input v-model='zoomVal'></el-input>
+      <el-input v-model="zoomVal"></el-input>
       <el-button @click="zoom">zoom</el-button>
     </div>
     <div>
-      <el-input v-model='translateY'></el-input>
+      <el-input v-model="translateY"></el-input>
       <el-button @click="translate">translate</el-button>
     </div>
   </div>
