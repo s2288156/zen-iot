@@ -54,11 +54,11 @@ const data = {
   ]
 };
 onMounted(() => {
-  let container = document.getElementById('container');
+  let contentDiv = document.getElementById('content');
+  let stencilDiv = document.getElementById('stencil');
+
   graph = new Graph({
-    container: container,
-    width: 1200,
-    height: 600,
+    container: contentDiv,
     background: {
       color: '#fffbe6'
     },
@@ -75,11 +75,11 @@ onMounted(() => {
   });
   graph.fromJSON(data);
   stencil = new Stencil({
+    title: 'stencil side',
     target: graph,
-    groups: [{ name: 'group1' }],
-
+    groups: [{ name: 'group1' }]
   });
-  container.appendChild(stencil.container);
+  stencilDiv.appendChild(stencil.container);
   let rect = new Rect({
     label: 'a',
     width: 80,
@@ -90,7 +90,27 @@ onMounted(() => {
 </script>
 
 <template>
-  <div id="container"></div>
+  <div id="container">
+    <div id="stencil" ref="stencil"></div>
+    <div id="content" ref="content"></div>
+  </div>
 </template>
 
-<style scoped lang="scss"></style>
+<style scoped lang="scss">
+#container {
+  display: flex;
+  padding: 0;
+  height: 100%;
+}
+#stencil {
+  position: relative;
+  width: 200px;
+  border: 1px solid #f0f0f0;
+}
+#content {
+  flex: 1;
+  margin-right: 8px;
+  margin-left: 8px;
+  box-shadow: 0 0 10px 1px #e9e9e9;
+}
+</style>
