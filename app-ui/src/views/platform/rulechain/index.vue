@@ -91,8 +91,8 @@ onMounted(() => {
 
 <template>
   <div id="container">
-    <div id="stencil" ref="stencil"></div>
-    <div id="content" ref="content"></div>
+    <div id="stencil"></div>
+    <div id="content"></div>
   </div>
 </template>
 
