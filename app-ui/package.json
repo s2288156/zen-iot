@@ -12,6 +12,7 @@
   "dependencies": {
     "@antv/x6": "^2.13.1",
     "@antv/x6-plugin-dnd": "^2.0.6",
+    "@antv/x6-plugin-snapline": "^2.1.7",
     "@antv/x6-plugin-stencil": "^2.1.4",
     "axios": "^1.4.0",
     "echarts": "^5.4.2",

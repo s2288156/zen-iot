@@ -4,6 +4,7 @@ import { Graph } from '@antv/x6';
 import { Dnd } from '@antv/x6-plugin-dnd';
 import { Stencil } from '@antv/x6-plugin-stencil';
 import { Rect } from '@antv/x6/lib/shape';
+import GetDragNodeOptions = Dnd.GetDragNodeOptions;
 
 let graph;
 let stencil;
@@ -53,12 +54,12 @@ const data = {
     }
   ]
 };
-onMounted(() => {
-  let contentDiv = document.getElementById('content');
-  let stencilDiv = document.getElementById('stencil');
 
+const contentRef = ref();
+const stencilRef = ref();
+onMounted(() => {
   graph = new Graph({
-    container: contentDiv,
+    container: contentRef.value,
     background: {
       color: '#fffbe6'
     },
@@ -77,37 +78,49 @@ onMounted(() => {
   stencil = new Stencil({
     title: 'stencil side',
     target: graph,
-    groups: [{ name: 'group1' }]
+    collapsable: true,
+    stencilGraphHeight: 0,
+    groups: [
+      { name: 'group1', title: 'Group 1' },
+      { name: 'group2', title: 'Group 2' }
+    ]
   });
-  stencilDiv.appendChild(stencil.container);
+  stencilRef.value.appendChild(stencil.container);
   let rect = new Rect({
     label: 'a',
     width: 80,
-    height: 40
+    height: 40,
   });
-  stencil.load([rect], 'group1');
+  stencil.load([rect], 'group2');
+  graph.on('node:click', ({e, x, y, node, view}) => {
+    console.log('x = ', x, ', y = ', y)
+  })
 });
+
+const startDrag = (sourceNode: Node, options: GetDragNodeOptions) => {
+  console.log(sourceNode.nodeType);
+};
 </script>
 
 <template>
-  <div id="container">
-    <div id="stencil"></div>
-    <div id="content"></div>
+  <div class="container">
+    <div class="stencil" ref="stencilRef"></div>
+    <div class="content" ref="contentRef"></div>
   </div>
 </template>
 
 <style scoped lang="scss">
-#container {
+.container {
   display: flex;
   padding: 0;
   height: 100%;
 }
-#stencil {
+.stencil {
   position: relative;
   width: 200px;
   border: 1px solid #f0f0f0;
 }
-#content {
+.content {
   flex: 1;
   margin-right: 8px;
   margin-left: 8px;
