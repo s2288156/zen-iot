@@ -1,13 +1,55 @@
 <script setup lang="ts">
-import { onMounted, ref } from 'vue'
+import { onMounted, reactive, ref } from 'vue';
 import { Graph } from '@antv/x6';
 import { Dnd } from '@antv/x6-plugin-dnd';
+import { NodeData } from './commons';
 
-const dndRef = ref()
-const contentRef = ref()
-let graph;
-let dnd;
-
+const dndRef = ref();
+const contentRef = ref();
+let graph: Graph;
+let dnd: Dnd;
+const nodes = reactive<Array<NodeData>>([
+  { className: 'dnd-rect', name: 'Rect', type: 'rect' },
+  { className: 'dnd-circle', name: 'Circle', type: 'circle' }
+]);
+const startDrag = (node: NodeData, event) => {
+  const type = node.type;
+  let graphNode: any;
+  switch (type) {
+    case 'rect':
+      graphNode = graph.createNode({
+        width: 100,
+        height: 40,
+        label: 'Rect',
+        attrs: {
+          body: {
+            stroke: '#8f8f8f',
+            strokeWidth: 1,
+            fill: '#fff',
+            rx: 6,
+            ry: 6
+          }
+        }
+      });
+      break;
+    case 'circle':
+      graphNode = graph.createNode({
+        width: 60,
+        height: 60,
+        shape: 'circle',
+        label: 'Circle',
+        attrs: {
+          body: {
+            stroke: '#8f8f8f',
+            strokeWidth: 1,
+            fill: '#fff'
+          }
+        }
+      });
+      break;
+  }
+  dnd.start(graphNode, event);
+};
 onMounted(() => {
   graph = new Graph({
     container: contentRef.value,
@@ -16,7 +58,7 @@ onMounted(() => {
       color: '#F2F7FA'
     }
   });
-  graph.centerContent()
+  graph.centerContent();
   dnd = new Dnd({
     target: graph,
     dndContainer: dndRef.value
@@ -27,8 +69,9 @@ onMounted(() => {
 <template>
   <div class="flow-container">
     <div class="flow-dnd" ref="dndRef">
-      <div class='dnd-rect' node-type='rect'>Rect</div>
-      <div class='dnd-circle' node-type='circle'>Circle</div>
+      <template v-for="node in nodes">
+        <div :class="node.className" @mousedown="startDrag(node, $event)">{{ node.name }}</div>
+      </template>
     </div>
     <div class="flow-content" ref="contentRef"></div>
   </div>
