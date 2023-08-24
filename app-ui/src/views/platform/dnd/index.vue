@@ -3,15 +3,65 @@ import { onMounted, reactive, ref } from 'vue';
 import { Graph } from '@antv/x6';
 import { Dnd } from '@antv/x6-plugin-dnd';
 import { NodeData } from './commons';
+import { Keyboard } from '@antv/x6-plugin-keyboard';
+import { Selection } from '@antv/x6-plugin-selection';
+import { Clipboard } from '@antv/x6-plugin-clipboard';
 
 const dndRef = ref();
 const contentRef = ref();
-let graph: Graph;
+let graph: Graphd;
 let dnd: Dnd;
 const nodes = reactive<Array<NodeData>>([
   { className: 'dnd-rect', name: 'Rect', type: 'rect' },
   { className: 'dnd-circle', name: 'Circle', type: 'circle' }
 ]);
+onMounted(() => {
+  graph = new Graph({
+    container: contentRef.value,
+    grid: true,
+    background: {
+      color: '#F2F7FA'
+    }
+  });
+  graph.use(
+    new Keyboard({
+      enabled: true,
+      global: true
+    })
+  );
+  graph.use(
+    new Selection({
+      enabled: true,
+      showNodeSelectionBox: true,
+      showEdgeSelectionBox: true
+    })
+  );
+  graph.use(
+    new Clipboard({
+      enabled: true
+    })
+  );
+  graph.centerContent();
+  dnd = new Dnd({
+    target: graph,
+    dndContainer: dndRef.value
+  });
+  graph.bindKey('ctrl+c', () => {
+    const cells = graph.getSelectedCells();
+    if (cells.length) {
+      graph.copy(cells);
+    }
+    return false;
+  });
+  graph.bindKey('ctrl+v', () => {
+    if (!graph.isClipboardEmpty()) {
+      const cells = graph.paste({ offset: 32 });
+      graph.cleanSelection();
+      graph.select(cells);
+    }
+    return false;
+  });
+});
 const startDrag = (node: NodeData, event) => {
   const type = node.type;
   let graphNode: any;
@@ -50,20 +100,6 @@ const startDrag = (node: NodeData, event) => {
   }
   dnd.start(graphNode, event);
 };
-onMounted(() => {
-  graph = new Graph({
-    container: contentRef.value,
-    grid: true,
-    background: {
-      color: '#F2F7FA'
-    }
-  });
-  graph.centerContent();
-  dnd = new Dnd({
-    target: graph,
-    dndContainer: dndRef.value
-  });
-});
 </script>
 
 <template>
