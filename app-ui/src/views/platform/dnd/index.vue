@@ -61,6 +61,14 @@ onMounted(() => {
     }
     return false;
   });
+  graph.bindKey('delete', () => {
+    const cells = graph.getSelectedCells();
+    if (cells.length) {
+      graph.cut(cells);
+      graph.cleanClipboard();
+    }
+    return false;
+  });
 });
 const startDrag = (node: NodeData, event) => {
   const type = node.type;
