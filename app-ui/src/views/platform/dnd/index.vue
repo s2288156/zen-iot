@@ -6,6 +6,7 @@ import { NodeData } from './commons';
 import { Keyboard } from '@antv/x6-plugin-keyboard';
 import { Selection } from '@antv/x6-plugin-selection';
 import { Clipboard } from '@antv/x6-plugin-clipboard';
+import { Scroller } from '@antv/x6-plugin-scroller'
 
 const dndRef = ref();
 const contentRef = ref();
@@ -38,9 +39,15 @@ onMounted(() => {
   );
   graph.use(
     new Clipboard({
-      enabled: true
+      enabled: true,
     })
   );
+  graph.use(
+    new Scroller({
+      enabled: true,
+      pannable: true
+    }),
+  )
   graph.centerContent();
   dnd = new Dnd({
     target: graph,
