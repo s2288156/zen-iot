@@ -103,6 +103,16 @@ const router = createRouter({
             icon: 'Cpu',
             roles: ['ROLE_ADMIN'],
           },
+        },
+        {
+          path: '/platform/dnd',
+          name: 'Dnd',
+          component: () => import('@/views/platform/dnd/index.vue'),
+          meta: {
+            title: '规则链Dnd',
+            icon: 'Cpu',
+            roles: ['ROLE_ADMIN'],
+          },
         }
       ],
     },
