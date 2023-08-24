@@ -33,8 +33,12 @@ onMounted(() => {
   graph.use(
     new Selection({
       enabled: true,
+      multiple: true,
+      rubberband: true,
+      movable: true,
       showNodeSelectionBox: true,
-      showEdgeSelectionBox: true
+      showEdgeSelectionBox: true,
+      modifiers: 'ctrl'
     })
   );
   graph.use(
