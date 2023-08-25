@@ -1,6 +1,6 @@
 <template>
   <el-container class="layout">
-    <el-aside width="200px">
+    <el-aside>
       <AsideMenu />
     </el-aside>
     <el-container>
@@ -27,18 +27,20 @@ import TheMain from "@/components/layout/Main/TheMain.vue"</script>
     height: 45px;
     background-color: #ffffff;
     border-bottom-style: solid;
-    border-bottom-width: 1px;
+    border-bottom-width: 0;
     border-bottom-color: #dfe4ea;
   }
 
   .el-aside {
+    width: 200px;
     background-color: #f1f2f6;
     border-right-style: solid;
-    border-right-width: 1px;
+    border-right-width: 0;
     border-right-color: #dfe4ea;
   }
 
   .el-main {
+    padding: 0;
     background-color: #ffffff;
   }
 }

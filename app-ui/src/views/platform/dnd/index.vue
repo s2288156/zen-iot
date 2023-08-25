@@ -6,7 +6,7 @@ import { NodeData } from './commons';
 import { Keyboard } from '@antv/x6-plugin-keyboard';
 import { Selection } from '@antv/x6-plugin-selection';
 import { Clipboard } from '@antv/x6-plugin-clipboard';
-import { Scroller } from '@antv/x6-plugin-scroller'
+import { Scroller } from '@antv/x6-plugin-scroller';
 
 const dndRef = ref();
 const contentRef = ref();
@@ -43,15 +43,15 @@ onMounted(() => {
   );
   graph.use(
     new Clipboard({
-      enabled: true,
+      enabled: true
     })
   );
   graph.use(
     new Scroller({
       enabled: true,
       pannable: true
-    }),
-  )
+    })
+  );
   graph.centerContent();
   dnd = new Dnd({
     target: graph,
@@ -123,12 +123,15 @@ const startDrag = (node: NodeData, event) => {
 
 <template>
   <div class="flow-container">
-    <div class="flow-dnd" ref="dndRef">
-      <template v-for="node in nodes">
-        <div :class="node.className" @mousedown="startDrag(node, $event)">{{ node.name }}</div>
-      </template>
+    <div class="flow-header">flow header</div>
+    <div class="flow-main">
+      <div class="flow-dnd" ref="dndRef">
+        <template v-for="node in nodes">
+          <div :class="node.className" @mousedown="startDrag(node, $event)">{{ node.name }}</div>
+        </template>
+      </div>
+      <div class="flow-content" ref="contentRef"></div>
     </div>
-    <div class="flow-content" ref="contentRef"></div>
   </div>
 </template>
 
@@ -137,11 +140,27 @@ const startDrag = (node: NodeData, event) => {
   display: flex;
   padding: 0;
   height: 100%;
+  flex-wrap: wrap;
+}
+.flow-main {
+  display: flex;
+  padding: 0;
+  height: 100%;
+}
+.flow-header {
+  position: relative;
+  padding: 0;
+  height: 50px;
+  width: 100%;
+  background-color: #f1f3f4;
+  border: 1px solid #dadce0;
+  box-sizing: border-box;
 }
 .flow-dnd {
   position: relative;
   width: 200px;
-  border: 1px solid #f0f0f0;
+  background-color: #f1f3f4;
+  border: 1px solid #dadce0;
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
@@ -149,9 +168,10 @@ const startDrag = (node: NodeData, event) => {
 }
 .flow-content {
   flex: 1;
+  width: calc(100vw - 200px);
   margin-right: 8px;
   margin-left: 8px;
-  box-shadow: 0 0 10px 1px #e9e9e9;
+  box-shadow: 0 0 10px 1px #dadce0;
 }
 .dnd-rect {
   width: 100px;
