@@ -10,7 +10,7 @@ import { Scroller } from '@antv/x6-plugin-scroller';
 
 const dndRef = ref();
 const contentRef = ref();
-let graph: Graphd;
+let graph: Graph;
 let dnd: Dnd;
 const nodes = reactive<Array<NodeData>>([
   { className: 'dnd-rect', name: 'Rect', type: 'rect' },
@@ -20,6 +20,11 @@ onMounted(() => {
   graph = new Graph({
     container: contentRef.value,
     grid: true,
+    // autoResize: true,
+    panning: {
+      enabled: true,
+      eventTypes: ['rightMouseDown']
+    },
     background: {
       color: '#F2F7FA'
     }
@@ -46,12 +51,12 @@ onMounted(() => {
       enabled: true
     })
   );
-  graph.use(
-    new Scroller({
-      enabled: true,
-      pannable: true
-    })
-  );
+  // graph.use(
+  //   new Scroller({
+  //     enabled: true,
+  //     pannable: true,
+  //   })
+  // );
   graph.centerContent();
   dnd = new Dnd({
     target: graph,
@@ -139,16 +144,17 @@ const startDrag = (node: NodeData, event) => {
 .flow-container {
   display: flex;
   padding: 0;
-  height: 100%;
+  height: calc(100vh - 45px);
   flex-wrap: wrap;
 }
 .flow-main {
+  position: relative;
   display: flex;
   padding: 0;
-  height: 100%;
+  height: calc(100vh - 95px);
+  width: 100%;
 }
 .flow-header {
-  position: relative;
   padding: 0;
   height: 50px;
   width: 100%;
@@ -168,9 +174,9 @@ const startDrag = (node: NodeData, event) => {
 }
 .flow-content {
   flex: 1;
-  width: calc(100vw - 200px);
-  margin-right: 8px;
-  margin-left: 8px;
+  height: 100%;
+  margin-right: 3px;
+  margin-left: 3px;
   box-shadow: 0 0 10px 1px #dadce0;
 }
 .dnd-rect {
@@ -183,7 +189,6 @@ const startDrag = (node: NodeData, event) => {
   border-radius: 6px;
   cursor: move;
 }
-
 .dnd-circle {
   width: 60px;
   height: 60px;
