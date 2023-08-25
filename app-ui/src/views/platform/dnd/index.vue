@@ -6,7 +6,6 @@ import { NodeData } from './commons';
 import { Keyboard } from '@antv/x6-plugin-keyboard';
 import { Selection } from '@antv/x6-plugin-selection';
 import { Clipboard } from '@antv/x6-plugin-clipboard';
-import { Scroller } from '@antv/x6-plugin-scroller';
 
 const dndRef = ref();
 const contentRef = ref();
@@ -17,13 +16,59 @@ const nodes = reactive<Array<NodeData>>([
   { className: 'node-circle', name: 'Circle', type: 'circle' }
 ]);
 onMounted(() => {
+  Graph.registerNode('zen-rect', {
+    inherit: 'rect',
+    width: 100,
+    height: 40,
+    attrs: {
+      body: {
+        stroke: '#8f8f8f',
+        strokeWidth: 1,
+        fill: '#fff',
+        rx: 6,
+        ry: 6
+      }
+    },
+    ports: {
+      groups: {
+        top: {
+          position: 'top',
+          attrs: {
+            circle: {
+              magnet: true,
+              stroke: '#8f8f8f',
+              r: 5,
+            },
+          },
+        },
+        bottom: {
+          position: 'bottom',
+          attrs: {
+            circle: {
+              magnet: true,
+              stroke: '#8f8f8f',
+              r: 5,
+            },
+          },
+        },
+      },
+    }
+  },true)
   graph = new Graph({
     container: contentRef.value,
     grid: true,
-    // autoResize: true,
     panning: {
       enabled: true,
       eventTypes: ['rightMouseDown']
+    },
+    connecting: {
+      snap: true,
+      allowBlank: true,
+      allowLoop: true,
+      allowNode: true,
+      allowEdge: false,
+      allowPort: true,
+      allowMulti: true
     },
     background: {
       color: '#F2F7FA'
@@ -43,7 +88,6 @@ onMounted(() => {
       movable: true,
       showNodeSelectionBox: true,
       showEdgeSelectionBox: true,
-      modifiers: 'ctrl'
     })
   );
   graph.use(
@@ -51,12 +95,6 @@ onMounted(() => {
       enabled: true
     })
   );
-  // graph.use(
-  //   new Scroller({
-  //     enabled: true,
-  //     pannable: true,
-  //   })
-  // );
   graph.centerContent();
   dnd = new Dnd({
     target: graph,
@@ -92,17 +130,15 @@ const startDrag = (node: NodeData, event) => {
   switch (type) {
     case 'rect':
       graphNode = graph.createNode({
-        width: 100,
-        height: 40,
+        shape: 'zen-rect',
         label: 'Rect',
-        attrs: {
-          body: {
-            stroke: '#8f8f8f',
-            strokeWidth: 1,
-            fill: '#fff',
-            rx: 6,
-            ry: 6
-          }
+        ports: {
+          items: [
+            {id: 'port_1', group: 'bottom'},
+            // {id: 'port_2', group: 'bottom'},
+            // {id: 'port_3', group: 'top'},
+            {id: 'port_4', group: 'top'},
+          ],
         }
       });
       break;
