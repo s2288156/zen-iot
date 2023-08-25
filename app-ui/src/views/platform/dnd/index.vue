@@ -13,8 +13,8 @@ const contentRef = ref();
 let graph: Graph;
 let dnd: Dnd;
 const nodes = reactive<Array<NodeData>>([
-  { className: 'dnd-rect', name: 'Rect', type: 'rect' },
-  { className: 'dnd-circle', name: 'Circle', type: 'circle' }
+  { className: 'node-rect', name: 'Rect', type: 'rect' },
+  { className: 'node-circle', name: 'Circle', type: 'circle' }
 ]);
 onMounted(() => {
   graph = new Graph({
@@ -147,13 +147,6 @@ const startDrag = (node: NodeData, event) => {
   height: calc(100vh - 45px);
   flex-wrap: wrap;
 }
-.flow-main {
-  position: relative;
-  display: flex;
-  padding: 0;
-  height: calc(100vh - 95px);
-  width: 100%;
-}
 .flow-header {
   padding: 0;
   height: 50px;
@@ -162,8 +155,13 @@ const startDrag = (node: NodeData, event) => {
   border: 1px solid #dadce0;
   box-sizing: border-box;
 }
+.flow-main {
+  display: flex;
+  padding: 0;
+  height: calc(100vh - 95px);
+  width: 100%;
+}
 .flow-dnd {
-  position: relative;
   width: 200px;
   background-color: #f1f3f4;
   border: 1px solid #dadce0;
@@ -174,12 +172,13 @@ const startDrag = (node: NodeData, event) => {
 }
 .flow-content {
   flex: 1;
-  height: 100%;
   margin-right: 3px;
   margin-left: 3px;
   box-shadow: 0 0 10px 1px #dadce0;
 }
-.dnd-rect {
+
+// cell styles
+.node-rect {
   width: 100px;
   height: 40px;
   margin: 16px;
@@ -189,7 +188,7 @@ const startDrag = (node: NodeData, event) => {
   border-radius: 6px;
   cursor: move;
 }
-.dnd-circle {
+.node-circle {
   width: 60px;
   height: 60px;
   margin: 16px;
