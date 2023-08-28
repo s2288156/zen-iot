@@ -6,6 +6,7 @@ import { NodeData } from './commons';
 import { Keyboard } from '@antv/x6-plugin-keyboard';
 import { Selection } from '@antv/x6-plugin-selection';
 import { Clipboard } from '@antv/x6-plugin-clipboard';
+import { Snapline } from '@antv/x6-plugin-snapline'
 
 const dndRef = ref();
 const contentRef = ref();
@@ -37,7 +38,10 @@ onMounted(() => {
             circle: {
               magnet: true,
               stroke: '#8f8f8f',
-              r: 5,
+              r: 3,
+              style: {
+                visibility: 'hidden'
+              }
             },
           },
         },
@@ -47,13 +51,43 @@ onMounted(() => {
             circle: {
               magnet: true,
               stroke: '#8f8f8f',
-              r: 5,
+              r: 3,
+              style: {
+                visibility: 'hidden'
+              }
+            },
+          },
+        },
+        left: {
+          position: 'left',
+          attrs: {
+            circle: {
+              magnet: true,
+              stroke: '#8f8f8f',
+              r: 3,
+              style: {
+                visibility: 'hidden'
+              }
+            },
+          },
+        },
+        right: {
+          position: 'right',
+          attrs: {
+            circle: {
+              magnet: true,
+              stroke: '#8f8f8f',
+              r: 3,
+              style: {
+                visibility: 'hidden'
+              }
             },
           },
         },
       },
     }
   },true)
+
   graph = new Graph({
     container: contentRef.value,
     grid: true,
@@ -62,6 +96,8 @@ onMounted(() => {
       eventTypes: ['rightMouseDown']
     },
     connecting: {
+      router: 'manhattan',
+      connector: 'rounded',
       snap: true,
       allowBlank: true,
       allowLoop: true,
@@ -74,6 +110,12 @@ onMounted(() => {
       color: '#F2F7FA'
     }
   });
+  graph.use(
+    new Snapline({
+      enabled: true,
+      sharp: true,
+    }),
+  );
   graph.use(
     new Keyboard({
       enabled: true,
@@ -123,6 +165,18 @@ onMounted(() => {
     }
     return false;
   });
+  graph.on('node:mouseenter', () => {
+    const ports = contentRef.value.querySelectorAll(
+      '.x6-port-body',
+    ) as NodeListOf<SVGElement>
+    showPorts(ports, true)
+  })
+  graph.on('node:mouseleave', () => {
+    const ports = contentRef.value.querySelectorAll(
+      '.x6-port-body',
+    ) as NodeListOf<SVGElement>
+    showPorts(ports, false)
+  })
 });
 const startDrag = (node: NodeData, event) => {
   const type = node.type;
@@ -134,10 +188,10 @@ const startDrag = (node: NodeData, event) => {
         label: 'Rect',
         ports: {
           items: [
-            {id: 'port_1', group: 'bottom'},
-            // {id: 'port_2', group: 'bottom'},
-            // {id: 'port_3', group: 'top'},
-            {id: 'port_4', group: 'top'},
+            {id: 'port_1', group: 'top'},
+            {id: 'port_2', group: 'bottom'},
+            {id: 'port_3', group: 'left'},
+            {id: 'port_4', group: 'right'},
           ],
         }
       });
@@ -160,11 +214,23 @@ const startDrag = (node: NodeData, event) => {
   }
   dnd.start(graphNode, event);
 };
+const printNodes = () => {
+  console.log(JSON.stringify(graph.toJSON()))
+}
+// 控制连接桩显示/隐藏
+const showPorts = (ports: NodeListOf<SVGElement>, show: boolean) => {
+  for (let i = 0, len = ports.length; i < len; i += 1) {
+    ports[i].style.visibility = show ? 'visible' : 'hidden'
+  }
+}
+// #endregion
 </script>
 
 <template>
   <div class="flow-container">
-    <div class="flow-header">flow header</div>
+    <div class="flow-header">
+      <el-button @click='printNodes'>Test</el-button>
+    </div>
     <div class="flow-main">
       <div class="flow-dnd" ref="dndRef">
         <template v-for="node in nodes">
