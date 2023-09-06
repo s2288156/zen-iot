@@ -39,7 +39,7 @@ export class GraphConfig {
       'zen-rect',
       {
         inherit: 'rect',
-        width: 100,
+        width: 160,
         height: 40,
         attrs: {
           body: {

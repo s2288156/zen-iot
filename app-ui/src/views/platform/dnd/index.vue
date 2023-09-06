@@ -7,48 +7,33 @@ const dndRef = ref();
 const contentRef = ref();
 let graphConfig: GraphConfig;
 const nodes = reactive<Array<NodeData>>([
-  { className: 'node-rect', name: 'save timeseries', type: 'rect' },
-  { className: 'node-rect', name: 'save attributes', type: 'rect' },
-  // { className: 'node-circle', name: 'Circle', type: 'circle' }
+  { className: 'node-rect', name: 'save timeseries', type: 'rect', backgroundColor: '#4dd0e1' },
+  { className: 'node-rect', name: 'save attributes', type: 'rect', backgroundColor: '#e57373' }
 ]);
 onMounted(() => {
   graphConfig = new GraphConfig(dndRef, contentRef);
   graphConfig.init();
 });
 const startDrag = (node: NodeData, event: MouseEvent) => {
-  const type = node.type;
-  let graphNode: any;
-  switch (type) {
-    case 'rect':
-      graphNode = graphConfig.getGraph().createNode({
-        shape: 'zen-rect',
-        label: 'Rect',
-        ports: {
-          items: [
-            { id: 'port_1', group: 'top' },
-            { id: 'port_2', group: 'bottom' },
-            { id: 'port_3', group: 'left' },
-            { id: 'port_4', group: 'right' }
-          ]
-        }
-      });
-      break;
-    case 'circle':
-      graphNode = graphConfig.getGraph().createNode({
-        width: 60,
-        height: 60,
-        shape: 'circle',
-        label: 'Circle',
-        attrs: {
-          body: {
-            stroke: '#8f8f8f',
-            strokeWidth: 1,
-            fill: '#fff'
-          }
-        }
-      });
-      break;
-  }
+  let graphNode = graphConfig.getGraph().createNode({
+    shape: 'zen-rect',
+    label: node.name,
+    attrs: {
+      body: {
+        stroke: '#8f8f8f',
+        strokeWidth: 1,
+        fill: node.backgroundColor
+      }
+    },
+    ports: {
+      items: [
+        { id: 'port_1', group: 'top' },
+        { id: 'port_2', group: 'bottom' },
+        { id: 'port_3', group: 'left' },
+        { id: 'port_4', group: 'right' }
+      ]
+    }
+  });
   graphConfig.getDnd().start(graphNode, event);
 };
 const printNodes = () => {
@@ -64,7 +49,7 @@ const printNodes = () => {
     <div class="flow-main">
       <div class="flow-dnd" ref="dndRef">
         <template v-for="node in nodes">
-          <div :class="node.className" @mousedown="startDrag(node, $event)">{{ node.name }}</div>
+          <div :class="node.className" :style="{backgroundColor: node.backgroundColor}" @mousedown="startDrag(node, $event)">{{ node.name }}</div>
         </template>
       </div>
       <div class="flow-content" ref="contentRef"></div>
