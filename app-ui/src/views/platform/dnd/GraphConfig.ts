@@ -200,18 +200,34 @@ export class GraphConfig {
     });
     this.graph.on('node:mouseenter', () => {
       const ports = this.contentRef.value.querySelectorAll('.x6-port-body') as NodeListOf<SVGElement>;
+      const cells = this.contentRef.value.querySelectorAll('.x6-node') as NodeListOf<SVGElement>;
       this.showPorts(ports, true);
+      this.changeCursor(cells, 'pointer')
     });
     this.graph.on('node:mouseleave', () => {
       const ports = this.contentRef.value.querySelectorAll('.x6-port-body') as NodeListOf<SVGElement>;
+      const cells = this.contentRef.value.querySelectorAll('.x6-node') as NodeListOf<SVGElement>;
       this.showPorts(ports, false);
+      this.changeCursor(cells, 'default')
     });
+    this.graph.on('cell:mousedown', ({ e }) => {
+      const cells = this.contentRef.value.querySelectorAll('.x6-cell') as NodeListOf<SVGElement>;
+      this.changeCursor(cells, 'move')
+    })
+    this.graph.on('graph:mouseenter', ({ e }) => {
+      this.contentRef.value.style.cursor = 'default'
+    })
   }
 
   // 控制连接桩显示/隐藏
   private showPorts(ports: NodeListOf<SVGElement>, show: boolean) {
     for (let i = 0, len = ports.length; i < len; i += 1) {
       ports[i].style.visibility = show ? 'visible' : 'hidden';
+    }
+  }
+  private changeCursor(cells: NodeListOf<SVGElement>, cursorType: string) {
+    for (let i = 0, len = cells.length; i < len; i += 1) {
+      cells[i].style.cursor = cursorType;
     }
   }
   // #endregion

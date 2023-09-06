@@ -1,5 +1,5 @@
 export type NodeData = {
-  type: string,
+  shape: string,
   name: string,
   className: string,
   backgroundColor: string
