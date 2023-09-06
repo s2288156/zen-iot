@@ -7,19 +7,15 @@ const dndRef = ref();
 const contentRef = ref();
 let graphConfig: GraphConfig;
 const nodes = reactive<Array<NodeData>>([
-  { className: 'node-rect', name: 'Rect', type: 'rect' },
-  { className: 'node-circle', name: 'Circle', type: 'circle' }
+  { className: 'node-rect', name: 'save timeseries', type: 'rect' },
+  { className: 'node-rect', name: 'save attributes', type: 'rect' },
+  // { className: 'node-circle', name: 'Circle', type: 'circle' }
 ]);
 onMounted(() => {
   graphConfig = new GraphConfig(dndRef, contentRef);
-  graphConfig.registerNode();
-  graphConfig.newGraph();
-  graphConfig.loadPlugin();
-  graphConfig.getGraph().centerContent();
-  graphConfig.loadDnd();
-  graphConfig.loadEvent();
+  graphConfig.init();
 });
-const startDrag = (node: NodeData, event) => {
+const startDrag = (node: NodeData, event: MouseEvent) => {
   const type = node.type;
   let graphNode: any;
   switch (type) {
@@ -115,9 +111,10 @@ const printNodes = () => {
 
 // cell styles
 .node-rect {
-  width: 100px;
+  font-size: 16px;
+  width: 160px;
   height: 40px;
-  margin: 16px;
+  margin: 10px;
   line-height: 40px;
   text-align: center;
   border: 1px solid #8f8f8f;

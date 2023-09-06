@@ -12,10 +12,18 @@ export class GraphConfig {
   private graph: Graph;
   private dnd: Dnd;
 
-
   constructor(dndRef: Ref, contentRef: Ref) {
     this.dndRef = dndRef
     this.contentRef = contentRef
+  }
+
+  public init() {
+    this.registerNode();
+    this.newGraph();
+    this.loadPlugin();
+    this.getGraph().centerContent();
+    this.loadDnd();
+    this.loadEvent();
   }
 
   public getGraph(): Graph {
@@ -26,7 +34,7 @@ export class GraphConfig {
     return this.dnd;
   }
 
-  public registerNode() {
+  private registerNode() {
     Graph.registerNode(
       'zen-rect',
       {
@@ -103,7 +111,7 @@ export class GraphConfig {
     );
   }
 
-  public newGraph(): Graph {
+  private newGraph(): Graph {
     this.graph =  new Graph({
       container: this.contentRef.value,
       grid: true,
@@ -129,7 +137,7 @@ export class GraphConfig {
     return this.graph;
   }
 
-  public loadPlugin(): void {
+  private loadPlugin(): void {
     this.graph.use(
       new Snapline({
         enabled: true,
@@ -159,14 +167,14 @@ export class GraphConfig {
     );
   }
 
-  public loadDnd(): void {
+  private loadDnd(): void {
     this.dnd = new Dnd({
       target: this.graph,
       dndContainer: this.dndRef.value
     });
   }
 
-  public loadEvent(): void {
+  private loadEvent(): void {
     this.graph.bindKey('ctrl+c', () => {
       const cells = this.graph.getSelectedCells();
       if (cells.length) {
