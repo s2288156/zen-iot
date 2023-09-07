@@ -45,6 +45,14 @@ public class JacksonUtil {
         return true;
     }
 
+    public static <T> T readValue(String content, Class<T> toValueType) {
+        try {
+            return OBJECT_MAPPER.readValue(content, toValueType);
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
     public static <T> T convertValue(Object fromValue, Class<T> toValueType) {
         return OBJECT_MAPPER.convertValue(fromValue, toValueType);
     }

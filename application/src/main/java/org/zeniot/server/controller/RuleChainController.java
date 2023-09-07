@@ -23,7 +23,6 @@ public class RuleChainController {
     public SingleResponse<?> saveRuleChain(@RequestBody RuleChain ruleChain) {
         List<JsonNode> cells = ruleChain.getCells();
         log.warn("{}", cells.get(1).get("shape"));
-
         return SingleResponse.success();
     }
 
