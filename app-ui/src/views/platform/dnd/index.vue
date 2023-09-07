@@ -7,8 +7,8 @@ const dndRef = ref();
 const contentRef = ref();
 let graphConfig: GraphConfig;
 const nodes = reactive<Array<NodeData>>([
-  { className: 'node-rect', name: 'save timeseries', shape: 'zen-rect', backgroundColor: '#4dd0e1' },
-  { className: 'node-rect', name: 'save attributes', shape: 'zen-rect', backgroundColor: '#e57373' }
+  { className: 'node-rect', name: 'save timeseries', shape: 'RECT_NODE', backgroundColor: '#4dd0e1' },
+  { className: 'node-rect', name: 'save attributes', shape: 'RECT_NODE', backgroundColor: '#e57373' }
 ]);
 onMounted(() => {
   graphConfig = new GraphConfig(dndRef, contentRef);
@@ -33,6 +33,18 @@ const startDrag = (node: NodeData, event: MouseEvent) => {
         { id: 'port_4', group: 'right' }
       ]
     },
+    tools: [
+      {
+        name: 'node-editor',
+        args: {
+          x: -630,
+          y: 13,
+          attrs: {
+            backgroundColor: '#EFF4FF',
+          },
+        },
+      },
+    ],
     data: {
 
     }
@@ -42,12 +54,77 @@ const startDrag = (node: NodeData, event: MouseEvent) => {
 const printNodes = () => {
   console.log(JSON.stringify(graphConfig.getGraph().toJSON()));
 };
+
+const testCreateNodes = () => {
+  graphConfig.getGraph().fromJSON([
+    {
+      "position": {
+        "x": -520,
+        "y": -250
+      },
+      "size": {
+        "width": 160,
+        "height": 40
+      },
+      "attrs": {
+        "text": {
+          "text": "save timeseries"
+        },
+        "body": {
+          "fill": "#4dd0e1"
+        }
+      },
+      "visible": true,
+      "shape": "zen-rect",
+      "id": "d298a15a-d7b6-4ccf-9ae9-f82d2c977119",
+      "data": {},
+      "zIndex": 1
+    },
+    {
+      "position": {
+        "x": -82,
+        "y": -250
+      },
+      "size": {
+        "width": 160,
+        "height": 40
+      },
+      "attrs": {
+        "text": {
+          "text": "save attributes"
+        },
+        "body": {
+          "fill": "#e57373"
+        }
+      },
+      "visible": true,
+      "shape": "zen-rect",
+      "id": "125a84b5-df49-45a8-b70b-da407a8b3587",
+      "data": {},
+      "zIndex": 2
+    },
+    {
+      "shape": "edge",
+      "id": "fdcd3e3d-821a-425b-a01a-95fd77ea351e",
+      "source": {
+        "cell": "d298a15a-d7b6-4ccf-9ae9-f82d2c977119",
+        "port": "port_4"
+      },
+      "target": {
+        "cell": "125a84b5-df49-45a8-b70b-da407a8b3587",
+        "port": "port_3"
+      },
+      "zIndex": 3
+    }
+  ])
+}
 </script>
 
 <template>
   <div class="flow-container">
     <div class="flow-header">
-      <el-button @click="printNodes">Test</el-button>
+      <el-button @click="printNodes">Print</el-button>
+      <el-button @click="testCreateNodes">Create</el-button>
     </div>
     <div class="flow-main">
       <div class="flow-dnd" ref="dndRef">

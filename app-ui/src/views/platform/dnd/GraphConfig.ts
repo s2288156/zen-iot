@@ -36,7 +36,7 @@ export class GraphConfig {
 
   private registerNode() {
     Graph.registerNode(
-      'zen-rect',
+      'RECT_NODE',
       {
         inherit: 'rect',
         width: 160,
