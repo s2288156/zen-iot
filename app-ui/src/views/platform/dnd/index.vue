@@ -7,8 +7,8 @@ const dndRef = ref();
 const contentRef = ref();
 let graphConfig: GraphConfig;
 const nodes = reactive<Array<NodeData>>([
-  { className: 'node-rect', name: 'save timeseries', shape: 'RECT_NODE', backgroundColor: '#4dd0e1' },
-  { className: 'node-rect', name: 'save attributes', shape: 'RECT_NODE', backgroundColor: '#e57373' }
+  { className: 'node-rect', name: 'save timeseries', shape: 'RECT_NODE', backgroundColor: '#4dd0e1', nodeType: 'SAVE_TIMESERIES' },
+  { className: 'node-rect', name: 'save attributes', shape: 'RECT_NODE', backgroundColor: '#e57373', nodeType: 'SAVE_ATTRIBUTES' }
 ]);
 onMounted(() => {
   graphConfig = new GraphConfig(dndRef, contentRef);
@@ -46,7 +46,7 @@ const startDrag = (node: NodeData, event: MouseEvent) => {
       },
     ],
     data: {
-
+      nodeType: node.nodeType
     }
   });
   graphConfig.getDnd().start(graphNode, event);
