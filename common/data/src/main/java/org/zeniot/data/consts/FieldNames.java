@@ -5,6 +5,7 @@ package org.zeniot.data.consts;
  */
 public abstract class FieldNames {
 
+    public static final String SHAPE_NAME = "shape";
     public static final String SOURCE_NAME = "source";
     public static final String TARGET_NAME = "target";
     public static final String CELL_NAME = "cell";

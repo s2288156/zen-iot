@@ -2,6 +2,7 @@ package org.zeniot.data.domain.rulechain;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import lombok.Data;
+import org.springframework.data.web.JsonPath;
 import org.zeniot.data.enums.NodeTypeEnum;
 
 import static org.zeniot.data.consts.FieldNames.*;

@@ -3,8 +3,8 @@ package org.zeniot.data.base;
 /**
  * @author Wu.Chunyang
  */
-public interface HasId {
-    Long getId();
+public interface HasId<T> {
+    T getId();
 
-    void setId(Long id);
+    void setId(T id);
 }

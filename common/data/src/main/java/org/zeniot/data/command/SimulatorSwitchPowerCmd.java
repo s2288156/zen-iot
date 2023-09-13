@@ -13,7 +13,7 @@ import org.zeniot.data.enums.SimulatorStatusEnum;
  */
 @Data
 @EqualsAndHashCode(callSuper = true)
-public class SimulatorSwitchPowerCmd extends Cmd implements HasId {
+public class SimulatorSwitchPowerCmd extends Cmd implements HasId<Long> {
 
     @NotNull
     private Long id;

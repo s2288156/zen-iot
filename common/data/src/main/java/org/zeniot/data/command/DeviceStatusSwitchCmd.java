@@ -13,7 +13,7 @@ import org.zeniot.data.enums.DeviceStatusEnum;
  */
 @Data
 @EqualsAndHashCode(callSuper = true)
-public class DeviceStatusSwitchCmd extends Cmd implements HasId {
+public class DeviceStatusSwitchCmd extends Cmd implements HasId<Long> {
 
     @NotNull
     private Long id;
