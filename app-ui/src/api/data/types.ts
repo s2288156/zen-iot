@@ -1,4 +1,4 @@
-import type {TransportType, TimeUnit} from "@/api/data/enums";
+import { Rule } from 'eslint'
 
 export type Account = {
   id?: any
@@ -49,3 +49,14 @@ export type SimulatorJsonFieldDefine = {
   valueOrigin: string
   valueBound: string
 }
+
+export type NodeDefine = {
+  id: string
+  positionInfo: object
+  nodeName: string
+  shape: string
+  nodeType: string
+  configData?: object
+}
+
+

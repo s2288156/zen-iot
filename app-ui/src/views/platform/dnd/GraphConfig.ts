@@ -36,7 +36,7 @@ export class GraphConfig {
 
   private registerNode() {
     Graph.registerNode(
-      'RECT_NODE',
+      'rect_node',
       {
         inherit: 'rect',
         width: 160,

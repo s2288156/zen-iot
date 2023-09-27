@@ -2,13 +2,14 @@
 import { onMounted, reactive, ref } from 'vue';
 import { NodeData } from './commons';
 import { GraphConfig } from '@/views/platform/dnd/GraphConfig';
+import { EdgeDefine } from '@/api/data/classes'
 
 const dndRef = ref();
 const contentRef = ref();
 let graphConfig: GraphConfig;
 const nodes = reactive<Array<NodeData>>([
-  { className: 'node-rect', name: 'save timeseries', shape: 'RECT_NODE', backgroundColor: '#4dd0e1', nodeType: 'SAVE_TIMESERIES' },
-  { className: 'node-rect', name: 'save attributes', shape: 'RECT_NODE', backgroundColor: '#e57373', nodeType: 'SAVE_ATTRIBUTES' }
+  { className: 'node-rect', name: 'save timeseries', shape: 'rect_node', backgroundColor: '#4dd0e1', nodeType: 'SAVE_TIMESERIES' },
+  { className: 'node-rect', name: 'save attributes', shape: 'rect_node', backgroundColor: '#e57373', nodeType: 'SAVE_ATTRIBUTES' }
 ]);
 onMounted(() => {
   graphConfig = new GraphConfig(dndRef, contentRef);
@@ -56,8 +57,15 @@ const printNodes = () => {
 };
 
 const testCreateNodes = () => {
-  // graphConfig.getGraph().fromJSON([{"position":{"x":-590,"y":-180},"size":{"width":160,"height":40},"attrs":{"text":{"text":"save timeseries"},"body":{"fill":"#4dd0e1"}},"visible":true,"shape":"RECT_NODE","ports":{"groups":{"top":{"position":"top","attrs":{"circle":{"magnet":true,"stroke":"#8f8f8f","r":3,"style":{"visibility":"hidden"}}}},"bottom":{"position":"bottom","attrs":{"circle":{"magnet":true,"stroke":"#8f8f8f","r":3,"style":{"visibility":"hidden"}}}},"left":{"position":"left","attrs":{"circle":{"magnet":true,"stroke":"#8f8f8f","r":3,"style":{"visibility":"hidden"}}}},"right":{"position":"right","attrs":{"circle":{"magnet":true,"stroke":"#8f8f8f","r":3,"style":{"visibility":"hidden"}}}}},"items":[{"id":"port_1","group":"top"},{"id":"port_2","group":"bottom"},{"id":"port_3","group":"left"},{"id":"port_4","group":"right"}]},"id":"5d2ac1a3-644b-465c-9c82-288b954b74ae","data":{"nodeType":"SAVE_TIMESERIES"},"tools":{"items":[{"name":"node-editor","args":{"x":-630,"y":13,"attrs":{"backgroundColor":"#EFF4FF"}}}]},"zIndex":1},{"position":{"x":-230,"y":-180},"size":{"width":160,"height":40},"attrs":{"text":{"text":"save attributes"},"body":{"fill":"#e57373"}},"visible":true,"shape":"RECT_NODE","ports":{"groups":{"top":{"position":"top","attrs":{"circle":{"magnet":true,"stroke":"#8f8f8f","r":3,"style":{"visibility":"hidden"}}}},"bottom":{"position":"bottom","attrs":{"circle":{"magnet":true,"stroke":"#8f8f8f","r":3,"style":{"visibility":"hidden"}}}},"left":{"position":"left","attrs":{"circle":{"magnet":true,"stroke":"#8f8f8f","r":3,"style":{"visibility":"hidden"}}}},"right":{"position":"right","attrs":{"circle":{"magnet":true,"stroke":"#8f8f8f","r":3,"style":{"visibility":"hidden"}}}}},"items":[{"id":"port_1","group":"top"},{"id":"port_2","group":"bottom"},{"id":"port_3","group":"left"},{"id":"port_4","group":"right"}]},"id":"a7ee81ee-a122-44f2-a5f7-755564918263","data":{"nodeType":"SAVE_ATTRIBUTES"},"tools":{"items":[{"name":"node-editor","args":{"x":-630,"y":13,"attrs":{"backgroundColor":"#EFF4FF"}}}]},"zIndex":2},{"shape":"edge","id":"4aa54ec9-826e-4756-a524-f88cee6db6f0","source":{"cell":"5d2ac1a3-644b-465c-9c82-288b954b74ae","port":"port_4"},"target":{"cell":"a7ee81ee-a122-44f2-a5f7-755564918263","port":"port_3"},"zIndex":3}])
+  graphConfig.getGraph().fromJSON([{"position":{"x":-590,"y":-180},"size":{"width":160,"height":40},"attrs":{"text":{"text":"save timeseries"},"body":{"fill":"#4dd0e1"}},"visible":true,"shape":"rect_node","ports":{"groups":{"top":{"position":"top","attrs":{"circle":{"magnet":true,"stroke":"#8f8f8f","r":3,"style":{"visibility":"hidden"}}}},"bottom":{"position":"bottom","attrs":{"circle":{"magnet":true,"stroke":"#8f8f8f","r":3,"style":{"visibility":"hidden"}}}},"left":{"position":"left","attrs":{"circle":{"magnet":true,"stroke":"#8f8f8f","r":3,"style":{"visibility":"hidden"}}}},"right":{"position":"right","attrs":{"circle":{"magnet":true,"stroke":"#8f8f8f","r":3,"style":{"visibility":"hidden"}}}}},"items":[{"id":"port_1","group":"top"},{"id":"port_2","group":"bottom"},{"id":"port_3","group":"left"},{"id":"port_4","group":"right"}]},"id":"5d2ac1a3-644b-465c-9c82-288b954b74ae","data":{"nodeType":"SAVE_TIMESERIES"},"tools":{"items":[{"name":"node-editor","args":{"x":-630,"y":13,"attrs":{"backgroundColor":"#EFF4FF"}}}]},"zIndex":1},{"position":{"x":-230,"y":-180},"size":{"width":160,"height":40},"attrs":{"text":{"text":"save attributes"},"body":{"fill":"#e57373"}},"visible":true,"shape":"rect_node","ports":{"groups":{"top":{"position":"top","attrs":{"circle":{"magnet":true,"stroke":"#8f8f8f","r":3,"style":{"visibility":"hidden"}}}},"bottom":{"position":"bottom","attrs":{"circle":{"magnet":true,"stroke":"#8f8f8f","r":3,"style":{"visibility":"hidden"}}}},"left":{"position":"left","attrs":{"circle":{"magnet":true,"stroke":"#8f8f8f","r":3,"style":{"visibility":"hidden"}}}},"right":{"position":"right","attrs":{"circle":{"magnet":true,"stroke":"#8f8f8f","r":3,"style":{"visibility":"hidden"}}}}},"items":[{"id":"port_1","group":"top"},{"id":"port_2","group":"bottom"},{"id":"port_3","group":"left"},{"id":"port_4","group":"right"}]},"id":"a7ee81ee-a122-44f2-a5f7-755564918263","data":{"nodeType":"SAVE_ATTRIBUTES"},"tools":{"items":[{"name":"node-editor","args":{"x":-630,"y":13,"attrs":{"backgroundColor":"#EFF4FF"}}}]},"zIndex":2},{"shape":"edge","id":"4aa54ec9-826e-4756-a524-f88cee6db6f0","source":{"cell":"5d2ac1a3-644b-465c-9c82-288b954b74ae","port":"port_4"},"target":{"cell":"a7ee81ee-a122-44f2-a5f7-755564918263","port":"port_3"},"zIndex":3}])
+  graphConfig.getGraph().toJSON().cells.forEach(cell => {
+    if(cell.shape === 'edge') {
+      let edgeDefine = EdgeDefine.newFromCell(cell)
+      console.log(edgeDefine)
+    } else if(cell.shape == 'rect_node') {
 
+    }
+  })
 }
 </script>
 
