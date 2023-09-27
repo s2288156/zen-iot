@@ -56,67 +56,8 @@ const printNodes = () => {
 };
 
 const testCreateNodes = () => {
-  graphConfig.getGraph().fromJSON([
-    {
-      "position": {
-        "x": -520,
-        "y": -250
-      },
-      "size": {
-        "width": 160,
-        "height": 40
-      },
-      "attrs": {
-        "text": {
-          "text": "save timeseries"
-        },
-        "body": {
-          "fill": "#4dd0e1"
-        }
-      },
-      "visible": true,
-      "shape": "zen-rect",
-      "id": "d298a15a-d7b6-4ccf-9ae9-f82d2c977119",
-      "data": {},
-      "zIndex": 1
-    },
-    {
-      "position": {
-        "x": -82,
-        "y": -250
-      },
-      "size": {
-        "width": 160,
-        "height": 40
-      },
-      "attrs": {
-        "text": {
-          "text": "save attributes"
-        },
-        "body": {
-          "fill": "#e57373"
-        }
-      },
-      "visible": true,
-      "shape": "zen-rect",
-      "id": "125a84b5-df49-45a8-b70b-da407a8b3587",
-      "data": {},
-      "zIndex": 2
-    },
-    {
-      "shape": "edge",
-      "id": "fdcd3e3d-821a-425b-a01a-95fd77ea351e",
-      "source": {
-        "cell": "d298a15a-d7b6-4ccf-9ae9-f82d2c977119",
-        "port": "port_4"
-      },
-      "target": {
-        "cell": "125a84b5-df49-45a8-b70b-da407a8b3587",
-        "port": "port_3"
-      },
-      "zIndex": 3
-    }
-  ])
+  // graphConfig.getGraph().fromJSON([{"position":{"x":-590,"y":-180},"size":{"width":160,"height":40},"attrs":{"text":{"text":"save timeseries"},"body":{"fill":"#4dd0e1"}},"visible":true,"shape":"RECT_NODE","ports":{"groups":{"top":{"position":"top","attrs":{"circle":{"magnet":true,"stroke":"#8f8f8f","r":3,"style":{"visibility":"hidden"}}}},"bottom":{"position":"bottom","attrs":{"circle":{"magnet":true,"stroke":"#8f8f8f","r":3,"style":{"visibility":"hidden"}}}},"left":{"position":"left","attrs":{"circle":{"magnet":true,"stroke":"#8f8f8f","r":3,"style":{"visibility":"hidden"}}}},"right":{"position":"right","attrs":{"circle":{"magnet":true,"stroke":"#8f8f8f","r":3,"style":{"visibility":"hidden"}}}}},"items":[{"id":"port_1","group":"top"},{"id":"port_2","group":"bottom"},{"id":"port_3","group":"left"},{"id":"port_4","group":"right"}]},"id":"5d2ac1a3-644b-465c-9c82-288b954b74ae","data":{"nodeType":"SAVE_TIMESERIES"},"tools":{"items":[{"name":"node-editor","args":{"x":-630,"y":13,"attrs":{"backgroundColor":"#EFF4FF"}}}]},"zIndex":1},{"position":{"x":-230,"y":-180},"size":{"width":160,"height":40},"attrs":{"text":{"text":"save attributes"},"body":{"fill":"#e57373"}},"visible":true,"shape":"RECT_NODE","ports":{"groups":{"top":{"position":"top","attrs":{"circle":{"magnet":true,"stroke":"#8f8f8f","r":3,"style":{"visibility":"hidden"}}}},"bottom":{"position":"bottom","attrs":{"circle":{"magnet":true,"stroke":"#8f8f8f","r":3,"style":{"visibility":"hidden"}}}},"left":{"position":"left","attrs":{"circle":{"magnet":true,"stroke":"#8f8f8f","r":3,"style":{"visibility":"hidden"}}}},"right":{"position":"right","attrs":{"circle":{"magnet":true,"stroke":"#8f8f8f","r":3,"style":{"visibility":"hidden"}}}}},"items":[{"id":"port_1","group":"top"},{"id":"port_2","group":"bottom"},{"id":"port_3","group":"left"},{"id":"port_4","group":"right"}]},"id":"a7ee81ee-a122-44f2-a5f7-755564918263","data":{"nodeType":"SAVE_ATTRIBUTES"},"tools":{"items":[{"name":"node-editor","args":{"x":-630,"y":13,"attrs":{"backgroundColor":"#EFF4FF"}}}]},"zIndex":2},{"shape":"edge","id":"4aa54ec9-826e-4756-a524-f88cee6db6f0","source":{"cell":"5d2ac1a3-644b-465c-9c82-288b954b74ae","port":"port_4"},"target":{"cell":"a7ee81ee-a122-44f2-a5f7-755564918263","port":"port_3"},"zIndex":3}])
+
 }
 </script>
 
