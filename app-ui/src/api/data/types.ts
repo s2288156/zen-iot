@@ -1,12 +1,12 @@
-import { Rule } from 'eslint'
+import { EdgeDefine, NodeDefine } from '@/api/data/RuleChainDefine';
 
 export type Account = {
-  id?: any
-  username: string
-  password?: string
-  createTime?: string
-  updateTime?: string
-}
+  id?: any;
+  username: string;
+  password?: string;
+  createTime?: string;
+  updateTime?: string;
+};
 
 export type Device = {
   id?: any
@@ -50,13 +50,8 @@ export type SimulatorJsonFieldDefine = {
   valueBound: string
 }
 
-export type NodeDefine = {
-  id: string
-  positionInfo: object
-  nodeName: string
-  shape: string
-  nodeType: string
-  configData?: object
+export type RuleChain = {
+  id?: number
+  nodes: NodeDefine[]
+  edges: EdgeDefine[]
 }
-
-

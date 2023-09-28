@@ -1,7 +1,14 @@
 package org.zeniot.dao.model;
 
-import jakarta.persistence.*;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
 import lombok.*;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
+
+import java.time.LocalDateTime;
 
 
 /**
@@ -14,7 +21,11 @@ import lombok.*;
 @ToString
 @Entity
 @Table(name = "t_node_relation")
-public class NodeRelationEntity extends BaseEntity {
+public class NodeRelationEntity {
+
+    @Id
+    @Column(name = "id", nullable = false)
+    private String id;
 
     @Column(name = "source_id")
     private Integer sourceId;
@@ -22,4 +33,11 @@ public class NodeRelationEntity extends BaseEntity {
     @Column(name = "target_id")
     private Integer targetId;
 
+    @CreationTimestamp
+    @Column(name = "create_time", nullable = false)
+    private LocalDateTime createTime;
+
+    @UpdateTimestamp
+    @Column(name = "update_time", nullable = false)
+    private LocalDateTime updateTime;
 }

@@ -1,5 +1,5 @@
-import {createRouter, createWebHistory} from 'vue-router'
-import TheLayout from '@/components/layout/TheLayout.vue'
+import { createRouter, createWebHistory } from 'vue-router';
+import TheLayout from '@/components/layout/TheLayout.vue';
 
 const router = createRouter({
   history: createWebHistory(),
@@ -10,7 +10,7 @@ const router = createRouter({
       component: () => import('@/views/login/TheLogin.vue'),
       meta: {
         title: '登录'
-      },
+      }
     },
     {
       path: '/',
@@ -26,9 +26,9 @@ const router = createRouter({
             icon: 'HomeFilled',
             roles: [],
             isMenuRoot: true
-          },
-        },
-      ],
+          }
+        }
+      ]
     },
     {
       path: '/system',
@@ -48,8 +48,8 @@ const router = createRouter({
           meta: {
             title: '用户管理',
             icon: 'User',
-            roles: ['ROLE_ADMIN'],
-          },
+            roles: ['ROLE_ADMIN']
+          }
         },
         {
           path: '/system/menu',
@@ -58,7 +58,7 @@ const router = createRouter({
           meta: {
             title: '菜单管理',
             icon: 'Menu',
-            roles: ['ROLE_ADMIN'],
+            roles: ['ROLE_ADMIN']
           }
         },
         {
@@ -68,10 +68,10 @@ const router = createRouter({
           meta: {
             title: 'Pinia',
             icon: 'Menu',
-            roles: ['ROLE_ADMIN'],
+            roles: ['ROLE_ADMIN']
           }
-        },
-      ],
+        }
+      ]
     },
     {
       path: '/platform',
@@ -91,18 +91,8 @@ const router = createRouter({
           meta: {
             title: '设备管理',
             icon: 'Cpu',
-            roles: ['ROLE_ADMIN'],
-          },
-        },
-        {
-          path: '/platform/rulechain',
-          name: 'RuleChain',
-          component: () => import('@/views/platform/rulechain/index.vue'),
-          meta: {
-            title: '规则链',
-            icon: 'Cpu',
-            roles: ['ROLE_ADMIN'],
-          },
+            roles: ['ROLE_ADMIN']
+          }
         },
         {
           path: '/platform/dnd',
@@ -111,10 +101,10 @@ const router = createRouter({
           meta: {
             title: '规则链Dnd',
             icon: 'Cpu',
-            roles: ['ROLE_ADMIN'],
-          },
+            roles: ['ROLE_ADMIN']
+          }
         }
-      ],
+      ]
     },
     {
       path: '/simulator',
@@ -134,12 +124,12 @@ const router = createRouter({
           meta: {
             title: '仿真设备管理',
             icon: 'Cpu',
-            roles: ['ROLE_ADMIN'],
-          },
+            roles: ['ROLE_ADMIN']
+          }
         }
-      ],
-    },
-  ],
-})
+      ]
+    }
+  ]
+});
 
 export default router

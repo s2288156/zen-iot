@@ -2,7 +2,9 @@
 import { onMounted, reactive, ref } from 'vue';
 import { NodeData } from './commons';
 import { GraphConfig } from '@/views/platform/dnd/GraphConfig';
-import { EdgeDefine } from '@/api/data/classes'
+import { EdgeDefine, NodeDefine } from '@/api/data/RuleChainDefine';
+import { saveRuleChain } from '@/api/rule-chain-apis';
+import { RuleChain } from '@/api/data/types';
 
 const dndRef = ref();
 const contentRef = ref();
@@ -41,10 +43,10 @@ const startDrag = (node: NodeData, event: MouseEvent) => {
           x: -630,
           y: 13,
           attrs: {
-            backgroundColor: '#EFF4FF',
-          },
-        },
-      },
+            backgroundColor: '#EFF4FF'
+          }
+        }
+      }
     ],
     data: {
       nodeType: node.nodeType
@@ -57,16 +59,84 @@ const printNodes = () => {
 };
 
 const testCreateNodes = () => {
-  graphConfig.getGraph().fromJSON([{"position":{"x":-590,"y":-180},"size":{"width":160,"height":40},"attrs":{"text":{"text":"save timeseries"},"body":{"fill":"#4dd0e1"}},"visible":true,"shape":"rect_node","ports":{"groups":{"top":{"position":"top","attrs":{"circle":{"magnet":true,"stroke":"#8f8f8f","r":3,"style":{"visibility":"hidden"}}}},"bottom":{"position":"bottom","attrs":{"circle":{"magnet":true,"stroke":"#8f8f8f","r":3,"style":{"visibility":"hidden"}}}},"left":{"position":"left","attrs":{"circle":{"magnet":true,"stroke":"#8f8f8f","r":3,"style":{"visibility":"hidden"}}}},"right":{"position":"right","attrs":{"circle":{"magnet":true,"stroke":"#8f8f8f","r":3,"style":{"visibility":"hidden"}}}}},"items":[{"id":"port_1","group":"top"},{"id":"port_2","group":"bottom"},{"id":"port_3","group":"left"},{"id":"port_4","group":"right"}]},"id":"5d2ac1a3-644b-465c-9c82-288b954b74ae","data":{"nodeType":"SAVE_TIMESERIES"},"tools":{"items":[{"name":"node-editor","args":{"x":-630,"y":13,"attrs":{"backgroundColor":"#EFF4FF"}}}]},"zIndex":1},{"position":{"x":-230,"y":-180},"size":{"width":160,"height":40},"attrs":{"text":{"text":"save attributes"},"body":{"fill":"#e57373"}},"visible":true,"shape":"rect_node","ports":{"groups":{"top":{"position":"top","attrs":{"circle":{"magnet":true,"stroke":"#8f8f8f","r":3,"style":{"visibility":"hidden"}}}},"bottom":{"position":"bottom","attrs":{"circle":{"magnet":true,"stroke":"#8f8f8f","r":3,"style":{"visibility":"hidden"}}}},"left":{"position":"left","attrs":{"circle":{"magnet":true,"stroke":"#8f8f8f","r":3,"style":{"visibility":"hidden"}}}},"right":{"position":"right","attrs":{"circle":{"magnet":true,"stroke":"#8f8f8f","r":3,"style":{"visibility":"hidden"}}}}},"items":[{"id":"port_1","group":"top"},{"id":"port_2","group":"bottom"},{"id":"port_3","group":"left"},{"id":"port_4","group":"right"}]},"id":"a7ee81ee-a122-44f2-a5f7-755564918263","data":{"nodeType":"SAVE_ATTRIBUTES"},"tools":{"items":[{"name":"node-editor","args":{"x":-630,"y":13,"attrs":{"backgroundColor":"#EFF4FF"}}}]},"zIndex":2},{"shape":"edge","id":"4aa54ec9-826e-4756-a524-f88cee6db6f0","source":{"cell":"5d2ac1a3-644b-465c-9c82-288b954b74ae","port":"port_4"},"target":{"cell":"a7ee81ee-a122-44f2-a5f7-755564918263","port":"port_3"},"zIndex":3}])
-  graphConfig.getGraph().toJSON().cells.forEach(cell => {
-    if(cell.shape === 'edge') {
-      let edgeDefine = EdgeDefine.newFromCell(cell)
-      console.log(edgeDefine)
-    } else if(cell.shape == 'rect_node') {
-
+  graphConfig.getGraph().fromJSON([
+    {
+      position: { x: -590, y: -180 },
+      size: { width: 160, height: 40 },
+      attrs: { text: { text: 'save timeseries' }, body: { fill: '#4dd0e1' } },
+      visible: true,
+      shape: 'rect_node',
+      ports: {
+        groups: {
+          top: { position: 'top', attrs: { circle: { magnet: true, stroke: '#8f8f8f', r: 3, style: { visibility: 'hidden' } } } },
+          bottom: { position: 'bottom', attrs: { circle: { magnet: true, stroke: '#8f8f8f', r: 3, style: { visibility: 'hidden' } } } },
+          left: { position: 'left', attrs: { circle: { magnet: true, stroke: '#8f8f8f', r: 3, style: { visibility: 'hidden' } } } },
+          right: { position: 'right', attrs: { circle: { magnet: true, stroke: '#8f8f8f', r: 3, style: { visibility: 'hidden' } } } }
+        },
+        items: [
+          { id: 'port_1', group: 'top' },
+          { id: 'port_2', group: 'bottom' },
+          { id: 'port_3', group: 'left' },
+          { id: 'port_4', group: 'right' }
+        ]
+      },
+      id: '5d2ac1a3-644b-465c-9c82-288b954b74ae',
+      data: { nodeType: 'SAVE_TIMESERIES' },
+      tools: { items: [{ name: 'node-editor', args: { x: -630, y: 13, attrs: { backgroundColor: '#EFF4FF' } } }] },
+      zIndex: 1
+    },
+    {
+      position: { x: -230, y: -180 },
+      size: { width: 160, height: 40 },
+      attrs: { text: { text: 'save attributes' }, body: { fill: '#e57373' } },
+      visible: true,
+      shape: 'rect_node',
+      ports: {
+        groups: {
+          top: { position: 'top', attrs: { circle: { magnet: true, stroke: '#8f8f8f', r: 3, style: { visibility: 'hidden' } } } },
+          bottom: { position: 'bottom', attrs: { circle: { magnet: true, stroke: '#8f8f8f', r: 3, style: { visibility: 'hidden' } } } },
+          left: { position: 'left', attrs: { circle: { magnet: true, stroke: '#8f8f8f', r: 3, style: { visibility: 'hidden' } } } },
+          right: { position: 'right', attrs: { circle: { magnet: true, stroke: '#8f8f8f', r: 3, style: { visibility: 'hidden' } } } }
+        },
+        items: [
+          { id: 'port_1', group: 'top' },
+          { id: 'port_2', group: 'bottom' },
+          { id: 'port_3', group: 'left' },
+          { id: 'port_4', group: 'right' }
+        ]
+      },
+      id: 'a7ee81ee-a122-44f2-a5f7-755564918263',
+      data: { nodeType: 'SAVE_ATTRIBUTES' },
+      tools: { items: [{ name: 'node-editor', args: { x: -630, y: 13, attrs: { backgroundColor: '#EFF4FF' } } }] },
+      zIndex: 2
+    },
+    {
+      shape: 'edge',
+      id: '4aa54ec9-826e-4756-a524-f88cee6db6f0',
+      source: { cell: '5d2ac1a3-644b-465c-9c82-288b954b74ae', port: 'port_4' },
+      target: { cell: 'a7ee81ee-a122-44f2-a5f7-755564918263', port: 'port_3' },
+      zIndex: 3
     }
-  })
-}
+  ]);
+  let ruleChain: RuleChain = { edges: [], nodes: [] };
+  graphConfig
+    .getGraph()
+    .toJSON()
+    .cells.forEach(cell => {
+      if (cell.shape === 'edge') {
+        let edge = EdgeDefine.newFromCell(cell);
+        ruleChain.edges.push(edge);
+      } else if (cell.shape == 'rect_node') {
+        let node = NodeDefine.newFromCell(cell);
+        ruleChain.nodes.push(node);
+      }
+    });
+  saveRuleChain(ruleChain).then(resp => {
+    if (resp.status === 200) {
+      console.log('@@@@@@@@@@@@@@@@@@@@@@@@');
+    }
+  });
+};
 </script>
 
 <template>
@@ -78,7 +148,7 @@ const testCreateNodes = () => {
     <div class="flow-main">
       <div class="flow-dnd" ref="dndRef">
         <template v-for="node in nodes">
-          <div :class="node.className" :style="{backgroundColor: node.backgroundColor}" @mousedown="startDrag(node, $event)">{{ node.name }}</div>
+          <div :class="node.className" :style="{ backgroundColor: node.backgroundColor }" @mousedown="startDrag(node, $event)">{{ node.name }}</div>
         </template>
       </div>
       <div class="flow-content" ref="contentRef"></div>
