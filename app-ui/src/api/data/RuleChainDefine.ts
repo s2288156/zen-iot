@@ -1,37 +1,26 @@
-  export class EdgeDefine {
-    private id: string;
-    private sourceId: string;
-    private sourcePort: string;
-    private targetId: string;
-    private targetPort: string;
+import { EdgeDefine, NodeDefine } from '@/api/data/types';
 
-    public static newFromCell(cell: any) {
-      let edgeDefine = new EdgeDefine();
-      edgeDefine.id = cell.id;
-      edgeDefine.sourceId = cell.source.cell;
-      edgeDefine.sourcePort = cell.source.port;
-      edgeDefine.targetId = cell.target.cell;
-      edgeDefine.targetPort = cell.target.port;
-      return edgeDefine;
-    }
+export class RuleChainDefine {
+  public static newEdgeFromCell(cell: any): EdgeDefine {
+    return {
+      id: cell.id,
+      sourceId: cell.source.cell,
+      sourcePort: cell.source.port,
+      targetId: cell.target.cell,
+      targetPort: cell.target.port
+    };
   }
 
-  export class NodeDefine {
-    private id: string;
-    private positionInfo: object;
-    private nodeName: string;
-    private shape: string;
-    private nodeType: string;
-    private configData: object;
-
-    public static newFromCell(cell: any) {
-      let nodeDefine = new NodeDefine();
-      nodeDefine.id = cell.id;
-      nodeDefine.positionInfo = cell.position;
-      nodeDefine.nodeName = cell.attrs.text.text;
-      nodeDefine.shape = cell.shape;
-      nodeDefine.nodeType = cell.data.nodeType;
-      nodeDefine.configData = cell.data;
-      return nodeDefine;
-    }
+  public static newNodeFromCell(cell: any): NodeDefine {
+    return {
+      id: cell.id,
+      nodeName: cell.attrs.text.text,
+      nodeType: cell.data.nodeType,
+      metadata: {
+        position: cell.position,
+        shape: cell.shape,
+        data: cell.data
+      }
+    };
   }
+}

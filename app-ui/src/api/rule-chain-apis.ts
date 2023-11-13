@@ -1,5 +1,5 @@
 import request from '@/utils/request';
-import { RuleChain } from '@/api/data/RuleChainDefine';
+import { RuleChain } from '@/api/data/types';
 
 export function saveRuleChain(data: RuleChain) {
   console.log(data);

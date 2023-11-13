@@ -40,12 +40,8 @@ public class NodeEntity {
     private String nodeType;
 
     @JdbcTypeCode(SqlTypes.JSON)
-    @Column(name = "config_data")
-    private JsonNode configData;
-
-    @JdbcTypeCode(SqlTypes.JSON)
-    @Column(name = "position_info")
-    private JsonNode positionInfo;
+    @Column(name = "metadata")
+    private JsonNode metadata;
 
     @CreationTimestamp
     @Column(name = "create_time", nullable = false)

@@ -14,9 +14,7 @@ import org.zeniot.data.enums.NodeTypeEnum;
 @Data
 public class Node extends DTO implements HasId<String> {
     private String id;
-    private JsonNode positionInfo;
     private String nodeName;
-    private String shape;
     private NodeTypeEnum nodeType;
-    private JsonNode configData;
+    private JsonNode metadata;
 }

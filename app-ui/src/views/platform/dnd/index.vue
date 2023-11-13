@@ -2,9 +2,9 @@
 import { onMounted, reactive, ref } from 'vue';
 import { NodeData } from './commons';
 import { GraphConfig } from '@/views/platform/dnd/GraphConfig';
-import { EdgeDefine, NodeDefine } from '@/api/data/RuleChainDefine';
 import { saveRuleChain } from '@/api/rule-chain-apis';
 import { RuleChain } from '@/api/data/types';
+import { RuleChainDefine } from '@/api/data/RuleChainDefine';
 
 const dndRef = ref();
 const contentRef = ref();
@@ -124,10 +124,10 @@ const testCreateNodes = () => {
     .toJSON()
     .cells.forEach(cell => {
       if (cell.shape === 'edge') {
-        let edge = EdgeDefine.newFromCell(cell);
+        let edge = RuleChainDefine.newEdgeFromCell(cell);
         ruleChain.edges.push(edge);
       } else if (cell.shape == 'rect_node') {
-        let node = NodeDefine.newFromCell(cell);
+        let node = RuleChainDefine.newNodeFromCell(cell);
         ruleChain.nodes.push(node);
       }
     });
