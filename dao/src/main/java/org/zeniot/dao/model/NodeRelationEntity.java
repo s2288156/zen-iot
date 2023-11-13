@@ -28,10 +28,10 @@ public class NodeRelationEntity {
     private String id;
 
     @Column(name = "source_id")
-    private Integer sourceId;
+    private String sourceId;
 
     @Column(name = "target_id")
-    private Integer targetId;
+    private String targetId;
 
     @CreationTimestamp
     @Column(name = "create_time", nullable = false)
