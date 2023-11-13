@@ -16,6 +16,8 @@ public class RuleChain extends DTO implements HasId<Long> {
 
     private Long id;
 
+    private String name;
+
     private List<Node> nodes;
 
     private List<Edge> edges;

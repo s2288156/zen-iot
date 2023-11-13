@@ -8,6 +8,7 @@ import { RuleChainDefine } from '@/api/data/RuleChainDefine';
 
 const dndRef = ref();
 const contentRef = ref();
+const ruleChain = ref<RuleChain>({ name: '', edges: [], nodes: [] });
 let graphConfig: GraphConfig;
 const nodes = reactive<Array<NodeData>>([
   { className: 'node-rect', name: 'save timeseries', shape: 'rect_node', backgroundColor: '#4dd0e1', nodeType: 'SAVE_TIMESERIES' },
@@ -17,6 +18,7 @@ onMounted(() => {
   graphConfig = new GraphConfig(dndRef, contentRef);
   graphConfig.init();
 });
+// 拖动新增
 const startDrag = (node: NodeData, event: MouseEvent) => {
   let graphNode = graphConfig.getGraph().createNode({
     shape: node.shape,
@@ -118,20 +120,19 @@ const testCreateNodes = () => {
       zIndex: 3
     }
   ]);
-  let ruleChain: RuleChain = { edges: [], nodes: [] };
   graphConfig
     .getGraph()
     .toJSON()
     .cells.forEach(cell => {
       if (cell.shape === 'edge') {
         let edge = RuleChainDefine.newEdgeFromCell(cell);
-        ruleChain.edges.push(edge);
+        ruleChain.value.edges.push(edge);
       } else if (cell.shape == 'rect_node') {
         let node = RuleChainDefine.newNodeFromCell(cell);
-        ruleChain.nodes.push(node);
+        ruleChain.value.nodes.push(node);
       }
     });
-  saveRuleChain(ruleChain).then(resp => {
+  saveRuleChain(ruleChain.value).then(resp => {
     if (resp.status === 200) {
       console.log('@@@@@@@@@@@@@@@@@@@@@@@@');
     }
@@ -152,6 +153,12 @@ const testCreateNodes = () => {
         </template>
       </div>
       <div class="flow-content" ref="contentRef"></div>
+      <div class="flow-info">
+        <el-row class="flow-info-row">
+          <span>规则链名称: </span>
+          <el-input placeholder="规则链名称" v-model="ruleChain.name" />
+        </el-row>
+      </div>
     </div>
   </div>
 </template>
@@ -191,6 +198,20 @@ const testCreateNodes = () => {
   margin-right: 3px;
   margin-left: 3px;
   box-shadow: 0 0 10px 1px #dadce0;
+}
+.flow-info {
+  width: 200px;
+  background-color: #f1f3f4;
+  border: 1px solid #dadce0;
+  .el-row {
+    margin: 5px;
+  }
+  span {
+    margin: 1px;
+  }
+  .el-input {
+    margin-top: 5px;
+  }
 }
 
 // cell styles

@@ -50,6 +50,7 @@ export type SimulatorJsonFieldDefine = {
 
 export type RuleChain = {
   id?: number;
+  name: string;
   nodes: NodeDefine[];
   edges: EdgeDefine[];
 };
