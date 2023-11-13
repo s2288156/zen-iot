@@ -24,7 +24,7 @@ public class RuleChainController {
     @PostMapping("/rule_chain")
     public SingleResponse<RuleChain> saveRuleChain(@RequestBody RuleChain ruleChain) {
         log.warn("{}", ruleChain);
-        return SingleResponse.success(ruleChainService.saveOrUpdateRuleChain(ruleChain));
+        return SingleResponse.success(ruleChainService.createOrUpdateRuleChain(ruleChain));
     }
 
 }

@@ -33,7 +33,7 @@ public class RuleChainServiceImpl implements RuleChainService {
 
     @Transactional
     @Override
-    public RuleChain saveOrUpdateRuleChain(RuleChain ruleChain) {
+    public RuleChain createOrUpdateRuleChain(RuleChain ruleChain) {
         final boolean isCreate = ruleChain.getId() == null;
         RuleChainEntity ruleChainEntity;
         if (isCreate) {

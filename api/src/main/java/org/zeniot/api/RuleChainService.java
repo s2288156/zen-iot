@@ -6,5 +6,5 @@ import org.zeniot.data.domain.rulechain.RuleChain;
  * @author Wu.Chunyang
  */
 public interface RuleChainService {
-    RuleChain saveOrUpdateRuleChain(RuleChain ruleChain);
+    RuleChain createOrUpdateRuleChain(RuleChain ruleChain);
 }
