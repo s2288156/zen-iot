@@ -22,13 +22,13 @@ public class DeviceServiceImpl implements DeviceService {
     @Autowired
     private DeviceRepository deviceRepository;
     @Autowired
-    private DeviceMapper mapper;
+    private DeviceMapper deviceMapper;
 
     @Override
     public PageResponse<Device> findDevices(PageQuery pageQuery) {
         Page<DeviceEntity> page = deviceRepository.findAll(pageQuery.toPageable());
         List<Device> devices = page.getContent().stream()
-                .map(entity -> mapper.entityToDevice(entity))
+                .map(entity -> deviceMapper.entityToDevice(entity))
                 .toList();
         return PageResponse.ok(devices, page);
     }
@@ -38,9 +38,9 @@ public class DeviceServiceImpl implements DeviceService {
         if (device.getId() == null) {
             device.setStatus(DeviceStatusEnum.DISABLE);
         }
-        DeviceEntity deviceEntity = mapper.deviceToEntity(device);
+        DeviceEntity deviceEntity = deviceMapper.deviceToEntity(device);
         deviceRepository.save(deviceEntity);
-        return mapper.entityToDevice(deviceEntity);
+        return deviceMapper.entityToDevice(deviceEntity);
     }
 
     @Override

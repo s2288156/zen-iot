@@ -26,6 +26,7 @@ public interface DeviceMapper {
         device.setTransportConfig(JacksonUtil.convertValue(entity.getTransportConfig(), DeviceTransportConfig.class));
     }
 
+    @Mapping(target = "deviceCredentialEntity", ignore = true)
     @Mapping(target = "transportConfig", ignore = true)
     @Mapping(target = "updateTime", ignore = true)
     @Mapping(target = "createTime", ignore = true)
