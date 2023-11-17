@@ -53,6 +53,8 @@ export type RuleChain = {
   name: string;
   nodes: NodeDefine[];
   edges: EdgeDefine[];
+  createTime?: string;
+  updateTime?: string;
 };
 
 export type NodeDefine = {
