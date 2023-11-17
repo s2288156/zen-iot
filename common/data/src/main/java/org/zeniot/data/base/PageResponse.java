@@ -28,7 +28,11 @@ public class PageResponse<T> extends Response {
         this.hasNext = hasNext;
     }
 
-    public static <T> PageResponse<T> ok(Collection<T> data, Page<?> page) {
+    public static <T> PageResponse<T> success(Collection<T> data, Page<?> page) {
         return new PageResponse<>(data, page.getSize(), page.getTotalPages(), page.getTotalElements(), page.hasNext());
+    }
+
+    public static <T> PageResponse<T> success() {
+        return new PageResponse<>(null, 0, 0, 0, false);
     }
 }

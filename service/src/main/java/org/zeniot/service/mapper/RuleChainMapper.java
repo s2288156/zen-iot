@@ -29,4 +29,8 @@ public interface RuleChainMapper {
     @Mapping(target = "updateTime", ignore = true)
     @Mapping(target = "createTime", ignore = true)
     NodeRelationEntity toEntity(Edge edge);
+
+    @Mapping(target = "nodes", ignore = true)
+    @Mapping(target = "edges", ignore = true)
+    RuleChain entityToRuleChain(RuleChainEntity entity);
 }

@@ -30,7 +30,7 @@ public class DeviceServiceImpl implements DeviceService {
         List<Device> devices = page.getContent().stream()
                 .map(entity -> deviceMapper.entityToDevice(entity))
                 .toList();
-        return PageResponse.ok(devices, page);
+        return PageResponse.success(devices, page);
     }
 
     @Override

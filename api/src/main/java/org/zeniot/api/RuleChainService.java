@@ -1,5 +1,7 @@
 package org.zeniot.api;
 
+import org.zeniot.data.base.PageQuery;
+import org.zeniot.data.base.PageResponse;
 import org.zeniot.data.domain.rulechain.RuleChain;
 
 /**
@@ -7,4 +9,6 @@ import org.zeniot.data.domain.rulechain.RuleChain;
  */
 public interface RuleChainService {
     RuleChain createOrUpdateRuleChain(RuleChain ruleChain);
+
+    PageResponse<RuleChain> findRuleChains(PageQuery pageQuery);
 }

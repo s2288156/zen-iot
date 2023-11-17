@@ -1,15 +1,14 @@
 <script setup lang="ts">
 import {ref} from "vue";
-import {getDevices} from "@/api/device-apis";
 import {PageQuery} from "@/api/global-types";
-import {RuleChainDefine} from "@/api/data/RuleChainDefine";
+import {RuleChain} from "@/api/data/types";
 
 const dialogFormVisible = ref(false)
 const pageQuery: PageQuery = {
   page: 0,
   size: 10,
 }
-// const ruleChains = ref<RuleChainDefine>
+const ruleChains = ref<RuleChain>()
 const loadList = () => {
   getDevices(pageQuery).then((response) => {
     devices.value = response

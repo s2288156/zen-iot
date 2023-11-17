@@ -19,7 +19,6 @@ import org.zeniot.service.mapper.SimulatorMapper;
 import org.zeniot.transport.api.SimulatorManagement;
 
 import java.util.List;
-import java.util.Optional;
 
 /**
  * @author Wu.Chunyang
@@ -39,7 +38,7 @@ public class SimulatorServiceImpl implements SimulatorService {
         Page<SimulatorEntity> simulatorPage = simulatorRepository.findAll(pageQuery.toPageable());
         List<Simulator> simulators = simulatorPage.getContent().stream().map(simulatorMapper::entityToSimulator)
                 .toList();
-        return PageResponse.ok(simulators, simulatorPage);
+        return PageResponse.success(simulators, simulatorPage);
     }
 
     @Override
