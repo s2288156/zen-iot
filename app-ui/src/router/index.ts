@@ -103,6 +103,16 @@ const router = createRouter({
             icon: 'Cpu',
             roles: ['ROLE_ADMIN']
           }
+        },
+        {
+          path: '/platform/rulechain',
+          name: 'Rule chain list',
+          component: () => import('@/views/platform/rulechain/index.vue'),
+          meta: {
+            title: '规则链列表',
+            icon: 'Cpu',
+            roles: ['ROLE_ADMIN']
+          }
         }
       ]
     },

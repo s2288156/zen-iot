@@ -5,6 +5,7 @@ import lombok.EqualsAndHashCode;
 import org.zeniot.data.base.DTO;
 import org.zeniot.data.base.HasId;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 /**
@@ -21,5 +22,7 @@ public class RuleChain extends DTO implements HasId<Long> {
     private List<Node> nodes;
 
     private List<Edge> edges;
+
+    private LocalDateTime updateTime;
 
 }

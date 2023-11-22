@@ -1,5 +1,6 @@
 import request from '@/utils/request';
-import { RuleChain } from '@/api/data/types';
+import {RuleChain} from '@/api/data/types';
+import {BaseDataPage, PageQuery} from "@/api/global-types";
 
 export function saveRuleChain(data: RuleChain) {
   console.log(data);
@@ -8,5 +9,13 @@ export function saveRuleChain(data: RuleChain) {
     method: 'post',
     data: data
   });
+}
+
+export function queryRuleChains(data: PageQuery){
+  return request({
+    url: '/api/rule_chains',
+    method: 'get',
+    params: data,
+  })
 }
 
