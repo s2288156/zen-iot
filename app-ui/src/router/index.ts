@@ -95,9 +95,9 @@ const router = createRouter({
           }
         },
         {
-          path: '/platform/dnd',
+          path: '/platform/rule-chain/dnd',
           name: 'Dnd',
-          component: () => import('@/views/platform/dnd/index.vue'),
+          component: () => import('@/views/platform/rulechain/RuleChainDetailView.vue'),
           meta: {
             title: '规则链Dnd',
             icon: 'Cpu',
@@ -105,9 +105,9 @@ const router = createRouter({
           }
         },
         {
-          path: '/platform/rulechain',
+          path: '/platform/rule-chain',
           name: 'Rule chain list',
-          component: () => import('@/views/platform/rulechain/index.vue'),
+          component: () => import('@/views/platform/rulechain/RuleChainListView.vue'),
           meta: {
             title: '规则链列表',
             icon: 'Cpu',

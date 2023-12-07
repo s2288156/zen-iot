@@ -65,4 +65,10 @@ public class RuleChainServiceImpl implements RuleChainService {
                 .toList();
         return PageResponse.success(ruleChains, ruleChainPage);
     }
+
+    @Override
+    public RuleChain getRuleChain(Long id) {
+        RuleChainEntity ruleChainEntity = ruleChainRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("RuleChain not found"));
+        return ruleChainMapper.entityToRuleChain(ruleChainEntity);
+    }
 }

@@ -11,4 +11,6 @@ public interface RuleChainService {
     RuleChain createOrUpdateRuleChain(RuleChain ruleChain);
 
     PageResponse<RuleChain> findRuleChains(PageQuery pageQuery);
+
+    RuleChain getRuleChain(Long id);
 }

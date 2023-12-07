@@ -1,5 +1,5 @@
 import { Graph } from '@antv/x6';
-import { ref, Ref } from 'vue'
+import { Ref } from 'vue'
 import { Snapline } from '@antv/x6-plugin-snapline'
 import { Keyboard } from '@antv/x6-plugin-keyboard'
 import { Selection } from '@antv/x6-plugin-selection'

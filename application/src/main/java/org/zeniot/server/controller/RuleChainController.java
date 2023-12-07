@@ -32,4 +32,9 @@ public class RuleChainController {
         return ruleChainService.findRuleChains(pageQuery);
     }
 
+    @GetMapping("/rule_chain/{id}")
+    public SingleResponse<RuleChain> getRuleChain(@PathVariable Long id) {
+        return SingleResponse.success(ruleChainService.getRuleChain(id));
+    }
+
 }

@@ -19,3 +19,9 @@ export function queryRuleChains(data: PageQuery){
   })
 }
 
+export function queryRuleChain(id: string) {
+  return request({
+    url: '/api/device/' + id,
+    method: 'get'
+  })
+}
