@@ -1,15 +1,13 @@
 package org.zeniot.dao.model;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.annotations.UpdateTimestamp;
 import org.hibernate.type.SqlTypes;
+import org.zeniot.data.enums.NodeTypeEnum;
 
 import java.time.LocalDateTime;
 
@@ -36,8 +34,9 @@ public class NodeEntity {
     @Column(name = "rule_chain_id")
     private Long ruleChainId;
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "node_type")
-    private String nodeType;
+    private NodeTypeEnum nodeType;
 
     @JdbcTypeCode(SqlTypes.JSON)
     @Column(name = "metadata")
@@ -51,8 +50,9 @@ public class NodeEntity {
     @Column(name = "update_time", nullable = false)
     private LocalDateTime updateTime;
 
-    // @ManyToOne
-    // @JoinColumn(name = "rule_chain_id")
-    // private RuleChainEntity ruleChainEntity;
+    @ToString.Exclude
+    @ManyToOne
+    @JoinColumn(name = "rule_chain_id", insertable = false, updatable = false)
+    private RuleChainEntity ruleChainEntity;
 
 }

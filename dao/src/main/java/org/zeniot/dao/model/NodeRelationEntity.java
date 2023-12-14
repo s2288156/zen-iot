@@ -1,9 +1,6 @@
 package org.zeniot.dao.model;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
@@ -27,6 +24,9 @@ public class NodeRelationEntity {
     @Column(name = "id", nullable = false)
     private String id;
 
+    @Column(name = "rule_chain_id")
+    private Long ruleChainId;
+
     @Column(name = "source_id")
     private String sourceId;
 
@@ -40,4 +40,9 @@ public class NodeRelationEntity {
     @UpdateTimestamp
     @Column(name = "update_time", nullable = false)
     private LocalDateTime updateTime;
+
+    @ToString.Exclude
+    @ManyToOne
+    @JoinColumn(name = "rule_chain_id", insertable = false, updatable = false)
+    private RuleChainEntity ruleChainEntity;
 }
