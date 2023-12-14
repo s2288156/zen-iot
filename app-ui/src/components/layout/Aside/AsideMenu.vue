@@ -16,7 +16,7 @@
 <script lang="ts" setup>
 import MenuItem from '@/components/layout/Aside/MenuItem.vue'
 import ZenLogo from '@/assets/zen-logo.svg'
-import {computed, reactive} from 'vue'
+import {computed, reactive, ref} from 'vue'
 import {useRoute, useRouter} from 'vue-router'
 
 const defaultActive = computed(() => {
@@ -24,15 +24,15 @@ const defaultActive = computed(() => {
   return path
 })
 
-let routerMenuList: any[] = []
+// const routerMenuList: any[] = []
+const menuList = ref<any[]>([])
 
 useRouter().getRoutes().forEach(route => {
   if (route.meta.isMenuRoot) {
-    routerMenuList.push(route)
+    menuList.value.push(route)
   }
 })
 
-const menuList = reactive(routerMenuList)
 
 const handleOpen = (key: string, keyPath: string[]) => {
   console.log('open', key, keyPath)

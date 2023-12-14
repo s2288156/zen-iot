@@ -6,6 +6,7 @@ import {queryRuleChain, saveRuleChain} from '@/api/rule-chain-apis';
 import {RuleChain} from '@/api/data/types';
 import {RuleChainDefine} from '@/api/data/RuleChainDefine';
 import router from "@/router";
+import {ElMessage} from "element-plus";
 
 const dndRef = ref();
 const contentRef = ref();
@@ -74,18 +75,35 @@ const printNodes = () => {
   console.log(JSON.stringify(graphConfig.getGraph().toJSON()));
 };
 
-const testCreateNodes = () => {
+const clickSaveRuleChain = () => {
+  graphConfig
+      .getGraph()
+      .toJSON()
+      .cells.forEach(cell => {
+    if (cell.shape === 'edge') {
+      const edge = RuleChainDefine.newEdgeFromCell(cell);
+      ruleChain.value.edges.push(edge);
+    } else if (cell.shape == 'rect_node') {
+      const node = RuleChainDefine.newNodeFromCell(cell);
+      ruleChain.value.nodes.push(node);
+    }
+  });
   saveRuleChain(ruleChain.value).then(resp => {
-    if (resp.status === 200) {
-      console.log('@@@@@@@@@@@@@@@@@@@@@@@@');
+    if (resp.data.success) {
+      ElMessage({
+        message: 'Saved success.',
+        type: 'success',
+      })
     }
   });
 };
+// 加载rule chain数据
 const params = new URLSearchParams(window.location.search);
 if (params && params.get('id')) {
   queryRuleChain(params.get('id')).then(resp => {
-    if (resp.status === 200) {
+    if (resp.success) {
       ruleChain.value = resp.data;
+      console.log(resp.data)
     }
   });
 }
@@ -95,7 +113,7 @@ if (params && params.get('id')) {
   <div class="flow-container">
     <div class="flow-header">
       <el-button @click="printNodes">Print</el-button>
-      <el-button @click="testCreateNodes">Create</el-button>
+      <el-button @click="clickSaveRuleChain">Save</el-button>
     </div>
     <div class="flow-main">
       <div ref="dndRef" class="flow-dnd">

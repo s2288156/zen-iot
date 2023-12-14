@@ -1,7 +1,7 @@
 <template>
   <template v-for="menu in menuList" :key="menu.path">
     <el-sub-menu
-      v-if="menu.children && menu.children.length > 0"
+      v-if="menu.children && menu.children.length > 0 && !menu.meta.isHidden"
       :index="menu.path"
     >
       <template #title>

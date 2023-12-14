@@ -48,7 +48,7 @@ const router = createRouter({
           meta: {
             title: '用户管理',
             icon: 'User',
-            roles: ['ROLE_ADMIN']
+            roles: ['ROLE_ADMIN'],
           }
         },
         {
@@ -58,7 +58,7 @@ const router = createRouter({
           meta: {
             title: '菜单管理',
             icon: 'Menu',
-            roles: ['ROLE_ADMIN']
+            roles: ['ROLE_ADMIN'],
           }
         },
         {
@@ -68,7 +68,7 @@ const router = createRouter({
           meta: {
             title: 'Pinia',
             icon: 'Menu',
-            roles: ['ROLE_ADMIN']
+            roles: ['ROLE_ADMIN'],
           }
         }
       ]
@@ -91,7 +91,7 @@ const router = createRouter({
           meta: {
             title: '设备管理',
             icon: 'Cpu',
-            roles: ['ROLE_ADMIN']
+            roles: ['ROLE_ADMIN'],
           }
         },
         {
@@ -101,7 +101,8 @@ const router = createRouter({
           meta: {
             title: '规则链Dnd',
             icon: 'Cpu',
-            roles: ['ROLE_ADMIN']
+            roles: ['ROLE_ADMIN'],
+            isHidden: true
           }
         },
         {

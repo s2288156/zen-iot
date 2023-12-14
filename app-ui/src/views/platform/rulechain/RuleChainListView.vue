@@ -24,8 +24,13 @@ loadList()
 const handelDelete = (row: RuleChain) => {
   console.log("delete row: ", row)
 }
+
 const handelDetail = (row: RuleChain) => {
   router.push({path: '/platform/rule-chain/dnd', query: {id: row.id}})
+}
+
+const toDnd = () => {
+  router.push('/platform/rule-chain/dnd')
 }
 
 const currentPage = ref(1)
@@ -50,7 +55,7 @@ const currentChange = () => {
         class="filter-item"
         icon="EditPen"
         type="primary"
-        @click="dialogFormVisible = !dialogFormVisible"
+        @click="toDnd()"
       >
         新增
       </el-button>
