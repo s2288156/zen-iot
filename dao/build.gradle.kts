@@ -16,6 +16,7 @@ dependencies {
     testCompileOnly("org.projectlombok:lombok")
     testAnnotationProcessor("org.projectlombok:lombok")
     testRuntimeOnly("com.h2database:h2")
+    testRuntimeOnly("org.flywaydb:flyway-core")
 }
 
 tasks.test {

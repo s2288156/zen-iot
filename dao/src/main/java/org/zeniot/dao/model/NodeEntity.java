@@ -51,4 +51,8 @@ public class NodeEntity {
     @Column(name = "update_time", nullable = false)
     private LocalDateTime updateTime;
 
+    // @ManyToOne
+    // @JoinColumn(name = "rule_chain_id")
+    // private RuleChainEntity ruleChainEntity;
+
 }
