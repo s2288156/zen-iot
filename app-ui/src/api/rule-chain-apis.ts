@@ -1,9 +1,9 @@
 import request from '@/utils/request';
-import {RuleChain} from '@/api/data/types';
-import {BaseDataPage, PageQuery, type RestResponse} from "@/api/global-types";
+import { RuleChain } from '@/api/data/types';
+import { PageQuery, PageResponse, type RestResponse } from '@/api/global-types';
 
 export function saveRuleChain(data: RuleChain) {
-  return request<RestResponse>({
+  return request<RestResponse<RuleChain>>({
     url: '/api/rule_chain',
     method: 'post',
     data: data
@@ -11,7 +11,7 @@ export function saveRuleChain(data: RuleChain) {
 }
 
 export function queryRuleChains(data: PageQuery) {
-  return request({
+  return request<PageResponse<RuleChain>>({
     url: '/api/rule_chains',
     method: 'get',
     params: data,
@@ -19,7 +19,7 @@ export function queryRuleChains(data: PageQuery) {
 }
 
 export function queryRuleChain(id: string) {
-  return request<RestResponse>({
+  return request<RestResponse<RuleChain>>({
     url: '/api/rule_chain/' + id,
     method: 'get'
   })

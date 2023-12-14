@@ -1,10 +1,11 @@
 import { Graph } from '@antv/x6';
-import { Ref } from 'vue'
-import { Snapline } from '@antv/x6-plugin-snapline'
-import { Keyboard } from '@antv/x6-plugin-keyboard'
-import { Selection } from '@antv/x6-plugin-selection'
-import { Clipboard } from '@antv/x6-plugin-clipboard'
-import { Dnd } from '@antv/x6-plugin-dnd'
+import { Ref } from 'vue';
+import { Snapline } from '@antv/x6-plugin-snapline';
+import { Keyboard } from '@antv/x6-plugin-keyboard';
+import { Selection } from '@antv/x6-plugin-selection';
+import { Clipboard } from '@antv/x6-plugin-clipboard';
+import { Dnd } from '@antv/x6-plugin-dnd';
+import { NodeData } from '@/views/platform/rulechain/commons';
 
 export class GraphConfig {
   private dndRef: Ref;
@@ -15,9 +16,48 @@ export class GraphConfig {
   constructor(dndRef: Ref, contentRef: Ref) {
     this.dndRef = dndRef
     this.contentRef = contentRef
+    this.init()
   }
 
-  public init() {
+  public startDrag(node: NodeData, event: MouseEvent) {
+    const graphNode = this.getGraph().createNode({
+      shape: node.shape,
+      label: node.name,
+      attrs: {
+        body: {
+          stroke: '#8f8f8f',
+          strokeWidth: 1,
+          fill: node.backgroundColor
+        }
+      },
+      ports: {
+        items: [
+          {id: 'port_1', group: 'top'},
+          {id: 'port_2', group: 'bottom'},
+          {id: 'port_3', group: 'left'},
+          {id: 'port_4', group: 'right'}
+        ]
+      },
+      tools: [
+        {
+          name: 'node-editor',
+          args: {
+            x: -630,
+            y: 13,
+            attrs: {
+              backgroundColor: '#EFF4FF'
+            }
+          }
+        }
+      ],
+      data: {
+        nodeType: node.nodeType
+      }
+    });
+    this.getDnd().start(graphNode, event);
+  }
+
+  private init() {
     this.registerNode();
     this.newGraph();
     this.loadPlugin();
@@ -210,11 +250,11 @@ export class GraphConfig {
       this.showPorts(ports, false);
       this.changeCursor(cells, 'default')
     });
-    this.graph.on('cell:mousedown', ({ e }) => {
+    this.graph.on('cell:mousedown', () => {
       const cells = this.contentRef.value.querySelectorAll('.x6-cell') as NodeListOf<SVGElement>;
       this.changeCursor(cells, 'move')
     })
-    this.graph.on('graph:mouseenter', ({ e }) => {
+    this.graph.on('graph:mouseenter', () => {
       this.contentRef.value.style.cursor = 'default'
     })
   }

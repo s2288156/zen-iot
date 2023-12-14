@@ -1,7 +1,7 @@
-import axios from 'axios'
-import type {RestResponse} from "@/api/global-types";
-import {ElMessage, ElMessageBox} from "element-plus";
-import {useUserStore} from "@/stores/user";
+import axios from 'axios';
+import type { RestResponse } from '@/api/global-types';
+import { ElMessage, ElMessageBox } from 'element-plus';
+import { useUserStore } from '@/stores/user';
 
 const service = axios.create({
   baseURL: 'http://localhost:8088',
@@ -23,7 +23,7 @@ service.interceptors.request.use(
 
 service.interceptors.response.use(
   response => {
-    const rsp: RestResponse = response.data
+    const rsp: RestResponse<object> = response.data
     if (!rsp.success) {
       ElMessage({
         showClose: true,
@@ -43,7 +43,7 @@ service.interceptors.response.use(
       }
       return Promise.reject(new Error(rsp.msg || 'Error'));
     } else {
-      return response.data
+      return response
     }
   }
 )

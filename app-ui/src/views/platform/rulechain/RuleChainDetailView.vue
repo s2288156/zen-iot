@@ -1,16 +1,15 @@
 <script setup lang="ts">
-import {onMounted, reactive, ref} from 'vue';
-import {NodeData} from './commons';
-import {GraphConfig} from '@/views/platform/rulechain/GraphConfig';
-import {queryRuleChain, saveRuleChain} from '@/api/rule-chain-apis';
-import {RuleChain} from '@/api/data/types';
-import {RuleChainDefine} from '@/api/data/RuleChainDefine';
-import router from "@/router";
-import {ElMessage} from "element-plus";
+import { onMounted, reactive, ref } from 'vue';
+import { NodeData } from './commons';
+import { GraphConfig } from '@/views/platform/rulechain/GraphConfig';
+import { queryRuleChain, saveRuleChain } from '@/api/rule-chain-apis';
+import { RuleChain } from '@/api/data/types';
+import { RuleChainDefine } from '@/api/data/RuleChainDefine';
+import { ElMessage } from 'element-plus';
 
 const dndRef = ref();
 const contentRef = ref();
-const ruleChain = ref<RuleChain>({name: '', edges: [], nodes: []});
+const ruleChain = ref<RuleChain>({ name: '', edges: [], nodes: [] });
 let graphConfig: GraphConfig;
 const nodeTemplates = reactive<Array<NodeData>>([
   {
@@ -31,69 +30,31 @@ const nodeTemplates = reactive<Array<NodeData>>([
 
 onMounted(() => {
   graphConfig = new GraphConfig(dndRef, contentRef);
-  graphConfig.init();
 });
-// 拖动新增
-const startDrag = (node: NodeData, event: MouseEvent) => {
-  const graphNode = graphConfig.getGraph().createNode({
-    shape: node.shape,
-    label: node.name,
-    attrs: {
-      body: {
-        stroke: '#8f8f8f',
-        strokeWidth: 1,
-        fill: node.backgroundColor
-      }
-    },
-    ports: {
-      items: [
-        {id: 'port_1', group: 'top'},
-        {id: 'port_2', group: 'bottom'},
-        {id: 'port_3', group: 'left'},
-        {id: 'port_4', group: 'right'}
-      ]
-    },
-    tools: [
-      {
-        name: 'node-editor',
-        args: {
-          x: -630,
-          y: 13,
-          attrs: {
-            backgroundColor: '#EFF4FF'
-          }
-        }
-      }
-    ],
-    data: {
-      nodeType: node.nodeType
-    }
-  });
-  graphConfig.getDnd().start(graphNode, event);
-};
+
 const printNodes = () => {
   console.log(JSON.stringify(graphConfig.getGraph().toJSON()));
 };
 
 const clickSaveRuleChain = () => {
   graphConfig
-      .getGraph()
-      .toJSON()
-      .cells.forEach(cell => {
-    if (cell.shape === 'edge') {
-      const edge = RuleChainDefine.newEdgeFromCell(cell);
-      ruleChain.value.edges.push(edge);
-    } else if (cell.shape == 'rect_node') {
-      const node = RuleChainDefine.newNodeFromCell(cell);
-      ruleChain.value.nodes.push(node);
-    }
-  });
+    .getGraph()
+    .toJSON()
+    .cells.forEach(cell => {
+      if (cell.shape === 'edge') {
+        const edge = RuleChainDefine.newEdgeFromCell(cell);
+        ruleChain.value.edges.push(edge);
+      } else if (cell.shape == 'rect_node') {
+        const node = RuleChainDefine.newNodeFromCell(cell);
+        ruleChain.value.nodes.push(node);
+      }
+    });
   saveRuleChain(ruleChain.value).then(resp => {
     if (resp.data.success) {
       ElMessage({
         message: 'Saved success.',
-        type: 'success',
-      })
+        type: 'success'
+      });
     }
   });
 };
@@ -101,10 +62,7 @@ const clickSaveRuleChain = () => {
 const params = new URLSearchParams(window.location.search);
 if (params && params.get('id')) {
   queryRuleChain(params.get('id')).then(resp => {
-    if (resp.success) {
-      ruleChain.value = resp.data;
-      console.log(resp.data)
-    }
+    console.log(resp.data);
   });
 }
 </script>
@@ -118,7 +76,7 @@ if (params && params.get('id')) {
     <div class="flow-main">
       <div ref="dndRef" class="flow-dnd">
         <template v-for="node in nodeTemplates" :key="node.id">
-          <div :class="node.className" :data-type="node.nodeType" :style="{ backgroundColor: node.backgroundColor }" @mousedown="startDrag(node, $event)">
+          <div :class="node.className" :data-type="node.nodeType" :style="{ backgroundColor: node.backgroundColor }" @mousedown="graphConfig.startDrag(node, $event)">
             {{ node.name }}
           </div>
         </template>
