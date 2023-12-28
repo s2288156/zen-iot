@@ -47,7 +47,7 @@ public class RuleChainServiceImpl implements RuleChainService {
                     .toList();
             nodeRepository.saveAll(nodeEntities);
             List<NodeRelationEntity> nodeRelationEntities = ruleChain.getEdges().stream()
-                    .map(ruleChainMapper::toEntity)
+                    .map(edge -> ruleChainMapper.toEntity(edge, ruleChainEntity.getId()))
                     .toList();
             nodeRelationRepository.saveAll(nodeRelationEntities);
             ruleChain.setId(ruleChainEntity.getId());

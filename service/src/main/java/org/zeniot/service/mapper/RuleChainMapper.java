@@ -18,17 +18,21 @@ public interface RuleChainMapper {
 
     RuleChainMapper INSTANCE = Mappers.getMapper(RuleChainMapper.class);
 
+    @Mapping(target = "nodeRelationEntities", ignore = true)
+    @Mapping(target = "nodeEntities", ignore = true)
     @Mapping(target = "updateTime", ignore = true)
     @Mapping(target = "createTime", ignore = true)
     RuleChainEntity toEntity(RuleChain ruleChain);
 
+    @Mapping(target = "ruleChainEntity", ignore = true)
     @Mapping(target = "updateTime", ignore = true)
     @Mapping(target = "createTime", ignore = true)
     NodeEntity toEntity(Node node, Long ruleChainId);
 
+    @Mapping(target = "ruleChainEntity", ignore = true)
     @Mapping(target = "updateTime", ignore = true)
     @Mapping(target = "createTime", ignore = true)
-    NodeRelationEntity toEntity(Edge edge);
+    NodeRelationEntity toEntity(Edge edge, Long ruleChainId);
 
     @Mapping(target = "nodes", ignore = true)
     @Mapping(target = "edges", ignore = true)
