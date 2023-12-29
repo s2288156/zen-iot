@@ -76,4 +76,9 @@ public class RuleChainServiceImpl implements RuleChainService {
         log.info(">>>> {}: {}, {}", ruleChainEntity.getName(), ruleChainEntity.getNodeEntities(), ruleChainEntity.getNodeRelationEntities());
         return ruleChainMapper.entityToRuleChain(ruleChainEntity);
     }
+
+    @Override
+    public void deleteRuleChain(Long id) {
+        ruleChainRepository.deleteById(id);
+    }
 }

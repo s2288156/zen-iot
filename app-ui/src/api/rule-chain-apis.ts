@@ -24,3 +24,10 @@ export function queryRuleChain(id: string) {
     method: 'get'
   })
 }
+
+export function deleteRuleChain(id: string) {
+  return request<RestResponse<void>>({
+    url: '/api/rule_chain/' + id,
+    method: 'delete'
+  })
+}

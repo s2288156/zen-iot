@@ -13,4 +13,6 @@ public interface RuleChainService {
     PageResponse<RuleChain> findRuleChains(PageQuery pageQuery);
 
     RuleChain getRuleChain(Long id);
+
+    void deleteRuleChain(Long id);
 }

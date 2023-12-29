@@ -2,8 +2,9 @@
 import { ref } from 'vue';
 import { PageQuery, PageResponse } from '@/api/global-types';
 import { RuleChain } from '@/api/data/types';
-import { queryRuleChains } from '@/api/rule-chain-apis';
+import { deleteRuleChain, queryRuleChains } from '@/api/rule-chain-apis';
 import router from '@/router';
+import { ElMessage } from 'element-plus';
 
 const pageQuery: PageQuery = {
   page: 0,
@@ -21,7 +22,15 @@ const loadList = () => {
 };
 loadList();
 const handelDelete = (row: RuleChain) => {
-  console.log('delete row: ', row);
+  deleteRuleChain(row.id).then(response => {
+    if (response.data.success) {
+      ElMessage({
+        message: 'Delete success.',
+        type: 'success'
+      });
+      loadList();
+    }
+  });
 };
 
 const handelDetail = (row: RuleChain) => {

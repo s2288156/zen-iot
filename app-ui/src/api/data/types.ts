@@ -7,7 +7,7 @@ export type Account = {
 };
 
 export type Device = {
-  id?: any;
+  id?: string;
   name: string;
   transportType: string;
   transportConfig?: string;
@@ -49,7 +49,7 @@ export type SimulatorJsonFieldDefine = {
 };
 
 export type RuleChain = {
-  id?: number;
+  id?: string;
   name?: string;
   nodes?: NodeDefine[];
   edges?: EdgeDefine[];

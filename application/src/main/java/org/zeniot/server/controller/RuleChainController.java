@@ -37,4 +37,10 @@ public class RuleChainController {
         return SingleResponse.success(ruleChainService.getRuleChain(id));
     }
 
+    @DeleteMapping("/rule_chain/{id}")
+    public SingleResponse<RuleChain> deleteRuleChain(@PathVariable Long id) {
+        ruleChainService.deleteRuleChain(id);
+        return SingleResponse.success();
+    }
+
 }
