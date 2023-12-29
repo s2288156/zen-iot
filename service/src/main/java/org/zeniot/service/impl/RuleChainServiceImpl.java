@@ -1,5 +1,6 @@
 package org.zeniot.service.impl;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
@@ -21,6 +22,7 @@ import java.util.List;
 /**
  * @author Wu.Chunyang
  */
+@Slf4j
 @Service
 public class RuleChainServiceImpl implements RuleChainService {
     @Autowired
@@ -56,6 +58,7 @@ public class RuleChainServiceImpl implements RuleChainService {
         return ruleChain;
     }
 
+    @Transactional
     @Override
     public PageResponse<RuleChain> findRuleChains(PageQuery pageQuery) {
         Page<RuleChainEntity> ruleChainPage = ruleChainRepository.findAll(pageQuery.toPageable());
@@ -66,9 +69,11 @@ public class RuleChainServiceImpl implements RuleChainService {
         return PageResponse.success(ruleChains, ruleChainPage);
     }
 
+    @Transactional
     @Override
     public RuleChain getRuleChain(Long id) {
         RuleChainEntity ruleChainEntity = ruleChainRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("RuleChain not found"));
+        log.info(">>>> {}: {}, {}", ruleChainEntity.getName(), ruleChainEntity.getNodeEntities(), ruleChainEntity.getNodeRelationEntities());
         return ruleChainMapper.entityToRuleChain(ruleChainEntity);
     }
 }

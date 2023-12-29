@@ -1,13 +1,17 @@
 package org.zeniot.data.domain.rulechain;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.NoArgsConstructor;
 import org.zeniot.data.base.DTO;
 import org.zeniot.data.base.HasId;
 
 /**
  * @author Wu.Chunyang
  */
+@NoArgsConstructor
+@AllArgsConstructor
 @EqualsAndHashCode(callSuper = true)
 @Data
 public class Edge extends DTO implements HasId<String> {
@@ -21,4 +25,7 @@ public class Edge extends DTO implements HasId<String> {
     private String targetId;
 
     private String targetPort;
+
+    private Long ruleChainId;
+
 }

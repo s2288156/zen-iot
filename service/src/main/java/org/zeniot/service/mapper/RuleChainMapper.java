@@ -34,7 +34,15 @@ public interface RuleChainMapper {
     @Mapping(target = "createTime", ignore = true)
     NodeRelationEntity toEntity(Edge edge, Long ruleChainId);
 
-    @Mapping(target = "nodes", ignore = true)
-    @Mapping(target = "edges", ignore = true)
+    @Mapping(target = "nodes", source = "nodeEntities")
+    @Mapping(target = "edges", source = "nodeRelationEntities")
     RuleChain entityToRuleChain(RuleChainEntity entity);
+
+    default Node entityToNode(NodeEntity entity) {
+        return new Node(entity.getId(), entity.getNodeName(), entity.getNodeType(), entity.getMetadata(), entity.getRuleChainId());
+    }
+
+    default Edge entityToEdge(NodeRelationEntity entity) {
+        return new Edge(entity.getId(), entity.getSourceId(), "sourcePort", entity.getTargetId(), "targetPort", entity.getRuleChainId());
+    }
 }
