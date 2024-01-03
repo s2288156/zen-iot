@@ -2,13 +2,6 @@ plugins {
     `java-library`
 }
 
-group = "org.zeniot.common"
-version = "0.0.1"
-
-repositories {
-    mavenCentral()
-}
-
 dependencies {
     implementation(project(":common:util"))
     implementation(project(":common:data"))
