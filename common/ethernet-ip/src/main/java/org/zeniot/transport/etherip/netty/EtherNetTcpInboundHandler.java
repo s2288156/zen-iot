@@ -1,4 +1,4 @@
-package org.zeniot.transport.etherip;
+package org.zeniot.transport.etherip.netty;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandler;
@@ -11,16 +11,16 @@ import lombok.extern.slf4j.Slf4j;
  */
 @Slf4j
 @ChannelHandler.Sharable
-public class EtherNetTcpHandler extends SimpleChannelInboundHandler<ByteBuf> {
+public class EtherNetTcpInboundHandler extends SimpleChannelInboundHandler<ByteBuf> {
     @Override
     protected void channelRead0(ChannelHandlerContext ctx, ByteBuf msg) throws Exception {
         log.info("Received message: " + msg.toString());
-        ctx.close();
+        // ctx.close();
     }
 
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
         log.error("", cause);
-        ctx.close();
+        // ctx.close();
     }
 }

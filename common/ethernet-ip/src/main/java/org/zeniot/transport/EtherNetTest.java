@@ -13,6 +13,7 @@ public class EtherNetTest {
     public static void main(String[] args) {
         EtherNetIPClient client = new EtherNetIPClient("172.22.252.207", 2);
         client.connectTcp();
+        client.write();
         TimeUnit.SECONDS.sleep(3);
         client.disconnect();
     }
