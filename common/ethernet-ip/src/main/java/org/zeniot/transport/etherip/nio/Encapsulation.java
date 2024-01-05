@@ -1,7 +1,9 @@
 package org.zeniot.transport.etherip.nio;
 
 import lombok.Getter;
-import org.zeniot.transport.etherip.nio.command.Command;
+import org.zeniot.transport.etherip.Command;
+import org.zeniot.transport.etherip.nio.protocol.Protocol;
+import org.zeniot.transport.etherip.nio.utils.Hexdump;
 
 import java.nio.ByteBuffer;
 import java.util.Arrays;

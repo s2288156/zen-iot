@@ -1,6 +1,8 @@
 package org.zeniot.transport.etherip.nio;
 
 import lombok.extern.slf4j.Slf4j;
+import org.zeniot.transport.etherip.nio.protocol.ProtocolDecoder;
+import org.zeniot.transport.etherip.nio.protocol.ProtocolEncoder;
 
 import java.net.InetSocketAddress;
 import java.nio.channels.AsynchronousSocketChannel;
@@ -39,11 +41,9 @@ public class TcpConnection extends Connection {
     @Override
     public void write(ProtocolEncoder encoder) throws Exception {
         this.buffer.clear();
-        System.out.println("clear: " + buffer);
         encoder.encode(this.buffer);
 
         this.buffer.flip();
-        System.out.println("flip: " + buffer);
 
         int to_write = this.buffer.limit();
         while (to_write > 0) {
@@ -53,7 +53,6 @@ public class TcpConnection extends Connection {
                 this.buffer.compact();
             }
         }
-        System.out.println("compact: " + buffer);
     }
 
     @Override

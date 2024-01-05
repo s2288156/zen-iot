@@ -1,6 +1,4 @@
-package org.zeniot.transport.etherip.nio.command;
-
-import org.zeniot.transport.etherip.nio.ProtocolAdapter;
+package org.zeniot.transport.etherip.nio.protocol;
 
 import java.nio.ByteBuffer;
 

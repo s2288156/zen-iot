@@ -1,4 +1,4 @@
-package org.zeniot.transport.etherip.nio;
+package org.zeniot.transport.etherip.nio.protocol;
 
 /**
  * @author Jack Wu

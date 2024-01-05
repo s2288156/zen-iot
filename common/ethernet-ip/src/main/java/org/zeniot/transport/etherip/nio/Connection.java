@@ -3,6 +3,9 @@ package org.zeniot.transport.etherip.nio;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
+import org.zeniot.transport.etherip.nio.protocol.Protocol;
+import org.zeniot.transport.etherip.nio.protocol.ProtocolDecoder;
+import org.zeniot.transport.etherip.nio.protocol.ProtocolEncoder;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
