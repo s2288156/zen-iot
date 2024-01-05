@@ -1,50 +1,68 @@
 package org.zeniot.transport.etherip;
 
-import io.netty.buffer.ByteBuf;
-import io.netty.buffer.ByteBufAllocator;
 import lombok.extern.slf4j.Slf4j;
-import org.zeniot.transport.etherip.netty.TcpConnection;
+import org.zeniot.transport.etherip.nio.Connection;
+import org.zeniot.transport.etherip.nio.Encapsulation;
+import org.zeniot.transport.etherip.nio.ProtocolAdapter;
+import org.zeniot.transport.etherip.nio.TcpConnection;
+import org.zeniot.transport.etherip.nio.command.Command;
+import org.zeniot.transport.etherip.nio.command.RegisterSession;
 
 /**
  * @author Jack Wu
  */
 @Slf4j
-public class EtherNetIPClient {
+public class EtherNetIPClient implements AutoCloseable {
 
     private final String ip;
     private final int slot;
-
-    private TcpConnection connection;
+    private Connection connection = null;
 
     public EtherNetIPClient(String ip, int slot) {
         this.ip = ip;
         this.slot = slot;
     }
 
-    public void connectTcp() {
-        this.connection = new TcpConnection();
-        this.connection.connect(ip);
+    @Override
+    public void close() throws Exception {
+        if (this.connection != null) {
+            this.unregisterSession();
+            this.connection.close();
+        }
     }
 
-    public void disconnect() {
-        this.connection.close();
+    /**
+     * Connect to device via TCP, register session
+     */
+    public void connectTcp() throws Exception
+    {
+        this.connection = new TcpConnection(this.ip, this.slot);
+        this.registerSession();
     }
 
-    public void write() {
-        final int status = 0;
-        final int options = 0;
-        ByteBuf req = ByteBufAllocator.DEFAULT.buffer();
-        req.writeShort(Command.RegisterSession.getCode());
-        req.writeShort(4);
-        // session
-        req.writeInt(0);
-        req.writeInt(status);
-        // Transaction
-        req.writeBytes(String.format("%08X", 3).getBytes());
-        req.writeInt(options);
-        req.writeShort(1);
-        req.writeShort(0);
-        log.info("{}", req);
-        this.connection.write(req);
+    /**
+     * Register session
+     */
+    private void registerSession() throws Exception
+    {
+        final RegisterSession register = new RegisterSession();
+        this.connection.execute(register);
+        this.connection.setSession(register.getSession());
+    }
+
+    /**
+     * Unregister session (device will close connection)
+     */
+    private void unregisterSession() {
+        try {
+            if (this.connection.getSession() == 0 || !this.connection.isOpen()) {
+                return;
+            }
+            this.connection.write(new Encapsulation(Command.UnRegisterSession,
+                    this.connection.getSession(), new ProtocolAdapter()));
+            // Cannot read after this point because PLC will close the connection
+        } catch (final Exception ex) {
+
+        }
     }
 }
