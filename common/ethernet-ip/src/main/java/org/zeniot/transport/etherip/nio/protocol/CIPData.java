@@ -1,6 +1,6 @@
 package org.zeniot.transport.etherip.nio.protocol;
 
-import org.zeniot.transport.etherip.nio.Connection;
+import org.zeniot.transport.etherip.nio.core.Connection;
 
 import java.nio.ByteBuffer;
 import java.util.Arrays;

@@ -1,4 +1,4 @@
-package org.zeniot.transport.etherip.nio;
+package org.zeniot.transport.etherip.nio.types;
 
 import lombok.Getter;
 
@@ -6,7 +6,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 
 /**
- * @author László Pataki
+ * @author Jack Wu
  * @see CIP_Vol1_3.3: AppendixB-Status Codes Table 3-5.29 Connection Manager Service Request Error Codes
  */
 

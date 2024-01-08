@@ -1,9 +1,9 @@
 package org.zeniot.transport.etherip.nio.protocol;
 
 import lombok.Getter;
-import org.zeniot.transport.etherip.nio.CipException;
 import org.zeniot.transport.etherip.nio.types.CNPath;
 import org.zeniot.transport.etherip.nio.types.CNService;
+import org.zeniot.transport.etherip.nio.types.CipException;
 
 import java.nio.ByteBuffer;
 

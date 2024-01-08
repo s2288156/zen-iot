@@ -1,4 +1,4 @@
-package org.zeniot.transport.etherip;
+package org.zeniot.transport.etherip.nio.types;
 
 import lombok.Getter;
 

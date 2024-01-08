@@ -1,4 +1,4 @@
-package org.zeniot.transport.etherip.nio;
+package org.zeniot.transport.etherip.nio.core;
 
 import lombok.extern.slf4j.Slf4j;
 import org.zeniot.transport.etherip.nio.protocol.ProtocolDecoder;

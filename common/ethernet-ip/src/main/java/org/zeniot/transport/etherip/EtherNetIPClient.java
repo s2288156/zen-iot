@@ -1,10 +1,11 @@
 package org.zeniot.transport.etherip;
 
 import lombok.extern.slf4j.Slf4j;
-import org.zeniot.transport.etherip.nio.Connection;
-import org.zeniot.transport.etherip.nio.Encapsulation;
-import org.zeniot.transport.etherip.nio.TcpConnection;
+import org.zeniot.transport.etherip.nio.core.Connection;
+import org.zeniot.transport.etherip.nio.core.Encapsulation;
+import org.zeniot.transport.etherip.nio.core.TcpConnection;
 import org.zeniot.transport.etherip.nio.protocol.*;
+import org.zeniot.transport.etherip.nio.types.Command;
 
 /**
  * @author Jack Wu
