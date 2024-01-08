@@ -3,8 +3,8 @@ package org.zeniot.transport.etherip;
 import lombok.extern.slf4j.Slf4j;
 import org.zeniot.transport.etherip.nio.Connection;
 import org.zeniot.transport.etherip.nio.Encapsulation;
-import org.zeniot.transport.etherip.nio.protocol.*;
 import org.zeniot.transport.etherip.nio.TcpConnection;
+import org.zeniot.transport.etherip.nio.protocol.*;
 
 /**
  * @author Jack Wu
@@ -32,20 +32,20 @@ public class EtherNetIPClient implements AutoCloseable {
     /**
      * Connect to device via TCP, register session
      */
-    public void connectTcp() throws Exception
-    {
+    public void connectTcp() throws Exception {
         this.connection = new TcpConnection(this.ip, this.slot);
         this.registerSession();
     }
 
-    /** Read a single array tag
-     *  @param tag Name of tag
-     *  @param count Number of array elements to read
-     *  @return Current value of the tag
-     *  @throws Exception on error
+    /**
+     * Read a single array tag
+     *
+     * @param tag   Name of tag
+     * @param count Number of array elements to read
+     * @return Current value of the tag
+     * @throws Exception on error
      */
-    public CIPData readTag(final String tag, final short count) throws Exception
-    {
+    public CIPData readTag(final String tag, final short count) throws Exception {
         final MRChipReadProtocol cip_read = new MRChipReadProtocol(tag, count);
         final Encapsulation encap =
                 new Encapsulation(Command.SendRRData, this.connection.getSession(),
@@ -57,10 +57,27 @@ public class EtherNetIPClient implements AutoCloseable {
     }
 
     /**
+     * Write a tag
+     *
+     * @param tag   Tag name
+     * @param value Value to write
+     * @throws Exception on error
+     */
+    public void writeTag(final String tag, final CIPData value) throws Exception {
+        final MRChipWriteProtocol cip_write = new MRChipWriteProtocol(tag, value);
+
+        final Encapsulation encap =
+                new Encapsulation(Command.SendRRData, this.connection.getSession(),
+                        new SendRRDataProtocol(
+                                new UnconnectedSendProtocol(this.slot,
+                                        cip_write)));
+        this.connection.execute(encap);
+    }
+
+    /**
      * Register session
      */
-    private void registerSession() throws Exception
-    {
+    private void registerSession() throws Exception {
         final RegisterSession register = new RegisterSession();
         this.connection.execute(register);
         this.connection.setSession(register.getSession());
