@@ -130,6 +130,15 @@ public class CIPData {
         }
     }
 
+    public int getValue() {
+        final byte[] values = new byte[this.elements];
+        final ByteBuffer buf = this.data.asReadOnlyBuffer();
+        buf.order(this.data.order());
+        buf.clear();
+        buf.get(values);
+        return values[0];
+    }
+
     /**
      * @return String representation for debugging
      */
