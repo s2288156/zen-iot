@@ -12,9 +12,9 @@ import org.zeniot.transport.etherip.nio.protocol.CIPData;
 public class EtherNetTest {
     private static final String TAG_BTN_START = "Btn_Start";
     private static final String TAG_BTN_STOP = "Btn_Stop";
-    private static final String TAG_MOTOR_CTRL = "MotorCtrl";
+    private static final String TAG_MOTOR_CTRL = "Motor_Ctrl";
 
-    private static String address = "172.22.252.207";
+    private static String address = "172.26.129.24";
     private static int slot = 2;
     private static short array = 1;
     private static CIPData write = null;
