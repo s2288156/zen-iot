@@ -1,7 +1,7 @@
 package org.zeniot.transport.etherip.nio.protocol;
 
-import org.zeniot.transport.etherip.Command;
-import org.zeniot.transport.etherip.nio.Encapsulation;
+import org.zeniot.transport.etherip.nio.core.Encapsulation;
+import org.zeniot.transport.etherip.nio.types.Command;
 
 /**
  * @author Jack Wu

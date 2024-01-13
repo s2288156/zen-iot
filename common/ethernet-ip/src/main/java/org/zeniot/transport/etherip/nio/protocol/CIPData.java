@@ -1,6 +1,6 @@
 package org.zeniot.transport.etherip.nio.protocol;
 
-import org.zeniot.transport.etherip.nio.Connection;
+import org.zeniot.transport.etherip.nio.core.Connection;
 
 import java.nio.ByteBuffer;
 import java.util.Arrays;
@@ -86,6 +86,31 @@ public class CIPData {
     }
 
     /**
+     * Initialize empty CIP data
+     *
+     * @param type     Data {@link Type}
+     * @param elements Number of elements
+     * @throws Exception when type is not handled
+     */
+    public CIPData(final Type type, final int elements) throws Exception {
+        switch (type) {
+            case BOOL:
+            case SINT:
+            case INT:
+            case DINT:
+            case BITS:
+            case REAL:
+                this.data = ByteBuffer.allocate(type.element_size * elements);
+                this.data.order(Connection.BYTE_ORDER);
+                this.type = type;
+                this.elements = (short) elements;
+                break;
+            default:
+                throw new Exception("Type " + type + " not handled");
+        }
+    }
+
+    /**
      * @return Number of elements
      */
     private short determineElementCount() throws Exception {
@@ -103,6 +128,15 @@ public class CIPData {
             default:
                 throw new Exception("Type " + this.type + " not handled");
         }
+    }
+
+    public int getValue() {
+        final byte[] values = new byte[this.elements];
+        final ByteBuffer buf = this.data.asReadOnlyBuffer();
+        buf.order(this.data.order());
+        buf.clear();
+        buf.get(values);
+        return values[0];
     }
 
     /**
@@ -174,5 +208,77 @@ public class CIPData {
                 result.append("Unknown Type " + this.type);
         }
         return result.toString();
+    }
+
+    /**
+     * Set CIP data
+     *
+     * @param index Element index 0, 1, ...
+     * @param value Numeric value to write to that element
+     * @throws Exception                 on invalid data type
+     * @throws IndexOutOfBoundsException if index is invalid
+     */
+    final synchronized public void set(final int index, final Number value)
+            throws Exception, IndexOutOfBoundsException {
+        switch (this.type) {
+            case BOOL:
+            case SINT:
+                this.data.put(this.type.element_size * index, value.byteValue());
+                break;
+            case INT:
+                this.data.putShort(this.type.element_size * index,
+                        value.shortValue());
+                break;
+            case DINT:
+            case BITS:
+                this.data.putInt(this.type.element_size * index, value.intValue());
+                break;
+            case REAL:
+                this.data.putFloat(this.type.element_size * index,
+                        value.floatValue());
+                break;
+            default:
+                throw new Exception(
+                        "Cannot set type " + this.type + " to a number");
+        }
+    }
+
+    /**
+     * Encode CIP data bytes into buffer
+     *
+     * @param buf {@link ByteBuffer} where data should be placed
+     * @throws Exception on error
+     */
+    final synchronized public void encode(final ByteBuffer buf) throws Exception {
+        buf.putShort(this.type.code);
+        // STRUCT already contains structure detail, elements etc.
+        // For other types, add the element count
+        if (this.type == Type.STRUCT) {
+            this.data.clear();
+            final short struct_detail = this.data.getShort();
+            if (struct_detail != Type.STRUCT_STRING.code) {
+                throw new Exception("Can only encode STRUCT_STRING, got 0x"
+                        + Integer.toHexString(struct_detail));
+            }
+            // The data buffer contains the string as _read_:
+            // STRUCT, STRUCT_STRING, length, chars.
+            // It needs to be written as
+            // STRUCT, STRUCT_STRING, _elements_, length, chars.
+            buf.putShort(struct_detail);
+            buf.putShort(this.elements);
+            // Copy length, chars from data into buf
+            buf.put(this.data);
+        } else {
+            buf.putShort(this.elements);
+            buf.put(this.data.array());
+        }
+    }
+
+    /**
+     * @return size if bytes of the encoded data
+     */
+    final public int getEncodedSize() {
+        // Type, Elements, raw data
+        return 2 + 2 + this.data.capacity();
     }
 }

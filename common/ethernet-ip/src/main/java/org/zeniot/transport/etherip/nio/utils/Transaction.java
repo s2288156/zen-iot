@@ -1,4 +1,4 @@
-package org.zeniot.transport.etherip.nio;
+package org.zeniot.transport.etherip.nio.utils;
 
 /**
  * @author Jack Wu
@@ -6,7 +6,7 @@ package org.zeniot.transport.etherip.nio;
 public class Transaction {
     // SYNC on access
     private static long transaction;
-    static long nextTransaction()
+    public static long nextTransaction()
     {
         synchronized(Transaction.class)
         {
@@ -17,7 +17,7 @@ public class Transaction {
         }
     }
 
-    static byte[] format(final long transaction)
+    public static byte[] format(final long transaction)
     {
         return String.format("%08X", transaction).getBytes();
     }
