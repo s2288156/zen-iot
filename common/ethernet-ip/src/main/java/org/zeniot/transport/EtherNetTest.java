@@ -32,7 +32,7 @@ public class EtherNetTest {
     }
 
     private static void printData(EtherNetIPClient client) throws Exception {
-        log.info("{}:{}", TAG_BTN_START, client.readTag(TAG_BTN_START, array).getValue());
+        log.info("{}:{}", TAG_BTN_START, client.readTag(TAG_BTN_START, array));
         log.info("{}:{}", TAG_BTN_STOP, client.readTag(TAG_BTN_STOP, array));
         log.info("{}:{}", TAG_MOTOR_CTRL, client.readTag(TAG_MOTOR_CTRL, array));
     }
