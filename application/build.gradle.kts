@@ -2,8 +2,6 @@ plugins {
     `java-library`
 }
 
-java.sourceCompatibility = JavaVersion.VERSION_17
-
 dependencies {
     implementation(project(":api"))
     implementation(project(":common:mqtt"))

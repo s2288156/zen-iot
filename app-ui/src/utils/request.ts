@@ -43,7 +43,7 @@ service.interceptors.response.use(
       }
       return Promise.reject(new Error(rsp.msg || 'Error'));
     } else {
-      return response
+      return response.data
     }
   }
 )

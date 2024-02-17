@@ -1,13 +1,13 @@
-import request from '@/utils/request'
-import type {Account} from '@/api/data/types'
-import type {PageQuery} from '@/api/global-types'
+import request from '@/utils/request';
+import type { Account } from '@/api/data/types';
+import type { PageQuery, PageResponse } from '@/api/global-types';
 
 export function getAccounts(data: PageQuery) {
-  return request({
+  return request<PageResponse<Account>>({
     url: '/api/accounts',
     method: 'get',
-    params: data,
-  })
+    params: data
+  });
 }
 
 export function registerAccount(data: Account) {

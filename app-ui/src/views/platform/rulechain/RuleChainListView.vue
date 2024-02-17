@@ -10,14 +10,14 @@ const pageQuery: PageQuery = {
   page: 0,
   size: 10
 };
-const ruleChains = ref<PageResponse<RuleChain>>({
+const ruleChains = ref<PageResponse<RuleChain> | any>({
   data: [],
   size: 0,
   totalPages: 0
 });
 const loadList = () => {
   queryRuleChains(pageQuery).then(response => {
-    ruleChains.value = response.data;
+    ruleChains.value = response;
   });
 };
 loadList();

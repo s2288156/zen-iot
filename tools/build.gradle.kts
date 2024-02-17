@@ -2,8 +2,6 @@ plugins {
     id("java")
 }
 
-java.sourceCompatibility = JavaVersion.VERSION_17
-
 dependencies {
     implementation(libs.j2mod)
     implementation("org.springframework.boot:spring-boot-starter-logging")
