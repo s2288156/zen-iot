@@ -1,5 +1,6 @@
 package org.zeniot.data.domain.rulechain;
 
+import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import org.zeniot.data.base.DTO;
@@ -17,6 +18,7 @@ public class RuleChain extends DTO implements HasId<Long> {
 
     private Long id;
 
+    @NotBlank(message = "The rule chain name cannot empty.")
     private String name;
 
     private List<Node> nodes;

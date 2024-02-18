@@ -22,7 +22,7 @@ public class RuleChainController {
     private RuleChainService ruleChainService;
 
     @PostMapping("/rule_chain")
-    public SingleResponse<RuleChain> saveRuleChain(@RequestBody RuleChain ruleChain) {
+    public SingleResponse<RuleChain> saveRuleChain(@RequestBody @Validated RuleChain ruleChain) {
         log.warn("{}", ruleChain);
         return SingleResponse.success(ruleChainService.createOrUpdateRuleChain(ruleChain));
     }

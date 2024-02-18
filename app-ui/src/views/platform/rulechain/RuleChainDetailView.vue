@@ -6,6 +6,7 @@ import { queryRuleChain, saveRuleChain } from '@/api/rule-chain-apis';
 import { RuleChain } from '@/api/data/types';
 import { RuleChainDefine } from '@/api/data/RuleChainDefine';
 import { ElMessage } from 'element-plus';
+import router from '@/router';
 
 const dndRef = ref();
 const contentRef = ref();
@@ -65,6 +66,10 @@ if (params && params.get('id')) {
     console.log(resp.data);
   });
 }
+
+const back = () => {
+  router.back();
+};
 </script>
 
 <template>
@@ -72,6 +77,7 @@ if (params && params.get('id')) {
     <div class="flow-header">
       <el-button @click="printNodes">Print</el-button>
       <el-button @click="clickSaveRuleChain">Save</el-button>
+      <el-button @click="back">Back</el-button>
     </div>
     <div class="flow-main">
       <div ref="dndRef" class="flow-dnd">

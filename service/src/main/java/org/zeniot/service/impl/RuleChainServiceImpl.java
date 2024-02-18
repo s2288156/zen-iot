@@ -53,6 +53,8 @@ public class RuleChainServiceImpl implements RuleChainService {
                     .toList();
             nodeRelationRepository.saveAll(nodeRelationEntities);
             ruleChain.setId(ruleChainEntity.getId());
+        } else {
+            // TODO: 2/18/2024 update logic
         }
 
         return ruleChain;
