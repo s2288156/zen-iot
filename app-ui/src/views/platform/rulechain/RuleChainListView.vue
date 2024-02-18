@@ -23,7 +23,7 @@ const loadList = () => {
 loadList();
 const handelDelete = (row: RuleChain) => {
   deleteRuleChain(row.id).then(response => {
-    if (response.data.success) {
+    if (response.success) {
       ElMessage({
         message: 'Delete success.',
         type: 'success'

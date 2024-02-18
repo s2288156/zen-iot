@@ -1,12 +1,12 @@
 <template>
   <el-dialog v-model="visible" title="Add Simulator">
-    <p>{{createSimulatorForm}}</p>
-    <el-form :disabled="formDisabled" label-width="140px" ref="ruleFormRef" :model="createSimulatorForm" :rules="rules" status-icon>
+    <p>{{ createSimulatorForm }}</p>
+    <el-form ref="ruleFormRef" :disabled="formDisabled" label-width="140px" :model="createSimulatorForm" :rules="rules" status-icon>
       <el-form-item label="Name" prop="name">
         <el-input v-model="createSimulatorForm.name" />
       </el-form-item>
       <el-form-item label="Transport Type" prop="transportType">
-        <el-select v-model="createSimulatorForm.transportType" @change="selectTransportTypeChange" placeholder="Transport Type">
+        <el-select v-model="createSimulatorForm.transportType" placeholder="Transport Type" @change="selectTransportTypeChange">
           <el-option v-for="item in deviceCommonData.transportTypes" :key="item" :label="item" :value="item" />
         </el-select>
       </el-form-item>
@@ -25,7 +25,7 @@
         <el-table :data="createSimulatorForm.transportConfig.timeseriesFields" stripe style="width: 100%">
           <el-table-column prop="name" label="Name" width="140">
             <template #default="scope">
-              <el-input v-model="scope.row.name"></el-input>
+              <el-input v-model="scope.row.name" />
             </template>
           </el-table-column>
           <el-table-column prop="fieldType" label="Field Type" width="140">
@@ -37,7 +37,7 @@
           </el-table-column>
           <el-table-column prop="valueOrigin" label="Value Origin">
             <template #default="scope">
-              <el-input v-model="scope.row.valueOrigin"></el-input>
+              <el-input v-model="scope.row.valueOrigin" />
             </template>
           </el-table-column>
           <el-table-column prop="valueBound" label="Value Bound">
@@ -46,7 +46,7 @@
               <el-link v-show="!formDisabled" type="primary" @click="add">+</el-link>
             </template>
             <template #default="scope">
-              <el-input v-model="scope.row.valueBound"></el-input>
+              <el-input v-model="scope.row.valueBound" />
             </template>
           </el-table-column>
         </el-table>
@@ -62,28 +62,28 @@
 </template>
 
 <script lang="ts" setup>
-import { reactive, ref } from 'vue'
-import type { FormInstance, FormRules } from 'element-plus'
-import type { DeviceCommon, Simulator } from '@/api/data/types'
-import { TimeUnit, TransportType } from '@/api/data/enums'
-import { defaultTransportConfig, saveSimulator } from '@/api/simulator-apis'
-import { getDeviceCommon } from '@/api/device-apis'
-import { SimulatorJsonFieldDefine } from '@/api/data/types'
+import { reactive, ref } from 'vue';
+import type { FormInstance, FormRules } from 'element-plus';
+import type { DeviceCommon, Simulator } from '@/api/data/types';
+import { SimulatorJsonFieldDefine } from '@/api/data/types';
+import { TimeUnit, TransportType } from '@/api/data/enums';
+import { defaultTransportConfig, saveSimulator } from '@/api/simulator-apis';
+import { getDeviceCommon } from '@/api/device-apis';
 
-const visible = ref(false)
-const formDisabled = ref(false)
-const deviceCommonData = ref<DeviceCommon>({})
-const ruleFormRef = ref<FormInstance>()
+const visible = ref(false);
+const formDisabled = ref(false);
+const deviceCommonData = ref<DeviceCommon>({});
+const ruleFormRef = ref<FormInstance>();
 
-let emit = defineEmits(['refresh'])
+const emit = defineEmits(['refresh']);
 
 const loadDeviceCommon = () => {
   getDeviceCommon().then(resp => {
-    deviceCommonData.value = resp.data
-  })
-}
+    deviceCommonData.value = resp.data;
+  });
+};
 
-let createSimulatorForm = reactive<Simulator>({
+const createSimulatorForm = reactive<Simulator>({
   transportType: TransportType[TransportType.MQTT],
   transportConfig: {
     type: TransportType[TransportType.MQTT],
@@ -92,92 +92,94 @@ let createSimulatorForm = reactive<Simulator>({
     timeUnit: TimeUnit[TimeUnit.SECONDS],
     timeseriesFields: []
   }
-})
+});
 
 const defaultTimeseriesField: SimulatorJsonFieldDefine = {
   fieldType: '',
   name: '',
   valueBound: '',
   valueOrigin: ''
-}
+};
 
 const selectTransportTypeChange = () => {
-  queryDefaultTransportConfig(createSimulatorForm.transportType || '')
-}
+  queryDefaultTransportConfig(createSimulatorForm.transportType || '');
+};
 
 const queryDefaultTransportConfig = (transportType: string) => {
   defaultTransportConfig(transportType).then(resp => {
-    createSimulatorForm.name = ''
-    createSimulatorForm.transportConfig = resp.data
-    defaultTimeseriesField.fieldType = createSimulatorForm.transportConfig.timeseriesFields[0].fieldType
-    defaultTimeseriesField.name = createSimulatorForm.transportConfig.timeseriesFields[0].name
-    defaultTimeseriesField.valueBound = createSimulatorForm.transportConfig.timeseriesFields[0].valueBound
-    defaultTimeseriesField.valueOrigin = createSimulatorForm.transportConfig.timeseriesFields[0].valueOrigin
-  })
-}
+    createSimulatorForm.name = '';
+    createSimulatorForm.transportConfig = resp.data;
+    defaultTimeseriesField.fieldType = createSimulatorForm.transportConfig.timeseriesFields[0].fieldType;
+    defaultTimeseriesField.name = createSimulatorForm.transportConfig.timeseriesFields[0].name;
+    defaultTimeseriesField.valueBound = createSimulatorForm.transportConfig.timeseriesFields[0].valueBound;
+    defaultTimeseriesField.valueOrigin = createSimulatorForm.transportConfig.timeseriesFields[0].valueOrigin;
+  });
+};
 const resetDeviceForm = (formEl: FormInstance) => {
-  formEl.resetFields()
-  createSimulatorForm.name = ''
-  createSimulatorForm.transportType = TransportType[TransportType.MQTT]
-  visible.value = false
-}
+  formEl.resetFields();
+  createSimulatorForm.name = '';
+  createSimulatorForm.transportType = TransportType[TransportType.MQTT];
+  visible.value = false;
+};
 
 const rules = reactive<FormRules>({
   name: [{ required: true, message: 'Please input name!', trigger: 'blur' }],
   transportType: [{ required: true, message: 'Please input transportType!', trigger: 'blur' }]
-})
+});
 
 const handleCreateSimulator = async (formEl: FormInstance) => {
-  if (!formEl) return
+  if (!formEl) return;
   await formEl.validate((valid, fields) => {
     if (valid) {
-      createSimulatorForm.transportConfig.type = createSimulatorForm.transportType
+      createSimulatorForm.transportConfig.type = createSimulatorForm.transportType;
       saveSimulator(createSimulatorForm).then(() => {
-        resetDeviceForm(formEl)
-        emit('refresh')
-      })
+        resetDeviceForm(formEl);
+        emit('refresh');
+      });
     }
-  })
-}
+  });
+};
 
 const add = () => {
-  let oneFieldDefine: SimulatorJsonFieldDefine = {
+  const oneFieldDefine: SimulatorJsonFieldDefine = {
     fieldType: defaultTimeseriesField.fieldType,
     name: defaultTimeseriesField.name,
     valueBound: defaultTimeseriesField.valueBound,
     valueOrigin: defaultTimeseriesField.valueOrigin
-  }
-  createSimulatorForm.transportConfig.timeseriesFields.push(oneFieldDefine)
-}
+  };
+  createSimulatorForm.transportConfig.timeseriesFields.push(oneFieldDefine);
+};
 
 const openAdd = () => {
-  visible.value = true
-  formDisabled.value = false
-  loadDeviceCommon()
-  queryDefaultTransportConfig(TransportType[TransportType.MQTT])
-}
+  visible.value = true;
+  formDisabled.value = false;
+  loadDeviceCommon();
+  queryDefaultTransportConfig(TransportType[TransportType.MQTT]);
+};
 
 const openDetail = (simulator: Simulator) => {
-  visible.value = true
-  formDisabled.value = true
-  loadDeviceCommon()
-  Object.assign(createSimulatorForm, simulator)
-}
+  visible.value = true;
+  formDisabled.value = true;
+  loadDeviceCommon();
+  Object.assign(createSimulatorForm, simulator);
+};
 
 const openEdit = (simulator: Simulator) => {
-  visible.value = true
-  formDisabled.value = false
-  loadDeviceCommon()
-  console.log(simulator)
-  Object.assign(createSimulatorForm, simulator)
-  Object.assign(createSimulatorForm.id, simulator.id)
-  Object.assign(createSimulatorForm.name, simulator.name)
-  Object.assign(createSimulatorForm.status, simulator.status)
-}
+  visible.value = true;
+  formDisabled.value = false;
+  loadDeviceCommon();
+  console.log(simulator);
+  Object.assign(createSimulatorForm, simulator);
+  Object.assign(createSimulatorForm.id, simulator.id);
+  Object.assign(createSimulatorForm.name, simulator.name);
+  Object.assign(createSimulatorForm.status, simulator.status);
+};
 
 defineExpose({
-  openAdd, openDetail, openEdit
-})
+  openAdd,
+  openDetail,
+  openEdit
+});
 </script>
 
 <style scoped lang="scss"></style>

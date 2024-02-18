@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted, reactive, ref } from 'vue';
+import { onMounted, ref } from 'vue';
 import { NodeData } from './commons';
 import { GraphConfig } from '@/views/platform/rulechain/GraphConfig';
 import { queryRuleChain, saveRuleChain } from '@/api/rule-chain-apis';
@@ -11,7 +11,7 @@ const dndRef = ref();
 const contentRef = ref();
 const ruleChain = ref<RuleChain>({ name: '', edges: [], nodes: [] });
 let graphConfig: GraphConfig;
-const nodeTemplates = reactive<Array<NodeData>>([
+const nodeTemplates = ref<Array<NodeData>>([
   {
     className: 'node-rect',
     name: 'save timeseries',
@@ -50,7 +50,7 @@ const clickSaveRuleChain = () => {
       }
     });
   saveRuleChain(ruleChain.value).then(resp => {
-    if (resp.data.success) {
+    if (resp.success) {
       ElMessage({
         message: 'Saved success.',
         type: 'success'
