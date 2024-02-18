@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref } from 'vue';
-import { PageQuery, PageResponse } from '@/api/global-types';
+import { PageQuery, RestResponse } from '@/api/global-types';
 import { RuleChain } from '@/api/data/types';
 import { deleteRuleChain, queryRuleChains } from '@/api/rule-chain-apis';
 import router from '@/router';
@@ -10,7 +10,7 @@ const pageQuery: PageQuery = {
   page: 0,
   size: 10
 };
-const ruleChains = ref<PageResponse<RuleChain> | any>({
+const ruleChains = ref<RestResponse<RuleChain>>({
   data: [],
   size: 0,
   totalPages: 0

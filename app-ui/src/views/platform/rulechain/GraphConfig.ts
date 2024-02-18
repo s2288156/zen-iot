@@ -57,7 +57,7 @@ export class GraphConfig {
     this.getDnd().start(graphNode, event);
   }
 
-  private init() {
+  public init() {
     this.registerNode();
     this.newGraph();
     this.loadPlugin();

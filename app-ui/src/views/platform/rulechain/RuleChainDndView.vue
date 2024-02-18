@@ -1,14 +1,14 @@
 <script setup lang="ts">
-import {onMounted, reactive, ref} from 'vue';
-import {NodeData} from './commons';
-import {GraphConfig} from '@/views/platform/rulechain/GraphConfig';
-import {saveRuleChain} from '@/api/rule-chain-apis';
-import {RuleChain} from '@/api/data/types';
-import {RuleChainDefine} from '@/api/data/RuleChainDefine';
+import { onMounted, reactive, ref } from 'vue';
+import { NodeData } from './commons';
+import { GraphConfig } from '@/views/platform/rulechain/GraphConfig';
+import { saveRuleChain } from '@/api/rule-chain-apis';
+import { RuleChain } from '@/api/data/types';
+import { RuleChainDefine } from '@/api/data/RuleChainDefine';
 
 const dndRef = ref();
 const contentRef = ref();
-const ruleChain = ref<RuleChain>({name: '', edges: [], nodes: []});
+const ruleChain = ref<RuleChain>({ name: '', edges: [], nodes: [] });
 let graphConfig: GraphConfig;
 const nodes = reactive<Array<NodeData>>([
   {
@@ -44,10 +44,10 @@ const startDrag = (node: NodeData, event: MouseEvent) => {
     },
     ports: {
       items: [
-        {id: 'port_1', group: 'top'},
-        {id: 'port_2', group: 'bottom'},
-        {id: 'port_3', group: 'left'},
-        {id: 'port_4', group: 'right'}
+        { id: 'port_1', group: 'top' },
+        { id: 'port_2', group: 'bottom' },
+        { id: 'port_3', group: 'left' },
+        { id: 'port_4', group: 'right' }
       ]
     },
     tools: [
@@ -75,101 +75,101 @@ const printNodes = () => {
 const testCreateNodes = () => {
   graphConfig.getGraph().fromJSON([
     {
-      position: {x: -590, y: -180},
-      size: {width: 160, height: 40},
-      attrs: {text: {text: 'save timeseries'}, body: {fill: '#4dd0e1'}},
+      position: { x: -590, y: -180 },
+      size: { width: 160, height: 40 },
+      attrs: { text: { text: 'save timeseries' }, body: { fill: '#4dd0e1' } },
       visible: true,
       shape: 'rect_node',
       ports: {
         groups: {
           top: {
             position: 'top',
-            attrs: {circle: {magnet: true, stroke: '#8f8f8f', r: 3, style: {visibility: 'hidden'}}}
+            attrs: { circle: { magnet: true, stroke: '#8f8f8f', r: 3, style: { visibility: 'hidden' } } }
           },
           bottom: {
             position: 'bottom',
-            attrs: {circle: {magnet: true, stroke: '#8f8f8f', r: 3, style: {visibility: 'hidden'}}}
+            attrs: { circle: { magnet: true, stroke: '#8f8f8f', r: 3, style: { visibility: 'hidden' } } }
           },
           left: {
             position: 'left',
-            attrs: {circle: {magnet: true, stroke: '#8f8f8f', r: 3, style: {visibility: 'hidden'}}}
+            attrs: { circle: { magnet: true, stroke: '#8f8f8f', r: 3, style: { visibility: 'hidden' } } }
           },
           right: {
             position: 'right',
-            attrs: {circle: {magnet: true, stroke: '#8f8f8f', r: 3, style: {visibility: 'hidden'}}}
+            attrs: { circle: { magnet: true, stroke: '#8f8f8f', r: 3, style: { visibility: 'hidden' } } }
           }
         },
         items: [
-          {id: 'port_1', group: 'top'},
-          {id: 'port_2', group: 'bottom'},
-          {id: 'port_3', group: 'left'},
-          {id: 'port_4', group: 'right'}
+          { id: 'port_1', group: 'top' },
+          { id: 'port_2', group: 'bottom' },
+          { id: 'port_3', group: 'left' },
+          { id: 'port_4', group: 'right' }
         ]
       },
       id: '5d2ac1a3-644b-465c-9c82-288b954b74ae',
-      data: {nodeType: 'SAVE_TIMESERIES'},
-      tools: {items: [{name: 'node-editor', args: {x: -630, y: 13, attrs: {backgroundColor: '#EFF4FF'}}}]},
+      data: { nodeType: 'SAVE_TIMESERIES' },
+      tools: { items: [{ name: 'node-editor', args: { x: -630, y: 13, attrs: { backgroundColor: '#EFF4FF' } } }] },
       zIndex: 1
     },
     {
-      position: {x: -230, y: -180},
-      size: {width: 160, height: 40},
-      attrs: {text: {text: 'save attributes'}, body: {fill: '#e57373'}},
+      position: { x: -230, y: -180 },
+      size: { width: 160, height: 40 },
+      attrs: { text: { text: 'save attributes' }, body: { fill: '#e57373' } },
       visible: true,
       shape: 'rect_node',
       ports: {
         groups: {
           top: {
             position: 'top',
-            attrs: {circle: {magnet: true, stroke: '#8f8f8f', r: 3, style: {visibility: 'hidden'}}}
+            attrs: { circle: { magnet: true, stroke: '#8f8f8f', r: 3, style: { visibility: 'hidden' } } }
           },
           bottom: {
             position: 'bottom',
-            attrs: {circle: {magnet: true, stroke: '#8f8f8f', r: 3, style: {visibility: 'hidden'}}}
+            attrs: { circle: { magnet: true, stroke: '#8f8f8f', r: 3, style: { visibility: 'hidden' } } }
           },
           left: {
             position: 'left',
-            attrs: {circle: {magnet: true, stroke: '#8f8f8f', r: 3, style: {visibility: 'hidden'}}}
+            attrs: { circle: { magnet: true, stroke: '#8f8f8f', r: 3, style: { visibility: 'hidden' } } }
           },
           right: {
             position: 'right',
-            attrs: {circle: {magnet: true, stroke: '#8f8f8f', r: 3, style: {visibility: 'hidden'}}}
+            attrs: { circle: { magnet: true, stroke: '#8f8f8f', r: 3, style: { visibility: 'hidden' } } }
           }
         },
         items: [
-          {id: 'port_1', group: 'top'},
-          {id: 'port_2', group: 'bottom'},
-          {id: 'port_3', group: 'left'},
-          {id: 'port_4', group: 'right'}
+          { id: 'port_1', group: 'top' },
+          { id: 'port_2', group: 'bottom' },
+          { id: 'port_3', group: 'left' },
+          { id: 'port_4', group: 'right' }
         ]
       },
       id: 'a7ee81ee-a122-44f2-a5f7-755564918263',
-      data: {nodeType: 'SAVE_ATTRIBUTES'},
-      tools: {items: [{name: 'node-editor', args: {x: -630, y: 13, attrs: {backgroundColor: '#EFF4FF'}}}]},
+      data: { nodeType: 'SAVE_ATTRIBUTES' },
+      tools: { items: [{ name: 'node-editor', args: { x: -630, y: 13, attrs: { backgroundColor: '#EFF4FF' } } }] },
       zIndex: 2
     },
     {
       shape: 'edge',
       id: '4aa54ec9-826e-4756-a524-f88cee6db6f0',
-      source: {cell: '5d2ac1a3-644b-465c-9c82-288b954b74ae', port: 'port_4'},
-      target: {cell: 'a7ee81ee-a122-44f2-a5f7-755564918263', port: 'port_3'},
+      source: { cell: '5d2ac1a3-644b-465c-9c82-288b954b74ae', port: 'port_4' },
+      target: { cell: 'a7ee81ee-a122-44f2-a5f7-755564918263', port: 'port_3' },
       zIndex: 3
     }
   ]);
   graphConfig
-      .getGraph()
-      .toJSON()
-      .cells.forEach(cell => {
-    if (cell.shape === 'edge') {
-      const edge = RuleChainDefine.newEdgeFromCell(cell);
-      ruleChain.value.edges.push(edge);
-    } else if (cell.shape == 'rect_node') {
-      const node = RuleChainDefine.newNodeFromCell(cell);
-      ruleChain.value.nodes.push(node);
-    }
-  });
+    .getGraph()
+    .toJSON()
+    .cells.forEach(cell => {
+      if (cell.shape === 'edge') {
+        const edge = RuleChainDefine.newEdgeFromCell(cell);
+        ruleChain.value.edges.push(edge);
+      } else if (cell.shape == 'rect_node') {
+        const node = RuleChainDefine.newNodeFromCell(cell);
+        ruleChain.value.nodes.push(node);
+      }
+    });
   saveRuleChain(ruleChain.value).then(resp => {
-    if (resp.status === 200) {
+    if (resp.success) {
       console.log('@@@@@@@@@@@@@@@@@@@@@@@@');
     }
   });
@@ -185,7 +185,7 @@ const testCreateNodes = () => {
     <div class="flow-main">
       <div ref="dndRef" class="flow-dnd">
         <template v-for="node in nodes" :key="node.id">
-<!--          :data-id="node.id"-->
+          <!--          :data-id="node.id"-->
           <div :class="node.className" :data-type="node.nodeType" :style="{ backgroundColor: node.backgroundColor }" @mousedown="startDrag(node, $event)">
             {{ node.name }}
           </div>
@@ -195,7 +195,7 @@ const testCreateNodes = () => {
       <div class="flow-info">
         <el-row class="flow-info-row">
           <span>规则链名称: </span>
-          <el-input v-model="ruleChain.name" placeholder="规则链名称"/>
+          <el-input v-model="ruleChain.name" placeholder="规则链名称" />
         </el-row>
       </div>
     </div>

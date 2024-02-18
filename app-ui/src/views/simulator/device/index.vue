@@ -42,14 +42,14 @@
 
 <script lang="ts" setup>
 import { ref } from 'vue';
-import type { PageQuery, PageResponse } from '@/api/global-types';
+import { PageQuery, RestResponse } from '@/api/global-types';
 import { ElMessage } from 'element-plus';
 import type { Simulator } from '@/api/data/types';
 import { deleteSimulator, getSimulators, switchSimulatorStatus } from '@/api/simulator-apis';
 import SimulatorDetail from './SimulatorDetail.vue';
 
 const pageQuery: PageQuery = { page: 0, size: 10 };
-const simulators = ref<PageResponse<Simulator> | any>({
+const simulators = ref<RestResponse<Simulator> | any>({
   data: [],
   size: 0,
   totalPages: 0

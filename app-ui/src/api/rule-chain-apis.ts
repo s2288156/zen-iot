@@ -1,33 +1,26 @@
 import request from '@/utils/request';
 import { RuleChain } from '@/api/data/types';
-import { PageQuery, PageResponse, type RestResponse } from '@/api/global-types';
+import { PageQuery } from '@/api/global-types';
 
 export function saveRuleChain(data: RuleChain) {
-  return request<RestResponse<RuleChain>>({
+  return request.post({
     url: '/api/rule_chain',
-    method: 'post',
     data: data
   });
 }
 
 export function queryRuleChains(data: PageQuery) {
-  return request<PageResponse<RuleChain>>({
+  return request.get({
     url: '/api/rule_chains',
-    method: 'get',
-    params: data,
-  })
+    params: data
+  });
 }
 
 export function queryRuleChain(id: string) {
-  return request<RestResponse<RuleChain>>({
-    url: '/api/rule_chain/' + id,
-    method: 'get'
-  })
+  return request.get({ url: '/api/rule_chain/' + id });
 }
 
 export function deleteRuleChain(id: string) {
-  return request<RestResponse<void>>({
-    url: '/api/rule_chain/' + id,
-    method: 'delete'
-  })
+  return request.delete({ url: '/api/rule_chain/' + id });
+
 }

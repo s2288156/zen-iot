@@ -2,7 +2,7 @@
   <div class="app-container">
     <div class="filter-container">
       <el-button class="filter-item" icon="EditPen" type="primary" @click="dialogFormVisible = !dialogFormVisible"> 新增 </el-button>
-      <el-button type="info" icon="RefreshRight" class="filter-item" @click="loadAccountList()">刷新 </el-button>
+      <el-button type="info" icon="RefreshRight" class="filter-item" @click="loadAccountList()">刷新</el-button>
     </div>
 
     <el-table :data="accountDataPage.data" style="width: 100%">
@@ -11,7 +11,7 @@
       <el-table-column prop="createTime" label="CreateDate" width="180" />
       <el-table-column prop="updateTime" label="UpdateDate" />
       <el-table-column fixed="right" label="Operations" width="120">
-        <template #default="{ row, $index }">
+        <template #default="{ row }">
           <el-button link size="small" type="primary" @click="handleClick">Detail</el-button>
           <el-button link size="small" type="primary" @click="handleDeleteAccount(row)">Delete</el-button>
         </template>
@@ -52,7 +52,7 @@
 import { deleteAccount, getAccounts, registerAccount } from '@/api/account-apis';
 import { reactive, ref } from 'vue';
 import type { Account } from '@/api/data/types';
-import type { PageQuery, PageResponse } from '@/api/global-types';
+import { PageQuery, RestResponse } from '@/api/global-types';
 import type { FormRules } from 'element-plus';
 import { ElMessage } from 'element-plus';
 
@@ -60,7 +60,7 @@ const pageQuery: PageQuery = {
   page: 0,
   size: 10
 };
-const accountDataPage = ref<PageResponse<Account> | any>({
+const accountDataPage = ref<RestResponse<Account>>({
   data: [],
   size: 0,
   totalPages: 0
@@ -123,7 +123,7 @@ const rules = reactive<FormRules>({
 
 const handleCreateAccount = () => {
   registerAccount(createAccountForm).then(resp => {
-    if (resp.status === 200) {
+    if (resp.success) {
       resetAccountForm();
       loadAccountList();
     }

@@ -1,34 +1,30 @@
 import request from '@/utils/request';
 import type { Account } from '@/api/data/types';
-import type { PageQuery, PageResponse } from '@/api/global-types';
+import type { PageQuery } from '@/api/global-types';
 
 export function getAccounts(data: PageQuery) {
-  return request<PageResponse<Account>>({
+  return request.get({
     url: '/api/accounts',
-    method: 'get',
     params: data
   });
 }
 
 export function registerAccount(data: Account) {
-  return request({
+  return request.post({
     url: '/api/account/register',
-    method: 'post',
-    data: data,
-  })
+    data: data
+  });
 }
 
 export function deleteAccount(id: number) {
-  return request({
-    url: '/api/account/' + id,
-    method: 'delete'
-  })
+  return request.delete({
+    url: '/api/account/' + id
+  });
 }
 
 export function login(data: Account) {
-  return request({
+  return request.post({
     url: '/api/login',
-    method: 'post',
     data: data
   });
 }

@@ -1,34 +1,30 @@
-import request from '@/utils/request'
-import type {Device} from '@/api/data/types'
-import type {PageQuery} from '@/api/global-types'
+import request from '@/utils/request';
+import type { Device } from '@/api/data/types';
+import type { PageQuery } from '@/api/global-types';
 
 export function getDeviceCommon() {
-  return request({
-    url: '/api/device/common',
-    method: 'get'
-  })
+  return request.get({
+    url: '/api/device/common'
+  });
 }
 
 export function getDevices(data: PageQuery) {
-  return request({
+  return request.get({
     url: '/api/devices',
-    method: 'get',
     params: data,
   })
 }
 
 export function saveDevice(data: Device) {
-  return request({
+  return request.post({
     url: '/api/device',
-    method: 'post',
     data: data,
   })
 }
 
 export function deleteDevice(id: string) {
-  return request({
+  return request.delete({
     url: '/api/device/' + id,
-    method: 'delete'
   })
 }
 

@@ -15,7 +15,7 @@
         </template>
       </el-table-column>
       <el-table-column fixed="right" label="Operations" width="120">
-        <template #default="{ row, $index }">
+        <template #default="{ row }">
           <el-button link size="small" type="primary" @click="handleClick">Detail</el-button>
           <el-button link size="small" type="primary" @click="handleDeleteDevice(row)">Delete</el-button>
         </template>
@@ -57,7 +57,7 @@
 <script lang="ts" setup>
 import { reactive, ref } from 'vue';
 import type { Device, DeviceCommon } from '@/api/data/types';
-import type { PageQuery, PageResponse } from '@/api/global-types';
+import { PageQuery, RestResponse } from '@/api/global-types';
 import type { FormInstance, FormRules } from 'element-plus';
 import { ElMessage } from 'element-plus';
 import { deleteDevice, getDeviceCommon, getDevices, saveDevice } from '@/api/device-apis';
@@ -66,7 +66,7 @@ const pageQuery: PageQuery = {
   page: 0,
   size: 10
 };
-const devices = ref<PageResponse<Device> | any>({
+const devices = ref<RestResponse<Device> | any>({
   data: [],
   size: 0,
   totalPages: 0
@@ -130,7 +130,7 @@ const getStatusTag = (row: Device) => {
 const dialogFormVisible = ref(false);
 const ruleFormRef = ref<FormInstance>();
 
-let createDeviceForm = reactive<Device>({
+const createDeviceForm = reactive<Device>({
   name: '',
   transportType: ''
 });

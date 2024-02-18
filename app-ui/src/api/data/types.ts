@@ -65,9 +65,9 @@ export type NodeDefine = {
 };
 
 export type EdgeDefine = {
-   id: string;
-   sourceId: string;
-   sourcePort: string;
-   targetId: string;
-   targetPort: string;
-}
+  id: string;
+  sourceId: string;
+  sourcePort: string;
+  targetId: string;
+  targetPort: string;
+};
