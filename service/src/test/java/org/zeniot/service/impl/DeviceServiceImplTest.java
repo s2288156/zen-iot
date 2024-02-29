@@ -3,16 +3,13 @@ package org.zeniot.service.impl;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.zeniot.AbstractBootTest;
-import org.zeniot.api.DeviceService;
 import org.zeniot.dao.model.DeviceEntity;
-import org.zeniot.dao.repository.DeviceRepository;
 import org.zeniot.data.base.PageQuery;
 import org.zeniot.data.base.PageResponse;
+import org.zeniot.data.domain.device.Device;
 import org.zeniot.data.enums.DeviceStatusEnum;
 import org.zeniot.data.enums.TransportTypeEnum;
-import org.zeniot.data.domain.device.Device;
 
 import java.util.List;
 
@@ -23,10 +20,6 @@ import static org.junit.jupiter.api.Assertions.*;
  */
 @Slf4j
 class DeviceServiceImplTest extends AbstractBootTest {
-    @Autowired
-    private DeviceService deviceService;
-    @Autowired
-    private DeviceRepository deviceRepository;
 
     private Device d1, d2;
 

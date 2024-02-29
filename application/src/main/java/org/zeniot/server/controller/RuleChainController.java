@@ -5,6 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.zeniot.api.RuleChainService;
+import org.zeniot.common.util.JacksonUtil;
 import org.zeniot.data.base.PageQuery;
 import org.zeniot.data.base.PageResponse;
 import org.zeniot.data.base.SingleResponse;
@@ -23,7 +24,7 @@ public class RuleChainController {
 
     @PostMapping("/rule_chain")
     public SingleResponse<RuleChain> saveRuleChain(@RequestBody @Validated RuleChain ruleChain) {
-        log.warn("{}", ruleChain);
+        log.warn("{}", JacksonUtil.toJsonStr(ruleChain));
         return SingleResponse.success(ruleChainService.createOrUpdateRuleChain(ruleChain));
     }
 

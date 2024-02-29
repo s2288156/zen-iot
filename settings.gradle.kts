@@ -19,6 +19,7 @@ dependencyResolutionManagement {
         }
     }
 }
+include("app-ui")
 include("application")
 include("dao")
 include("service")

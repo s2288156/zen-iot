@@ -64,6 +64,7 @@ const params = new URLSearchParams(window.location.search);
 if (params && params.get('id')) {
   queryRuleChain(params.get('id')).then(resp => {
     console.log(resp.data);
+    ruleChain.value.name = resp.data.name;
   });
 }
 

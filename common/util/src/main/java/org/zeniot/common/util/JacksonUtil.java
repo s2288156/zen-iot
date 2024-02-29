@@ -61,7 +61,7 @@ public class JacksonUtil {
         return OBJECT_MAPPER.convertValue(fromValue, toValueType);
     }
 
-    public static String toString(Object value) {
+    public static String toJsonStr(Object value) {
         try {
             return OBJECT_MAPPER.writeValueAsString(value);
         } catch (JsonProcessingException e) {

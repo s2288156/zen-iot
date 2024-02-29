@@ -1,4 +1,4 @@
-package org.zeniot.server.transport;
+package org.zeniot.service.transport;
 
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;

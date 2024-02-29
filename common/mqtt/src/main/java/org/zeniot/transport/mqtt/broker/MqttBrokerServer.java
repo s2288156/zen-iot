@@ -49,6 +49,7 @@ public class MqttBrokerServer {
         });
 
         try {
+            // TODO: 2/29/2024 端口可配置
             channelFuture = b.bind(1883).sync();
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
