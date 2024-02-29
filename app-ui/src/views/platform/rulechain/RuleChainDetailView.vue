@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue';
 import { NodeData } from './commons';
-import { GraphConfig } from '@/views/platform/rulechain/GraphConfig';
+import { RuleChainGraph } from '@/views/platform/rulechain/RuleChainGraph';
 import { queryRuleChain, saveRuleChain } from '@/api/rule-chain-apis';
 import { RuleChain } from '@/api/data/types';
 import { RuleChainDefine } from '@/api/data/RuleChainDefine';
@@ -11,7 +11,7 @@ import router from '@/router';
 const dndRef = ref();
 const contentRef = ref();
 const ruleChain = ref<RuleChain>({ name: '', edges: [], nodes: [] });
-let graphConfig: GraphConfig;
+let graphConfig: RuleChainGraph;
 const nodeTemplates = ref<Array<NodeData>>([
   {
     className: 'node-rect',
@@ -30,7 +30,7 @@ const nodeTemplates = ref<Array<NodeData>>([
 ]);
 
 onMounted(() => {
-  graphConfig = new GraphConfig(dndRef, contentRef);
+  graphConfig = new RuleChainGraph(dndRef, contentRef);
 });
 
 const printNodes = () => {

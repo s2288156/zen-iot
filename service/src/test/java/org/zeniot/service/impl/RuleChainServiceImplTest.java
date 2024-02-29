@@ -7,27 +7,30 @@ import org.junit.jupiter.api.Test;
 import org.zeniot.AbstractBootTest;
 import org.zeniot.data.domain.rulechain.RuleChain;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+
 /**
  * @author Wu.Chunyang
  */
 @Slf4j
 class RuleChainServiceImplTest extends AbstractBootTest {
 
-    private Long id;
+    RuleChain createdRuleChain;
 
     @BeforeEach
     void setUp() {
-        RuleChain createdRuleChain = ruleChainService.createOrUpdateRuleChain(ruleChain1);
-        id = createdRuleChain.getId();
+        createdRuleChain = ruleChainService.createOrUpdateRuleChain(ruleChain1);
     }
 
     @AfterEach
     void tearDown() {
-        ruleChainService.deleteRuleChain(id);
+        ruleChainService.deleteRuleChain(createdRuleChain.getId());
     }
 
     @Test
     void createOrUpdateRuleChain() {
+        assertEquals(ruleChain1.getName(), createdRuleChain.getName(), "created rule chain data exception.");
     }
 
     @Test
@@ -36,9 +39,11 @@ class RuleChainServiceImplTest extends AbstractBootTest {
 
     @Test
     void getRuleChain() {
+        RuleChain ruleChain = ruleChainService.getRuleChain(createdRuleChain.getId());
+        assertEquals(2, ruleChain.getNodes().size());
+        assertEquals(1, ruleChain.getEdges().size());
+        assertNotNull(ruleChain.getEdges().getFirst().getId());
+        assertNotNull(ruleChain.getNodes().getFirst().getId());
     }
 
-    @Test
-    void deleteRuleChain() {
-    }
 }

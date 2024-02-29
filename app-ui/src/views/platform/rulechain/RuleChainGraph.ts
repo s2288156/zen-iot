@@ -7,7 +7,7 @@ import { Clipboard } from '@antv/x6-plugin-clipboard';
 import { Dnd } from '@antv/x6-plugin-dnd';
 import { NodeData } from '@/views/platform/rulechain/commons';
 
-export class GraphConfig {
+export class RuleChainGraph {
   private dndRef: Ref;
   private contentRef: Ref;
   private graph: Graph;
