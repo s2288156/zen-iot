@@ -7,10 +7,6 @@ spring:
     open-in-view: false
     show-sql: true
   datasource:
-#    url: jdbc:h2:~/h2-data/test;database_to_upper=false
-#    driver-class-name: org.h2.Driver
-#    username: test
-#    password: 112233
     url: jdbc:postgresql://localhost:5432/db_zen_iot
     username: postgres
     password: postgres

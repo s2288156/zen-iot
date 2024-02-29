@@ -7,12 +7,11 @@ spring:
     open-in-view: false
     show-sql: true
   datasource:
-    url: jdbc:h2:~/h2/test;database_to_upper=false;MODE=PostgreSQL
-    driver-class-name: org.h2.Driver
-    username: test
-    password: 123123
+    url: jdbc:postgresql://localhost:5432/db_zen_iot_test
+    username: postgres
+    password: postgres
   flyway:
-    enabled: false
+    enabled: true
 
 secret:
   key: "UiTXuwC4pHqsLoHGimE1aZ686FAdKDz1BPVL2JMzTsYv8Y6YJHpJnKrjtK23XqMS"
