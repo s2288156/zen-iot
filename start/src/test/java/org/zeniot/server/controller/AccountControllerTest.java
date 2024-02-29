@@ -52,7 +52,7 @@ public class AccountControllerTest extends AbstractControllerTest {
         PageQuery pageQuery = new PageQuery();
         pageQuery.setPage(0);
         pageQuery.setSize(2);
-        doGet("/api/accounts", JacksonUtil.toString(pageQuery))
+        doGet("/api/accounts", JacksonUtil.toJsonStr(pageQuery))
                 .andExpect(jsonPath("$.data.size()").value(2))
                 .andExpect(jsonPath("$.totalPages").value(5))
                 .andExpect(jsonPath("$.totalElements").value(10));

@@ -10,10 +10,8 @@ import io.netty.util.ReferenceCountUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.zeniot.common.util.JacksonUtil;
 import org.zeniot.data.domain.simulator.transport.SimulatorMqttTransportConfig;
-import org.zeniot.data.enums.FieldTypeEnum;
 
 import java.nio.charset.StandardCharsets;
-import java.util.Random;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -67,7 +65,7 @@ public class MqttClientHandler extends ChannelInboundHandlerAdapter {
             MqttPublishMessage publishMessage = new MqttPublishMessage(
                     publishFixedHeader,
                     publishVariableHeader,
-                    Unpooled.wrappedBuffer(JacksonUtil.toString(payloadJsonNode).getBytes(StandardCharsets.UTF_8))
+                    Unpooled.wrappedBuffer(JacksonUtil.toJsonStr(payloadJsonNode).getBytes(StandardCharsets.UTF_8))
             );
             ctx.writeAndFlush(publishMessage);
         }, 0, transportConfig.getPeriod(), transportConfig.getTimeUnit());

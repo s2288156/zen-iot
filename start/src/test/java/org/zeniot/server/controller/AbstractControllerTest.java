@@ -57,7 +57,7 @@ public class AbstractControllerTest {
     }
 
     private String toJson(Object content) {
-        return JacksonUtil.toString(content);
+        return JacksonUtil.toJsonStr(content);
     }
 
     protected <T> T getResponse(ResultActions resultActions, Class<T> responseClass) throws UnsupportedEncodingException {

@@ -4,8 +4,7 @@ plugins {
 
 dependencies {
     implementation(project(":api"))
-    implementation(project(":common:mqtt"))
-    implementation(project(":common:transport-api"))
+//    implementation(project(":common:transport-api"))
     implementation(project(":common:util"))
     implementation(project(":common:data"))
     api(libs.nimbus.jose.jwt)
