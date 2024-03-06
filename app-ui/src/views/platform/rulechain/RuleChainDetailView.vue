@@ -7,11 +7,13 @@ import { RuleChain } from '@/api/data/types';
 import { RuleChainDefine } from '@/api/data/RuleChainDefine';
 import { ElMessage } from 'element-plus';
 import router from '@/router';
+import {IotGraph} from "@/components/graph/IotGraph";
+import {Cell, Node} from "@antv/x6";
 
 const dndRef = ref();
 const contentRef = ref();
 const ruleChain = ref<RuleChain>({ name: '', edges: [], nodes: [] });
-let graphConfig: RuleChainGraph;
+let graphConfig: IotGraph;
 const nodeTemplates = ref<Array<NodeData>>([
   {
     className: 'node-rect',
@@ -39,9 +41,7 @@ const printNodes = () => {
 
 const clickSaveRuleChain = () => {
   graphConfig
-    .getGraph()
-    .toJSON()
-    .cells.forEach(cell => {
+    .getCells().forEach(cell => {
       if (cell.shape === 'edge') {
         const edge = RuleChainDefine.newEdgeFromCell(cell);
         ruleChain.value.edges.push(edge);
@@ -65,6 +65,98 @@ if (params && params.get('id')) {
   queryRuleChain(params.get('id')).then(resp => {
     console.log(resp.data);
     ruleChain.value.name = resp.data.name;
+    resp.data.nodes.forEach(n => {
+      const node = new Node({
+        position: n.metadata.position,
+        size: {
+          width: 160,
+          height: 40
+        },
+        attrs: n.metadata.attrs,
+        visible: true,
+        shape: n.shape,
+        ports: {
+          groups: {
+            "top": {
+              "position": "top",
+              "attrs": {
+                "circle": {
+                  "magnet": true,
+                  "stroke": "#8f8f8f",
+                  "r": 3,
+                  "style": {
+                    "visibility": "hidden"
+                  }
+                }
+              }
+            },
+            "bottom": {
+              "position": "bottom",
+              "attrs": {
+                "circle": {
+                  "magnet": true,
+                  "stroke": "#8f8f8f",
+                  "r": 3,
+                  "style": {
+                    "visibility": "hidden"
+                  }
+                }
+              }
+            },
+            "left": {
+              "position": "left",
+              "attrs": {
+                "circle": {
+                  "magnet": true,
+                  "stroke": "#8f8f8f",
+                  "r": 3,
+                  "style": {
+                    "visibility": "hidden"
+                  }
+                }
+              }
+            },
+            "right": {
+              "position": "right",
+              "attrs": {
+                "circle": {
+                  "magnet": true,
+                  "stroke": "#8f8f8f",
+                  "r": 3,
+                  "style": {
+                    "visibility": "hidden"
+                  }
+                }
+              }
+            }
+          },
+          items: [
+            {id: "port_1", group: "top"},
+            {id: "port_2", group: "bottom"},
+            {id: "port_3", group: "left"},
+            {id: "port_4", group: "right"},
+          ]
+        },
+        id: n.id,
+        data: n.metadata.data,
+        tools: {
+          items: [
+            {
+              name: "node-editor",
+              args: {
+                "x": -630,
+                "y": 13,
+                "attrs": {
+                  "backgroundColor": "#EFF4FF"
+                }
+              }
+            }
+          ]
+        },
+        zIndex: 1
+      });
+      console.log(node)
+    })
   });
 }
 

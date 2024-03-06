@@ -1,6 +1,7 @@
 package org.zeniot.data.domain.simulator;
 
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import org.zeniot.data.base.DTO;
 import org.zeniot.data.enums.DeviceStatusEnum;
 import org.zeniot.data.enums.TransportTypeEnum;
@@ -10,6 +11,7 @@ import java.util.List;
 /**
  * @author Wu.Chunyang
  */
+@EqualsAndHashCode(callSuper = true)
 @Data
 public class SimulatorCommonData extends DTO {
     private List<TransportTypeEnum> transportTypes;

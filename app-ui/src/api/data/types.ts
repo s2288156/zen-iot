@@ -61,7 +61,7 @@ export type NodeDefine = {
   id: string;
   nodeName: string;
   nodeType: string;
-  metadata: object;
+  metadata: CellMetadata;
 };
 
 export type EdgeDefine = {
@@ -71,3 +71,19 @@ export type EdgeDefine = {
   targetId: string;
   targetPort: string;
 };
+
+export type CellMetadata = {
+  position?: Position
+  shape?: string
+  data?: CommonData
+  attrs?: object
+}
+
+export type Position = {
+  x: number
+  y: number
+}
+
+export type CommonData = {
+  nodeType?: string
+}

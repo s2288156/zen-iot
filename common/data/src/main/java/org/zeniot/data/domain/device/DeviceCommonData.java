@@ -1,6 +1,7 @@
 package org.zeniot.data.domain.device;
 
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import org.zeniot.data.base.DTO;
 import org.zeniot.data.enums.DeviceCredentialTypeEnum;
 import org.zeniot.data.enums.DeviceStatusEnum;
@@ -13,6 +14,7 @@ import java.util.concurrent.TimeUnit;
 /**
  * @author Wu.Chunyang
  */
+@EqualsAndHashCode(callSuper = true)
 @Data
 public class DeviceCommonData extends DTO {
     private List<TransportTypeEnum> transportTypes;

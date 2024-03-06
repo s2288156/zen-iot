@@ -19,7 +19,8 @@ export class RuleChainDefine {
       metadata: {
         position: cell.position,
         shape: cell.shape,
-        data: cell.data
+        data: cell.data,
+        attrs: cell.attrs
       }
     };
   }
