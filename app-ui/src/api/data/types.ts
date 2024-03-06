@@ -55,6 +55,7 @@ export type RuleChain = {
   edges?: EdgeDefine[];
   createTime?: string;
   updateTime?: string;
+  graphJson: object
 };
 
 export type NodeDefine = {

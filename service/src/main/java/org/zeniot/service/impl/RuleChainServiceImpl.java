@@ -75,7 +75,6 @@ public class RuleChainServiceImpl implements RuleChainService {
     @Override
     public RuleChain getRuleChain(Long id) {
         RuleChainEntity ruleChainEntity = ruleChainRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("RuleChain not found"));
-        log.info(">>>> {}: {}, {}", ruleChainEntity.getName(), ruleChainEntity.getNodeEntities(), ruleChainEntity.getNodeRelationEntities());
         return ruleChainMapper.entityToRuleChain(ruleChainEntity);
     }
 

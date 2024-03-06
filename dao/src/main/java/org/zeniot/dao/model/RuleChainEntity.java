@@ -1,7 +1,10 @@
 package org.zeniot.dao.model;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 
 import java.util.LinkedHashSet;
 import java.util.Set;
@@ -21,6 +24,10 @@ public class RuleChainEntity extends BaseEntity {
 
     @Column(name = "name")
     private String name;
+
+    @JdbcTypeCode(SqlTypes.JSON)
+    @Column(name = "graph_json")
+    private JsonNode graphJson;
 
     @ToString.Exclude
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, mappedBy = "ruleChainEntity")

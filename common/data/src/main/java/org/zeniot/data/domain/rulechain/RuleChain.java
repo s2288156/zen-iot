@@ -1,5 +1,6 @@
 package org.zeniot.data.domain.rulechain;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -26,5 +27,7 @@ public class RuleChain extends DTO implements HasId<Long> {
     private List<Edge> edges;
 
     private LocalDateTime updateTime;
+
+    private JsonNode graphJson;
 
 }
