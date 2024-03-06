@@ -8,7 +8,7 @@ import { RuleChainDefine } from '@/api/data/RuleChainDefine';
 import { ElMessage } from 'element-plus';
 import router from '@/router';
 import {IotGraph} from "@/components/graph/IotGraph";
-import {Cell, Node} from "@antv/x6";
+import {Cell, Edge, Node} from "@antv/x6";
 
 const dndRef = ref();
 const contentRef = ref();
@@ -155,8 +155,23 @@ if (params && params.get('id')) {
         },
         zIndex: 1
       });
-      console.log(node)
+      graphConfig.getGraph().addNode(node)
     })
+    resp.data.edges.forEach(e => {
+      const edge = new Edge({
+        shape: "edge",
+        source: {
+          cell: e.sourceId,
+          port: e.sourcePort
+        },
+        target: {
+          cell: e.targetId,
+          port: e.targetPort
+        }
+      });
+      graphConfig.getGraph().addEdge(edge)
+    })
+    console.log(graphConfig.getGraph().toJSON())
   });
 }
 
