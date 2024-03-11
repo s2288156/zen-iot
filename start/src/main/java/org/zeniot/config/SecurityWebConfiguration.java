@@ -37,7 +37,7 @@ public class SecurityWebConfiguration {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
                 .authorizeHttpRequests(interceptUrlRegistry -> interceptUrlRegistry
-                        .requestMatchers("/api/login").permitAll()
+                        .requestMatchers("/api/login", "/api/test/**").permitAll()
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         .anyRequest().authenticated())
                 .exceptionHandling(exceptionHandlingConfigurer -> exceptionHandlingConfigurer.authenticationEntryPoint(authenticationEntryPoint()))
