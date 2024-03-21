@@ -41,22 +41,22 @@ public class RuleChainServiceImpl implements RuleChainService {
     public RuleChain createOrUpdateRuleChain(RuleChain ruleChain) {
         final boolean isCreate = ruleChain.getId() == null;
         RuleChainEntity ruleChainEntity;
-        if (isCreate) {
-            ruleChainEntity = ruleChainMapper.toEntity(ruleChain);
-            ruleChainRepository.save(ruleChainEntity);
-            List<NodeEntity> nodeEntities = ruleChain.getNodes().stream()
-                    .map(node -> ruleChainMapper.toEntity(node, ruleChainEntity.getId()))
-                    .toList();
-            nodeRepository.saveAll(nodeEntities);
-            List<NodeRelationEntity> nodeRelationEntities = ruleChain.getEdges().stream()
-                    .map(edge -> ruleChainMapper.toEntity(edge, ruleChainEntity.getId()))
-                    .toList();
-            nodeRelationRepository.saveAll(nodeRelationEntities);
-            ruleChain.setId(ruleChainEntity.getId());
-        } else {
+        ruleChainEntity = ruleChainMapper.toEntity(ruleChain);
+        if (!isCreate) {
             // TODO: 2/18/2024 update logic
+            nodeRepository.deleteByRuleChainId(ruleChain.getId());
+            nodeRelationRepository.deleteByRuleChainId(ruleChain.getId());
         }
-
+        ruleChainRepository.save(ruleChainEntity);
+        List<NodeEntity> nodeEntities = ruleChain.getNodes().stream()
+                .map(node -> ruleChainMapper.toEntity(node, ruleChainEntity.getId()))
+                .toList();
+        nodeRepository.saveAll(nodeEntities);
+        List<NodeRelationEntity> nodeRelationEntities = ruleChain.getEdges().stream()
+                .map(edge -> ruleChainMapper.toEntity(edge, ruleChainEntity.getId()))
+                .toList();
+        nodeRelationRepository.saveAll(nodeRelationEntities);
+        ruleChain.setId(ruleChainEntity.getId());
         return ruleChain;
     }
 

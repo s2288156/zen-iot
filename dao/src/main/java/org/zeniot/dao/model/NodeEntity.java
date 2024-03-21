@@ -42,10 +42,6 @@ public class NodeEntity {
     @Column(name = "metadata")
     private JsonNode metadata;
 
-    @CreationTimestamp
-    @Column(name = "create_time", nullable = false)
-    private LocalDateTime createTime;
-
     @UpdateTimestamp
     @Column(name = "update_time", nullable = false)
     private LocalDateTime updateTime;

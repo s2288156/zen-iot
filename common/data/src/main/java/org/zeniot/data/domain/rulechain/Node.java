@@ -9,6 +9,8 @@ import org.zeniot.data.base.DTO;
 import org.zeniot.data.base.HasId;
 import org.zeniot.data.enums.NodeTypeEnum;
 
+import java.time.LocalDateTime;
+
 /**
  * @author Wu.Chunyang
  */
@@ -22,5 +24,4 @@ public class Node extends DTO implements HasId<String> {
     private NodeTypeEnum nodeType;
     private JsonNode metadata;
     private Long ruleChainId;
-
 }

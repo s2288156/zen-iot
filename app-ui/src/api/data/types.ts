@@ -63,6 +63,8 @@ export type NodeDefine = {
   nodeName: string;
   nodeType: string;
   metadata: CellMetadata;
+  createTime?: string;
+  updateTime?: string;
 };
 
 export type EdgeDefine = {
@@ -71,6 +73,8 @@ export type EdgeDefine = {
   sourcePort: string;
   targetId: string;
   targetPort: string;
+  createTime?: string;
+  updateTime?: string;
 };
 
 export type CellMetadata = {

@@ -30,4 +30,5 @@ public class RuleChain extends DTO implements HasId<Long> {
 
     private JsonNode graphJson;
 
+    private LocalDateTime createTime;
 }

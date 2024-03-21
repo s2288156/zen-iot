@@ -20,19 +20,15 @@ public interface RuleChainMapper {
 
     @Mapping(target = "nodeRelationEntities", ignore = true)
     @Mapping(target = "nodeEntities", ignore = true)
-    @Mapping(target = "updateTime", ignore = true)
-    @Mapping(target = "createTime", ignore = true)
     RuleChainEntity toEntity(RuleChain ruleChain);
 
-    @Mapping(target = "ruleChainEntity", ignore = true)
     @Mapping(target = "updateTime", ignore = true)
-    @Mapping(target = "createTime", ignore = true)
+    @Mapping(target = "ruleChainEntity", ignore = true)
     @Mapping(source = "ruleChainId", target = "ruleChainId")
     NodeEntity toEntity(Node node, Long ruleChainId);
 
-    @Mapping(target = "ruleChainEntity", ignore = true)
     @Mapping(target = "updateTime", ignore = true)
-    @Mapping(target = "createTime", ignore = true)
+    @Mapping(target = "ruleChainEntity", ignore = true)
     @Mapping(source = "ruleChainId", target = "ruleChainId")
     NodeRelationEntity toEntity(Edge edge, Long ruleChainId);
 

@@ -51,6 +51,7 @@ const clickSaveRuleChain = () => {
   ruleChain.value.graphJson = graphConfig.getGraph().toJSON();
   saveRuleChain(ruleChain.value).then(resp => {
     if (resp.success) {
+      ruleChain.value.id = resp.data.id;
       ElMessage({
         message: 'Saved success.',
         type: 'success'
@@ -63,7 +64,11 @@ const params = new URLSearchParams(window.location.search);
 if (params && params.get('id')) {
   queryRuleChain(params.get('id')).then(resp => {
     console.log(resp.data);
+    if (resp.data.id) {
+      ruleChain.value.id = resp.data.id;
+    }
     ruleChain.value.name = resp.data.name;
+    ruleChain.value.createTime = resp.data.createTime;
     graphConfig.getGraph().fromJSON(resp.data.graphJson);
   });
 }

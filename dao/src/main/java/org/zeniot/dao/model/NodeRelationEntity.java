@@ -33,10 +33,6 @@ public class NodeRelationEntity {
     @Column(name = "target_id")
     private String targetId;
 
-    @CreationTimestamp
-    @Column(name = "create_time", nullable = false)
-    private LocalDateTime createTime;
-
     @UpdateTimestamp
     @Column(name = "update_time", nullable = false)
     private LocalDateTime updateTime;
