@@ -1,5 +1,5 @@
 export type Account = {
-  id?: any;
+  id?: string | number;
   username: string;
   password?: string;
   createTime?: string;
@@ -24,7 +24,7 @@ export type DeviceCommon = {
 };
 
 export type Simulator = {
-  id?: any;
+  id?: string | number;
   name?: string;
   transportType?: string;
   transportConfig?: TransportConfig;
