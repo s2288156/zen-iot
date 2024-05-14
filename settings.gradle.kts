@@ -16,6 +16,8 @@ dependencyResolutionManagement {
             library("mapstruct-processor", "org.mapstruct:mapstruct-processor:1.5.3.Final")
             library("j2mod", "com.ghgande:j2mod:3.1.1")
             library("netty-all", "io.netty:netty-all:4.1.85.Final")
+            library("plc4j-api", "org.apache.plc4x:plc4j-api:0.12.0")
+            library("plc4j-ads", "org.apache.plc4x:plc4j-driver-ads:0.12.0")
         }
     }
 }

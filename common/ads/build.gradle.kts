@@ -3,8 +3,8 @@ plugins {
 }
 
 dependencies {
-    implementation(project(":common:util"))
-    implementation(project(":common:data"))
+    implementation(project(":common:transport-api"))
+    implementation(libs.plc4j.ads)
 
     compileOnly("org.projectlombok:lombok")
     annotationProcessor("org.projectlombok:lombok")

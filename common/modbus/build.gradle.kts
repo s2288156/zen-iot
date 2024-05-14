@@ -3,8 +3,7 @@ plugins {
 }
 
 dependencies {
-    implementation(project(":common:util"))
-    implementation(project(":common:data"))
+    implementation(project(":common:transport-api"))
     api(libs.j2mod)
 
     compileOnly("org.projectlombok:lombok")

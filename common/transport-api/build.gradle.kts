@@ -3,7 +3,10 @@ plugins {
 }
 
 dependencies {
+    api(project(":common:util"))
     api(project(":common:data"))
+    api(libs.plc4j.api)
+
     compileOnly("org.projectlombok:lombok")
     annotationProcessor("org.projectlombok:lombok")
 
