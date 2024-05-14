@@ -44,3 +44,5 @@ include("workflow:workflow-engine")
 findProject(":workflow:workflow-engine")?.name = "workflow-engine"
 include("common:ethernet-ip")
 findProject(":common:ethernet-ip")?.name = "ethernet-ip"
+include("common:ads")
+findProject(":common:ads")?.name = "ads"
