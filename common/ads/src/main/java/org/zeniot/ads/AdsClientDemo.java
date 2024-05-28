@@ -31,13 +31,12 @@ public class AdsClientDemo {
 
     @SneakyThrows
     private static void request() {
-        String sourceAmsNetId = "192.168.50.44.1.1";
+        String sourceAmsNetId = "172.18.160.1.1.1";
         int sourceAmsPort = 851;
         String targetIp = "172.18.161.236";
-        // String targetIp = "127.0.0.1";
         String targetAmsNetId = "172.28.131.49.1.1";
         int targetAmsPort = 851;
-        AdsClient adsClient = new AdsClient(targetIp, 48898);
+        AdsClient adsClient = new AdsClient(targetIp, 48898, targetAmsNetId, targetAmsPort, sourceAmsNetId, sourceAmsPort);
         adsClient.connect();
         byte[] request = {
                 (byte) 0x00, (byte) 0x00, (byte) 0x2c, (byte) 0x00, (byte) 0x00, (byte) 0x00, // 6 bit

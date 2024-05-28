@@ -27,12 +27,11 @@
 //     public static void main(String[] args) {
 //
 //         String spsIp = "172.18.161.236";
-//         String clientIp = "192.168.50.44";
-//         String sourceAmsNetId = "192.168.50.44.1.1";
+//         String sourceAmsNetId = "172.18.160.1.1.1";
 //         int sourceAmsPort = 851;
 //         String targetAmsNetId = "172.28.131.49.1.1";
 //         int targetAmsPort = 851;
-//         String connectionString = String.format("ads:tcp://%s?source-ams-net-id=%s&source-ams-port=%d&target-ams-net-id=%s&target-ams-port=%d", spsIp, sourceAmsNetId, sourceAmsPort, targetAmsNetId, targetAmsPort);
+//         String connectionString = String.format("ads:tcp://%s:48898?source-ams-net-id=%s&source-ams-port=%d&target-ams-net-id=%s&target-ams-port=%d", spsIp, sourceAmsNetId, sourceAmsPort, targetAmsNetId, targetAmsPort);
 //
 //         // AdsReadRequest
 //         try (PlcConnection plcConnection = new DefaultPlcDriverManager().getConnection(connectionString)) {

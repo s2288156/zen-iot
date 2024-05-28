@@ -11,11 +11,11 @@ public abstract class DataTypeConvertor {
      * 不能直接使用Integer.byteValue()，会出现越界问题丢失数据，比如：
      * 851直接byteValue() = 83，而851转十六进制 = 353，再转byte[] = [83, 3]
      *
-     * @return byte[]
+     * @return byte[] 小端序
      */
-    public static byte[] toHexToBytes(Integer num) {
-        int length = calculatePaddingLength(num);
-        String hex = String.format("%0" + length + "X", num);
+    public static byte[] toHexToBytes(Integer num, int desiredLength) {
+        // int length = calculatePaddingLength(num);
+        String hex = String.format("%0" + desiredLength + "X", num);
         log.info("num: {}, hex: {}", num, hex);
         return hexToBytes(hex);
     }

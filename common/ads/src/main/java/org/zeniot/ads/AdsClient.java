@@ -17,14 +17,22 @@ import lombok.extern.slf4j.Slf4j;
  */
 @Slf4j
 public class AdsClient {
-    private String ip;
-    private Integer port;
-    private Bootstrap bootstrap;
+    private final String ip;
+    private final Integer port;
+    private final String targetAmsNetId;
+    private final Integer targetAmsPort;
+    private final String sourceAmsNetId;
+    private final Integer sourceAmsPort;
+    private final Bootstrap bootstrap;
     private Channel ch;
 
-    public AdsClient(String ip, Integer port) {
+    public AdsClient(String ip, Integer port, String targetAmsNetId, Integer targetAmsPort, String sourceAmsNetId, Integer sourceAmsPort) {
         this.ip = ip;
         this.port = port;
+        this.targetAmsNetId = targetAmsNetId;
+        this.targetAmsPort = targetAmsPort;
+        this.sourceAmsNetId = sourceAmsNetId;
+        this.sourceAmsPort = sourceAmsPort;
         this.bootstrap = new Bootstrap();
         try {
             bootstrap.group(new NioEventLoopGroup(1))
