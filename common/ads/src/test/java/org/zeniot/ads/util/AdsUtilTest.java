@@ -24,4 +24,9 @@ class AdsUtilTest {
         assertThrows(IllegalArgumentException.class, () -> AdsUtil.parseAmsNetId("127.0.0.1.1.1.1"));
         assertThrows(IllegalArgumentException.class, () -> AdsUtil.parseAmsNetId("127.0.0.1.1.1."));
     }
+
+    @Test
+    void parseAmsPort_test() {
+        assertArrayEquals(new byte[]{(byte) 0x53, (byte) 0x03}, AdsUtil.parseAmsPort(851));
+    }
 }

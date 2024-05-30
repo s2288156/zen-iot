@@ -1,5 +1,6 @@
 package org.zeniot.ads.util;
 
+import org.zeniot.common.util.DataTypeConvertor;
 import org.zeniot.common.util.PatternValidator;
 
 /**
@@ -14,6 +15,14 @@ public abstract class AdsUtil {
         }
         for (int i = 0; i < octets.length; i++) {
             result[i] = Integer.valueOf(octets[i]).byteValue();
+        }
+        return result;
+    }
+
+    public static byte[] parseAmsPort(Integer amsPort) {
+        byte[] result = DataTypeConvertor.toHexToBytes(amsPort, 4);
+        if (result.length != 2) {
+            throw new IllegalArgumentException("Invalid amsPort: " + amsPort);
         }
         return result;
     }
