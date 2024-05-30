@@ -5,7 +5,7 @@ import org.zeniot.common.util.DataTypeConvertor;
 /**
  * @author Jack Wu
  */
-public enum AdsCommand {
+public enum AdsCommandId {
     INVALID(0),
     READ_DEVICE_INFO(1),
     READ(2),
@@ -21,7 +21,7 @@ public enum AdsCommand {
 
     private static final Integer length = 4;
 
-    AdsCommand(int id) {
+    AdsCommandId(int id) {
         this.id = id;
     }
 
