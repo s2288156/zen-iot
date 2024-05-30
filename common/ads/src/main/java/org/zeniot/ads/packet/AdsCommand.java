@@ -1,5 +1,7 @@
 package org.zeniot.ads.packet;
 
+import org.zeniot.common.util.DataTypeConvertor;
+
 /**
  * @author Jack Wu
  */
@@ -17,7 +19,14 @@ public enum AdsCommand {
     ;
     private final int id;
 
+    private static final Integer length = 4;
+
     AdsCommand(int id) {
         this.id = id;
     }
+
+    public byte[] toLittleEndianBytes() {
+        return DataTypeConvertor.toHexToBytes(this.id, length);
+    }
+
 }
