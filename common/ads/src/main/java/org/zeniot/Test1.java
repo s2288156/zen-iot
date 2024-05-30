@@ -8,7 +8,7 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class Test1 {
     public static void main(String[] args) {
-        System.out.println(Short.MAX_VALUE);
-        System.out.println(Byte.MAX_VALUE);
+        System.out.println(Integer.parseUnsignedInt("00004025", 16));
+
     }
 }

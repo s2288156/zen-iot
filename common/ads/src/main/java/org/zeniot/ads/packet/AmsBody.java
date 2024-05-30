@@ -3,17 +3,15 @@ package org.zeniot.ads.packet;
 /**
  * @author Jack Wu
  */
-public class AmsHeader<T> {
-    // private String targetAmsNetId;
-    // private Integer targetAmsPort;
-    // private String sourceAmsNetId;
-    // private Integer sourceAmsPort;
-    private AdsCommandId commandId;
+public abstract class AmsBody {
+    private AmsTcpHeader header;
+
+    private CommandId commandId;
     /**
      * Request(0) / Response(1): 0x000_
      * ADS command: 0x0004
      */
-    private byte[] stateFlags;
+    private StateFlag stateFlag;
     /**
      * Size: 4 bytes
      * Description: Size of the data range. The unit is byte.
@@ -33,11 +31,5 @@ public class AmsHeader<T> {
      */
     private String invokeId;
 
-    /**
-     * Size: n bytes
-     * Description: Data range. The data range contains the parameter of the considering ADS commands.
-     */
-    private T adsCommand;
-
-
+    public abstract byte[] commandBytes();
 }

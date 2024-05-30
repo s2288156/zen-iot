@@ -11,6 +11,7 @@ import io.netty.channel.socket.nio.NioSocketChannel;
 import io.netty.handler.logging.LogLevel;
 import io.netty.handler.logging.LoggingHandler;
 import lombok.extern.slf4j.Slf4j;
+import org.zeniot.ads.packet.AmsBody;
 
 /**
  * @author Jack Wu
@@ -48,6 +49,10 @@ public class AdsClient {
         } catch (Exception e) {
             log.error("", e);
         }
+    }
+
+    public synchronized void write(AmsBody amsBody) {
+
     }
 
     public synchronized void writeMsg(byte[] data) {

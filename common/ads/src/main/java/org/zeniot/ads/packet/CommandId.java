@@ -5,7 +5,7 @@ import org.zeniot.common.util.DataTypeConvertor;
 /**
  * @author Jack Wu
  */
-public enum AdsCommandId {
+public enum CommandId {
     INVALID(0),
     READ_DEVICE_INFO(1),
     READ(2),
@@ -19,14 +19,14 @@ public enum AdsCommandId {
     ;
     private final int id;
 
-    private static final Integer length = 4;
+    private static final Integer length = 2;
 
-    AdsCommandId(int id) {
+    CommandId(int id) {
         this.id = id;
     }
 
     public byte[] toLittleEndianBytes() {
-        return DataTypeConvertor.toHexToBytes(this.id, length);
+        return DataTypeConvertor.toHexToBytes(this.id, length * 2);
     }
 
 }

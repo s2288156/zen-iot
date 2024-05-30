@@ -24,6 +24,9 @@ class DataTypeConvertorTest {
     }
 
     @Test
-    void t1() {
+    void hexToBytes_test() {
+        String groupIndex = "00004040";
+        byte[] bytes = DataTypeConvertor.hexToBytes(groupIndex);
+        Assertions.assertArrayEquals(new byte[]{(byte) 0x40, (byte) 0x40, (byte) 0x00, (byte) 0x00}, bytes);
     }
 }
