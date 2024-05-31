@@ -1,10 +1,13 @@
 package org.zeniot.ads.packet;
 
+import org.zeniot.ads.packet.amsheader.AmsErrorCode;
+import org.zeniot.ads.packet.amsheader.CommandId;
+import org.zeniot.ads.packet.amsheader.StateFlag;
+
 /**
  * @author Jack Wu
  */
-public abstract class AmsBody {
-    private AmsTcpHeader header;
+public abstract class AmsBody extends AmsTcpHeader {
 
     private CommandId commandId;
     /**
@@ -22,7 +25,7 @@ public abstract class AmsBody {
      * Description: AMS error number. See ADS Return Codes.
      * no error - 0x00000000
      */
-    private String errorCode;
+    private AmsErrorCode errorCode;
 
     /**
      * Size: 4 bytes
@@ -32,4 +35,12 @@ public abstract class AmsBody {
     private String invokeId;
 
     public abstract byte[] commandBytes();
+
+    public AmsBody(CommandId commandId, StateFlag stateFlag, Integer length, AmsErrorCode errorCode, String invokeId) {
+        this.commandId = commandId;
+        this.stateFlag = stateFlag;
+        this.length = length;
+        this.errorCode = errorCode;
+        this.invokeId = invokeId;
+    }
 }

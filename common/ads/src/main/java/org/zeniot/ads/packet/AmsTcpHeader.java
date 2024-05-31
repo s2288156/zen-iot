@@ -13,10 +13,13 @@ public class AmsTcpHeader {
         length = new byte[4];
     }
 
-    public void putLength(Integer length) {
-        // data[5] = (byte) ((length >> 24) & 0xFF);
-        // data[4] = (byte) ((length >> 16) & 0xFF);
-        // data[3] = (byte) ((length >> 8) & 0xFF);
-        // data[2] = (byte) (length & 0xFF);
+    public static AmsTcpHeader create(Integer length) {
+        AmsTcpHeader amsTcpHeader = new AmsTcpHeader();
+        amsTcpHeader.length[0] = (byte) (length & 0xFF);
+        amsTcpHeader.length[1] = (byte) ((length >> 8) & 0xFF);
+        amsTcpHeader.length[2] = (byte) ((length >> 16) & 0xFF);
+        amsTcpHeader.length[3] = (byte) ((length >> 24) & 0xFF);
+        return amsTcpHeader;
     }
+
 }

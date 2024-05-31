@@ -1,6 +1,7 @@
 package org.zeniot.ads.packet;
 
 import org.junit.jupiter.api.Test;
+import org.zeniot.ads.packet.amsheader.CommandId;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 

@@ -21,6 +21,7 @@ class DataTypeConvertorTest {
         Assertions.assertArrayEquals(new byte[]{(byte) 0x31}, DataTypeConvertor.toHexToBytes(49, 2));
         Assertions.assertArrayEquals(new byte[]{(byte) 0x01}, DataTypeConvertor.toHexToBytes(1, 2));
         Assertions.assertArrayEquals(new byte[]{(byte) 0x53, (byte) 0x03}, DataTypeConvertor.toHexToBytes(851, 4));
+        Assertions.assertArrayEquals(new byte[]{(byte) 0xe8, (byte) 0xdf, (byte) 0x05, (byte) 0x00}, DataTypeConvertor.toHexToBytes(385000, 8));
     }
 
     @Test

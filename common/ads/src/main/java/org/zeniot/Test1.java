@@ -8,7 +8,11 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class Test1 {
     public static void main(String[] args) {
-        System.out.println(Integer.parseUnsignedInt("00004025", 16));
-
+        String s = "start";
+        byte[] bytes = s.getBytes();
+        log.info("{}", bytes);
+        for (byte aByte : bytes) {
+            log.info("{}", Integer.toHexString(aByte));
+        }
     }
 }

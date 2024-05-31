@@ -1,4 +1,4 @@
-package org.zeniot.ads.packet;
+package org.zeniot.ads.packet.command;
 
 import org.zeniot.common.util.DataTypeConvertor;
 
