@@ -1,8 +1,12 @@
 package org.zeniot.ads.packet;
 
+import io.netty.buffer.ByteBuf;
+import io.netty.buffer.Unpooled;
 import org.zeniot.ads.packet.amsheader.AmsErrorCode;
 import org.zeniot.ads.packet.amsheader.CommandId;
 import org.zeniot.ads.packet.amsheader.StateFlag;
+import org.zeniot.ads.util.AdsUtil;
+import org.zeniot.common.util.DataTypeConvertor;
 
 /**
  * @author Jack Wu
@@ -27,20 +31,40 @@ public abstract class AmsBody extends AmsTcpHeader {
      */
     private AmsErrorCode errorCode;
 
-    /**
-     * Size: 4 bytes
-     * Description: Free usable 32 bit array. Usually this array serves to send an Id.
-     * This Id makes is possible to assign a received response to a request, which was sent before.
-     */
-    private String invokeId;
-
     public abstract byte[] commandBytes();
 
-    public AmsBody(CommandId commandId, StateFlag stateFlag, Integer length, AmsErrorCode errorCode, String invokeId) {
+    public AmsBody(CommandId commandId, StateFlag stateFlag, Integer length, AmsErrorCode errorCode) {
         this.commandId = commandId;
         this.stateFlag = stateFlag;
         this.length = length;
         this.errorCode = errorCode;
-        this.invokeId = invokeId;
     }
+
+    public ByteBuf toByteBuf(Integer invokeId, String targetAmsNetId, Integer targetAmsPort, String sourceAmsNetId, Integer sourceAmsPort) {
+        byte[] commandBytes = commandBytes();
+
+        byte[] commandIdBytes = commandId.toLittleEndianBytes();
+        byte[] stateFlagBytes = stateFlag.toLittleEndianBytes();
+        byte[] lengthBytes = DataTypeConvertor.toHexToBytes(commandBytes.length, 8);
+        byte[] errorCodeBytes = errorCode.toLittleEndianBytes();
+        byte[] invokeIdBytes = DataTypeConvertor.toHexToBytes(invokeId, 8);
+
+        super.addLength(32 + commandBytes.length);
+
+        return Unpooled.wrappedBuffer(
+                super.getReserved(),
+                super.getLength(),
+                AdsUtil.parseAmsNetId(targetAmsNetId),
+                AdsUtil.parseAmsPort(targetAmsPort),
+                AdsUtil.parseAmsNetId(sourceAmsNetId),
+                AdsUtil.parseAmsPort(sourceAmsPort),
+                commandIdBytes,
+                stateFlagBytes,
+                lengthBytes,
+                errorCodeBytes,
+                invokeIdBytes,
+                commandBytes
+        );
+    }
+
 }

@@ -13,7 +13,6 @@ import java.util.concurrent.TimeUnit;
 public class AdsClientDemo {
 
 
-    @SneakyThrows
     public static void main(String[] args) {
         request();
         // t1();
@@ -33,10 +32,10 @@ public class AdsClientDemo {
     private static void request() {
         String sourceAmsNetId = "172.18.160.1.1.1";
         int sourceAmsPort = 851;
-        String targetIp = "172.18.161.236";
+        String ip = "172.18.21.43";
         String targetAmsNetId = "172.28.131.49.1.1";
         int targetAmsPort = 851;
-        AdsClient adsClient = new AdsClient(targetIp, 48898, targetAmsNetId, targetAmsPort, sourceAmsNetId, sourceAmsPort);
+        AdsClient adsClient = new AdsClient(ip, 48898, targetAmsNetId, targetAmsPort, sourceAmsNetId, sourceAmsPort);
         adsClient.connect();
         byte[] request = {
                 (byte) 0x00, (byte) 0x00, (byte) 0x2c, (byte) 0x00, (byte) 0x00, (byte) 0x00, // 6 bit

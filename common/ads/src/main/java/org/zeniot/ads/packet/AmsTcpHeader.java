@@ -1,11 +1,15 @@
 package org.zeniot.ads.packet;
 
+import lombok.Getter;
+
 /**
  * @author Jack Wu
  */
 public class AmsTcpHeader {
+    @Getter
     private byte[] reserved;
 
+    @Getter
     private byte[] length;
 
     public AmsTcpHeader() {
@@ -13,13 +17,12 @@ public class AmsTcpHeader {
         length = new byte[4];
     }
 
-    public static AmsTcpHeader create(Integer length) {
-        AmsTcpHeader amsTcpHeader = new AmsTcpHeader();
-        amsTcpHeader.length[0] = (byte) (length & 0xFF);
-        amsTcpHeader.length[1] = (byte) ((length >> 8) & 0xFF);
-        amsTcpHeader.length[2] = (byte) ((length >> 16) & 0xFF);
-        amsTcpHeader.length[3] = (byte) ((length >> 24) & 0xFF);
-        return amsTcpHeader;
+    public AmsTcpHeader addLength(Integer length) {
+        this.length[0] = (byte) (length & 0xFF);
+        this.length[1] = (byte) ((length >> 8) & 0xFF);
+        this.length[2] = (byte) ((length >> 16) & 0xFF);
+        this.length[3] = (byte) ((length >> 24) & 0xFF);
+        return this;
     }
 
 }

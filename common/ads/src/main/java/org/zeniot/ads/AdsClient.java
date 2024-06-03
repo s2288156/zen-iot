@@ -3,6 +3,7 @@ package org.zeniot.ads;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufAllocator;
+import io.netty.buffer.ByteBufUtil;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.nio.NioEventLoopGroup;
@@ -26,6 +27,13 @@ public class AdsClient {
     private final Integer sourceAmsPort;
     private final Bootstrap bootstrap;
     private Channel ch;
+
+    /**
+     * Size: 4 bytes
+     * Description: Free usable 32 bit array. Usually this array serves to send an Id.
+     * This Id makes is possible to assign a received response to a request, which was sent before.
+     */
+    private static Integer invokeId = 0;
 
     public AdsClient(String ip, Integer port, String targetAmsNetId, Integer targetAmsPort, String sourceAmsNetId, Integer sourceAmsPort) {
         this.ip = ip;
@@ -52,7 +60,9 @@ public class AdsClient {
     }
 
     public synchronized void write(AmsBody amsBody) {
-
+        ByteBuf byteBuf = amsBody.toByteBuf(invokeId++, targetAmsNetId, targetAmsPort, sourceAmsNetId, sourceAmsPort);
+        log.info("{}", ByteBufUtil.getBytes(byteBuf));
+        ch.writeAndFlush(byteBuf);
     }
 
     public synchronized void writeMsg(byte[] data) {

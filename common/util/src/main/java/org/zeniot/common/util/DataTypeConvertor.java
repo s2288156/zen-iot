@@ -16,7 +16,7 @@ public abstract class DataTypeConvertor {
      */
     public static byte[] toHexToBytes(Integer num, int hexLength) {
         String hex = String.format("%0" + hexLength + "X", num);
-        log.info("num: {}, hex: {}", num, hex);
+        // log.info("num: {}, hex: {}", num, hex);
         return hexToBytes(hex);
     }
 
