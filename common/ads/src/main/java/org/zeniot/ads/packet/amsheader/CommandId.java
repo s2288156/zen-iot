@@ -19,14 +19,19 @@ public enum CommandId {
     ;
     private final int id;
 
-    private static final Integer length = 2;
+    public static final Integer BYTES_SIZE = 2;
 
     CommandId(int id) {
         this.id = id;
     }
 
     public byte[] toLittleEndianBytes() {
-        return DataTypeConvertor.toHexToBytes(this.id, length * 2);
+        return DataTypeConvertor.toHexToBytes(this.id, BYTES_SIZE * 2);
+    }
+
+    public static CommandId fromBytes(byte[] bytes) {
+        int commandId = DataTypeConvertor.bytesToIntLittleEndian(bytes);
+        return CommandId.values()[commandId];
     }
 
 }

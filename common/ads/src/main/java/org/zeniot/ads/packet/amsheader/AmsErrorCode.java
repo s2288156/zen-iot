@@ -1,5 +1,6 @@
 package org.zeniot.ads.packet.amsheader;
 
+import org.apache.commons.lang3.StringUtils;
 import org.zeniot.common.util.DataTypeConvertor;
 
 /**
@@ -23,4 +24,15 @@ public enum AmsErrorCode {
         return DataTypeConvertor.hexToBytes(this.code);
     }
 
+
+    public static AmsErrorCode fromBytes(byte[] bytes) {
+        int result = DataTypeConvertor.bytesToIntLittleEndian(bytes);
+        String code = String.format("%08X", result);
+        for (AmsErrorCode errorCode : AmsErrorCode.values()) {
+            if (StringUtils.equals(errorCode.code, code)) {
+                return errorCode;
+            }
+        }
+        return null;
+    }
 }

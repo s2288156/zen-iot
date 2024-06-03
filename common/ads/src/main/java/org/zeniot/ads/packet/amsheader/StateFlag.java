@@ -22,4 +22,13 @@ public enum StateFlag {
         return DataTypeConvertor.toHexToBytes(this.id, length * 2);
     }
 
+    public static StateFlag fromBytes(byte[] bytes) {
+        int result = DataTypeConvertor.bytesToIntLittleEndian(bytes);
+        for (StateFlag stateFlag : StateFlag.values()) {
+            if (stateFlag.id == result) {
+                return stateFlag;
+            }
+        }
+        return null;
+    }
 }

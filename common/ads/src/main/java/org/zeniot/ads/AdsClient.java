@@ -60,7 +60,7 @@ public class AdsClient {
     }
 
     public synchronized void write(AmsBody amsBody) {
-        ByteBuf byteBuf = amsBody.toByteBuf(invokeId++, targetAmsNetId, targetAmsPort, sourceAmsNetId, sourceAmsPort);
+        ByteBuf byteBuf = amsBody.toRequestByteBuf(invokeId++, targetAmsNetId, targetAmsPort, sourceAmsNetId, sourceAmsPort);
         log.info("{}", ByteBufUtil.getBytes(byteBuf));
         ch.writeAndFlush(byteBuf);
     }

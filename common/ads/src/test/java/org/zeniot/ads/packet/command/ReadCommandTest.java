@@ -13,9 +13,9 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 class ReadCommandTest {
 
     @Test
-    void commandBytes_test() {
+    void dataBytes_test() {
         ReadCommand readCommand = new ReadCommand(385000, AdsDataType.BOOL);
-        byte[] bytes = readCommand.commandBytes();
+        byte[] bytes = readCommand.dataBytes();
         log.info("{}", bytes);
         assertEquals(12, bytes.length);
     }

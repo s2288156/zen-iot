@@ -34,4 +34,12 @@ public abstract class DataTypeConvertor {
         return data;
     }
 
+    public static int bytesToIntLittleEndian(byte[] bytes) {
+        int result = 0;
+        for (int i = 0; i < bytes.length; i++) {
+            result |= (bytes[i] & 0xFF) << (i * 8);
+        }
+        return result;
+    }
+
 }

@@ -13,41 +13,48 @@ import org.zeniot.common.util.DataTypeConvertor;
  */
 public abstract class AmsBody extends AmsTcpHeader {
 
-    private CommandId commandId;
+    private final CommandId commandId;
     /**
      * Request(0) / Response(1): 0x000_
      * ADS command: 0x0004
      */
-    private StateFlag stateFlag;
+    private final StateFlag stateFlag;
     /**
      * Size: 4 bytes
      * Description: Size of the data range. The unit is byte.
      */
-    private Integer length;
+    private final Integer length;
     /**
      * Size: 4 bytes
      * Description: AMS error number. See ADS Return Codes.
      * no error - 0x00000000
      */
-    private AmsErrorCode errorCode;
+    private final AmsErrorCode errorCode;
 
-    public abstract byte[] commandBytes();
+    public abstract byte[] dataBytes();
 
-    public AmsBody(CommandId commandId, StateFlag stateFlag, Integer length, AmsErrorCode errorCode) {
+    public AmsBody(CommandId commandId, StateFlag stateFlag, Integer length) {
         this.commandId = commandId;
         this.stateFlag = stateFlag;
         this.length = length;
+        this.errorCode = AmsErrorCode.NO_ERROR;
+    }
+
+    public AmsBody(byte[] length, CommandId commandId, StateFlag stateFlag, Integer length1, AmsErrorCode errorCode) {
+        super(length);
+        this.commandId = commandId;
+        this.stateFlag = stateFlag;
+        this.length = length1;
         this.errorCode = errorCode;
     }
 
-    public ByteBuf toByteBuf(Integer invokeId, String targetAmsNetId, Integer targetAmsPort, String sourceAmsNetId, Integer sourceAmsPort) {
-        byte[] commandBytes = commandBytes();
-
+    public ByteBuf toRequestByteBuf(Integer invokeId, String targetAmsNetId, Integer targetAmsPort, String sourceAmsNetId, Integer sourceAmsPort) {
         byte[] commandIdBytes = commandId.toLittleEndianBytes();
         byte[] stateFlagBytes = stateFlag.toLittleEndianBytes();
-        byte[] lengthBytes = DataTypeConvertor.toHexToBytes(commandBytes.length, 8);
+        byte[] lengthBytes = DataTypeConvertor.toHexToBytes(this.length, 8);
         byte[] errorCodeBytes = errorCode.toLittleEndianBytes();
         byte[] invokeIdBytes = DataTypeConvertor.toHexToBytes(invokeId, 8);
+        byte[] commandBytes = dataBytes();
 
         super.addLength(32 + commandBytes.length);
 
@@ -65,6 +72,12 @@ public abstract class AmsBody extends AmsTcpHeader {
                 invokeIdBytes,
                 commandBytes
         );
+    }
+
+    public static AmsBody fromResponseByteBuf(ByteBuf buf) {
+        // AmsBody amsBody = new AmsBody();
+
+        return null;
     }
 
 }
