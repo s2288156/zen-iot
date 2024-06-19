@@ -51,6 +51,7 @@ public class AdsClient {
                         protected void initChannel(SocketChannel ch) throws Exception {
                             ch.pipeline()
                                     .addLast(new LoggingHandler(LogLevel.INFO))
+                                    .addLast(new AdsDecoder())
                                     .addLast(new AdsClientHandler());
                         }
                     });

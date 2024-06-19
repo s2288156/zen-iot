@@ -14,7 +14,6 @@ public class AdsClientHandler extends SimpleChannelInboundHandler<ByteBuf> {
     @Override
     protected void channelRead0(ChannelHandlerContext channelHandlerContext, ByteBuf byteBuf) throws Exception {
         byte[] bytes = ByteBufUtil.getBytes(byteBuf);
-        // log.info("channel read >> {}", bytes);
     }
 
     @Override

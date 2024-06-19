@@ -15,15 +15,20 @@ class AdsClientTest {
 
     @Test
     void write() {
-        String sourceAmsNetId = "172.18.16.1.1.1";
+        // String ip = "47.113.227.247";
+        String ip = "172.29.130.198";
+
+        // String sourceAmsNetId = "172.24.143.55.1.1";
+        String sourceAmsNetId = "172.29.128.1.1.1";
         int sourceAmsPort = 851;
-        String ip = "172.18.21.43";
         String targetAmsNetId = "172.28.131.49.1.1";
         int targetAmsPort = 851;
         AdsClient adsClient = new AdsClient(ip, 48898, targetAmsNetId, targetAmsPort, sourceAmsNetId, sourceAmsPort);
+        // 如果使用属性名称，需要通过一个命令查询到名称和indexOffset的对应关系，最终报文中发送的是indexOffset
         ReadCommand readCommand = new ReadCommand(385000, AdsDataType.BOOL);
+        // ReadCommand readCommand = new ReadCommand(385004, AdsDataType.INT);
         adsClient.connect();
-        for (int i = 0; i < 10; i++) {
+        for (int i = 0; i < 1; i++) {
             adsClient.write(readCommand);
             try {
                 TimeUnit.SECONDS.sleep(1);

@@ -38,7 +38,7 @@ public enum IndexGroup {
     ;
     private final String id;
 
-    private static final Integer length = 4;
+    public static final Integer length = 4;
 
     IndexGroup(String id) {
         this.id = id;

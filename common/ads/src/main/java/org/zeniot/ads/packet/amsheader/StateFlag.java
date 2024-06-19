@@ -12,14 +12,14 @@ public enum StateFlag {
     ;
     private final int id;
 
-    private static final Integer length = 2;
+    public static final Integer BYTE_SIZE = 2;
 
     StateFlag(int id) {
         this.id = id;
     }
 
     public byte[] toLittleEndianBytes() {
-        return DataTypeConvertor.toHexToBytes(this.id, length * 2);
+        return DataTypeConvertor.toHexToBytes(this.id, BYTE_SIZE * 2);
     }
 
     public static StateFlag fromBytes(byte[] bytes) {
