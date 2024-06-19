@@ -25,13 +25,13 @@ public class AdsDecoder extends ByteToMessageDecoder {
         log.info("{}", ByteBufUtil.getBytes(in));
         int readableBytes = in.readableBytes();
         log.info("readable {} bytes", readableBytes);
-        if(readableBytes <= headerLength) {
+        if (readableBytes <= headerLength) {
             return;
         }
         // reserved: 2 bytes
         in.readBytes(2);
         int bodyLength = in.readIntLE();
-        if(readableBytes < headerLength + bodyLength) {
+        if (readableBytes < headerLength + bodyLength) {
             in.resetReaderIndex();
             return;
         }
@@ -40,8 +40,13 @@ public class AdsDecoder extends ByteToMessageDecoder {
         ByteBuf commandId = in.readBytes(CommandId.BYTE_SIZE);
         ByteBuf stateFlag = in.readBytes(StateFlag.BYTE_SIZE);
         int responseLength = in.readIntLE(); // 4 bytes
-        ByteBuf errorCode = in.readBytes(4);
+        int errorCode = in.readIntLE();
         ByteBuf invokeId = in.readBytes(4);
+
+        if (errorCode > 0) {
+            log.error("readerIndex: {}, error code {}", in.readerIndex(), errorCode);
+            return;
+        }
 
         // response data
         // ADS error number
@@ -51,8 +56,9 @@ public class AdsDecoder extends ByteToMessageDecoder {
         // Data which are supplied back.
         ByteBuf data = in.readBytes(responseLength - 4 - 4);
 
-        log.info("readerIndex: {}, commandId: {}, stateFlag: {} ,responseLength: {}, invokeId: {}, result: {}， dataLength: {}, data: {}",
+        log.info("readerIndex: {}, errorCode: {}, commandId: {}, stateFlag: {} ,responseLength: {}, invokeId: {}, result: {}， dataLength: {}, data: {}",
                 in.readerIndex(),
+                errorCode,
                 ByteBufUtil.getBytes(commandId),
                 ByteBufUtil.getBytes(stateFlag),
                 responseLength,
@@ -65,7 +71,7 @@ public class AdsDecoder extends ByteToMessageDecoder {
 
     private static boolean discardIllegalByte(ByteBuf in) {
         byte firstByte = in.readByte();
-        if(firstByte != 0) {
+        if (firstByte != 0) {
             log.info("discard value: {}", firstByte);
             return true;
         }
