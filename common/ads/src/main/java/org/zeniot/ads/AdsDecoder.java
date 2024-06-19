@@ -51,8 +51,10 @@ public class AdsDecoder extends ByteToMessageDecoder {
         // Data which are supplied back.
         ByteBuf data = in.readBytes(responseLength - 4 - 4);
 
-        log.info("readerIndex: {} ,responseLength: {}, invokeId: {}, result: {}， dataLength: {}, data: {}",
+        log.info("readerIndex: {}, commandId: {}, stateFlag: {} ,responseLength: {}, invokeId: {}, result: {}， dataLength: {}, data: {}",
                 in.readerIndex(),
+                ByteBufUtil.getBytes(commandId),
+                ByteBufUtil.getBytes(stateFlag),
                 responseLength,
                 ByteBufUtil.getBytes(invokeId),
                 ByteBufUtil.getBytes(result),
