@@ -9,7 +9,7 @@ import com.intellij.database.util.DasUtil
  *   PROJECT     project
  *   FILES       files helper
  */
-packageName = "org.zeniot.dao.model;"  //这里要换成自己项目 实体的包路径
+packageName = "org.zen.iot.dao.model;"  //这里要换成自己项目 实体的包路径
 typeMapping = [
         (~/(?i)int/)               : "Integer",  //数据库类型和Jave类型映射关系
         (~/(?i)float|double|real/) : "Double",

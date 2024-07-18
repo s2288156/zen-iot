@@ -3,8 +3,11 @@ plugins {
     id("org.graalvm.buildtools.native") version "0.9.18"
 }
 
-java.sourceCompatibility = JavaVersion.VERSION_21
-java.targetCompatibility = JavaVersion.VERSION_21
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(21)
+    }
+}
 
 dependencies {
     implementation(project(":dao"))
