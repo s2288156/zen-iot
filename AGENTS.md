@@ -9,4 +9,3 @@ Prioritize correctness over agreement. State uncertainty instead of guessing, an
 - **Java**: JDK 21 via `JAVA_HOME`;
 - **Build tooling**: Gradle 9.7.1
 - Git
-    
