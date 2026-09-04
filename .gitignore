@@ -70,3 +70,6 @@ pnpm-debug.log*
 build
 /.jpb/
 /lib/
+
+# Node.js
+node_modules/
