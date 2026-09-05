@@ -12,11 +12,11 @@ Prioritize correctness over agreement. State uncertainty instead of guessing, an
 
 ## Essential commands
 
-| Task                    | Command                              | Description                                     |
-|-------------------------|--------------------------------------|-------------------------------------------------|
-| Format all              | `./gradlew spotlessApply`            | Format Java + Markdown files in-place           |
-| Check format            | `./gradlew spotlessCheck`            | Verify formatting without modifying files       |
-| Format Java             | `./gradlew spotlessJavaApply`        | Format Java files only                          |
-| Format Markdown         | `./gradlew spotlessMarkdownApply`    | Format Markdown files only                      |
-| Lint Markdown           | `./gradlew lintMarkdown`             | Check Markdown conventions via markdownlint     |
-| Full check              | `./gradlew check`                    | Run spotlessCheck + lintMarkdown + test         |
+| Task            | Command                           | Description                                 |
+| --------------- | --------------------------------- | ------------------------------------------- |
+| Format all      | `./gradlew spotlessApply`         | Format Java + Markdown files in-place       |
+| Check format    | `./gradlew spotlessCheck`         | Verify formatting without modifying files   |
+| Format Java     | `./gradlew spotlessJavaApply`     | Format Java files only                      |
+| Format Markdown | `./gradlew spotlessMarkdownApply` | Format Markdown files only                  |
+| Lint Markdown   | `./gradlew lintMarkdown`          | Check Markdown conventions via markdownlint |
+| Full check      | `./gradlew check`                 | Run spotlessCheck + lintMarkdown + test     |
