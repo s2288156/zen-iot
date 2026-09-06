@@ -1,12 +1,13 @@
 # Zen IoT
 
-基于 Spring Boot 3 + Gradle 多模块架构的物联网管理平台。
+基于 Spring Boot 4.1 + Gradle 多模块架构的物联网管理平台。
 
 ## 项目结构
 
 ```text
 zen-iot/
 ├── admin-service/     # 后台管理服务
+├── common-core/       # 公共模块（统一响应、异常、审计、分页）
 └── build.gradle.kts   # 根项目配置
 ```
 
@@ -92,6 +93,19 @@ zen-iot/
 - Spring Data Redis
 - MySQL Connector
 - Lombok
+
+### common-core
+
+各业务服务的公共模块。依赖后即自动装配（通过 `AutoConfiguration.imports`，无需修改启动类）：
+
+- **统一 API 响应**：`ApiResponse<T>`（code/message/data，成功码 200）
+- **错误码与业务异常**：`ErrorCode` 接口 + `GlobalErrorCode` 通用枚举 + `BusinessException`，业务服务可自建枚举实现 `ErrorCode` 扩展码段
+- **全局异常处理器**：`GlobalExceptionHandler`（`@RestControllerAdvice`，业务服务可注册自己的 Bean 接管）
+- **DAO 基础实体**：`BaseEntity`（`id` + `create_time`/`update_time`/`creator`/`updater` 审计字段）
+- **分页工具**：`PageQuery`（转 Spring Data `Pageable`）/ `PageResult<T>`（由 `Page<T>` 构建）
+- **JPA 审计配置**：自动启用 `@EnableJpaAuditing`，默认审计人为 `"system"`，业务服务定义自己的 `AuditorAware<String>` Bean 即可覆盖
+
+**主要依赖：** Spring Boot Web、Validation、Data JPA、Lombok
 
 ## 开发规范
 

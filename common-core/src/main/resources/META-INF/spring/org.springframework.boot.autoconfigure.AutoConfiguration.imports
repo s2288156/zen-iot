@@ -1,0 +1,2 @@
+com.zen.iot.common.core.config.ZenWebAutoConfiguration
+com.zen.iot.common.core.config.ZenJpaAuditingAutoConfiguration
