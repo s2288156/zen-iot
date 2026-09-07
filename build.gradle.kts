@@ -64,7 +64,7 @@ val npx = if (isWindows) "npx.cmd" else "npx"
 val lintMarkdown = tasks.register<Exec>("lintMarkdown") {
 	group = "verification"
 	description = "检查 Markdown 规范"
-	commandLine(npx, "markdownlint", "**/*.md")
+	commandLine(npx, "markdownlint-cli", "**/*.md")
 }
 
 val lintMarkdownFix = tasks.register<Exec>("lintMarkdownFix") {
