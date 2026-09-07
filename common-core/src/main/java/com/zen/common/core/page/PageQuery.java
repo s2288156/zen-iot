@@ -1,4 +1,4 @@
-package com.zen.iot.common.core.page;
+package com.zen.common.core.page;
 
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;

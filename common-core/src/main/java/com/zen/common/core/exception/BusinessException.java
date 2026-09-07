@@ -1,4 +1,4 @@
-package com.zen.iot.common.core.exception;
+package com.zen.common.core.exception;
 
 import lombok.Getter;
 

@@ -1,4 +1,4 @@
-package com.zen.iot.common.core.page;
+package com.zen.common.core.page;
 
 import java.util.List;
 import lombok.Getter;

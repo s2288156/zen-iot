@@ -1,12 +1,12 @@
-package com.zen.iot.common.core.web;
+package com.zen.common.core.web;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import com.zen.iot.common.core.exception.BusinessException;
-import com.zen.iot.common.core.exception.GlobalErrorCode;
+import com.zen.common.core.exception.BusinessException;
+import com.zen.common.core.exception.GlobalErrorCode;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.test.web.servlet.MockMvc;

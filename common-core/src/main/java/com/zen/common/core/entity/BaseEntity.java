@@ -1,4 +1,4 @@
-package com.zen.iot.common.core.entity;
+package com.zen.common.core.entity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.EntityListeners;

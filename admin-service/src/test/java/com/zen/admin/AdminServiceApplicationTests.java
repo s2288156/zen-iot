@@ -1,4 +1,4 @@
-package com.zen.iot.admin;
+package com.zen.admin;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;

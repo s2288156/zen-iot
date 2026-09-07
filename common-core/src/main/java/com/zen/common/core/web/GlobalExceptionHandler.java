@@ -1,8 +1,8 @@
-package com.zen.iot.common.core.web;
+package com.zen.common.core.web;
 
-import com.zen.iot.common.core.api.ApiResponse;
-import com.zen.iot.common.core.exception.BusinessException;
-import com.zen.iot.common.core.exception.GlobalErrorCode;
+import com.zen.common.core.api.ApiResponse;
+import com.zen.common.core.exception.BusinessException;
+import com.zen.common.core.exception.GlobalErrorCode;
 import jakarta.servlet.ServletException;
 import jakarta.validation.ConstraintViolationException;
 import lombok.extern.slf4j.Slf4j;

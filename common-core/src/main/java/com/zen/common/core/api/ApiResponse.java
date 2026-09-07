@@ -1,8 +1,8 @@
-package com.zen.iot.common.core.api;
+package com.zen.common.core.api;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.zen.iot.common.core.exception.ErrorCode;
-import com.zen.iot.common.core.exception.GlobalErrorCode;
+import com.zen.common.core.exception.ErrorCode;
+import com.zen.common.core.exception.GlobalErrorCode;
 import lombok.Getter;
 
 /** 统一 API 响应体:code=200 表示成功;失败时为 HTTP 语义码或业务错误码。 */

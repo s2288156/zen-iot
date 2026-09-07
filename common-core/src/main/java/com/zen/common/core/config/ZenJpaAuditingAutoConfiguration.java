@@ -1,4 +1,4 @@
-package com.zen.iot.common.core.config;
+package com.zen.common.core.config;
 
 import java.util.Optional;
 import org.springframework.boot.autoconfigure.AutoConfiguration;

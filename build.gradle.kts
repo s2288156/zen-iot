@@ -12,7 +12,7 @@ subprojects {
 	apply(plugin = "java")
 	apply(plugin = "io.spring.dependency-management")
 
-	group = "com.zen.iot"
+	group = "com.zen"
 	version = "0.0.1-SNAPSHOT"
 
 	configure<JavaPluginExtension> {
@@ -70,7 +70,7 @@ val lintMarkdown = tasks.register<Exec>("lintMarkdown") {
 val lintMarkdownFix = tasks.register<Exec>("lintMarkdownFix") {
 	group = "verification"
 	description = "自动修复 Markdown 规范问题（markdownlint --fix）"
-	commandLine(npx, "markdownlint", "**/*.md", "--fix")
+	commandLine(npx, "markdownlint-cli", "**/*.md", "--fix")
 }
 
 tasks.named("spotlessApply") {

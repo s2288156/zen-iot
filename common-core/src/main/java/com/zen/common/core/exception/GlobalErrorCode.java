@@ -1,4 +1,4 @@
-package com.zen.iot.common.core.exception;
+package com.zen.common.core.exception;
 
 /** 通用错误码,与 HTTP 语义对齐;业务错误码请在消费方服务内自建枚举实现 {@link ErrorCode}。 */
 public enum GlobalErrorCode implements ErrorCode {

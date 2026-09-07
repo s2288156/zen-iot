@@ -1,6 +1,6 @@
-package com.zen.iot.common.core.config;
+package com.zen.common.core.config;
 
-import com.zen.iot.common.core.web.GlobalExceptionHandler;
+import com.zen.common.core.web.GlobalExceptionHandler;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
