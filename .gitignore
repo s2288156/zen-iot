@@ -71,6 +71,7 @@ doc/httpclient/MyLocal*.http
 /lib/
 
 # AI Tools
+.trae/
 .cursor/
 .continue/
 .aider/
