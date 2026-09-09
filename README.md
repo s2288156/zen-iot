@@ -15,7 +15,7 @@ zen-iot/
 
 - **Java**: JDK 21
 - **Gradle**: 9.7.1（已包含 wrapper）
-- **Node.js**: 用于 Markdown 格式化（Spotless 自动管理）
+- **Node.js**: 20 及以上，Markdown 格式化与 markdownlint 通过 `npx` 调用（Spotless 自动管理依赖，首次运行需联网）
 
 ## Gradle 命令参考
 
@@ -42,11 +42,12 @@ zen-iot/
 
 ### 测试
 
-| 命令                      | 说明                                                |
-| ------------------------- | --------------------------------------------------- |
-| `./gradlew test`          | 运行所有模块的测试                                  |
-| `./gradlew check`         | 运行所有检查（spotlessCheck + lintMarkdown + test） |
-| `./gradlew check -x test` | 运行检查但跳过测试                                  |
+| 命令                      | 说明                                                          |
+| ------------------------- | ------------------------------------------------------------- |
+| `./gradlew test`          | 运行所有模块的测试                                            |
+| `./gradlew check`         | 运行所有检查（spotlessCheck + lintMarkdown + test）           |
+| `./gradlew check -x test` | 运行检查但跳过测试                                            |
+| `./gradlew prePushCheck`  | 推送前轻量门禁（格式 + Markdown 规范 + 全模块编译，不跑测试） |
 
 ### 运行应用
 
@@ -109,10 +110,28 @@ zen-iot/
 
 ## 开发规范
 
-- Java 代码使用 google-java-format 格式化
-- Markdown 文档使用 Prettier 格式化
+### 格式化
+
+- Java 代码使用 palantir-java-format 格式化（版本见 `build.gradle.kts` 的 Spotless 配置）
+- Markdown 文档使用 Prettier 格式化，并按 markdownlint 校验
 - 提交前运行 `./gradlew spotlessApply` 确保代码格式正确
 - 提交前运行 `./gradlew lintMarkdown` 确保文档规范
+
+### Git 钩子
+
+克隆仓库后执行一次任意 Gradle 任务（如 `./gradlew help`），`org.danilopianini.gradle-pre-commit-git-hooks` 插件会按 `settings.gradle.kts` 里的 `gitHooks` 声明生成 `.git/hooks` 下的三个钩子：
+
+| 钩子         | 执行内容                                                                                                        |
+| ------------ | --------------------------------------------------------------------------------------------------------------- |
+| `pre-commit` | `./gradlew spotlessCheck`，Java/Markdown 格式不合规即拒绝提交（daemon 热时约 2 秒）                             |
+| `commit-msg` | Conventional Commits 校验，type 限 `fix/feat/build/chore/ci/docs/perf/refactor/revert/style/test`，scope 可省略 |
+| `pre-push`   | `./gradlew prePushCheck`，格式 + Markdown 规范 + 全模块编译（不跑测试）                                         |
+
+- 钩子文件由构建脚本生成，不要手工编辑：每次 Gradle 调用都会按脚本声明覆盖回去。
+- 全量门禁仍是 `./gradlew check`；`admin-service` 的 `@SpringBootTest` 依赖本机 MySQL 8 / Nacos / Redis 容器，因此 pre-push 不跑测试，避免容器没起时误报。
+- `commit-msg` 的 scope 只接受字母、数字、空格与 `/ + -`，`.ai`、`common_core` 这类写法会被拒。
+- `.git` 不可写的环境（agent 沙箱、源码包）用 `./gradlew <task> -PskipGitHooks` 跳过钩子安装。
+- 插件只生成上述三个钩子，第三方工具已有的 `post-commit` / `post-checkout` 不受影响。
 
 ## 许可证
 
