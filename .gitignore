@@ -70,7 +70,11 @@ doc/httpclient/MyLocal*.http
 /.jpb/
 /lib/
 
+# ai temp docs
+.ai/
+
 # AI Tools
+.qoder/
 .trae/
 .cursor/
 .continue/

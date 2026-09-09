@@ -61,16 +61,19 @@ spotless {
 val isWindows = System.getProperty("os.name").lowercase().contains("windows")
 val npx = if (isWindows) "npx.cmd" else "npx"
 
+// markdownlint-cli 的 `**` 不匹配以点开头的路径段，需显式列出隐藏的 .ai 目录
+val markdownTargets = listOf("**/*.md", ".ai/**/*.md")
+
 val lintMarkdown = tasks.register<Exec>("lintMarkdown") {
 	group = "verification"
 	description = "检查 Markdown 规范"
-	commandLine(npx, "markdownlint-cli", "**/*.md")
+	commandLine(listOf(npx, "markdownlint-cli") + markdownTargets)
 }
 
 val lintMarkdownFix = tasks.register<Exec>("lintMarkdownFix") {
 	group = "verification"
 	description = "自动修复 Markdown 规范问题（markdownlint --fix）"
-	commandLine(npx, "markdownlint-cli", "**/*.md", "--fix")
+	commandLine(listOf(npx, "markdownlint-cli") + markdownTargets + listOf("--fix"))
 }
 
 tasks.named("spotlessApply") {
