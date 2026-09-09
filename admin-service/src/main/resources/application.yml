@@ -1,5 +1,6 @@
 server:
-  port: 8081
+  # 8081 被本机 nacos-standalone 容器的控制台占用
+  port: 8082
 
 spring:
   application:
