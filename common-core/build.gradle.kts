@@ -3,10 +3,6 @@ plugins {
 	id("io.spring.dependency-management")
 }
 
-dependencyManagement {
-	imports { mavenBom("org.springframework.boot:spring-boot-dependencies:4.1.1") }
-}
-
 // Spring Framework 7 移除了无 -parameters 时的降级参数名发现;Boot 插件会自动加该 flag，本模块未 apply Boot 插件需显式声明
 tasks.withType<JavaCompile> {
 	options.compilerArgs.add("-parameters")

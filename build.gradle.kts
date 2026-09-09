@@ -12,6 +12,15 @@ subprojects {
 	apply(plugin = "java")
 	apply(plugin = "io.spring.dependency-management")
 
+	// 版本只在根声明一次，子模块依赖一律不写版本号；接入新的第三方栈时在此追加 BOM
+	configure<io.spring.gradle.dependencymanagement.dsl.DependencyManagementExtension> {
+		imports {
+			mavenBom("org.springframework.boot:spring-boot-dependencies:4.1.1")
+			mavenBom("org.springframework.cloud:spring-cloud-dependencies:2025.1.2")
+			mavenBom("com.alibaba.cloud:spring-cloud-alibaba-dependencies:2025.1.0.0")
+		}
+	}
+
 	group = "com.zen"
 	version = "0.0.1-SNAPSHOT"
 
