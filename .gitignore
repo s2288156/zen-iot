@@ -22,6 +22,8 @@ out/
 .settings/
 .springBeans
 .sts4-cache
+# Eclipse / Buildship 编译输出（Gradle 的输出是 build/）
+bin/
 
 # IDE - NetBeans
 /nbproject/private/
