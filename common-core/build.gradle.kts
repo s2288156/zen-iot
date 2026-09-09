@@ -13,6 +13,10 @@ dependencies {
 	api("org.springframework.boot:spring-boot-starter-web")
 	api("org.springframework.boot:spring-boot-starter-validation")
 	api("org.springframework.boot:spring-boot-starter-data-jpa")
+	// JWT 工具与 Phase 2 的 WebFlux 网关复用同一份代码,故 com.zen.common.core.jwt 不得引用 Servlet API
+	api("io.jsonwebtoken:jjwt-api")
+	runtimeOnly("io.jsonwebtoken:jjwt-impl")
+	runtimeOnly("io.jsonwebtoken:jjwt-jackson")
 
 	compileOnly("org.projectlombok:lombok")
 	annotationProcessor("org.projectlombok:lombok")
