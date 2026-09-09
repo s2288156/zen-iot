@@ -22,17 +22,17 @@ import org.hibernate.annotations.SQLRestriction;
 @SQLRestriction("deleted = 0")
 public class RoleEntity extends BaseEntity {
 
-  @Column(name = "role_code", nullable = false, length = 64, unique = true)
-  private String roleCode;
+    @Column(name = "role_code", nullable = false, length = 64, unique = true)
+    private String roleCode;
 
-  @Column(name = "role_name", nullable = false, length = 64)
-  private String roleName;
+    @Column(name = "role_name", nullable = false, length = 64)
+    private String roleName;
 
-  @Column(name = "description", length = 255)
-  private String description;
+    @Column(name = "description", length = 255)
+    private String description;
 
-  @ElementCollection(fetch = FetchType.EAGER)
-  @CollectionTable(name = "t_role_module", joinColumns = @JoinColumn(name = "role_id"))
-  @Column(name = "module_code", nullable = false, length = 32)
-  private Set<String> modules = new LinkedHashSet<>();
+    @ElementCollection(fetch = FetchType.EAGER)
+    @CollectionTable(name = "t_role_module", joinColumns = @JoinColumn(name = "role_id"))
+    @Column(name = "module_code", nullable = false, length = 32)
+    private Set<String> modules = new LinkedHashSet<>();
 }

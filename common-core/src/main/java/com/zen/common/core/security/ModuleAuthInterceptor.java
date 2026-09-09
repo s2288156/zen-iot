@@ -12,23 +12,22 @@ import org.springframework.web.servlet.HandlerInterceptor;
  */
 public class ModuleAuthInterceptor implements HandlerInterceptor {
 
-  @Override
-  public boolean preHandle(
-      HttpServletRequest request, HttpServletResponse response, Object handler) {
-    if (!(handler instanceof HandlerMethod handlerMethod)) {
-      return true;
+    @Override
+    public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) {
+        if (!(handler instanceof HandlerMethod handlerMethod)) {
+            return true;
+        }
+        RequireModule required = handlerMethod.getMethodAnnotation(RequireModule.class);
+        if (required == null) {
+            return true;
+        }
+        UserPrincipal principal = UserContext.get();
+        if (principal == null) {
+            throw new BusinessException(GlobalErrorCode.UNAUTHORIZED);
+        }
+        if (!principal.modules().contains(required.value().getCode())) {
+            throw new BusinessException(GlobalErrorCode.FORBIDDEN);
+        }
+        return true;
     }
-    RequireModule required = handlerMethod.getMethodAnnotation(RequireModule.class);
-    if (required == null) {
-      return true;
-    }
-    UserPrincipal principal = UserContext.get();
-    if (principal == null) {
-      throw new BusinessException(GlobalErrorCode.UNAUTHORIZED);
-    }
-    if (!principal.modules().contains(required.value().getCode())) {
-      throw new BusinessException(GlobalErrorCode.FORBIDDEN);
-    }
-    return true;
-  }
 }

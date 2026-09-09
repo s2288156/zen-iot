@@ -21,25 +21,25 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/auth")
 public class AuthController {
 
-  private final AuthService authService;
+    private final AuthService authService;
 
-  public AuthController(AuthService authService) {
-    this.authService = authService;
-  }
+    public AuthController(AuthService authService) {
+        this.authService = authService;
+    }
 
-  @PostMapping("/login")
-  public ApiResponse<TokenPair> login(@Valid @RequestBody LoginRequest request) {
-    return ApiResponse.success(authService.login(request));
-  }
+    @PostMapping("/login")
+    public ApiResponse<TokenPair> login(@Valid @RequestBody LoginRequest request) {
+        return ApiResponse.success(authService.login(request));
+    }
 
-  @PostMapping("/refresh")
-  public ApiResponse<TokenPair> refresh(@Valid @RequestBody RefreshRequest request) {
-    return ApiResponse.success(authService.refresh(request.refreshToken()));
-  }
+    @PostMapping("/refresh")
+    public ApiResponse<TokenPair> refresh(@Valid @RequestBody RefreshRequest request) {
+        return ApiResponse.success(authService.refresh(request.refreshToken()));
+    }
 
-  @PostMapping("/logout")
-  public ApiResponse<Void> logout(@Valid @RequestBody LogoutRequest request) {
-    authService.logout(request.refreshToken());
-    return ApiResponse.success();
-  }
+    @PostMapping("/logout")
+    public ApiResponse<Void> logout(@Valid @RequestBody LogoutRequest request) {
+        authService.logout(request.refreshToken());
+        return ApiResponse.success();
+    }
 }

@@ -33,72 +33,59 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 @EnableConfigurationProperties(SecurityProperties.class)
 public class ZenSecurityAutoConfiguration {
 
-  @Bean
-  @ConditionalOnMissingBean(TokenRevocationChecker.class)
-  public TokenRevocationChecker disabledTokenRevocationChecker() {
-    return TokenRevocationChecker.disabled();
-  }
+    @Bean
+    @ConditionalOnMissingBean(TokenRevocationChecker.class)
+    public TokenRevocationChecker disabledTokenRevocationChecker() {
+        return TokenRevocationChecker.disabled();
+    }
 
-  @Bean
-  @ConditionalOnMissingBean(UserContextResolver.class)
-  @ConditionalOnProperty(
-      prefix = "zen.security",
-      name = "context-source",
-      havingValue = "jwt",
-      matchIfMissing = true)
-  public UserContextResolver jwtUserContextResolver(
-      ObjectProvider<JwtTokenVerifier> verifier, TokenRevocationChecker revocationChecker) {
-    return new JwtUserContextResolver(
-        verifier.getIfAvailable(
-            () -> {
-              throw new IllegalStateException(
-                  "zen.security.context-source=jwt 需要 zen.jwt.secret（UTF-8 ≥ 32 字节）；"
-                      + "本服务不解析 Token 时请改为 context-source=gateway-header");
-            }),
-        revocationChecker);
-  }
+    @Bean
+    @ConditionalOnMissingBean(UserContextResolver.class)
+    @ConditionalOnProperty(prefix = "zen.security", name = "context-source", havingValue = "jwt", matchIfMissing = true)
+    public UserContextResolver jwtUserContextResolver(
+            ObjectProvider<JwtTokenVerifier> verifier, TokenRevocationChecker revocationChecker) {
+        return new JwtUserContextResolver(
+                verifier.getIfAvailable(() -> {
+                    throw new IllegalStateException("zen.security.context-source=jwt 需要 zen.jwt.secret（UTF-8 ≥ 32 字节）；"
+                            + "本服务不解析 Token 时请改为 context-source=gateway-header");
+                }),
+                revocationChecker);
+    }
 
-  @Bean
-  @ConditionalOnMissingBean(UserContextResolver.class)
-  @ConditionalOnProperty(
-      prefix = "zen.security",
-      name = "context-source",
-      havingValue = "gateway-header")
-  public UserContextResolver gatewayHeaderUserContextResolver() {
-    return new GatewayHeaderUserContextResolver();
-  }
+    @Bean
+    @ConditionalOnMissingBean(UserContextResolver.class)
+    @ConditionalOnProperty(prefix = "zen.security", name = "context-source", havingValue = "gateway-header")
+    public UserContextResolver gatewayHeaderUserContextResolver() {
+        return new GatewayHeaderUserContextResolver();
+    }
 
-  @Bean
-  @ConditionalOnMissingBean
-  public AuthInterceptor authInterceptor(UserContextResolver resolver) {
-    return new AuthInterceptor(resolver);
-  }
+    @Bean
+    @ConditionalOnMissingBean
+    public AuthInterceptor authInterceptor(UserContextResolver resolver) {
+        return new AuthInterceptor(resolver);
+    }
 
-  @Bean
-  @ConditionalOnMissingBean
-  public ModuleAuthInterceptor moduleAuthInterceptor() {
-    return new ModuleAuthInterceptor();
-  }
+    @Bean
+    @ConditionalOnMissingBean
+    public ModuleAuthInterceptor moduleAuthInterceptor() {
+        return new ModuleAuthInterceptor();
+    }
 
-  @Bean
-  public WebMvcConfigurer zenSecurityWebMvcConfigurer(
-      AuthInterceptor authInterceptor,
-      ModuleAuthInterceptor moduleAuthInterceptor,
-      SecurityProperties properties) {
-    String[] whitelist = properties.getWhitelist().toArray(String[]::new);
-    return new WebMvcConfigurer() {
-      @Override
-      public void addInterceptors(InterceptorRegistry registry) {
-        // 注册顺序即执行顺序：模块校验要读鉴权写入的 UserContext，不能排在前面
-        registry
-            .addInterceptor(authInterceptor)
-            .addPathPatterns("/**")
-            .excludePathPatterns(whitelist);
-        registry
-            .addInterceptor(moduleAuthInterceptor)
-            .addPathPatterns("/**")
-            .excludePathPatterns(whitelist);
-      }
-    };
-  }
+    @Bean
+    public WebMvcConfigurer zenSecurityWebMvcConfigurer(
+            AuthInterceptor authInterceptor,
+            ModuleAuthInterceptor moduleAuthInterceptor,
+            SecurityProperties properties) {
+        String[] whitelist = properties.getWhitelist().toArray(String[]::new);
+        return new WebMvcConfigurer() {
+            @Override
+            public void addInterceptors(InterceptorRegistry registry) {
+                // 注册顺序即执行顺序：模块校验要读鉴权写入的 UserContext，不能排在前面
+                registry.addInterceptor(authInterceptor).addPathPatterns("/**").excludePathPatterns(whitelist);
+                registry.addInterceptor(moduleAuthInterceptor)
+                        .addPathPatterns("/**")
+                        .excludePathPatterns(whitelist);
+            }
+        };
+    }
 }

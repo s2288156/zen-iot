@@ -16,15 +16,15 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/demo")
 public class DemoController {
 
-  @GetMapping("/admin")
-  @RequireModule(ModuleCode.ADMIN)
-  public ApiResponse<String> admin() {
-    return ApiResponse.success("admin 模块接口");
-  }
+    @GetMapping("/admin")
+    @RequireModule(ModuleCode.ADMIN)
+    public ApiResponse<String> admin() {
+        return ApiResponse.success("admin 模块接口");
+    }
 
-  @GetMapping("/ecs")
-  @RequireModule(ModuleCode.ECS)
-  public ApiResponse<String> ecs() {
-    return ApiResponse.success("ecs 模块接口");
-  }
+    @GetMapping("/ecs")
+    @RequireModule(ModuleCode.ECS)
+    public ApiResponse<String> ecs() {
+        return ApiResponse.success("ecs 模块接口");
+    }
 }

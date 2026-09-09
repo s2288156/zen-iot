@@ -26,23 +26,23 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 @EntityListeners(AuditingEntityListener.class)
 public abstract class BaseEntity {
 
-  @Id
-  @GeneratedValue(strategy = GenerationType.IDENTITY)
-  private Long id;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
-  @CreatedDate
-  @Column(name = "create_time", updatable = false, nullable = false)
-  private LocalDateTime createTime;
+    @CreatedDate
+    @Column(name = "create_time", updatable = false, nullable = false)
+    private LocalDateTime createTime;
 
-  @LastModifiedDate
-  @Column(name = "update_time")
-  private LocalDateTime updateTime;
+    @LastModifiedDate
+    @Column(name = "update_time")
+    private LocalDateTime updateTime;
 
-  @CreatedBy
-  @Column(name = "creator", updatable = false, length = 64)
-  private String creator;
+    @CreatedBy
+    @Column(name = "creator", updatable = false, length = 64)
+    private String creator;
 
-  @LastModifiedBy
-  @Column(name = "updater", length = 64)
-  private String updater;
+    @LastModifiedBy
+    @Column(name = "updater", length = 64)
+    private String updater;
 }

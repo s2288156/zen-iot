@@ -25,9 +25,9 @@ import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
 @EnableJpaAuditing
 public class ZenJpaAuditingAutoConfiguration {
 
-  @Bean
-  @ConditionalOnMissingBean(AuditorAware.class)
-  public AuditorAware<String> zenAuditorAware() {
-    return () -> Optional.of("system");
-  }
+    @Bean
+    @ConditionalOnMissingBean(AuditorAware.class)
+    public AuditorAware<String> zenAuditorAware() {
+        return () -> Optional.of("system");
+    }
 }

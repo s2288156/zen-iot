@@ -20,15 +20,15 @@ import org.springframework.context.annotation.Bean;
 @EnableConfigurationProperties(JwtProperties.class)
 public class ZenJwtAutoConfiguration {
 
-  @Bean
-  @ConditionalOnMissingBean
-  public JwtTokenIssuer jwtTokenIssuer(JwtProperties properties) {
-    return new JwtTokenIssuer(properties);
-  }
+    @Bean
+    @ConditionalOnMissingBean
+    public JwtTokenIssuer jwtTokenIssuer(JwtProperties properties) {
+        return new JwtTokenIssuer(properties);
+    }
 
-  @Bean
-  @ConditionalOnMissingBean
-  public JwtTokenVerifier jwtTokenVerifier(JwtProperties properties) {
-    return new JwtTokenVerifier(properties);
-  }
+    @Bean
+    @ConditionalOnMissingBean
+    public JwtTokenVerifier jwtTokenVerifier(JwtProperties properties) {
+        return new JwtTokenVerifier(properties);
+    }
 }

@@ -18,14 +18,14 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 @Configuration(proxyBeanMethods = false)
 public class ZenAdminAuthConfiguration {
 
-  @Bean
-  public PasswordEncoder passwordEncoder() {
-    return new BCryptPasswordEncoder();
-  }
+    @Bean
+    public PasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder();
+    }
 
-  /** 覆盖 common-core 的默认审计人 {@code system}；自动配置在用户 Bean 之后评估，会自动退让。 */
-  @Bean
-  public AuditorAware<String> auditorAware() {
-    return () -> Optional.ofNullable(UserContext.get()).map(UserPrincipal::username);
-  }
+    /** 覆盖 common-core 的默认审计人 {@code system}；自动配置在用户 Bean 之后评估，会自动退让。 */
+    @Bean
+    public AuditorAware<String> auditorAware() {
+        return () -> Optional.ofNullable(UserContext.get()).map(UserPrincipal::username);
+    }
 }

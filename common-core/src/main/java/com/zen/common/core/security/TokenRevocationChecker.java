@@ -9,21 +9,21 @@ import java.time.Duration;
  */
 public interface TokenRevocationChecker {
 
-  /** 按 Token 剩余有效期写入撤销记录,记录随 TTL 自动过期,不做清理任务。 */
-  void revoke(String jti, Duration ttl);
+    /** 按 Token 剩余有效期写入撤销记录,记录随 TTL 自动过期,不做清理任务。 */
+    void revoke(String jti, Duration ttl);
 
-  boolean isRevoked(String jti);
+    boolean isRevoked(String jti);
 
-  /** 空实现:撤销无处可写,校验恒通过。 */
-  static TokenRevocationChecker disabled() {
-    return new TokenRevocationChecker() {
-      @Override
-      public void revoke(String jti, Duration ttl) {}
+    /** 空实现:撤销无处可写,校验恒通过。 */
+    static TokenRevocationChecker disabled() {
+        return new TokenRevocationChecker() {
+            @Override
+            public void revoke(String jti, Duration ttl) {}
 
-      @Override
-      public boolean isRevoked(String jti) {
-        return false;
-      }
-    };
-  }
+            @Override
+            public boolean isRevoked(String jti) {
+                return false;
+            }
+        };
+    }
 }

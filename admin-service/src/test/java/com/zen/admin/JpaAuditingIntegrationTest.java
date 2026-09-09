@@ -23,35 +23,36 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional
 class JpaAuditingIntegrationTest {
 
-  @Autowired private UserRepository userRepository;
+    @Autowired
+    private UserRepository userRepository;
 
-  @AfterEach
-  void clearContext() {
-    UserContext.clear();
-  }
+    @AfterEach
+    void clearContext() {
+        UserContext.clear();
+    }
 
-  @Test
-  void createdByMatchesTheLoggedInUser() {
-    UserContext.set(new UserPrincipal(2L, "demo", List.of("user"), List.of("ecs"), "jti", null));
+    @Test
+    void createdByMatchesTheLoggedInUser() {
+        UserContext.set(new UserPrincipal(2L, "demo", List.of("user"), List.of("ecs"), "jti", null));
 
-    UserEntity saved = userRepository.save(auditProbe());
+        UserEntity saved = userRepository.save(auditProbe());
 
-    assertThat(saved.getCreator()).isEqualTo("demo");
-    assertThat(saved.getCreateTime()).isNotNull();
-  }
+        assertThat(saved.getCreator()).isEqualTo("demo");
+        assertThat(saved.getCreateTime()).isNotNull();
+    }
 
-  @Test
-  void unauthenticatedWriteFallsBackToNoAuditor() {
-    UserEntity saved = userRepository.save(auditProbe());
+    @Test
+    void unauthenticatedWriteFallsBackToNoAuditor() {
+        UserEntity saved = userRepository.save(auditProbe());
 
-    assertThat(saved.getCreator()).isNull();
-  }
+        assertThat(saved.getCreator()).isNull();
+    }
 
-  private UserEntity auditProbe() {
-    UserEntity user = new UserEntity();
-    user.setUsername("audit-probe");
-    user.setPassword("$2a$10$not-a-real-hash");
-    user.setStatus(UserEntity.STATUS_ENABLED);
-    return user;
-  }
+    private UserEntity auditProbe() {
+        UserEntity user = new UserEntity();
+        user.setUsername("audit-probe");
+        user.setPassword("$2a$10$not-a-real-hash");
+        user.setStatus(UserEntity.STATUS_ENABLED);
+        return user;
+    }
 }

@@ -11,32 +11,30 @@ import org.springframework.mock.web.MockHttpServletResponse;
 
 class AuthInterceptorTest {
 
-  private static final UserPrincipal PRINCIPAL =
-      new UserPrincipal(1L, "admin", List.of("admin"), List.of("ADMIN"), "jti-1", null);
+    private static final UserPrincipal PRINCIPAL =
+            new UserPrincipal(1L, "admin", List.of("admin"), List.of("ADMIN"), "jti-1", null);
 
-  private final AuthInterceptor interceptor = new AuthInterceptor(request -> PRINCIPAL);
+    private final AuthInterceptor interceptor = new AuthInterceptor(request -> PRINCIPAL);
 
-  @Test
-  void storesPrincipalForTheRequestAndClearsItAfterwards() {
-    MockHttpServletRequest request = new MockHttpServletRequest();
+    @Test
+    void storesPrincipalForTheRequestAndClearsItAfterwards() {
+        MockHttpServletRequest request = new MockHttpServletRequest();
 
-    assertThat(interceptor.preHandle(request, new MockHttpServletResponse(), new Object()))
-        .isTrue();
-    assertThat(UserContext.get()).isEqualTo(PRINCIPAL);
+        assertThat(interceptor.preHandle(request, new MockHttpServletResponse(), new Object()))
+                .isTrue();
+        assertThat(UserContext.get()).isEqualTo(PRINCIPAL);
 
-    interceptor.afterCompletion(request, new MockHttpServletResponse(), new Object(), null);
-    assertThat(UserContext.get()).isNull();
-  }
+        interceptor.afterCompletion(request, new MockHttpServletResponse(), new Object(), null);
+        assertThat(UserContext.get()).isNull();
+    }
 
-  @Test
-  void unauthenticatedRequestIsRejectedBeforeReachingTheController() {
-    AuthInterceptor anonymous = new AuthInterceptor(request -> null);
+    @Test
+    void unauthenticatedRequestIsRejectedBeforeReachingTheController() {
+        AuthInterceptor anonymous = new AuthInterceptor(request -> null);
 
-    assertThatThrownBy(
-            () ->
-                anonymous.preHandle(
-                    new MockHttpServletRequest(), new MockHttpServletResponse(), new Object()))
-        .isInstanceOf(BusinessException.class);
-    assertThat(UserContext.get()).isNull();
-  }
+        assertThatThrownBy(() ->
+                        anonymous.preHandle(new MockHttpServletRequest(), new MockHttpServletResponse(), new Object()))
+                .isInstanceOf(BusinessException.class);
+        assertThat(UserContext.get()).isNull();
+    }
 }

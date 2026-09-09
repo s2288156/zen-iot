@@ -14,9 +14,9 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 @ConditionalOnClass(RestControllerAdvice.class)
 public class ZenWebAutoConfiguration {
 
-  @Bean
-  @ConditionalOnMissingBean(GlobalExceptionHandler.class)
-  public GlobalExceptionHandler globalExceptionHandler() {
-    return new GlobalExceptionHandler();
-  }
+    @Bean
+    @ConditionalOnMissingBean(GlobalExceptionHandler.class)
+    public GlobalExceptionHandler globalExceptionHandler() {
+        return new GlobalExceptionHandler();
+    }
 }

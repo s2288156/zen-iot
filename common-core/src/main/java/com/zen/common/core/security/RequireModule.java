@@ -16,5 +16,5 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 public @interface RequireModule {
 
-  ModuleCode value();
+    ModuleCode value();
 }

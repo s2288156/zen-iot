@@ -15,24 +15,19 @@ import java.util.List;
  * @param expiresAt Token 过期时刻,决定黑名单条目的 TTL;网关透传模式下为 {@code null}
  */
 public record UserPrincipal(
-    long userId,
-    String username,
-    List<String> roles,
-    List<String> modules,
-    String jti,
-    Instant expiresAt) {
+        long userId, String username, List<String> roles, List<String> modules, String jti, Instant expiresAt) {
 
-  public UserPrincipal {
-    roles = roles == null ? List.of() : List.copyOf(roles);
-    modules = modules == null ? List.of() : List.copyOf(modules);
-  }
-
-  /** 剩余有效期;无过期时刻(网关透传模式)时返回 {@code null},调用方据此跳过撤销。 */
-  public Duration remainingTtl() {
-    if (expiresAt == null) {
-      return null;
+    public UserPrincipal {
+        roles = roles == null ? List.of() : List.copyOf(roles);
+        modules = modules == null ? List.of() : List.copyOf(modules);
     }
-    Duration remaining = Duration.between(Instant.now(), expiresAt);
-    return remaining.isNegative() ? Duration.ZERO : remaining;
-  }
+
+    /** 剩余有效期;无过期时刻(网关透传模式)时返回 {@code null},调用方据此跳过撤销。 */
+    public Duration remainingTtl() {
+        if (expiresAt == null) {
+            return null;
+        }
+        Duration remaining = Duration.between(Instant.now(), expiresAt);
+        return remaining.isNegative() ? Duration.ZERO : remaining;
+    }
 }

@@ -48,7 +48,8 @@ spotless {
 	java {
 		target("**/*.java")
 		targetExclude("**/build/**")
-		googleJavaFormat("1.36.1")
+		palantirJavaFormat("2.97.0")
+		removeUnusedImports()
 		toggleOffOn()
 	}
 	format("markdown") {

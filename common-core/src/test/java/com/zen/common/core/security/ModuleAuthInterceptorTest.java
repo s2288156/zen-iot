@@ -14,72 +14,72 @@ import org.springframework.web.method.HandlerMethod;
 
 class ModuleAuthInterceptorTest {
 
-  private final ModuleAuthInterceptor interceptor = new ModuleAuthInterceptor();
+    private final ModuleAuthInterceptor interceptor = new ModuleAuthInterceptor();
 
-  @Test
-  void nonHandlerEndpointsArePassedThrough() {
-    assertThat(interceptor.preHandle(null, null, new Object())).isTrue();
-  }
+    @Test
+    void nonHandlerEndpointsArePassedThrough() {
+        assertThat(interceptor.preHandle(null, null, new Object())).isTrue();
+    }
 
-  @Test
-  void unannotatedMethodsOnlyRequireLogin() {
-    UserContext.set(principal("admin"));
+    @Test
+    void unannotatedMethodsOnlyRequireLogin() {
+        UserContext.set(principal("admin"));
 
-    assertThat(interceptor.preHandle(null, null, handler("open"))).isTrue();
+        assertThat(interceptor.preHandle(null, null, handler("open"))).isTrue();
 
-    UserContext.clear();
-  }
+        UserContext.clear();
+    }
 
-  @Test
-  void annotatedMethodWithoutAnyContextIsUnauthorized() {
-    assertThatThrownBy(() -> interceptor.preHandle(null, null, handler("admin")))
-        .isInstanceOf(BusinessException.class);
-  }
-
-  @ParameterizedTest
-  @MethodSource("cases")
-  void annotatedMethodsAreCheckedAgainstTheTokenModuleSnapshot(
-      List<String> modules, Class<? extends Exception> expected) {
-    UserContext.set(principal(modules.toArray(String[]::new)));
-
-    try {
-      if (expected == null) {
-        assertThat(interceptor.preHandle(null, null, handler("admin"))).isTrue();
-      } else {
+    @Test
+    void annotatedMethodWithoutAnyContextIsUnauthorized() {
         assertThatThrownBy(() -> interceptor.preHandle(null, null, handler("admin")))
-            .isInstanceOf(expected);
-      }
-    } finally {
-      UserContext.clear();
+                .isInstanceOf(BusinessException.class);
     }
-  }
 
-  static Stream<Arguments> cases() {
-    return Stream.of(
-        // 码值是小写：种子数据与 modules claim 都用 admin/ecs/rcs/wcs
-        Arguments.of(List.of("admin"), null),
-        Arguments.of(List.of("ecs", "wcs"), BusinessException.class),
-        Arguments.of(List.of("ADMIN"), BusinessException.class),
-        Arguments.of(List.of(), BusinessException.class));
-  }
+    @ParameterizedTest
+    @MethodSource("cases")
+    void annotatedMethodsAreCheckedAgainstTheTokenModuleSnapshot(
+            List<String> modules, Class<? extends Exception> expected) {
+        UserContext.set(principal(modules.toArray(String[]::new)));
 
-  private HandlerMethod handler(String method) {
-    try {
-      return new HandlerMethod(new Endpoint(), Endpoint.class.getMethod(method));
-    } catch (NoSuchMethodException e) {
-      throw new IllegalStateException(e);
+        try {
+            if (expected == null) {
+                assertThat(interceptor.preHandle(null, null, handler("admin"))).isTrue();
+            } else {
+                assertThatThrownBy(() -> interceptor.preHandle(null, null, handler("admin")))
+                        .isInstanceOf(expected);
+            }
+        } finally {
+            UserContext.clear();
+        }
     }
-  }
 
-  private UserPrincipal principal(String... modules) {
-    return new UserPrincipal(1L, "admin", List.of("admin"), List.of(modules), "jti", null);
-  }
+    static Stream<Arguments> cases() {
+        return Stream.of(
+                // 码值是小写：种子数据与 modules claim 都用 admin/ecs/rcs/wcs
+                Arguments.of(List.of("admin"), null),
+                Arguments.of(List.of("ecs", "wcs"), BusinessException.class),
+                Arguments.of(List.of("ADMIN"), BusinessException.class),
+                Arguments.of(List.of(), BusinessException.class));
+    }
 
-  static class Endpoint {
+    private HandlerMethod handler(String method) {
+        try {
+            return new HandlerMethod(new Endpoint(), Endpoint.class.getMethod(method));
+        } catch (NoSuchMethodException e) {
+            throw new IllegalStateException(e);
+        }
+    }
 
-    @RequireModule(ModuleCode.ADMIN)
-    public void admin() {}
+    private UserPrincipal principal(String... modules) {
+        return new UserPrincipal(1L, "admin", List.of("admin"), List.of(modules), "jti", null);
+    }
 
-    public void open() {}
-  }
+    static class Endpoint {
+
+        @RequireModule(ModuleCode.ADMIN)
+        public void admin() {}
+
+        public void open() {}
+    }
 }

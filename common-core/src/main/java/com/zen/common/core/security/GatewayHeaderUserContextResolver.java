@@ -11,41 +11,44 @@ import java.util.List;
  */
 public class GatewayHeaderUserContextResolver implements UserContextResolver {
 
-  public static final String USER_ID_HEADER = "X-User-Id";
-  public static final String USERNAME_HEADER = "X-Username";
-  public static final String ROLES_HEADER = "X-User-Roles";
-  public static final String MODULES_HEADER = "X-User-Modules";
+    public static final String USER_ID_HEADER = "X-User-Id";
+    public static final String USERNAME_HEADER = "X-Username";
+    public static final String ROLES_HEADER = "X-User-Roles";
+    public static final String MODULES_HEADER = "X-User-Modules";
 
-  @Override
-  public UserPrincipal resolve(HttpServletRequest request) {
-    long userId = parseUserId(request.getHeader(USER_ID_HEADER));
-    if (userId < 0) {
-      return null;
+    @Override
+    public UserPrincipal resolve(HttpServletRequest request) {
+        long userId = parseUserId(request.getHeader(USER_ID_HEADER));
+        if (userId < 0) {
+            return null;
+        }
+        return new UserPrincipal(
+                userId,
+                request.getHeader(USERNAME_HEADER),
+                csv(request.getHeader(ROLES_HEADER)),
+                csv(request.getHeader(MODULES_HEADER)),
+                null,
+                null);
     }
-    return new UserPrincipal(
-        userId,
-        request.getHeader(USERNAME_HEADER),
-        csv(request.getHeader(ROLES_HEADER)),
-        csv(request.getHeader(MODULES_HEADER)),
-        null,
-        null);
-  }
 
-  private long parseUserId(String value) {
-    if (value == null || value.isBlank()) {
-      return -1;
+    private long parseUserId(String value) {
+        if (value == null || value.isBlank()) {
+            return -1;
+        }
+        try {
+            return Long.parseLong(value.trim());
+        } catch (NumberFormatException e) {
+            return -1;
+        }
     }
-    try {
-      return Long.parseLong(value.trim());
-    } catch (NumberFormatException e) {
-      return -1;
-    }
-  }
 
-  private List<String> csv(String value) {
-    if (value == null || value.isBlank()) {
-      return List.of();
+    private List<String> csv(String value) {
+        if (value == null || value.isBlank()) {
+            return List.of();
+        }
+        return Arrays.stream(value.split(","))
+                .map(String::trim)
+                .filter(s -> !s.isEmpty())
+                .toList();
     }
-    return Arrays.stream(value.split(",")).map(String::trim).filter(s -> !s.isEmpty()).toList();
-  }
 }

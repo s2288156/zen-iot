@@ -16,17 +16,17 @@ import java.util.List;
  * @param expiresAt 过期时刻
  */
 public record VerifiedToken(
-    String jti,
-    long userId,
-    String username,
-    List<String> roles,
-    List<String> modules,
-    TokenType type,
-    Instant expiresAt) {
+        String jti,
+        long userId,
+        String username,
+        List<String> roles,
+        List<String> modules,
+        TokenType type,
+        Instant expiresAt) {
 
-  /** 剩余有效期,即黑名单条目的 TTL;已过期返回零。 */
-  public Duration remainingTtl() {
-    Duration remaining = Duration.between(Instant.now(), expiresAt);
-    return remaining.isNegative() ? Duration.ZERO : remaining;
-  }
+    /** 剩余有效期,即黑名单条目的 TTL;已过期返回零。 */
+    public Duration remainingTtl() {
+        Duration remaining = Duration.between(Instant.now(), expiresAt);
+        return remaining.isNegative() ? Duration.ZERO : remaining;
+    }
 }
