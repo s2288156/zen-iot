@@ -88,6 +88,14 @@ val lintMarkdownFix = tasks.register<Exec>("lintMarkdownFix") {
 	commandLine(listOf(npx, "markdownlint-cli") + markdownTargets + listOf("--fix"))
 }
 
+// 推送前轻量门禁：只校格式与编译，不跑依赖本机 MySQL/Nacos 的测试；全量门禁仍是 check
+val prePushCheck = tasks.register("prePushCheck") {
+	group = "verification"
+	description = "推送前轻量门禁：Java/Markdown 格式 + Markdown 规范 + 全模块编译（不跑测试）"
+	dependsOn(tasks.named("spotlessCheck"), lintMarkdown)
+	dependsOn(subprojects.map { "${it.path}:testClasses" })
+}
+
 tasks.named("spotlessApply") {
 	finalizedBy(lintMarkdownFix)
 }
