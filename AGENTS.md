@@ -13,15 +13,40 @@ Prioritize correctness over agreement. State uncertainty instead of guessing, an
 
 ## Essential commands
 
-| Task          | Command                       | Description                                                               |
-| ------------- | ----------------------------- | ------------------------------------------------------------------------- |
-| Format all    | `./gradlew spotlessApply`     | Format Java + Markdown files in-place, then auto-fix Markdown lint issues |
-| Check format  | `./gradlew spotlessCheck`     | Verify formatting without modifying files                                 |
-| Format Java   | `./gradlew spotlessJavaApply` | Format Java files only                                                    |
-| Lint Markdown | `./gradlew lintMarkdown`      | Check Markdown conventions via markdownlint                               |
-| Fix Markdown  | `./gradlew lintMarkdownFix`   | Auto-fix Markdown conventions via markdownlint --fix                      |
-| Full check    | `./gradlew check`             | Run spotlessCheck + lintMarkdown + test                                   |
-| Push gate     | `./gradlew prePushCheck`      | Format + Markdown lint + compile every module, without running tests      |
+| Task              | Command                             | Description                                                                          |
+| ----------------- | ----------------------------------- | ------------------------------------------------------------------------------------ |
+| Format all        | `./gradlew spotlessApply`           | Format Java + Markdown + kts + YAML in-place, then auto-fix Markdown lint issues     |
+| Check format      | `./gradlew spotlessCheck`           | Verify formatting without modifying files                                            |
+| Format Java       | `./gradlew spotlessJavaApply`       | Format Java files only                                                               |
+| Lint Markdown     | `./gradlew lintMarkdown`            | Check Markdown conventions via markdownlint                                          |
+| Fix Markdown      | `./gradlew lintMarkdownFix`         | Auto-fix Markdown conventions via markdownlint --fix                                 |
+| Unit tests        | `./gradlew test`                    | Run tests that need no local middleware (integration tests are tagged out)           |
+| Integration tests | `./gradlew test -PintegrationTests` | Include the `@Tag("integration")` tests; requires local MySQL/Nacos/Redis containers |
+| Architecture      | `./gradlew architectureTest`        | ArchUnit layering and dependency-direction rules, no Spring context                  |
+| Defect scan       | `./gradlew spotbugsMain`            | SpotBugs over main sources; `spotbugsTest` also runs in `check`                      |
+| Full check        | `./gradlew check`                   | Format + Markdown lint + compile (-Werror) + SpotBugs + architecture + unit tests    |
+| Push gate         | `./gradlew prePushCheck`            | Format + Markdown lint + compile (-Werror) + SpotBugs(main) + architecture rules     |
+
+## Enforced conventions
+
+Every rule below has a gate behind it, so a workaround shows up as a failed push rather than a review comment.
+
+- **Zero compiler warnings**: `-Xlint:deprecation,unchecked -Werror` on every module. Do not switch it to
+  `-Xlint:all` — Lombok then emits `No processor claimed any of these annotations`, which `-Werror` turns into a
+  build failure. Suppress only with a reason.
+- **Nullability**: `org.springframework.lang.Nullable`/`NonNull` are deprecated in Spring Framework 7. Use
+  `org.jspecify.annotations.*` when an annotation is needed; both `-Werror` and an ArchUnit rule reject the Spring ones.
+- **Layering** (ArchUnit, `architectureTest`): `controller → service → repository → entity` one-way, controllers never
+  touch persistence entities, `@Transactional` only appears in `service`, `common-core` never depends on a business
+  service, and `com.zen.common.core.jwt` stays free of the Servlet API so the Phase 2 gateway can reuse it.
+- **SpotBugs**: `Effort.DEFAULT` + `Confidence.MEDIUM`, failures block. Prefer fixing code; a new exemption belongs in
+  `gradle/spotbugs/exclude.xml` with a comment justifying it, and must stay narrow (rule + package, never a blanket
+  category). `VerifiedToken` shed 4 findings by adding a `List.copyOf` compact constructor instead of an exemption.
+- **Tests**: anything needing local MySQL/Nacos/Redis carries `@Tag("integration")` so `test`/`check` stay runnable on a
+  clean machine. New tests should avoid containers by default.
+- **Formatting**: Spotless covers `*.java` (palantir), `*.md` (Prettier + markdownlint), `*.gradle.kts` (whitespace and
+  final newline only, existing tab indentation is kept) and `*.yml` (Prettier). Flyway `db/migration/*.sql` is
+  deliberately left unformatted so migration diffs stay reviewable.
 
 ## Workflow
 
