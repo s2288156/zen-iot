@@ -31,6 +31,17 @@ subprojects {
 		// ArchUnit 没有 BOM，用单条约束把版本留在根，模块仍不写版本号
 		dependencies {
 			dependency("com.tngtech.archunit:archunit-junit5:1.5.0")
+			/*
+			 * Boot 4.1.1 的 BOM 把 log4j2 钉在 2.25.1，而 2.25.1 的 POM 链里
+			 * error_prone_annotations 的版本是 ${error-prone.version}——该属性定义在上溯两级的
+			 * logging-parent 里，Gradle 的 POM 模型构建器不展开它，于是每次解析都刷一条
+			 * 「Errors occurred while building effective model」告警（仅告警，不影响构建结果）。
+			 * 全构建唯一带 log4j-core 的地方是 SpotBugs 引擎的 classpath（spotbugs 配置），
+			 * 依赖管理插件对该配置一视同仁地改写版本（force / strictly 实测都被它压过）。
+			 * 这里按应用侧 nacos-log4j2-adapter 实际解析到的 2.25.5 对齐：2.25.1 不再进图，告警消失，
+			 * 且 log4j-core 与 log4j-api 保持同版本。Boot 的 BOM 升到 ≥ 2.26.1 后可删掉这条。
+			 */
+			dependency("org.apache.logging.log4j:log4j-core:2.25.5")
 		}
 	}
 
