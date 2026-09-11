@@ -24,6 +24,11 @@ public record VerifiedToken(
         TokenType type,
         Instant expiresAt) {
 
+    public VerifiedToken {
+        roles = roles == null ? List.of() : List.copyOf(roles);
+        modules = modules == null ? List.of() : List.copyOf(modules);
+    }
+
     /** 剩余有效期,即黑名单条目的 TTL;已过期返回零。 */
     public Duration remainingTtl() {
         Duration remaining = Duration.between(Instant.now(), expiresAt);
