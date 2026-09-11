@@ -8,6 +8,7 @@ import com.zen.common.core.security.UserContext;
 import com.zen.common.core.security.UserPrincipal;
 import java.util.List;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -21,6 +22,7 @@ import org.springframework.transaction.annotation.Transactional;
  */
 @SpringBootTest(properties = "spring.cloud.nacos.discovery.enabled=false")
 @Transactional
+@Tag("integration") // 依赖本机 MySQL/Nacos/Redis：默认从 test/check 排除，容器就绪时用 -PintegrationTests 跑
 class JpaAuditingIntegrationTest {
 
     @Autowired
