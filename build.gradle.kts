@@ -16,6 +16,7 @@ val runIntegrationTests = project.hasProperty("integrationTests")
 
 subprojects {
 	apply(plugin = "java")
+	apply(plugin = "jacoco")
 	apply(plugin = "io.spring.dependency-management")
 	apply(plugin = "com.github.spotbugs")
 
@@ -56,12 +57,6 @@ subprojects {
 
 	dependencies {
 		testImplementation("com.tngtech.archunit:archunit-junit5")
-	}
-
-	repositories {
-		maven { url = uri("https://maven.aliyun.com/repository/public") }
-		mavenCentral()
-		mavenLocal()
 	}
 
 	tasks.withType<JavaCompile>().configureEach {
@@ -106,6 +101,15 @@ subprojects {
 		ignoreFailures.set(false)
 		excludeFilter.set(rootProject.layout.projectDirectory.file("gradle/spotbugs/exclude.xml"))
 	}
+
+	// 覆盖率报告：只出 XML + HTML，不设阈值门禁；数据由 test 任务产出
+	tasks.withType<JacocoReport>().configureEach {
+		reports {
+			xml.required.set(true)
+			html.required.set(true)
+		}
+	}
+	tasks.named("test") { finalizedBy("jacocoTestReport") }
 }
 
 spotless {
