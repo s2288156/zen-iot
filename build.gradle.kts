@@ -60,9 +60,7 @@ subprojects {
 
 	repositories {
 		maven { url = uri("https://maven.aliyun.com/repository/public") }
-		maven { url = uri("https://maven.aliyun.com/repository/central") }
 		mavenCentral()
-		// mavenLocal 排最后：本机 install 的快照不再优先污染解析，保证构建可复现
 		mavenLocal()
 	}
 
@@ -81,7 +79,7 @@ subprojects {
 	}
 
 	// 架构门禁单独成任务：只跑 @Tag("architecture")，秒级且不碰中间件，可安全进 pre-push
-	val testSourceSet = the<SourceSetContainer>().getByName("test")
+	val testSourceSet = sourceSets.getByName("test")
 	tasks.register<Test>("architectureTest") {
 		group = "verification"
 		description = "架构约束测试（ArchUnit，无需本机中间件）"
@@ -169,8 +167,14 @@ val lintMarkdownFix = tasks.register<Exec>("lintMarkdownFix") {
 	commandLine(listOf(npx, "markdownlint-cli") + markdownTargets + listOf("--fix"))
 }
 
-val compileGate = subprojects.map { "${it.path}:testClasses" } + subprojects.map { "${it.path}:spotbugsMain" } +
-	subprojects.map { "${it.path}:architectureTest" }
+// TaskProvider 懒加载，避免配置期急切解析所有子项目
+val compileGate = subprojects.flatMap { subproject ->
+	listOf(
+		subproject.tasks.named("testClasses"),
+		subproject.tasks.named("spotbugsMain"),
+		subproject.tasks.named("architectureTest"),
+	)
+}
 
 // 推送前轻量门禁：格式 + 编译零告警 + 架构约束 + SpotBugs 缺陷扫描，不跑测试；全量门禁仍是 check
 val prePushCheck = tasks.register("prePushCheck") {
