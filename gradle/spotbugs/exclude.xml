@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  SpotBugs 排除规则：只收「理由明确、范围尽量窄」的豁免，新增必须写注释说明。
+  能改代码修掉的一律改代码——例：VerifiedToken 的 List 字段改为构造期 List.copyOf 固化后，
+  原先 4 条 EI_EXPOSE_REP/EI_EXPOSE_REP2 自动消失，不需要任何豁免。
+-->
+<FindBugsFilter>
+  <!--
+    EI_EXPOSE_REP2「构造器存下外部可变对象」对 Spring 容器管理的协作者不成立：
+    service/config 层的构造参数由容器注入，按设计就是共享单例，做防御性拷贝反而破坏容器语义。
+    范围只限这两个分层包 + 这一条规则；实体/DTO/业务对象持有外部可变引用的情况仍然照报。
+    （注：更精确的 <Class annotation="org.springframework.stereotype.Service"/> 在 SpotBugs 4.10.4
+    实测不生效，故按包名收敛。）
+  -->
+  <Match>
+    <Class name="~com\.zen\..*\.(service|config)\..*"/>
+    <Bug pattern="EI_EXPOSE_REP2"/>
+  </Match>
+</FindBugsFilter>

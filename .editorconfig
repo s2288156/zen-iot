@@ -1,4 +1,28 @@
+root = true
+
+[*]
+charset = utf-8
+end_of_line = lf
+insert_final_newline = true
+trim_trailing_whitespace = true
+
+# 与 palantir-java-format 的实际产出一致，避免 IDE 自动缩进与门禁互相打架
+[*.java]
+indent_style = space
+indent_size = 4
+max_line_length = 120
+
+[*.{yml,yaml}]
+indent_style = space
+indent_size = 2
+
+# 构建脚本沿用既有 tab 缩进（Spotless 对 kts 只校空白卫生，不做重排）
+[*.gradle.kts]
+indent_style = tab
+
 [*.md]
 max_line_length = off
+# 行尾两空格是 Markdown 的硬换行，不能裁
 trim_trailing_whitespace = false
-insert_final_newline = false
+# MD047 与 Prettier 都要求文件以换行结尾
+insert_final_newline = true

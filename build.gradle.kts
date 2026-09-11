@@ -3,14 +3,21 @@ plugins {
 	id("io.spring.dependency-management") version "1.1.7" apply false
 	id("org.springframework.boot") version "4.1.1" apply false
 	id("com.diffplug.spotless") version "8.10.1"
+	id("com.github.spotbugs") version "6.5.11" apply false
 }
 
 group = "com.zen"
 version = "0.0.1-SNAPSHOT"
 
+// 依赖本机 MySQL/Nacos/Redis 的测试一律打 @Tag("integration")，默认从 test/check 排除，
+// 这样 check 在干净环境下也是可执行的真门禁；容器就绪时用 ./gradlew test -PintegrationTests 纳入
+val integrationTag = "integration"
+val runIntegrationTests = project.hasProperty("integrationTests")
+
 subprojects {
 	apply(plugin = "java")
 	apply(plugin = "io.spring.dependency-management")
+	apply(plugin = "com.github.spotbugs")
 
 	// 版本只在根声明一次，子模块依赖一律不写版本号；接入新的第三方栈时在此追加 BOM
 	configure<io.spring.gradle.dependencymanagement.dsl.DependencyManagementExtension> {
@@ -20,6 +27,10 @@ subprojects {
 			mavenBom("com.alibaba.cloud:spring-cloud-alibaba-dependencies:2025.1.0.0")
 			// common-core 以 api 暴露 jjwt 类型，版本必须在根统一管；模块局部 BOM 不会传递给消费方
 			mavenBom("io.jsonwebtoken:jjwt-bom:0.12.7")
+		}
+		// ArchUnit 没有 BOM，用单条约束把版本留在根，模块仍不写版本号
+		dependencies {
+			dependency("com.tngtech.archunit:archunit-junit5:1.5.0")
 		}
 	}
 
@@ -32,22 +43,66 @@ subprojects {
 		}
 	}
 
+	dependencies {
+		testImplementation("com.tngtech.archunit:archunit-junit5")
+	}
+
 	repositories {
 		maven { url = uri("https://maven.aliyun.com/repository/public") }
 		maven { url = uri("https://maven.aliyun.com/repository/central") }
-		mavenLocal()
 		mavenCentral()
+		// mavenLocal 排最后：本机 install 的快照不再优先污染解析，保证构建可复现
+		mavenLocal()
 	}
 
-	tasks.withType<Test> {
-		useJUnitPlatform()
+	tasks.withType<JavaCompile>().configureEach {
+		// 不取 -Xlint:all：Lombok 的「No processor claimed any of these annotations」会稳定告警，
+		// 叠加 -Werror 必然失败；deprecation + unchecked 已能拦住 Spring 7 废弃 API（如 org.springframework.lang.Nullable）
+		options.compilerArgs.addAll(listOf("-Xlint:deprecation", "-Xlint:unchecked", "-Werror"))
+	}
+
+	tasks.withType<Test>().configureEach {
+		useJUnitPlatform {
+			if (!runIntegrationTests) {
+				excludeTags(integrationTag)
+			}
+		}
+	}
+
+	// 架构门禁单独成任务：只跑 @Tag("architecture")，秒级且不碰中间件，可安全进 pre-push
+	val testSourceSet = the<SourceSetContainer>().getByName("test")
+	tasks.register<Test>("architectureTest") {
+		group = "verification"
+		description = "架构约束测试（ArchUnit，无需本机中间件）"
+		testClassesDirs = testSourceSet.output.classesDirs
+		classpath = testSourceSet.runtimeClasspath
+		dependsOn(tasks.named("testClasses"))
+		useJUnitPlatform {
+			includeTags("architecture")
+		}
+	}
+
+	// 6.5.x 默认不生成任何报告文件，必须显式打开，否则失败时只有一句 exit code 1
+	// 插件默认不注册任何报告，失败时只会看到 exit code 1；这里显式建 HTML + XML 两类报告
+	tasks.withType<com.github.spotbugs.snom.SpotBugsTask>().configureEach {
+		reports.create("html") { required.set(true) }
+		reports.create("xml") { required.set(true) }
+	}
+
+	// 缺陷扫描：6.5.x 的 Threshold 已改名 Confidence
+	configure<com.github.spotbugs.snom.SpotBugsExtension> {
+		toolVersion.set("4.10.4")
+		effort.set(com.github.spotbugs.snom.Effort.DEFAULT)
+		reportLevel.set(com.github.spotbugs.snom.Confidence.MEDIUM)
+		ignoreFailures.set(false)
+		excludeFilter.set(rootProject.layout.projectDirectory.file("gradle/spotbugs/exclude.xml"))
 	}
 }
 
 spotless {
 	java {
 		target("**/*.java")
-		targetExclude("**/build/**")
+		targetExclude("**/build/**", "**/bin/**")
 		palantirJavaFormat("2.97.0")
 		removeUnusedImports()
 		toggleOffOn()
@@ -68,6 +123,21 @@ spotless {
 			)
 		trimTrailingWhitespace()
 	}
+	// 只定空白与文件结尾，不引入 ktlint：避免把既有 tab 缩进的构建脚本整体重排
+	format("gradleScripts") {
+		target("**/*.gradle.kts")
+		targetExclude("**/build/**", "**/.gradle/**")
+		trimTrailingWhitespace()
+		endWithNewline()
+	}
+	format("yaml") {
+		target("**/*.yml", "**/*.yaml")
+		targetExclude("**/build/**", "**/.gradle/**", "**/bin/**", "**/node_modules/**")
+		prettier()
+		trimTrailingWhitespace()
+		endWithNewline()
+	}
+	// 刻意不格式化 db/migration/*.sql：Flyway 脚本是历史记录，重排会让迁移 diff 无法审查
 }
 
 val isWindows = System.getProperty("os.name").lowercase().contains("windows")
@@ -88,12 +158,15 @@ val lintMarkdownFix = tasks.register<Exec>("lintMarkdownFix") {
 	commandLine(listOf(npx, "markdownlint-cli") + markdownTargets + listOf("--fix"))
 }
 
-// 推送前轻量门禁：只校格式与编译，不跑依赖本机 MySQL/Nacos 的测试；全量门禁仍是 check
+val compileGate = subprojects.map { "${it.path}:testClasses" } + subprojects.map { "${it.path}:spotbugsMain" } +
+	subprojects.map { "${it.path}:architectureTest" }
+
+// 推送前轻量门禁：格式 + 编译零告警 + 架构约束 + SpotBugs 缺陷扫描，不跑测试；全量门禁仍是 check
 val prePushCheck = tasks.register("prePushCheck") {
 	group = "verification"
-	description = "推送前轻量门禁：Java/Markdown 格式 + Markdown 规范 + 全模块编译（不跑测试）"
+	description = "推送前门禁：Java/Markdown/kts/YAML 格式 + Markdown 规范 + 编译(-Werror) + SpotBugs(main) + 架构约束"
 	dependsOn(tasks.named("spotlessCheck"), lintMarkdown)
-	dependsOn(subprojects.map { "${it.path}:testClasses" })
+	dependsOn(compileGate)
 }
 
 tasks.named("spotlessApply") {
