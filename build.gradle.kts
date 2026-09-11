@@ -59,12 +59,6 @@ subprojects {
 		testImplementation("com.tngtech.archunit:archunit-junit5")
 	}
 
-	repositories {
-		maven { url = uri("https://maven.aliyun.com/repository/public") }
-		mavenCentral()
-		mavenLocal()
-	}
-
 	tasks.withType<JavaCompile>().configureEach {
 		// 不取 -Xlint:all：Lombok 的「No processor claimed any of these annotations」会稳定告警，
 		// 叠加 -Werror 必然失败；deprecation + unchecked 已能拦住 Spring 7 废弃 API（如 org.springframework.lang.Nullable）
