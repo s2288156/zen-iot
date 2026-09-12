@@ -1,4 +1,4 @@
-# 开发与测试基础设施：MySQL 8 + Redis 7 + Nacos 3.1.1（与 Spring Cloud Alibaba 2025.1.0.0 对齐）
+# 开发与测试基础设施：MySQL 8 + Redis 8 + Nacos 3.1.1（与 Spring Boot 4.1 / Spring Cloud Alibaba 2025.1.0.0 对齐）
 # 启动：docker compose -f docker/docker-compose.dev.yml up -d
 # 停止：docker compose -f docker/docker-compose.dev.yml down
 services:
@@ -21,7 +21,7 @@ services:
       start_period: 10s
 
   redis:
-    image: redis:7-alpine
+    image: redis:8-alpine
     container_name: zen-redis-dev
     restart: unless-stopped
     ports:
