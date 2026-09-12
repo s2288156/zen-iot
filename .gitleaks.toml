@@ -1,0 +1,28 @@
+[gitleaks]
+# Global config：gitleaks 8.x+ 默认启用全部 built-in rules
+# 本文件只做项目级例外收窄
+
+# 仅扫描以下路径（与 Gradle 项目结构对齐）
+# paths = [
+#   path = "admin-service/src/main/resources/application.yml",
+#   path = "common-core",
+# ]
+
+# .git 目录和 node_modules 天然排除（gitleaks 默认行为）
+
+[[rules]]
+# 规则：Generic Password - 匹配带 password/secret 等关键词的值
+# 以下是本项目已知的"假阳性"源，必须收窄到文件级，不全局关闭
+
+# 例外 1：application.yml 中的 dev BCrypt 密文和默认 JWT secret 属占位值
+#  - adminPassword: 开发口令 Admin@123 的 BCrypt 密文
+#  - demoPassword:  开发口令 Demo@123 的 BCrypt 密文
+#  - JWT secret:    带 "zen-dev-" 前缀的默认值，生产由环境变量覆盖
+[[allowlists]]
+path = "admin-service/src/main/resources/application.yml"
+regexTarget = secret
+regex = '''(
+  \$2a\$10\$Kw/dU22ig8dIrz9ImLCRRuhLRvQ8E8tWX94ORQRKmz1iYL2d0sHDi|
+  \$2a\$10\$NZ7XEuah1yYhoC6QZNzUk\.pK\.SbVr1wAm3oTECPxHeACd9Jc512AG|
+  zen-dev-admin-service-hs256-secret-key-32-bytes
+)'''

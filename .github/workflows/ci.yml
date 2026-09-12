@@ -5,6 +5,9 @@ on:
     branches: [main]
   push:
     branches: [main]
+  # 每周一早 2:00 跑 OSV 扫描（非阻断）
+  schedule:
+    - cron: "0 18 * * 0"
 
 # 同 PR 新运行取消旧运行
 concurrency:
@@ -15,6 +18,7 @@ permissions:
   contents: read
 
 jobs:
+  # ——— 静态门禁（现有，不变）———
   check:
     name: ./gradlew check (JDK 21)
     runs-on: ubuntu-latest
@@ -43,5 +47,161 @@ jobs:
             **/build/reports/spotbugs/
             **/build/reports/tests/
             **/build/reports/jacoco/
+          if-no-files-found: ignore
+          retention-days: 7
+
+  # ——— 集成测试（依赖 MySQL/Nacos/Redis 容器）———
+  integration:
+    name: ./gradlew check -PintegrationTests (JDK 21)
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: root
+          MYSQL_DATABASE: zen_admin
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd "mysqladmin ping -h localhost -uroot -proot"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+          --health-start-period 10s
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 5s
+          --health-timeout 3s
+          --health-retries 10
+          --health-start-period 5s
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup JDK 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "21"
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
+
+      # Nacos 无官方 service 镜像，单独拉起并轮询就绪
+      # Nacos 3.x 即使关闭鉴权也要求 NACOS_AUTH_* 三项占位值
+      - name: Start Nacos and wait for readiness
+        run: |
+          docker run -d --name nacos-integration \
+            -e MODE=standalone \
+            -e NACOS_AUTH_ENABLE=false \
+            -e NACOS_AUTH_TOKEN=Z2VuZGV2bmFjb3NhdXRoZW50b2tlbjMyYnl0ZXNceW1s \
+            -e NACOS_AUTH_IDENTITY_KEY=serverIdentity \
+            -e NACOS_AUTH_IDENTITY_VALUE=security \
+            -e JVM_XMS=512m \
+            -e JVM_XMX=512m \
+            -p 8848:8848 \
+            -p 9848:9848 \
+            nacos/nacos-server:v3.1.1
+          for i in $(seq 1 36); do
+            # Nacos 3.x 健康端点从 /v1/ 迁移到 /v3/，简化检查首页 200
+            if curl -sf http://localhost:8848/nacos/ > /dev/null 2>&1; then
+              echo "Nacos is ready after ${i} tries"
+              exit 0
+            fi
+            echo "Waiting for Nacos... (try ${i}/36)"
+            sleep 5
+          done
+          echo "ERROR: Nacos failed to start within 180s"
+          docker logs nacos-integration 2>&1 | tail -50
+          exit 1
+
+      # Flyway 空库回放：确保迁移脚本在完全空的 MySQL 上可以完整执行
+      - name: Verify Flyway migrations on empty DB
+        run: |
+          docker run --rm --network host \
+            flyway/flyway:11 \
+            -url="jdbc:mysql://localhost:3306/zen_admin?useSSL=false&allowPublicKeyRetrieval=true" \
+            -user=root \
+            -password=root \
+            -locations=filesystem:admin-service/src/main/resources/db/migration \
+            migrate
+
+      - name: Run check with integration tests
+        env:
+          # GitHub Actions services 默认暴露到 host.docker.internal 或直接 localhost
+          MYSQL_HOST: localhost
+          NACOS_SERVER_ADDR: localhost:8848
+          REDIS_HOST: localhost
+        run: |
+          ./gradlew --no-daemon clean check -PintegrationTests
+
+      - name: Upload reports (always)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: integration-reports
+          path: |
+            **/build/reports/spotbugs/
+            **/build/reports/tests/
+            **/build/reports/jacoco/
+          if-no-files-found: ignore
+          retention-days: 7
+
+  # ——— 密钥扫描（PR 检查变更文件，push/main 全量）———
+  gitleaks:
+    name: Secret scan (gitleaks)
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      # 官方 action：PR 只扫变更，push/main 扫全量
+      - uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          args: >-
+            --config-path .gitleaks.toml
+            --report-path /tmp/gitleaks-report.json
+          # scope 自动处理：PR = changed files, push = all
+          # 见 https://github.com/gitleaks/gitleaks-action
+
+  # ——— 依赖漏洞扫描（weekly + PR，非阻断）———
+  osv-scan:
+    name: Dependency vulnerability scan (OSV)
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "21"
+
+      - name: Generate Gradle dependency lockfile
+        run: ./gradlew dependencies --console=plain > /tmp/gradle-deps.txt 2>&1 || true
+
+      - name: Run OSV scanner
+        uses: google/osv-scanner-action/osv-scanner-action@v1.8.1
+        with:
+          scan-mode: lockfile
+          # Gradle 支持有限，先扫 manifest files，后续可调整
+          results-file-path: osv-results.json
+          exit-code: "0"
+
+      - name: Upload OSV results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: osv-scan-results
+          path: osv-results.json
           if-no-files-found: ignore
           retention-days: 7
