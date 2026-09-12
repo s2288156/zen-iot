@@ -1,0 +1,69 @@
+# 开发与测试基础设施：MySQL 8 + Redis 8 + Nacos 3.1.1（与 Spring Boot 4.1 / Spring Cloud Alibaba 2025.1.0.0 对齐）
+# 启动：docker compose -f docker/docker-compose.dev.yml up -d
+# 停止：docker compose -f docker/docker-compose.dev.yml down
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: zen-mysql-dev
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: zen_admin
+    ports:
+      - "3306:3306"
+    volumes:
+      - zen_mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-proot"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+
+  redis:
+    image: redis:8-alpine
+    container_name: zen-redis-dev
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - zen_redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+      start_period: 5s
+
+  nacos:
+    image: nacos/nacos-server:v3.1.1
+    container_name: zen-nacos-dev
+    restart: unless-stopped
+    environment:
+      MODE: standalone
+      # Nacos 3.x 强制要求三项鉴权配置存在（即使关闭鉴权也需要占位值）
+      NACOS_AUTH_ENABLE: "false"
+      NACOS_AUTH_TOKEN: Z2VuZGV2bmFjb3NhdXRoZW50b2tlbjMyYnl0ZXNceW1s
+      NACOS_AUTH_IDENTITY_KEY: serverIdentity
+      NACOS_AUTH_IDENTITY_VALUE: security
+      JVM_XMS: 512m
+      JVM_XMX: 512m
+    ports:
+      - "8848:8848"
+      - "9848:9848"
+    healthcheck:
+      # Nacos 3.x 健康端点从 /v1/ 迁移到 /v3/，且需要额外配置兼容
+      # 简化：检查 8848 端口是否监听即可确认启动就绪
+      test:
+        [
+          "CMD-SHELL",
+          "curl -s -o /dev/null -w '%{http_code}' http://localhost:8848/nacos/ | grep -q 200 || exit 1",
+        ]
+      interval: 5s
+      timeout: 5s
+      retries: 18
+      start_period: 30s
+
+volumes:
+  zen_mysql_data:
+  zen_redis_data:
