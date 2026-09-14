@@ -181,8 +181,9 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      # v2 只用 scan-args；从项目根递归扫描所有已知 manifest files
-      - uses: google/osv-scanner-action@v2.5.0
+      # google/osv-scanner-action v2 has both a reusable workflow and an action entrypoint;
+      # the action itself is at the /osv-scanner-action sub-path
+      - uses: google/osv-scanner-action/osv-scanner-action@v2
         with:
           scan-args: |
             --format sarif
