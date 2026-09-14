@@ -122,7 +122,8 @@ spotless {
 	}
 	format("markdown") {
 		target("**/*.md")
-		targetExclude("**/build/**", "**/.gradle/**", "**/node_modules/**")
+		// .ai/ 是 gitignore 的临时笔记：Spotless 的 ** 会匹配到点开头的路径，未跟踪文件于是反过来卡住每一次提交
+		targetExclude("**/build/**", "**/.gradle/**", "**/node_modules/**", "**/.ai/**")
 		prettier()
 			.config(
 				mapOf(
