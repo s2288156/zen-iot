@@ -1,11 +1,15 @@
 #!/usr/bin/env kotlin
 
+// settings.kts 只有一个 git-hooks 插件，硬编码可接受；根 build.gradle.kts 的 4 个插件走 catalog alias
+// pluginManagement 块在此省略：Catalog 自动加载只对 build.gradle.kts 生效，settings 若需 alias 需显式声明
+
 plugins {
 	id("org.danilopianini.gradle-pre-commit-git-hooks") version "2.1.23"
 }
 
 // 集中式仓库声明：根项目（Spotless detached configuration）与所有子项目自动继承；
 // 子项目不再单独声明 repositories，若未来某个子项目需要私有仓库可在其脚本里追加
+// Gradle 9 自动加载 gradle/libs.versions.toml 为 `libs` catalog，无需显式声明
 dependencyResolutionManagement {
 	repositoriesMode.set(RepositoriesMode.PREFER_SETTINGS)
 	repositories {
