@@ -20,6 +20,7 @@ out/
 .factorypath
 .project
 .settings/
+!.settings/org.eclipse.jdt.core.prefs
 .springBeans
 .sts4-cache
 # Eclipse / Buildship 编译输出（Gradle 的输出是 build/）
@@ -34,6 +35,8 @@ bin/
 
 # IDE - VS Code
 .vscode/
+!.vscode/settings.json
+!.vscode/extensions.json
 *.suo
 *.ntvs*
 *.njsproj
