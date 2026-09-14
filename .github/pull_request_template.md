@@ -7,7 +7,7 @@
 - [ ] `./gradlew check` 通过（format + compile(-Werror) + SpotBugs + ArchUnit + test）
 - [ ] 破坏性变更已标注（API 移除 / 签名变化 / 必填字段变化），见下方「破坏性变更」节
 - [ ] 数据库迁移文件在 `db/migration/`，Flyway 兼容旧版本；**未手动修改既有脚本**
-- [ ] 新增依赖已在 `gradle/libs.versions.toml` 登记版本
+- [ ] 新增依赖不在模块脚本里写版本号；版本只在根 `build.gradle.kts` 声明一次（BOM 或 `dependencyManagement`）
 - [ ] 集成测试已加 `@Tag("integration")`，默认 `test` 阶段不依赖本地中间件
 
 ## 破坏性变更

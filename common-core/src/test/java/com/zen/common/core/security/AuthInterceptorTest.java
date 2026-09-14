@@ -6,6 +6,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import com.zen.common.core.exception.BusinessException;
 import java.util.List;
 import org.junit.jupiter.api.Test;
+import org.slf4j.MDC;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
 
@@ -23,9 +24,11 @@ class AuthInterceptorTest {
         assertThat(interceptor.preHandle(request, new MockHttpServletResponse(), new Object()))
                 .isTrue();
         assertThat(UserContext.get()).isEqualTo(PRINCIPAL);
+        assertThat(MDC.get("userId")).isEqualTo("1");
 
         interceptor.afterCompletion(request, new MockHttpServletResponse(), new Object(), null);
         assertThat(UserContext.get()).isNull();
+        assertThat(MDC.get("userId")).isNull();
     }
 
     @Test
