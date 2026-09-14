@@ -56,7 +56,13 @@ class JwtTokenTest {
     @Test
     void tamperedSignatureIsRejected() {
         String token = issuer.issue(PRINCIPAL).accessToken();
-        String tampered = token.substring(0, token.length() - 1) + (token.endsWith("A") ? "B" : "A");
+        int signatureStart = token.lastIndexOf('.') + 1;
+        char signatureHead = token.charAt(signatureStart);
+        // 篡改签名首字符而不是末字符：base64url 不补齐，43 个字符的末字符只有 6 位有效，
+        // 换掉它有 4/64 概率解码出完全相同的字节，测试就会偶发通过
+        String tampered = token.substring(0, signatureStart)
+                + (signatureHead == 'A' ? 'B' : 'A')
+                + token.substring(signatureStart + 1);
 
         assertUnauthorized(() -> verifier.verify(tampered, TokenType.ACCESS));
     }
