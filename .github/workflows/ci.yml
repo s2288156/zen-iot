@@ -168,14 +168,6 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GITLEAKS_CONFIG: ".gitleaks.toml"
 
-  # ——— 依赖漏洞扫描（weekly + PR，非阻断）———
-  # google/osv-scanner-action 仓库 tag 是 v1.9.2（不是 CLI 的 v2.x）；
-  # 它只提供 reusable workflows，不提供独立 action entrypoint
-  osv-scan:
-    name: Dependency vulnerability scan (OSV)
-    continue-on-error: true
-    permissions:
-      contents: read
-      security-events: write
-    # 调用上游仓库的 reusable workflow，内部处理 checkout + scan + SARIF upload
-    uses: "google/osv-scanner-action/.github/workflows/osv-scanner-reusable.yml@v1.9.2"
+  # ——— 依赖漏洞扫描已拆到 .github/workflows/osv-scan.yml ———
+  # google/osv-scanner-action 的 reusable workflow 不能在同一 jobs 块里
+  # 与普通 job 混写，独立 workflow 更干净

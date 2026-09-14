@@ -1,0 +1,35 @@
+name: OSV Dependency Scan
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+  # 每周一早 10:00 UTC 跑全量扫描
+  schedule:
+    - cron: "0 2 * * 1"
+
+concurrency:
+  group: osv-scan-${{ github.ref }}
+  cancel-in-progress: true
+
+# 非阻断：OSV 误报或 Gradle lockfile 不被识别时不阻塞合并
+jobs:
+  osv-scan:
+    # google/osv-scanner-action 仓库最新 tag 是 v1.9.2（这是 action 封装层版本，
+    # 独立于 osv-scanner CLI 的 v2.x 版本号）。它只提供 reusable workflows，
+    # 不提供独立 action entrypoint，所以必须这样调用
+    uses: "google/osv-scanner-action/.github/workflows/osv-scanner-reusable.yml@v1.9.2"
+    permissions:
+      actions: read
+      contents: read
+      security-events: write
+    continue-on-error: true
+    with:
+      # 默认 recursive scan，支持 Java/Gradle 依赖清单识别
+      scan-args: |-
+        -r
+        --skip-git
+        ./
+      # 漏洞不阻断（Gradle 支持有限），CI 只做告警
+      fail-on-vuln: false
