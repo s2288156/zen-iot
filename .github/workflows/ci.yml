@@ -40,7 +40,7 @@ jobs:
 
       - name: Upload reports (always)
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: build-reports
           path: |
@@ -141,7 +141,7 @@ jobs:
 
       - name: Upload reports (always)
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: integration-reports
           path: |
