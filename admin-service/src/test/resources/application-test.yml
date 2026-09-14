@@ -1,0 +1,35 @@
+server:
+  port: 0 # 随机端口（WebEnvironment.NONE 不会实际绑定，但保险起见）
+
+spring:
+  application:
+    name: admin-service
+  # 逐属性关闭中间件自动配置，避免 flyway/datasource/redis/nacos 尝试连接
+  flyway:
+    enabled: false
+  jpa:
+    hibernate:
+      ddl-auto: none
+  cloud:
+    nacos:
+      discovery:
+        enabled: false
+      config:
+        enabled: false
+
+zen:
+  security:
+    context-source: jwt
+    whitelist:
+      - /auth/login
+      - /auth/refresh
+      - /actuator/**
+      - /v3/api-docs/**
+      - /swagger-ui/**
+      - /swagger-ui.html
+
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+  swagger-ui:
+    path: /swagger-ui.html
