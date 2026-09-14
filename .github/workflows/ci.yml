@@ -174,24 +174,21 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     continue-on-error: true
+    permissions:
+      contents: read
+      # 需要上传 SARIF 到 GitHub Security tab
+      security-events: write
     steps:
       - uses: actions/checkout@v4
 
-      - uses: actions/setup-java@v4
+      # v2 只用 scan-args；从项目根递归扫描所有已知 manifest files
+      - uses: google/osv-scanner-action@v2.5.0
         with:
-          distribution: temurin
-          java-version: "21"
-
-      - name: Generate Gradle dependency lockfile
-        run: ./gradlew dependencies --console=plain > /tmp/gradle-deps.txt 2>&1 || true
-
-      - name: Run OSV scanner
-        uses: google/osv-scanner-action/osv-scanner-action@v1.8.1
-        with:
-          scan-mode: lockfile
-          # Gradle 支持有限，先扫 manifest files，后续可调整
-          results-file-path: osv-results.json
-          exit-code: "0"
+          scan-args: |
+            --format sarif
+            --output osv-results.sarif
+            --recursive
+            .
 
       - name: Upload OSV results
         if: always()
