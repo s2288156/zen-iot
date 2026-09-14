@@ -157,8 +157,8 @@ spotless {
 val isWindows = System.getProperty("os.name").lowercase().contains("windows")
 val npx = if (isWindows) "npx.cmd" else "npx"
 
-// markdownlint-cli 的 `**` 不匹配以点开头的路径段，需显式列出隐藏的 .ai 目录
-val markdownTargets = listOf("**/*.md", ".ai/**/*.md")
+// .ai/ 是 gitignore 的临时笔记：和 Spotless 一样排除，未跟踪文件不该卡住 pre-push
+val markdownTargets = listOf("**/*.md")
 
 val lintMarkdown = tasks.register<Exec>("lintMarkdown") {
 	group = "verification"
