@@ -163,7 +163,7 @@ jobs:
 
       # v2 只用 env 变量，不接受 with 输入；配置文件路径通过 GITLEAKS_CONFIG 指定
       # PR/push 扫描范围自动切换：PR = changed files, push = all
-      - uses: gitleaks/gitleaks-action@v2
+      - uses: gitleaks/gitleaks-action@v3
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GITLEAKS_CONFIG: ".gitleaks.toml"
