@@ -169,33 +169,13 @@ jobs:
           GITLEAKS_CONFIG: ".gitleaks.toml"
 
   # ——— 依赖漏洞扫描（weekly + PR，非阻断）———
+  # google/osv-scanner-action 仓库 tag 是 v1.9.2（不是 CLI 的 v2.x）；
+  # 它只提供 reusable workflows，不提供独立 action entrypoint
   osv-scan:
     name: Dependency vulnerability scan (OSV)
-    runs-on: ubuntu-latest
-    timeout-minutes: 10
     continue-on-error: true
     permissions:
       contents: read
-      # 需要上传 SARIF 到 GitHub Security tab
       security-events: write
-    steps:
-      - uses: actions/checkout@v4
-
-      # google/osv-scanner-action v2 has both a reusable workflow and an action entrypoint;
-      # the action itself is at the /osv-scanner-action sub-path
-      - uses: google/osv-scanner-action/osv-scanner-action@v2
-        with:
-          scan-args: |
-            --format sarif
-            --output osv-results.sarif
-            --recursive
-            .
-
-      - name: Upload OSV results
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: osv-scan-results
-          path: osv-results.json
-          if-no-files-found: ignore
-          retention-days: 7
+    # 调用上游仓库的 reusable workflow，内部处理 checkout + scan + SARIF upload
+    uses: "google/osv-scanner-action/.github/workflows/osv-scanner-reusable.yml@v1.9.2"

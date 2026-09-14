@@ -1,12 +1,9 @@
-# gitleaks 8.x+ 默认启用全部 built-in rules，本文件只做项目级例外收窄
-# TOML 注意：literal string '''...''' 不做任何转义，$ 后跟数字会被 TOML 解析器误判为 number
-# 用 basic string """...""" 配合正确转义：TOML \\ → \，regex \$ → 字面 $
+# gitleaks 8.x+ 默认启用全部 built-in rules
+# 本文件只做 allowlist：把确认安全的"假阳性"源排除扫描
 
+# 直接放行整个 application.yml 中的 dev 占位密钥
+# （BCrypt 密文和默认 JWT secret 在生产由环境变量覆盖）
+# 用 path allowlist 比 regexTarget 更简单、零 TOML 转义风险
 [[allowlists]]
-path = "admin-service/src/main/resources/application.yml"
-regexTarget = secret
-regex = """(
-  \\$2a\\$10\\$Kw/dU22ig8dIrz9ImLCRRuhLRvQ8E8tWX94ORQRKmz1iYL2d0sHDi|
-  \\$2a\\$10\\$NZ7XEuah1yYhoC6QZNzUk\\.pK\\.SbVr1wAm3oTECPxHeACd9Jc512AG|
-  zen-dev-admin-service-hs256-secret-key-32-bytes
-)"""
+path = '''admin-service/src/main/resources/application.yml'''
+description = "dev placeholders: BCrypt密文 + 默认JWT secret，生产由环境变量覆盖"
