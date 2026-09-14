@@ -1,25 +1,13 @@
 plugins {
 	java
-	alias(libs.plugins.spring.dependency.management) apply false
-	alias(libs.plugins.spring.boot) apply false
-	alias(libs.plugins.spotless)
-	alias(libs.plugins.spotbugs) apply false
+	id("io.spring.dependency-management") version "1.1.7" apply false
+	id("org.springframework.boot") version "4.1.1" apply false
+	id("com.diffplug.spotless") version "8.10.1"
+	id("com.github.spotbugs") version "6.5.11" apply false
 }
 
 group = "com.zen"
 version = "0.0.1-SNAPSHOT"
-
-// Kotlin DSL 闭包作用域问题：subprojects { ... } 里的 libs 会被解析为子项目的扩展，
-// 但 Gradle 9 在根脚本执行 subprojects 时子项目还没注入 catalog——所以先在根上下文把所有
-// 需要的版本值解析到 val，再在 subprojects 里用这些已求值的值
-val vSpringBoot = libs.versions.springBoot.get()
-val vSpringCloud = libs.versions.springCloud.get()
-val vSpringCloudAlibaba = libs.versions.springCloudAlibaba.get()
-val vJjwt = libs.versions.jjwt.get()
-val vArchunit = libs.versions.archunit.get()
-val vLog4j = libs.versions.log4j.get()
-val vSpotbugsTool = libs.versions.spotbugsTool.get()
-val vPalantir = libs.versions.palantir.get()
 
 // 依赖本机 MySQL/Nacos/Redis 的测试一律打 @Tag("integration")，默认从 test/check 排除，
 // 这样 check 在干净环境下也是可执行的真门禁；容器就绪时用 ./gradlew test -PintegrationTests 纳入
@@ -33,19 +21,17 @@ subprojects {
 	apply(plugin = "com.github.spotbugs")
 
 	// 版本只在根声明一次，子模块依赖一律不写版本号；接入新的第三方栈时在此追加 BOM
-	// BOM 版本号集中在 gradle/libs.versions.toml，这里只用根级已求值的 val，避免 Kotlin DSL
-	// 闭包作用域解析子项目扩展时 libs 尚未注入的问题
 	configure<io.spring.gradle.dependencymanagement.dsl.DependencyManagementExtension> {
 		imports {
-			mavenBom("org.springframework.boot:spring-boot-dependencies:$vSpringBoot")
-			mavenBom("org.springframework.cloud:spring-cloud-dependencies:$vSpringCloud")
-			mavenBom("com.alibaba.cloud:spring-cloud-alibaba-dependencies:$vSpringCloudAlibaba")
+			mavenBom("org.springframework.boot:spring-boot-dependencies:4.1.1")
+			mavenBom("org.springframework.cloud:spring-cloud-dependencies:2025.1.2")
+			mavenBom("com.alibaba.cloud:spring-cloud-alibaba-dependencies:2025.1.0.0")
 			// common-core 以 api 暴露 jjwt 类型，版本必须在根统一管；模块局部 BOM 不会传递给消费方
-			mavenBom("io.jsonwebtoken:jjwt-bom:$vJjwt")
+			mavenBom("io.jsonwebtoken:jjwt-bom:0.12.7")
 		}
 		// ArchUnit 没有 BOM，用单条约束把版本留在根，模块仍不写版本号
 		dependencies {
-			dependency("com.tngtech.archunit:archunit-junit5:$vArchunit")
+			dependency("com.tngtech.archunit:archunit-junit5:1.5.0")
 			/*
 			 * Boot 4.1.1 的 BOM 把 log4j2 钉在 2.25.1，而 2.25.1 的 POM 链里
 			 * error_prone_annotations 的版本是 ${error-prone.version}——该属性定义在上溯两级的
@@ -56,7 +42,7 @@ subprojects {
 			 * 这里按应用侧 nacos-log4j2-adapter 实际解析到的 2.25.5 对齐：2.25.1 不再进图，告警消失，
 			 * 且 log4j-core 与 log4j-api 保持同版本。Boot 的 BOM 升到 ≥ 2.26.1 后可删掉这条。
 			 */
-			dependency("org.apache.logging.log4j:log4j-core:$vLog4j")
+			dependency("org.apache.logging.log4j:log4j-core:2.25.5")
 		}
 	}
 
@@ -107,9 +93,9 @@ subprojects {
 		reports.create("xml") { required.set(true) }
 	}
 
-	// 缺陷扫描：6.5.x 的 Threshold 已改名 Confidence；toolVersion 也纳入 catalog，升级时只改 toml
+	// 缺陷扫描：6.5.x 的 Threshold 已改名 Confidence
 	configure<com.github.spotbugs.snom.SpotBugsExtension> {
-		toolVersion.set(vSpotbugsTool)
+		toolVersion.set("4.10.4")
 		effort.set(com.github.spotbugs.snom.Effort.DEFAULT)
 		reportLevel.set(com.github.spotbugs.snom.Confidence.MEDIUM)
 		ignoreFailures.set(false)
@@ -130,7 +116,7 @@ spotless {
 	java {
 		target("**/*.java")
 		targetExclude("**/build/**", "**/bin/**")
-		palantirJavaFormat(vPalantir)
+		palantirJavaFormat("2.97.0")
 		removeUnusedImports()
 		toggleOffOn()
 	}

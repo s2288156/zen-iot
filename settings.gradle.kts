@@ -9,7 +9,6 @@ plugins {
 
 // 集中式仓库声明：根项目（Spotless detached configuration）与所有子项目自动继承；
 // 子项目不再单独声明 repositories，若未来某个子项目需要私有仓库可在其脚本里追加
-// Gradle 9 自动加载 gradle/libs.versions.toml 为 `libs` catalog，无需显式声明
 dependencyResolutionManagement {
 	repositoriesMode.set(RepositoriesMode.PREFER_SETTINGS)
 	repositories {
