@@ -2,7 +2,7 @@ plugins {
 	java
 	id("io.spring.dependency-management") version "1.1.7" apply false
 	id("org.springframework.boot") version "4.1.1" apply false
-	id("com.diffplug.spotless") version "8.10.1"
+	id("com.diffplug.spotless") version "8.10.2"
 	id("com.github.spotbugs") version "6.5.11" apply false
 }
 
@@ -24,10 +24,10 @@ subprojects {
 	configure<io.spring.gradle.dependencymanagement.dsl.DependencyManagementExtension> {
 		imports {
 			mavenBom("org.springframework.boot:spring-boot-dependencies:4.1.1")
-			mavenBom("org.springframework.cloud:spring-cloud-dependencies:2025.1.2")
+			mavenBom("org.springframework.cloud:spring-cloud-dependencies:2025.1.3")
 			mavenBom("com.alibaba.cloud:spring-cloud-alibaba-dependencies:2025.1.0.0")
 			// common-core 以 api 暴露 jjwt 类型，版本必须在根统一管；模块局部 BOM 不会传递给消费方
-			mavenBom("io.jsonwebtoken:jjwt-bom:0.12.7")
+			mavenBom("io.jsonwebtoken:jjwt-bom:0.13.0")
 		}
 		// ArchUnit 没有 BOM，用单条约束把版本留在根，模块仍不写版本号
 		dependencies {
@@ -42,7 +42,7 @@ subprojects {
 			 * 这里按应用侧 nacos-log4j2-adapter 实际解析到的 2.25.5 对齐：2.25.1 不再进图，告警消失，
 			 * 且 log4j-core 与 log4j-api 保持同版本。Boot 的 BOM 升到 ≥ 2.26.1 后可删掉这条。
 			 */
-			dependency("org.apache.logging.log4j:log4j-core:2.25.5")
+			dependency("org.apache.logging.log4j:log4j-core:2.26.1")
 		}
 	}
 
