@@ -33,7 +33,7 @@ jobs:
           java-version: "21"
 
       - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@v4
+        uses: gradle/actions/setup-gradle@v6
 
       - name: Run check (no integration tests)
         run: ./gradlew --no-daemon clean check
@@ -89,7 +89,7 @@ jobs:
           java-version: "21"
 
       - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@v4
+        uses: gradle/actions/setup-gradle@v6
 
       # Nacos 无官方 service 镜像，单独拉起并轮询就绪
       # Nacos 3.x 即使关闭鉴权也要求 NACOS_AUTH_* 三项占位值
