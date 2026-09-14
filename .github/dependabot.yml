@@ -1,0 +1,40 @@
+# 依赖更新自动化
+# Dependabot 识别 gradle/libs.versions.toml 中的版本引用并生成 PR；
+# 所有 PR 自动触发 .github/workflows/ci.yml，失败即人工介入，不自动合并
+
+version: 2
+
+updates:
+  # Gradle 依赖（Version Catalog 统一管理）
+  - package-ecosystem: gradle
+    directory: "/"
+    schedule:
+      interval: weekly
+      day: monday
+      time: "09:00"
+      timezone: Asia/Hong_Kong
+    # 版本分组：minor/patch 自动成组 PR，major 升级单独 PR（破坏性风险）
+    groups:
+      patch-and-minor:
+        update-types:
+          - patch
+          - minor
+    open-pull-requests-limit: 10
+    labels:
+      - dependencies
+      - gradle
+    commit-message:
+      prefix: build
+      include: scope
+
+  # GitHub Actions
+  - package-ecosystem: github-actions
+    directory: "/"
+    schedule:
+      interval: monthly
+    labels:
+      - dependencies
+      - github-actions
+    commit-message:
+      prefix: ci
+      include: scope

@@ -1,0 +1,4 @@
+# CODEOWNERS —— 当前单人阶段，全部路径 owner 为维护者
+# 未来多服务阶段按目录拆分（如 /admin-service @backend-team /frontend @frontend-team）
+
+* @s2288156

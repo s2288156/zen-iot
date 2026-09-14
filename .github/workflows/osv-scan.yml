@@ -1,0 +1,23 @@
+name: OSV Dependency Scan
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+  # 每周一早 10:00 UTC 跑全量扫描
+  schedule:
+    - cron: "0 2 * * 1"
+
+concurrency:
+  group: osv-scan-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  osv-scan:
+    # google/osv-scanner-action v1.9.2 — 注意：这是 action 封装层仓库 tag，
+    # 独立于 osv-scanner CLI 的 v2.x 版本号。
+    # 它只提供 reusable workflows（.github/workflows/*.yml），不提供独立 action entrypoint
+    uses: "google/osv-scanner-action/.github/workflows/osv-scanner-reusable.yml@v1.9.2"
+    with:
+      fail-on-vuln: false # 非阻断，只告警

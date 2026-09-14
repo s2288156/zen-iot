@@ -1,0 +1,31 @@
+# Version Catalog —— 所有版本号的单一可信来源
+# 升级依赖时只改这里，根脚本和子模块通过 libs.versions.xxx 或 alias(libs.plugins.xxx) 引用
+# 注意：dependency-management 的 mavenBom() / dependency() 只接受 String，BOM 版本统一用 "${libs.versions.xxx.get()}" 拼接
+
+[versions]
+springBoot = "4.1.1"
+springCloud = "2025.1.2"
+springCloudAlibaba = "2025.1.0.0"
+jjwt = "0.12.7"
+springDependencyManagement = "1.1.7"
+spotless = "8.10.1"
+spotbugsPlugin = "6.5.11"
+spotbugsTool = "4.10.4"
+archunit = "1.5.0"
+log4j = "2.25.5"
+gitHooks = "2.1.23"
+springdoc = "3.1.0"
+palantir = "2.97.0"
+
+[libraries]
+# 单条依赖（无 BOM 覆盖或需要单独钉版本）
+archunit-junit5 = { group = "com.tngtech.archunit", name = "archunit-junit5", version.ref = "archunit" }
+log4j-core = { group = "org.apache.logging.log4j", name = "log4j-core", version.ref = "log4j" }
+springdoc-openapi-starter-webmvc-ui = { group = "org.springdoc", name = "springdoc-openapi-starter-webmvc-ui", version.ref = "springdoc" }
+
+[plugins]
+spring-boot = { id = "org.springframework.boot", version.ref = "springBoot" }
+spring-dependency-management = { id = "io.spring.dependency-management", version.ref = "springDependencyManagement" }
+spotless = { id = "com.diffplug.spotless", version.ref = "spotless" }
+spotbugs = { id = "com.github.spotbugs", version.ref = "spotbugsPlugin" }
+git-hooks = { id = "org.danilopianini.gradle-pre-commit-git-hooks", version.ref = "gitHooks" }
