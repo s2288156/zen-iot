@@ -1,0 +1,13 @@
+# 生产/容器部署 profile：与本地唯一的差异是日志形态。默认 profile 不配 logging.structured，
+# 保持人类可读文本；这里切到 JSON，让采集端可检索、跨服务可按同一 traceId 串联。
+logging:
+  structured:
+    format:
+      # Boot 4 内置 formatter（org.springframework.boot.logging.logback.LogstashStructuredLogFormatter），
+      # 不需要 logstash-logback-encoder；traceId/spanId/userId 等 MDC 字段自动提升为 JSON 顶层字段
+      console: logstash
+      file: logstash
+    json:
+      # 内置 logstash formatter 不带服务名字段，多服务共用一份日志流时无法区分来源
+      add:
+        service: ${spring.application.name}

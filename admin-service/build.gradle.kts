@@ -12,6 +12,8 @@ dependencies {
 	implementation("org.flywaydb:flyway-mysql")
 	// 网关心跳与健康检查用；注册中心见 application.yml 的 spring.cloud.nacos
 	implementation("org.springframework.boot:spring-boot-starter-actuator")
+	// 只保证 /actuator/prometheus 端点与 exposition 格式就绪，Prometheus/Grafana 服务端在 Phase 10 部署
+	runtimeOnly("io.micrometer:micrometer-registry-prometheus")
 	implementation("com.alibaba.cloud:spring-cloud-starter-alibaba-nacos-discovery")
 	// 只要 BCrypt 编码器；引入 starter-security 会装配默认过滤器链，接管 401/403 并绕过统一异常处理
 	implementation("org.springframework.security:spring-security-crypto")

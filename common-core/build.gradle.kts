@@ -13,6 +13,12 @@ dependencies {
 	api("org.springframework.boot:spring-boot-starter-web")
 	api("org.springframework.boot:spring-boot-starter-validation")
 	api("org.springframework.boot:spring-boot-starter-data-jpa")
+	// 链路追踪只做 A 层：traceId 生成/透传/写 MDC，日志可串联，但 span 不上报。
+	// 刻意不用 spring-boot-starter-opentelemetry——它连带 opentelemetry-exporter-otlp 与
+	// micrometer-registry-otlp，会真的开始外发数据；Phase 10 部署追踪后端时再换成该 starter。
+	// Boot 4 起自动配置独立成模块，不引这个就没有 Tracer/traceId 装配
+	implementation("org.springframework.boot:spring-boot-micrometer-tracing-opentelemetry")
+	runtimeOnly("io.micrometer:micrometer-tracing-bridge-otel")
 	// JWT 工具与 Phase 2 的 WebFlux 网关复用同一份代码,故 com.zen.common.core.jwt 不得引用 Servlet API
 	api("io.jsonwebtoken:jjwt-api")
 	runtimeOnly("io.jsonwebtoken:jjwt-impl")

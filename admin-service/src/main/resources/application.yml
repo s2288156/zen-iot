@@ -38,6 +38,21 @@ spring:
         # 服务名取 spring.application.name；Phase 2 网关按该名做 lb:// 发现
         server-addr: ${NACOS_SERVER_ADDR:localhost:8848}
 
+management:
+  endpoints:
+    web:
+      exposure:
+        # 白名单收敛：Boot 默认只开 health，此处仅补 prometheus，env/beans/configprops 一律不暴露
+        # /actuator/** 在 zen.security.whitelist 里免鉴权，暴露面就是匿名可读面
+        include:
+          - health
+          - prometheus
+  endpoint:
+    health:
+      # 打开 liveness/readiness 分组，Phase 10 K8s 探针直接打 /actuator/health/liveness 与 /readiness
+      probes:
+        enabled: true
+
 zen:
   jwt:
     # HS256 密钥，UTF-8 长度必须 ≥ 32 字节；生产由 ZEN_JWT_SECRET 覆盖，并与 Phase 2 网关保持完全一致
