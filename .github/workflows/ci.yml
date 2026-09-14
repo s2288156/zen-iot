@@ -161,16 +161,12 @@ jobs:
         with:
           fetch-depth: 0
 
-      # 官方 action：PR 只扫变更，push/main 扫全量
+      # v2 只用 env 变量，不接受 with 输入；配置文件路径通过 GITLEAKS_CONFIG 指定
+      # PR/push 扫描范围自动切换：PR = changed files, push = all
       - uses: gitleaks/gitleaks-action@v2
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          args: >-
-            --config-path .gitleaks.toml
-            --report-path /tmp/gitleaks-report.json
-          # scope 自动处理：PR = changed files, push = all
-          # 见 https://github.com/gitleaks/gitleaks-action
+          GITLEAKS_CONFIG: ".gitleaks.toml"
 
   # ——— 依赖漏洞扫描（weekly + PR，非阻断）———
   osv-scan:
