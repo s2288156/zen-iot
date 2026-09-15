@@ -1,11 +1,12 @@
 # 依赖更新自动化
-# Dependabot 识别 gradle/libs.versions.toml 中的版本引用并生成 PR；
+# gradle ecosystem 直接解析 build.gradle.kts / settings.gradle.kts 里硬编码的坐标
+# （含 dependencyManagement 的 mavenBom 字符串与单条 dependency 约束）与插件版本；
 # 所有 PR 自动触发 .github/workflows/ci.yml，失败即人工介入，不自动合并
 
 version: 2
 
 updates:
-  # Gradle 依赖（Version Catalog 统一管理）
+  # Gradle 依赖（版本硬编码在根 build.gradle.kts 与 settings.gradle.kts）
   - package-ecosystem: gradle
     directory: "/"
     schedule:
