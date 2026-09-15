@@ -14,6 +14,17 @@ version = "0.0.1-SNAPSHOT"
 val integrationTag = "integration"
 val runIntegrationTests = project.hasProperty("integrationTests")
 
+// 版本一致性门禁的两个输入：
+// - sameVersionGroups：同一 group 内的构件必须同版本。触发源是"单条钉住组内一个构件"的约束——
+//   Dependabot 每周一抬它却不抬 BOM 管的兄弟构件，#15 与 #20 两次把 spotbugs 配置拆成 core 2.26.1 + api 2.25.5。
+//   根脚本现在不留这种约束，门禁守的是将来再有人加。
+// - coherenceConfigurations：跨模块比较要看的配置。testRuntimeClasspath 是这里最有意义的一条，
+//   库模块的自测运行时一旦和应用的不是同一套，CI 绿着也能藏住序列化行为差异。
+val sameVersionGroups = listOf("org.apache.logging.log4j")
+val coherenceConfigurations =
+	listOf("annotationProcessor", "compileClasspath", "runtimeClasspath", "testRuntimeClasspath", "spotbugs")
+val versionReportPath = "reports/dependency-versions.txt"
+
 subprojects {
 	apply(plugin = "java")
 	apply(plugin = "jacoco")
@@ -32,19 +43,6 @@ subprojects {
 		// ArchUnit 没有 BOM，用单条约束把版本留在根，模块仍不写版本号
 		dependencies {
 			dependency("com.tngtech.archunit:archunit-junit5:1.5.0")
-			/*
-			 * 全构建唯一带 log4j-core 的地方是 SpotBugs 引擎的 classpath（spotbugs 配置）。
-			 * log4j 2.25.1 的 POM 链里 error_prone_annotations 写作 ${error-prone.version}，该属性
-			 * 定义在上溯两级的 logging-parent 里、名字还对不上，Gradle 的 POM 模型构建器不展开它，
-			 * 于是每次解析刷一条「Errors occurred while building effective model」告警（仅告警，不影响构建结果）。
-			 * 2.25.1 出自 spring-cloud-alibaba-dependencies 直接声明的 <log4j-core.version>：Boot 的 BOM
-			 * 只在 apply 了 org.springframework.boot 插件的模块里盖得住它，common-core 只挂了依赖管理插件，
-			 * SCA 的直接声明就赢了（实测 log4j-core 与 log4j-slf4j2-impl 两项在两个模块里版本不同）。
-			 * 所以这条约束删不掉：删了 common-core 立刻回落到 2.25.1，告警回归。
-			 * 它只钉 core，log4j-api 跟着 Boot 的 log4j-bom 走；Boot 升 log4j2 时这一行要同步，
-			 * 否则反过来变成 core 低于 api。依赖管理对 spotbugs 配置同样改写版本，force / strictly 会被压过。
-			 */
-			dependency("org.apache.logging.log4j:log4j-core:2.25.5")
 		}
 	}
 
@@ -104,34 +102,45 @@ subprojects {
 		excludeFilter.set(rootProject.layout.projectDirectory.file("gradle/spotbugs/exclude.xml"))
 	}
 
-	// 同组构件必须解析到同一版本：Dependabot 只抬根脚本里单条钉住的坐标，不会同步 BOM 管的兄弟构件，
-	// 上面那条 override 一改版本，SpotBugs 的 classpath 就同时挂着 core 2.26.1 与 api 2.25.5（#15 实测）。
-	// 这个前提交给构建期断言守住，而不是靠下一个读注释的人重新实测。
-	val sameVersionGroups = listOf("org.apache.logging.log4j")
+	// 只解析本模块的配置：并行执行下跨项目解析会被 Gradle 拒（attempted without an exclusive lock）。
+	// 所以比对分两步——本任务断言"同组同版本"并写出已解析版本报告，根任务 crossModuleVersionCheck 读报告做跨模块比较。
+	// 故意不声明 outputs：依赖版本变了但任务被判定 UP-TO-DATE 会留下过期报告，比门禁空转更糟。
+	val versionReport = layout.buildDirectory.file(versionReportPath)
 	val versionCoherenceCheck = tasks.register("versionCoherenceCheck") {
 		group = "verification"
-		description = "校验 $sameVersionGroups 在 spotbugs 配置上只落到一个版本"
-		val coordinates = provider {
-			configurations.getByName("spotbugs").incoming.artifacts.artifacts.mapNotNull { artifact ->
-				val id = artifact.id.componentIdentifier as? ModuleComponentIdentifier ?: return@mapNotNull null
-				Triple(id.group, id.version, artifact.file.name)
-			}
+		description = "断言 $sameVersionGroups 在本模块各配置内同版本，并写出已解析版本报告"
+		val resolved = provider {
+			coherenceConfigurations.mapNotNull { name ->
+				val cfg = configurations.findByName(name)
+				if (cfg == null || !cfg.isCanBeResolved) {
+					null
+				} else {
+					cfg.incoming.artifacts.artifacts.mapNotNull { artifact ->
+						val id = artifact.id.componentIdentifier as? ModuleComponentIdentifier ?: return@mapNotNull null
+						Triple(name, id.displayName.removeSuffix(":${id.version}"), id.version)
+					}
+				}
+			}.flatten().distinct()
 		}
 		doLast {
-			val byGroup = coordinates.get().groupBy({ it.first })
-			val violations = sameVersionGroups.mapNotNull { group ->
-				val matched = byGroup[group] ?: return@mapNotNull null
-				val versions = matched.map { it.second }.distinct().sorted()
-				if (versions.size > 1) group to Pair(versions, matched.map { it.third }.sorted()) else null
-			}
-			if (violations.isNotEmpty()) {
+			val rows = resolved.get()
+			val split = rows.filter { it.second.substringBefore(':') in sameVersionGroups }
+				.groupBy({ it.first }, { it })
+				.mapNotNull { (name, hits) ->
+					if (hits.map { it.third }.distinct().size < 2) null else {
+						"  $name ${hits.first().second.substringBefore(':')} -> " +
+							hits.sortedBy { it.second }.joinToString(", ") { "${it.second.substringAfter(':')}:${it.third}" }
+					}
+				}
+			if (split.isNotEmpty()) {
 				throw GradleException(
-					"${project.name}: 以下依赖组解析出多个版本，同组构件必须同版本\n" +
-						violations.joinToString("\n") { (group, detail) ->
-							"  $group -> ${detail.first}\n    ${detail.second}"
-						} +
-						"\n对齐根 build.gradle.kts 里单条钉住的版本约束与 BOM 托管的兄弟构件，Dependabot 只会抬前者。",
+					"${project.name}: 同组构件解析出多个版本\n${split.joinToString("\n")}" +
+						"\n单条钉住的约束要连 BOM 管的兄弟构件一起对齐，Dependabot 只会抬前者。",
 				)
+			}
+			versionReport.get().asFile.apply {
+				parentFile.mkdirs()
+				writeText(rows.joinToString("\n") { "${it.first}|${it.second}|${it.third}" } + "\n")
 			}
 		}
 	}
@@ -219,12 +228,47 @@ val compileGate = subprojects.flatMap { subproject ->
 	)
 }
 
+// 同一坐标在各模块必须解析到同一版本。common-core 的 testRuntimeClasspath 曾在 Jackson 2.12.7.1 上跑，
+// 而 admin-service 运行时是 2.21.5——库模块自测的版本和部署不是一套，CI 绿着也藏得住。
+// 根因是托管优先级：spring-cloud-alibaba-dependencies 直接声明的坐标只在没挂 Boot 插件的模块里生效。
+// 数据来自各模块 versionCoherenceCheck 写的报告（并行执行下根任务不能直接解析别人的配置）。
+val crossModuleVersionCheck = tasks.register("crossModuleVersionCheck") {
+	group = "verification"
+	description = "比对各模块已解析版本报告，同一坐标出现多个版本即失败"
+	dependsOn(subprojects.map { it.tasks.named("versionCoherenceCheck") })
+	val reports = subprojects.map { it.name to it.layout.buildDirectory.file(versionReportPath) }
+	doLast {
+		// key = "配置 坐标"，value = 各模块解析到的版本
+		val seen = mutableMapOf<String, MutableList<Pair<String, String>>>()
+		reports.forEach { (moduleName, report) ->
+			val file = report.get().asFile
+			if (!file.isFile) {
+				throw GradleException("缺少 $moduleName 的已解析版本报告：$file。先跑 ./gradlew versionCoherenceCheck")
+			}
+			file.readLines().filter { it.isNotBlank() }.forEach { line ->
+				val (configurationName, coordinate, version) = line.split('|')
+				seen.getOrPut("$configurationName $coordinate") { mutableListOf() } += moduleName to version
+			}
+		}
+		val drift = seen.toList()
+			.filter { it.second.map { (_, version) -> version }.distinct().size > 1 }
+			.sortedBy { it.first }
+			.map { (key, hits) ->
+				"  $key -> " + hits.sortedBy { it.first }.joinToString(", ") { (moduleName, version) -> "$moduleName=$version" }
+			}
+		if (drift.isNotEmpty()) {
+			throw GradleException("同一坐标在不同模块解析到了不同版本：\n${drift.joinToString("\n")}")
+		}
+	}
+}
+
 // 推送前轻量门禁：格式 + 编译零告警 + 架构约束 + SpotBugs 缺陷扫描，不跑测试；全量门禁仍是 check
 val prePushCheck = tasks.register("prePushCheck") {
 	group = "verification"
-	description = "推送前门禁：Java/Markdown/kts/YAML 格式 + Markdown 规范 + 编译(-Werror) + SpotBugs(main) + 架构约束 + 同组版本一致性"
+	description = "推送前门禁：Java/Markdown/kts/YAML 格式 + Markdown 规范 + 编译(-Werror) + SpotBugs(main) + 架构约束 + 版本一致性"
 	dependsOn(tasks.named("spotlessCheck"), lintMarkdown)
 	dependsOn(compileGate)
+	dependsOn(crossModuleVersionCheck)
 }
 
 tasks.named("spotlessApply") {
@@ -232,5 +276,5 @@ tasks.named("spotlessApply") {
 }
 
 tasks.named("check") {
-	dependsOn(lintMarkdown)
+	dependsOn(lintMarkdown, crossModuleVersionCheck)
 }

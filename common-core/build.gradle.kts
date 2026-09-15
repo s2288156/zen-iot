@@ -1,11 +1,18 @@
 plugins {
 	id("java-library")
 	id("io.spring.dependency-management")
+	// 挂 Boot 插件只为拿它注入的托管版本。只挂依赖管理插件时，spring-cloud-alibaba-dependencies
+	// 直接声明的坐标会盖过 Boot 的 BOM（实测 jackson-databind 2.12.7.1、lombok 1.18.38、slf4j-api 2.0.17），
+	// 于是本模块自测用的版本和 admin-service 运行时不是一套；挂上之后两模块 2230 项托管版本全等。
+	id("org.springframework.boot")
 }
 
-// Spring Framework 7 移除了无 -parameters 时的降级参数名发现;Boot 插件会自动加该 flag，本模块未 apply Boot 插件需显式声明
-tasks.withType<JavaCompile> {
-	options.compilerArgs.add("-parameters")
+// Boot 插件不会因为是 java-library 就自动关 bootJar，不关则 assemble 报「Main class name has not been
+// configured」；关掉之后要重新启用 jar，并把 Boot 给 jar 的 -plain classifier 复位成默认产物名
+tasks.named<org.springframework.boot.gradle.tasks.bundling.BootJar>("bootJar") { enabled = false }
+tasks.named<Jar>("jar") {
+	enabled = true
+	archiveClassifier.set("")
 }
 
 dependencies {
