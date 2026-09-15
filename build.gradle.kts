@@ -33,16 +33,18 @@ subprojects {
 		dependencies {
 			dependency("com.tngtech.archunit:archunit-junit5:1.5.0")
 			/*
-			 * Boot 4.1.1 的 BOM 把 log4j2 钉在 2.25.1，而 2.25.1 的 POM 链里
-			 * error_prone_annotations 的版本是 ${error-prone.version}——该属性定义在上溯两级的
-			 * logging-parent 里，Gradle 的 POM 模型构建器不展开它，于是每次解析都刷一条
-			 * 「Errors occurred while building effective model」告警（仅告警，不影响构建结果）。
-			 * 全构建唯一带 log4j-core 的地方是 SpotBugs 引擎的 classpath（spotbugs 配置），
-			 * 依赖管理插件对该配置一视同仁地改写版本（force / strictly 实测都被它压过）。
-			 * 这里按应用侧 nacos-log4j2-adapter 实际解析到的 2.25.5 对齐：2.25.1 不再进图，告警消失，
-			 * 且 log4j-core 与 log4j-api 保持同版本。Boot 的 BOM 升到 ≥ 2.26.1 后可删掉这条。
+			 * 全构建唯一带 log4j-core 的地方是 SpotBugs 引擎的 classpath（spotbugs 配置）。
+			 * log4j 2.25.1 的 POM 链里 error_prone_annotations 写作 ${error-prone.version}，该属性
+			 * 定义在上溯两级的 logging-parent 里、名字还对不上，Gradle 的 POM 模型构建器不展开它，
+			 * 于是每次解析刷一条「Errors occurred while building effective model」告警（仅告警，不影响构建结果）。
+			 * 2.25.1 出自 spring-cloud-alibaba-dependencies 直接声明的 <log4j-core.version>：Boot 的 BOM
+			 * 只在 apply 了 org.springframework.boot 插件的模块里盖得住它，common-core 只挂了依赖管理插件，
+			 * SCA 的直接声明就赢了（实测 log4j-core 与 log4j-slf4j2-impl 两项在两个模块里版本不同）。
+			 * 所以这条约束删不掉：删了 common-core 立刻回落到 2.25.1，告警回归。
+			 * 它只钉 core，log4j-api 跟着 Boot 的 log4j-bom 走；Boot 升 log4j2 时这一行要同步，
+			 * 否则反过来变成 core 低于 api。依赖管理对 spotbugs 配置同样改写版本，force / strictly 会被压过。
 			 */
-			dependency("org.apache.logging.log4j:log4j-core:2.26.1")
+			dependency("org.apache.logging.log4j:log4j-core:2.25.5")
 		}
 	}
 
@@ -100,6 +102,41 @@ subprojects {
 		reportLevel.set(com.github.spotbugs.snom.Confidence.MEDIUM)
 		ignoreFailures.set(false)
 		excludeFilter.set(rootProject.layout.projectDirectory.file("gradle/spotbugs/exclude.xml"))
+	}
+
+	// 同组构件必须解析到同一版本：Dependabot 只抬根脚本里单条钉住的坐标，不会同步 BOM 管的兄弟构件，
+	// 上面那条 override 一改版本，SpotBugs 的 classpath 就同时挂着 core 2.26.1 与 api 2.25.5（#15 实测）。
+	// 这个前提交给构建期断言守住，而不是靠下一个读注释的人重新实测。
+	val sameVersionGroups = listOf("org.apache.logging.log4j")
+	val versionCoherenceCheck = tasks.register("versionCoherenceCheck") {
+		group = "verification"
+		description = "校验 $sameVersionGroups 在 spotbugs 配置上只落到一个版本"
+		val coordinates = provider {
+			configurations.getByName("spotbugs").incoming.artifacts.artifacts.mapNotNull { artifact ->
+				val id = artifact.id.componentIdentifier as? ModuleComponentIdentifier ?: return@mapNotNull null
+				Triple(id.group, id.version, artifact.file.name)
+			}
+		}
+		doLast {
+			val byGroup = coordinates.get().groupBy({ it.first })
+			val violations = sameVersionGroups.mapNotNull { group ->
+				val matched = byGroup[group] ?: return@mapNotNull null
+				val versions = matched.map { it.second }.distinct().sorted()
+				if (versions.size > 1) group to Pair(versions, matched.map { it.third }.sorted()) else null
+			}
+			if (violations.isNotEmpty()) {
+				throw GradleException(
+					"${project.name}: 以下依赖组解析出多个版本，同组构件必须同版本\n" +
+						violations.joinToString("\n") { (group, detail) ->
+							"  $group -> ${detail.first}\n    ${detail.second}"
+						} +
+						"\n对齐根 build.gradle.kts 里单条钉住的版本约束与 BOM 托管的兄弟构件，Dependabot 只会抬前者。",
+				)
+			}
+		}
+	}
+	tasks.named("check") {
+		dependsOn(versionCoherenceCheck)
 	}
 
 	// 覆盖率报告：只出 XML + HTML，不设阈值门禁；数据由 test 任务产出
@@ -178,13 +215,14 @@ val compileGate = subprojects.flatMap { subproject ->
 		subproject.tasks.named("testClasses"),
 		subproject.tasks.named("spotbugsMain"),
 		subproject.tasks.named("architectureTest"),
+		subproject.tasks.named("versionCoherenceCheck"),
 	)
 }
 
 // 推送前轻量门禁：格式 + 编译零告警 + 架构约束 + SpotBugs 缺陷扫描，不跑测试；全量门禁仍是 check
 val prePushCheck = tasks.register("prePushCheck") {
 	group = "verification"
-	description = "推送前门禁：Java/Markdown/kts/YAML 格式 + Markdown 规范 + 编译(-Werror) + SpotBugs(main) + 架构约束"
+	description = "推送前门禁：Java/Markdown/kts/YAML 格式 + Markdown 规范 + 编译(-Werror) + SpotBugs(main) + 架构约束 + 同组版本一致性"
 	dependsOn(tasks.named("spotlessCheck"), lintMarkdown)
 	dependsOn(compileGate)
 }

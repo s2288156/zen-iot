@@ -1,7 +1,7 @@
 #!/usr/bin/env kotlin
 
-// settings.kts 只有一个 git-hooks 插件，硬编码可接受；根 build.gradle.kts 的 4 个插件走 catalog alias
-// pluginManagement 块在此省略：Catalog 自动加载只对 build.gradle.kts 生效，settings 若需 alias 需显式声明
+// 插件版本一律硬编码：本文件只有 git-hooks 一个插件，根 build.gradle.kts 的 4 个插件同理
+// 未写 pluginManagement 块：目前没有自定义解析源的需求，真要接私有插件仓库时在此声明
 
 plugins {
 	id("org.danilopianini.gradle-pre-commit-git-hooks") version "2.1.24"

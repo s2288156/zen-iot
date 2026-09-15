@@ -161,7 +161,7 @@ jobs:
         with:
           fetch-depth: 0
 
-      # v2 只用 env 变量，不接受 with 输入；配置文件路径通过 GITLEAKS_CONFIG 指定
+      # 该 action 不声明 with 输入（v2/v3 一致），配置文件路径走 GITLEAKS_CONFIG env
       # PR/push 扫描范围自动切换：PR = changed files, push = all
       - uses: gitleaks/gitleaks-action@v3
         env:
