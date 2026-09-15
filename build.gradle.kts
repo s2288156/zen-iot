@@ -44,7 +44,7 @@ subprojects {
 			 * 它只钉 core，log4j-api 跟着 Boot 的 log4j-bom 走；Boot 升 log4j2 时这一行要同步，
 			 * 否则反过来变成 core 低于 api。依赖管理对 spotbugs 配置同样改写版本，force / strictly 会被压过。
 			 */
-			dependency("org.apache.logging.log4j:log4j-core:2.25.5")
+			dependency("org.apache.logging.log4j:log4j-core:2.26.1")
 		}
 	}
 
