@@ -134,8 +134,9 @@ zen-iot/
 
 现有架构约束（违反即 `architectureTest` 失败）：
 
-- `admin-service`：`controller → service → repository → entity` 单向；controller 不得依赖持久化实体；`@Transactional` 只出现在 `service` 层
-- `common-core`：不得依赖任何业务服务包；`com.zen.common.core.jwt` 不得引用 `jakarta.servlet`（Phase 2 网关要复用同一份 JWT 代码）
+- `admin-service`：`controller → service → repository → entity` 单向；controller 不得依赖持久化实体；`@Transactional` 只出现在 `service` 层；`*Controller`/`*Service`/`*Repository`/`*Entity` 各归其包；包切片之间无循环依赖
+- `common-core`：不得依赖任何业务服务包；`com.zen.common.core.jwt` 不得引用 `jakarta.servlet`（Phase 2 网关要复用同一份 JWT 代码）；包切片之间无循环依赖
+- 各模块（`ArchitectureTest` 逐模块断言）：禁止字段注入（`@Autowired`/`@Resource`/`@Inject` 落在字段上），一律构造器注入；禁止 `System.out`/`System.err` 与 `printStackTrace`，输出必须走日志框架，否则拿不到 P3-1 注入的 traceId；禁止 `new Date()`——只禁构造调用而不禁整个 `java.util.Date`，因为 jjwt 的 `issuedAt`/`expiration` 签名只收 `Date`
 - 全局：禁止使用 Spring Framework 7 已废弃的 `org.springframework.lang.Nullable` / `NonNull`，需要标注可空性时用 `org.jspecify.annotations.*`
 
 依赖本机中间件的测试必须打 `@Tag("integration")`，`test`/`check` 默认排除它们，因此 `./gradlew check` 在干净机器上也是可执行的真门禁；容器起来后用 `./gradlew test -PintegrationTests` 补跑。

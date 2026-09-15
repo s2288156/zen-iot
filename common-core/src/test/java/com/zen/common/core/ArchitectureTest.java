@@ -1,6 +1,9 @@
 package com.zen.common.core;
 
 import static com.tngtech.archunit.lang.syntax.ArchRuleDefinition.noClasses;
+import static com.tngtech.archunit.library.GeneralCodingRules.NO_CLASSES_SHOULD_ACCESS_STANDARD_STREAMS;
+import static com.tngtech.archunit.library.GeneralCodingRules.NO_CLASSES_SHOULD_USE_FIELD_INJECTION;
+import static com.tngtech.archunit.library.dependencies.SlicesRuleDefinition.slices;
 
 import com.tngtech.archunit.core.domain.JavaClasses;
 import com.tngtech.archunit.core.importer.ClassFileImporter;
@@ -59,5 +62,40 @@ class ArchitectureTest {
                 .haveFullyQualifiedName("org.springframework.lang.NonNull")
                 .because("Spring 7 已废弃这两个注解,需要可空性标注时用 org.jspecify.annotations.*")
                 .check(COMMON_CORE);
+    }
+
+    /** 公共模块同样只走构造器注入:自动配置类靠方法参数拿依赖,字段注入会让 bean 的装配顺序变得不可读。 */
+    @Test
+    void neverInjectsByField() {
+        NO_CLASSES_SHOULD_USE_FIELD_INJECTION.check(COMMON_CORE);
+    }
+
+    /**
+     * 输出统一走日志框架:P3-1 已把 traceId 打进日志,而标准流输出既拿不到 traceId、也不受日志级别控制。
+     * ArchUnit 的这条内置规则同时覆盖 {@code System.out}/{@code System.err} 与 {@code Throwable#printStackTrace}。
+     */
+    @Test
+    void neverWritesToStandardStreams() {
+        NO_CLASSES_SHOULD_ACCESS_STANDARD_STREAMS.check(COMMON_CORE);
+    }
+
+    /**
+     * 时间源统一:{@code new Date()} 隐式读系统时钟、无法注入测试时钟。
+     * 刻意只禁构造调用而不禁整个 {@code java.util.Date}:本模块的 {@link com.zen.common.core.jwt.JwtTokenIssuer}
+     * 必须把 {@code Instant} 转成 Date 递给 jjwt,{@code Date.from(Instant)} 属于那道 API 边界。
+     */
+    @Test
+    void neverConstructsJavaUtilDate() {
+        noClasses()
+                .should()
+                .callConstructor("java.util.Date")
+                .because("用 java.time;java.util.Date 只允许作为 jjwt 的 API 边界短暂出现")
+                .check(COMMON_CORE);
+    }
+
+    /** 包切片之间无循环依赖:common-core 会被网关与所有业务服务依赖,成环的包没法在需要时单独拆出。 */
+    @Test
+    void packageSlicesAreFreeOfCycles() {
+        slices().matching("com.zen.common.core.(*)..").should().beFreeOfCycles().check(COMMON_CORE);
     }
 }
