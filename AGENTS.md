@@ -36,10 +36,10 @@ Every rule below has a gate behind it, so a workaround shows up as a failed push
   build failure. Suppress only with a reason.
 - **Nullability**: `org.springframework.lang.Nullable`/`NonNull` are deprecated in Spring Framework 7. Use
   `org.jspecify.annotations.*` when an annotation is needed; both `-Werror` and an ArchUnit rule reject the Spring ones.
-- **Layering** (ArchUnit, `architectureTest`): `controller → service → repository → entity` one-way, controllers never
-  touch persistence entities, `@Transactional` only appears in `service`, each `*Controller`/`*Service`/`*Repository`/
-  `*Entity` resides in its own package, package slices stay acyclic, `common-core` never depends on a business
-  service, and `com.zen.common.core.jwt` stays free of the Servlet API so the Phase 2 gateway can reuse it.
+  - **Layering** (ArchUnit, `architectureTest`): `controller → service → repository → entity` one-way, controllers never
+    touch persistence entities, `@Transactional` only appears in `service`, each `*Controller`/`*Service`/`*Repository`/
+    `*Entity` resides in its own package, package slices stay acyclic, `common-core` never depends on a business
+    service, and `com.zen.common.core.jwt` stays free of the Servlet API so the Phase 2 gateway can reuse it.
 - **Coding hygiene** (ArchUnit, asserted per module): constructor injection only, so `@Autowired`/`@Resource`/`@Inject`
   never sit on a field; no `System.out`/`System.err`/`printStackTrace`, because only the logging framework carries the
   traceId from P3-1; no `new Date()`, while `java.util.Date` itself stays legal for jjwt's `issuedAt`/`expiration`.

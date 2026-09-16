@@ -1,6 +1,6 @@
 server:
-  # 8081 被本机 nacos-standalone 容器的控制台占用
-  port: 8082
+  # 端口按 Phase 0「端口规划」分配：gateway 占 28080，业务服务从 28081 起递增
+  port: 28081
 
 spring:
   application:

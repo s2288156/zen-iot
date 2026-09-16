@@ -26,7 +26,10 @@ gitHooks {
 		tasks("spotlessCheck")
 	}
 	commitMsg {
-		conventionalCommits()
+		// 不用插件的 conventionalCommits() 便捷方法：它的内置脚本用 POSIX [[:graph:]] / [[:alnum:]]，
+		// 在 GNU grep 默认 locale 下只匹配 ASCII，导致中文 subject / 含中文 scope 的提交信息被误拒。
+		// 下方独立脚本完全照搬插件模板（v2.1.24），仅放宽 scope/subject 两处字符类以支持 CJK。
+		from(file("gradle/git-hooks/commit-msg.sh"))
 	}
 	hook("pre-push") {
 		tasks("prePushCheck")
