@@ -1,5 +1,6 @@
 package com.zen.common.core.security;
 
+import com.zen.common.security.auth.UserPrincipal;
 import jakarta.servlet.http.HttpServletRequest;
 
 /** 从请求中还原登录身份,是 {@code zen.security.context-source} 两种取值的共同抽象。 */

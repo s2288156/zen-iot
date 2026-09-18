@@ -4,8 +4,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import com.zen.admin.entity.UserEntity;
 import com.zen.admin.repository.UserRepository;
-import com.zen.common.core.security.UserContext;
-import com.zen.common.core.security.UserPrincipal;
+import com.zen.common.security.auth.UserContext;
+import com.zen.common.security.auth.UserPrincipal;
 import java.util.List;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Tag;

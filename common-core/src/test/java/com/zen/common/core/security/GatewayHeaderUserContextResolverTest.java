@@ -2,6 +2,8 @@ package com.zen.common.core.security;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import com.zen.common.security.auth.TrustedHeaders;
+import com.zen.common.security.auth.UserPrincipal;
 import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.springframework.mock.web.MockHttpServletRequest;
@@ -13,10 +15,10 @@ class GatewayHeaderUserContextResolverTest {
     @Test
     void readsIdentityFromGatewayHeaders() {
         MockHttpServletRequest request = new MockHttpServletRequest();
-        request.addHeader(GatewayHeaderUserContextResolver.USER_ID_HEADER, "7");
-        request.addHeader(GatewayHeaderUserContextResolver.USERNAME_HEADER, "demo");
-        request.addHeader(GatewayHeaderUserContextResolver.ROLES_HEADER, "user");
-        request.addHeader(GatewayHeaderUserContextResolver.MODULES_HEADER, "ECS, RCS,wcs");
+        request.addHeader(TrustedHeaders.USER_ID, "7");
+        request.addHeader(TrustedHeaders.USERNAME, "demo");
+        request.addHeader(TrustedHeaders.USER_ROLES, "user");
+        request.addHeader(TrustedHeaders.USER_MODULES, "ECS, RCS,wcs");
 
         assertThat(resolver.resolve(request))
                 .extracting(
@@ -29,19 +31,19 @@ class GatewayHeaderUserContextResolverTest {
         assertThat(resolver.resolve(new MockHttpServletRequest())).isNull();
 
         MockHttpServletRequest blank = new MockHttpServletRequest();
-        blank.addHeader(GatewayHeaderUserContextResolver.USER_ID_HEADER, "  ");
-        blank.addHeader(GatewayHeaderUserContextResolver.USERNAME_HEADER, "attacker");
+        blank.addHeader(TrustedHeaders.USER_ID, "  ");
+        blank.addHeader(TrustedHeaders.USERNAME, "attacker");
         assertThat(resolver.resolve(blank)).isNull();
 
         MockHttpServletRequest notANumber = new MockHttpServletRequest();
-        notANumber.addHeader(GatewayHeaderUserContextResolver.USER_ID_HEADER, "1 or 2=2");
+        notANumber.addHeader(TrustedHeaders.USER_ID, "1 or 2=2");
         assertThat(resolver.resolve(notANumber)).isNull();
     }
 
     @Test
     void absentRoleAndModuleHeadersBindToEmptyCollections() {
         MockHttpServletRequest request = new MockHttpServletRequest();
-        request.addHeader(GatewayHeaderUserContextResolver.USER_ID_HEADER, "7");
+        request.addHeader(TrustedHeaders.USER_ID, "7");
 
         UserPrincipal principal = resolver.resolve(request);
 

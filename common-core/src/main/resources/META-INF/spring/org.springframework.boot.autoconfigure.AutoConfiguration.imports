@@ -1,4 +1,3 @@
 com.zen.common.core.config.ZenWebAutoConfiguration
 com.zen.common.core.config.ZenJpaAuditingAutoConfiguration
-com.zen.common.core.config.ZenJwtAutoConfiguration
 com.zen.common.core.config.ZenSecurityAutoConfiguration

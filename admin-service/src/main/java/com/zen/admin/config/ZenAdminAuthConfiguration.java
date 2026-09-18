@@ -1,7 +1,7 @@
 package com.zen.admin.config;
 
-import com.zen.common.core.security.UserContext;
-import com.zen.common.core.security.UserPrincipal;
+import com.zen.common.security.auth.UserContext;
+import com.zen.common.security.auth.UserPrincipal;
 import java.util.Optional;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

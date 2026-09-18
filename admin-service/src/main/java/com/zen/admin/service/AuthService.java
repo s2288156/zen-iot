@@ -4,23 +4,23 @@ import com.zen.admin.dto.LoginRequest;
 import com.zen.admin.entity.RoleEntity;
 import com.zen.admin.entity.UserEntity;
 import com.zen.admin.repository.UserRepository;
-import com.zen.common.core.exception.BusinessException;
-import com.zen.common.core.exception.GlobalErrorCode;
-import com.zen.common.core.jwt.JwtTokenIssuer;
-import com.zen.common.core.jwt.JwtTokenVerifier;
-import com.zen.common.core.jwt.TokenPair;
-import com.zen.common.core.jwt.TokenPrincipal;
-import com.zen.common.core.jwt.TokenType;
-import com.zen.common.core.jwt.VerifiedToken;
-import com.zen.common.core.security.TokenRevocationChecker;
-import com.zen.common.core.security.UserContext;
-import com.zen.common.core.security.UserPrincipal;
+import com.zen.common.security.auth.TokenRevocationChecker;
+import com.zen.common.security.auth.UserContext;
+import com.zen.common.security.auth.UserPrincipal;
+import com.zen.common.security.error.BusinessException;
+import com.zen.common.security.error.GlobalErrorCode;
+import com.zen.common.security.jwt.JwtTokenIssuer;
+import com.zen.common.security.jwt.JwtTokenVerifier;
+import com.zen.common.security.jwt.TokenPair;
+import com.zen.common.security.jwt.TokenPrincipal;
+import com.zen.common.security.jwt.TokenType;
+import com.zen.common.security.jwt.VerifiedToken;
 import java.time.Duration;
 import java.util.List;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-/** 登录、登出。授权判定不在这里,由 {@code @RequireModule} 拦截器按 Token 里的模块快照执行。 */
+/** 登录、登出。授权判定不在这里,由 {@code com.zen.common.security.auth.RequireModule} 拦截器按 Token 里的模块快照执行。 */
 @Service
 public class AuthService {
 

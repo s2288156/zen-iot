@@ -8,10 +8,10 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import com.zen.admin.dto.LoginRequest;
 import com.zen.admin.service.AuthService;
-import com.zen.common.core.exception.BusinessException;
-import com.zen.common.core.exception.GlobalErrorCode;
-import com.zen.common.core.jwt.TokenPair;
 import com.zen.common.core.web.GlobalExceptionHandler;
+import com.zen.common.security.error.BusinessException;
+import com.zen.common.security.error.GlobalErrorCode;
+import com.zen.common.security.jwt.TokenPair;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

@@ -3,7 +3,11 @@ package com.zen.common.core.security;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-import com.zen.common.core.exception.BusinessException;
+import com.zen.common.security.auth.ModuleCode;
+import com.zen.common.security.auth.RequireModule;
+import com.zen.common.security.auth.UserContext;
+import com.zen.common.security.auth.UserPrincipal;
+import com.zen.common.security.error.BusinessException;
 import java.util.List;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.Test;

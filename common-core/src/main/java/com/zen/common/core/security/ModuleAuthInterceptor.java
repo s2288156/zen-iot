@@ -1,7 +1,10 @@
 package com.zen.common.core.security;
 
-import com.zen.common.core.exception.BusinessException;
-import com.zen.common.core.exception.GlobalErrorCode;
+import com.zen.common.security.auth.RequireModule;
+import com.zen.common.security.auth.UserContext;
+import com.zen.common.security.auth.UserPrincipal;
+import com.zen.common.security.error.BusinessException;
+import com.zen.common.security.error.GlobalErrorCode;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.web.method.HandlerMethod;

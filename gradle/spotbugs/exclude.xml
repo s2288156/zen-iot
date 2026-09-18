@@ -16,4 +16,14 @@
     <Class name="~com\.zen\..*\.(service|config)\..*"/>
     <Bug pattern="EI_EXPOSE_REP2"/>
   </Match>
+  <!--
+    网关的另外三个包同样只持有容器注入的共享单例（ObjectMapper、ReactiveStringRedisTemplate），
+    做防御性拷贝既无意义（ObjectMapper 的拷贝会丢掉 spring.jackson 配置）也没有出口（这些 Bean 由容器唯一持有）。
+    逐包点名而不是放宽到整个 com.zen：JWT 与业务对象持有外部可变引用的情况仍然照报
+    （对比 common-core 的 VerifiedToken 靠 List.copyOf 消掉 findings、没有走豁免）。
+  -->
+  <Match>
+    <Class name="~com\.zen\.gateway\.(auth|error|filter)\..*"/>
+    <Bug pattern="EI_EXPOSE_REP2"/>
+  </Match>
 </FindBugsFilter>

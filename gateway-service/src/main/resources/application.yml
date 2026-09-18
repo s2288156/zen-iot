@@ -1,0 +1,105 @@
+server:
+  # 端口按 Phase 0「端口规划」：网关独占 28080，业务服务从 28081 起递增
+  port: 28080
+
+spring:
+  application:
+    name: gateway-service
+  # 与 admin-service 同一手法：仅靠 nacos-discovery starter 就能解析 nacos: 前缀，optional 保证 Nacos 上没有该 dataId 时照常启动
+  config:
+    import: optional:nacos:gateway-service.yaml
+  # traceId 进网关日志 + traceparent 注入下游请求头，都依赖 Reactor 的自动上下文传播：
+  # Boot 4 默认是 limited（只在部分算子恢复 ThreadLocal），网关这条链路上 Tracer.currentSpan() 取不到 span，
+  # 于是 SCG 的 observedRequestHttpHeadersFilter 无 trace 可注入，admin-service 只能另起一条 trace（实测）。
+  # 代价是每个操作符多一次上下文快照恢复，网关这种薄链路可以接受。
+  reactor:
+    context-propagation: auto
+  data:
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
+  cloud:
+    nacos:
+      discovery:
+        # 服务名取 spring.application.name；下游四个服务同名注册，网关按它做 lb:// 发现
+        server-addr: ${NACOS_SERVER_ADDR:localhost:8848}
+    gateway:
+      # Cloud 2025.1（网关 5.0.x）起配置整体挪到 spring.cloud.gateway.server.webflux.*，旧 spring.cloud.gateway.* 已移除
+      server:
+        webflux:
+          # /api/{service}/** → lb://{service}，StripPrefix=2 剥掉 /api/{service} 两段
+          # 契约：前缀归网关，下游服务内不含 /api（Phase 1 的 /auth/login 即网关侧 /api/admin/auth/login）
+          routes:
+            - id: admin-service
+              # 默认走 Nacos 服务发现。GATEWAY_ADMIN_URI 允许把这一条钉到固定地址（测试与排障用），
+              # 而 predicates/filters 仍来自本文件：整条路由的行为继续是被测对象，而不是测试自己重写一遍
+              uri: ${GATEWAY_ADMIN_URI:lb://admin-service}
+              predicates:
+                - Path=/api/admin/**
+              filters:
+                - StripPrefix=2
+            - id: wcs-service
+              uri: lb://wcs-service
+              predicates:
+                - Path=/api/wcs/**
+              filters:
+                - StripPrefix=2
+            - id: rcs-service
+              uri: lb://rcs-service
+              predicates:
+                - Path=/api/rcs/**
+              filters:
+                - StripPrefix=2
+            - id: ecs-service
+              uri: lb://ecs-service
+              predicates:
+                - Path=/api/ecs/**
+              filters:
+                - StripPrefix=2
+
+management:
+  endpoints:
+    web:
+      exposure:
+        # 与 admin-service 一致：暴露面收敛为 health + prometheus，env/beans/configprops 一律不开
+        include:
+          - health
+          - prometheus
+  endpoint:
+    health:
+      # 打开 liveness/readiness 分组，Phase 10 容器探针直接打 /actuator/health/liveness 与 /readiness
+      probes:
+        enabled: true
+
+zen:
+  jwt:
+    # HS256 密钥必须与 admin-service 完全一致，否则 Phase 1 签发的 Token 在这里一律验签失败
+    # 生产由 ZEN_JWT_SECRET 覆盖；密钥不进代码库，dev 默认值只为让本机可跑
+    secret: ${ZEN_JWT_SECRET:zen-dev-admin-service-hs256-secret-key-32-bytes}
+  gateway:
+    auth:
+      # 白名单匹配带前缀的入站路径，直接照抄服务内的裸路径会全部漏放
+      whitelist:
+        - /api/admin/auth/login
+        - /api/admin/auth/refresh
+        # 健康检查经网关也可匿名读，与 Phase 1 服务内白名单同口径；prometheus 不放开，指标只走内网
+        - /api/*/actuator/health
+        - /api/*/actuator/health/**
+        # 网关自身的 /actuator/** 不经全局过滤器（不是路由请求），列在这里只作意图声明
+        - /actuator/health
+        - /actuator/health/**
+    cors:
+      # 前端凭 Bearer Token 认证，不带 Cookie，故 allow-credentials 默认 false
+      allowed-origin-patterns:
+        - "*"
+      allowed-methods:
+        - GET
+        - POST
+        - PUT
+        - PATCH
+        - DELETE
+        - OPTIONS
+      allowed-headers:
+        - "*"
+      allow-credentials: false
+      max-age: 1h
