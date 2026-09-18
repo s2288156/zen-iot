@@ -2,12 +2,12 @@ package com.zen.gateway.filter;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import com.zen.common.core.jwt.JwtProperties;
-import com.zen.common.core.jwt.JwtTokenIssuer;
-import com.zen.common.core.jwt.JwtTokenVerifier;
-import com.zen.common.core.jwt.TokenPair;
-import com.zen.common.core.jwt.TokenPrincipal;
-import com.zen.common.core.security.TrustedHeaders;
+import com.zen.common.security.auth.TrustedHeaders;
+import com.zen.common.security.jwt.JwtProperties;
+import com.zen.common.security.jwt.JwtTokenIssuer;
+import com.zen.common.security.jwt.JwtTokenVerifier;
+import com.zen.common.security.jwt.TokenPair;
+import com.zen.common.security.jwt.TokenPrincipal;
 import com.zen.gateway.auth.TokenBlocklist;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
@@ -170,11 +170,19 @@ class JwtAuthGlobalFilterTest {
         return new TokenPrincipal(7L, "demo", List.of("user"), List.of("ecs", "rcs"));
     }
 
-    /** 换掉签名最后一个字符：长度不变但签名校验必失败。 */
+    /**
+     * 篡改签名首位字符：长度不变、签名必不匹配。
+     *
+     * <p>刻意不动<b>末位</b>字符——HS256 的 32 字节签名编码成 base64url 后共 43 个字符，最后一个字符有 2 位不属于任何
+     * 字节，改它有四分之一概率解出同一个签名，测试于是「偶发通过」（与 {@code ba7c27a} 修掉的 JwtTokenTest 那类失效同源）。
+     */
     private String tamper(String token) {
-        int cut = token.length() - 1;
-        char replacement = token.charAt(cut) == 'a' ? 'b' : 'a';
-        return token.substring(0, cut) + replacement;
+        int head = token.lastIndexOf('.') + 1;
+        char original = token.charAt(head);
+        char replacement = original == 'a' ? 'b' : 'a';
+        String tampered = token.substring(0, head) + replacement + token.substring(head + 1);
+        assertThat(tampered).isNotEqualTo(token);
+        return tampered;
     }
 
     private MockServerWebExchange exchange(MockServerHttpRequest.BaseBuilder<?> request) {

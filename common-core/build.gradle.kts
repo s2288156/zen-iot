@@ -16,6 +16,9 @@ tasks.named<Jar>("jar") {
 }
 
 dependencies {
+	// Web 无关的安全内核（JWT、统一响应、错误码、身份头契约）拆到了 common-security；
+	// 本模块的 GlobalExceptionHandler/拦截器在公共签名里用到那些类型，故以 api 透传，消费方无需重复声明
+	api(project(":common-security"))
 	// 类型出现在公共签名中的 starter 必须以 api 暴露
 	api("org.springframework.boot:spring-boot-starter-web")
 	api("org.springframework.boot:spring-boot-starter-validation")
@@ -26,11 +29,6 @@ dependencies {
 	// Boot 4 起自动配置独立成模块，不引这个就没有 Tracer/traceId 装配
 	implementation("org.springframework.boot:spring-boot-micrometer-tracing-opentelemetry")
 	runtimeOnly("io.micrometer:micrometer-tracing-bridge-otel")
-	// JWT 工具与 Phase 2 的 WebFlux 网关复用同一份代码,故 com.zen.common.core.jwt 不得引用 Servlet API
-	api("io.jsonwebtoken:jjwt-api")
-	runtimeOnly("io.jsonwebtoken:jjwt-impl")
-	runtimeOnly("io.jsonwebtoken:jjwt-jackson")
-
 	compileOnly("org.projectlombok:lombok")
 	annotationProcessor("org.projectlombok:lombok")
 

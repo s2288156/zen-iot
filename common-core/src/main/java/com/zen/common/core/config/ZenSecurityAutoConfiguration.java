@@ -1,13 +1,13 @@
 package com.zen.common.core.config;
 
-import com.zen.common.core.jwt.JwtTokenVerifier;
 import com.zen.common.core.security.AuthInterceptor;
 import com.zen.common.core.security.GatewayHeaderUserContextResolver;
 import com.zen.common.core.security.JwtUserContextResolver;
 import com.zen.common.core.security.ModuleAuthInterceptor;
-import com.zen.common.core.security.SecurityProperties;
-import com.zen.common.core.security.TokenRevocationChecker;
 import com.zen.common.core.security.UserContextResolver;
+import com.zen.common.security.auth.SecurityProperties;
+import com.zen.common.security.auth.TokenRevocationChecker;
+import com.zen.common.security.jwt.JwtTokenVerifier;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
@@ -22,8 +22,8 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
  * 认证拦截的自动配置:注册 {@link AuthInterceptor} 与身份来源,并把 {@code zen.security.whitelist} 交给 {@code
  * InterceptorRegistry#excludePathPatterns} 匹配。
  *
- * <p>必须限定 Servlet Web 应用:Phase 2 的 WebFlux 网关同样依赖 {@code common-core},Servlet 拦截器与 {@link
- * WebMvcConfigurer} 漏到网关类路径上就是启动失败。
+ * <p>必须限定 Servlet Web 应用：反应式网关依赖的是拆出来的 {@code common-security}，本模块的类一旦被它引到
+ * 类路径上，Servlet 拦截器与 {@link WebMvcConfigurer} 就会漏进反应式应用，启动直接失败。
  *
  * <p>{@code zen.security.enabled=false} 会整体跳过鉴权,只供本地开发与测试,生产环境不得关闭。
  */

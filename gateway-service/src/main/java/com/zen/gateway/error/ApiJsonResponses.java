@@ -1,6 +1,6 @@
 package com.zen.gateway.error;
 
-import com.zen.common.core.api.ApiResponse;
+import com.zen.common.security.api.ApiResponse;
 import java.nio.charset.StandardCharsets;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.io.buffer.DataBuffer;

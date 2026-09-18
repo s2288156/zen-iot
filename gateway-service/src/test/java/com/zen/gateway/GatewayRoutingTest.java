@@ -5,9 +5,9 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 import com.sun.net.httpserver.HttpServer;
-import com.zen.common.core.jwt.JwtTokenIssuer;
-import com.zen.common.core.jwt.TokenPrincipal;
-import com.zen.common.core.security.TrustedHeaders;
+import com.zen.common.security.auth.TrustedHeaders;
+import com.zen.common.security.jwt.JwtTokenIssuer;
+import com.zen.common.security.jwt.TokenPrincipal;
 import com.zen.gateway.auth.TokenBlocklist;
 import java.io.IOException;
 import java.net.InetSocketAddress;

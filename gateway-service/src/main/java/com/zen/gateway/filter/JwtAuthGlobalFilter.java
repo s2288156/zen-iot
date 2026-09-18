@@ -1,12 +1,12 @@
 package com.zen.gateway.filter;
 
-import com.zen.common.core.exception.BusinessException;
-import com.zen.common.core.exception.ErrorCode;
-import com.zen.common.core.exception.GlobalErrorCode;
-import com.zen.common.core.jwt.JwtTokenVerifier;
-import com.zen.common.core.jwt.TokenType;
-import com.zen.common.core.jwt.VerifiedToken;
-import com.zen.common.core.security.TrustedHeaders;
+import com.zen.common.security.auth.TrustedHeaders;
+import com.zen.common.security.error.BusinessException;
+import com.zen.common.security.error.ErrorCode;
+import com.zen.common.security.error.GlobalErrorCode;
+import com.zen.common.security.jwt.JwtTokenVerifier;
+import com.zen.common.security.jwt.TokenType;
+import com.zen.common.security.jwt.VerifiedToken;
 import com.zen.gateway.auth.TokenBlocklist;
 import com.zen.gateway.error.ApiJsonResponses;
 import java.util.List;
@@ -52,7 +52,7 @@ public final class JwtAuthGlobalFilter implements GlobalFilter, Ordered {
     private final List<PathPattern> whitelist;
 
     /**
-     * @param tokenVerifier 与 admin-service 同一密钥的验签器（{@code common-core} 自动装配）
+     * @param tokenVerifier 与 admin-service 同一密钥的验签器（{@code common-security} 自动装配）
      * @param tokenBlocklist 反应式黑名单读取，与 Phase 1 共用 {@code auth:blacklist:{jti}}
      * @param whitelistPaths 免鉴权路径，匹配的是<b>带前缀的入站路径</b>（如 {@code /api/admin/auth/login}），与下游服务内的裸路径不是同一套字符串
      */

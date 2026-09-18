@@ -1,6 +1,6 @@
 package com.zen.gateway.auth;
 
-import com.zen.common.core.security.TokenRevocationChecker;
+import com.zen.common.security.auth.TokenRevocationChecker;
 import org.springframework.data.redis.core.ReactiveStringRedisTemplate;
 import reactor.core.publisher.Mono;
 

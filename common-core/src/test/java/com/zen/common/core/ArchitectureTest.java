@@ -23,21 +23,12 @@ class ArchitectureTest {
             .withImportOption(new ImportOption.DoNotIncludeTests())
             .importPackages("com.zen.common.core");
 
-    /** 对应 common-core/build.gradle.kts 的注释约束:JWT 要与 Phase 2 的 WebFlux 网关复用,绝不能碰 Servlet API。 */
-    @Test
-    void jwtPackageStaysServletFree() {
-        noClasses()
-                .that()
-                .resideInAPackage("com.zen.common.core.jwt..")
-                .should()
-                .dependOnClassesThat()
-                .resideInAPackage("jakarta.servlet..")
-                .because("com.zen.common.core.jwt 要能被非 Servlet 的网关复用")
-                .check(COMMON_CORE);
-    }
-
     /**
      * 公共模块不得反向依赖业务服务,否则模块边界就断了。
+     *
+     * <p>拆出 {@code common-security} 后,「JWT 不得绑定传输层」这条不变量已改由该模块自己的
+     * {@code moduleStaysFreeOfWebAndPersistence()} 把守（比原来只禁 {@code jakarta.servlet} 更严）;
+     * 方向依赖（common-security 不得反过来引用 common-core）也在那边断言。
      *
      * <p>包名列表逐模块硬编码:每建一个新模块都要在这里补一条(Phase 0「新模块接入门禁清单」第 3 条),漏一项就是该模块的反向依赖无人拦。
      */
@@ -86,7 +77,7 @@ class ArchitectureTest {
 
     /**
      * 时间源统一:{@code new Date()} 隐式读系统时钟、无法注入测试时钟。
-     * 刻意只禁构造调用而不禁整个 {@code java.util.Date}:本模块的 {@link com.zen.common.core.jwt.JwtTokenIssuer}
+     * 刻意只禁构造调用而不禁整个 {@code java.util.Date}:本模块的 {@link com.zen.common.security.jwt.JwtTokenIssuer}
      * 必须把 {@code Instant} 转成 Date 递给 jjwt,{@code Date.from(Instant)} 属于那道 API 边界。
      */
     @Test
@@ -98,7 +89,7 @@ class ArchitectureTest {
                 .check(COMMON_CORE);
     }
 
-    /** 包切片之间无循环依赖:common-core 会被网关与所有业务服务依赖,成环的包没法在需要时单独拆出。 */
+    /** 包切片之间无循环依赖:common-core 会被所有业务服务依赖（网关只依赖 common-security）,成环的包没法在需要时单独拆出。 */
     @Test
     void packageSlicesAreFreeOfCycles() {
         slices().matching("com.zen.common.core.(*)..").should().beFreeOfCycles().check(COMMON_CORE);

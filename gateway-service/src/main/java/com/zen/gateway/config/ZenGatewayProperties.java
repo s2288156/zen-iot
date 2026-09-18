@@ -1,5 +1,6 @@
 package com.zen.gateway.config;
 
+import com.zen.common.security.auth.SecurityProperties;
 import java.time.Duration;
 import java.util.List;
 import lombok.Getter;
@@ -9,7 +10,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 /**
  * 网关自有配置，前缀 {@code zen.gateway}。
  *
- * <p>刻意不复用 {@code common-core} 的 {@code SecurityProperties}（前缀 {@code zen.security}）：那份配置由带
+ * <p>刻意不复用 {@code common-security} 的 {@link SecurityProperties}（前缀 {@code zen.security}）：那份配置由带
  * {@code @ConditionalOnWebApplication(SERVLET)} 的自动配置绑定，反应式网关里根本不装配；而且两边的白名单匹配的是不同字符串——
  * 网关匹配带前缀的入站路径，服务匹配剥掉前缀后的裸路径。
  */

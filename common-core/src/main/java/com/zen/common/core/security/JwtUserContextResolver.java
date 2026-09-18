@@ -1,10 +1,12 @@
 package com.zen.common.core.security;
 
-import com.zen.common.core.exception.BusinessException;
-import com.zen.common.core.exception.GlobalErrorCode;
-import com.zen.common.core.jwt.JwtTokenVerifier;
-import com.zen.common.core.jwt.TokenType;
-import com.zen.common.core.jwt.VerifiedToken;
+import com.zen.common.security.auth.TokenRevocationChecker;
+import com.zen.common.security.auth.UserPrincipal;
+import com.zen.common.security.error.BusinessException;
+import com.zen.common.security.error.GlobalErrorCode;
+import com.zen.common.security.jwt.JwtTokenVerifier;
+import com.zen.common.security.jwt.TokenType;
+import com.zen.common.security.jwt.VerifiedToken;
 import jakarta.servlet.http.HttpServletRequest;
 
 /** 自解析 {@code Authorization: Bearer} 的 JWT 模式:服务持有密钥,不信任任何身份请求头。 */

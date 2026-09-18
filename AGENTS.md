@@ -39,7 +39,10 @@ Every rule below has a gate behind it, so a workaround shows up as a failed push
 - **Layering** (ArchUnit, `architectureTest`): `controller → service → repository → entity` one-way, controllers never
   touch persistence entities, `@Transactional` only appears in `service`, each `*Controller`/`*Service`/`*Repository`/
   `*Entity` resides in its own package, package slices stay acyclic, `common-core` never depends on a business
-  service, and `com.zen.common.core.jwt` stays free of the Servlet API so the Phase 2 gateway can reuse it.
+  service or on the gateway, and `common-security` (the web-free kernel: JWT, `ApiResponse`, error codes,
+  `TrustedHeaders`) stays free of any transport or persistence stack — no Servlet, no Spring Web, no JPA, no
+  Spring Data, no `@Transactional` — and never points back at `common-core`. That is what lets the reactive
+  gateway reuse Phase 1's signing code without a list of `exclude` rules.
 - **Coding hygiene** (ArchUnit, asserted per module): constructor injection only, so `@Autowired`/`@Resource`/`@Inject`
   never sit on a field; no `System.out`/`System.err`/`printStackTrace`, because only the logging framework carries the
   traceId from P3-1; no `new Date()`, while `java.util.Date` itself stays legal for jjwt's `issuedAt`/`expiration`.

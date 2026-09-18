@@ -1,8 +1,8 @@
 package com.zen.admin.controller;
 
-import com.zen.common.core.api.ApiResponse;
-import com.zen.common.core.security.ModuleCode;
-import com.zen.common.core.security.RequireModule;
+import com.zen.common.security.api.ApiResponse;
+import com.zen.common.security.auth.ModuleCode;
+import com.zen.common.security.auth.RequireModule;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;

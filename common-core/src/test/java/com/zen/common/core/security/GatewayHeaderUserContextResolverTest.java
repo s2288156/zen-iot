@@ -2,6 +2,8 @@ package com.zen.common.core.security;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import com.zen.common.security.auth.TrustedHeaders;
+import com.zen.common.security.auth.UserPrincipal;
 import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.springframework.mock.web.MockHttpServletRequest;

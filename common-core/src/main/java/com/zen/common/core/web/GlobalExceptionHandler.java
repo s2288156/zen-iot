@@ -1,8 +1,8 @@
 package com.zen.common.core.web;
 
-import com.zen.common.core.api.ApiResponse;
-import com.zen.common.core.exception.BusinessException;
-import com.zen.common.core.exception.GlobalErrorCode;
+import com.zen.common.security.api.ApiResponse;
+import com.zen.common.security.error.BusinessException;
+import com.zen.common.security.error.GlobalErrorCode;
 import jakarta.servlet.ServletException;
 import jakarta.validation.ConstraintViolationException;
 import lombok.extern.slf4j.Slf4j;

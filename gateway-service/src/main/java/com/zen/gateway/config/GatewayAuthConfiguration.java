@@ -1,6 +1,6 @@
 package com.zen.gateway.config;
 
-import com.zen.common.core.jwt.JwtTokenVerifier;
+import com.zen.common.security.jwt.JwtTokenVerifier;
 import com.zen.gateway.auth.RedisTokenBlocklist;
 import com.zen.gateway.auth.TokenBlocklist;
 import com.zen.gateway.filter.JwtAuthGlobalFilter;
@@ -13,7 +13,7 @@ import tools.jackson.databind.ObjectMapper;
 /**
  * 鉴权链路的 Bean 装配：反应式黑名单 + 全局鉴权过滤器。
  *
- * <p>{@code JwtTokenVerifier} 由 {@code common-core} 的 {@code ZenJwtAutoConfiguration} 自动装配（以
+ * <p>{@code JwtTokenVerifier} 由 {@code common-security} 的 {@code ZenJwtAutoConfiguration} 自动装配（以
  * {@code zen.jwt.secret} 存在为开关），本类不重复声明。
  */
 @Configuration(proxyBeanMethods = false)

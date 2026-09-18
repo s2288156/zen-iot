@@ -18,7 +18,7 @@ import org.junit.jupiter.api.Test;
  *
  * <p>WebFlux 网关没有 JPA 层，不套用 {@code controller → service → repository → entity} 四层（Phase 0「新模块接入门禁清单」
  * 第 2 条），但通用四条（禁字段注入、禁标准流、禁 {@code new Date()}、包切片无环）原样保留，另加三条只属于反应式网关的约束——它们正是
- * Phase 2「关键决策」里 exclude 策略与「Redis 必须走反应式」两条的自动化版本。摘掉任一条都会退化成一句口头约定。
+ * Phase 2「关键决策」里「依赖隔离」与「Redis 必须走反应式」两条的自动化版本。摘掉任一条都会退化成一句口头约定。
  */
 @Tag("architecture")
 class ArchitectureTest {
@@ -50,23 +50,28 @@ class ArchitectureTest {
     }
 
     /**
-     * 网关不得复用 {@code common-core} 里 Servlet 专属的那几件：{@code AuthInterceptor}/{@code
-     * ModuleAuthInterceptor}/{@code UserContext}（ThreadLocal 身份上下文在反应式线程上会串号）与
-     * {@code GlobalExceptionHandler}。
+     * 网关不得依赖 {@code common-core}：那里剩下的每一类都绑定 Servlet（拦截器、{@code WebMvcConfigurer} 自动配置、
+     * JPA 实体基类、{@code GlobalExceptionHandler}）。拆出 {@code common-security} 之后这条从「建议」变成了断言——
+     * 网关的构建脚本里已没有任何 {@code exclude}，一旦有人重新引回 {@code common-core}，本条立刻变红，
+     * 而失效方式原本要等真启动才看得见。
+     *
+     * <p>{@code UserContext} 与 Servlet 无关（它是 ThreadLocal），所以单独点名：反应式链路里一个请求会跨多个线程，
+     * ThreadLocal 身份上下文要么读到上一个请求的用户、要么读到 null。
      */
     @Test
-    void neverReachesIntoServletOnlyCommonCore() {
+    void neverDependsOnCommonCore() {
         noClasses()
                 .should()
                 .dependOnClassesThat()
-                .resideInAnyPackage("com.zen.common.core.web..", "com.zen.common.core.entity..")
+                .resideInAnyPackage(
+                        "com.zen.common.core..", "com.zen.common.core.web..", "com.zen.common.core.entity..")
                 .orShould()
                 .dependOnClassesThat()
                 .haveSimpleNameEndingWith("Interceptor")
                 .orShould()
                 .dependOnClassesThat()
-                .haveFullyQualifiedName("com.zen.common.core.security.UserContext")
-                .because("这些类型依赖 Servlet API 或 ThreadLocal，反应式网关用不了")
+                .haveFullyQualifiedName("com.zen.common.security.auth.UserContext")
+                .because("网关是 WebFlux 应用，Servlet 拦截器与 ThreadLocal 身份上下文都不能复用")
                 .check(GATEWAY_SERVICE);
     }
 

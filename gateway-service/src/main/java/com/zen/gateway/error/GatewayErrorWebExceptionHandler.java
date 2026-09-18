@@ -1,7 +1,7 @@
 package com.zen.gateway.error;
 
-import com.zen.common.core.exception.BusinessException;
-import com.zen.common.core.exception.GlobalErrorCode;
+import com.zen.common.security.error.BusinessException;
+import com.zen.common.security.error.GlobalErrorCode;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.stream.Collectors;

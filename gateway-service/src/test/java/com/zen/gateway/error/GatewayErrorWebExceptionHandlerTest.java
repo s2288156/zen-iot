@@ -2,8 +2,8 @@ package com.zen.gateway.error;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import com.zen.common.core.exception.BusinessException;
-import com.zen.common.core.exception.GlobalErrorCode;
+import com.zen.common.security.error.BusinessException;
+import com.zen.common.security.error.GlobalErrorCode;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpStatus;
 import org.springframework.mock.http.server.reactive.MockServerHttpRequest;

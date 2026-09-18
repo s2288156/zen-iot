@@ -1,11 +1,12 @@
 package com.zen.gateway.auth;
 
+import com.zen.common.security.auth.TokenRevocationChecker;
 import reactor.core.publisher.Mono;
 
 /**
  * 网关侧的 Token 撤销读取：只查黑名单，撤销由 admin-service 写入（见 Phase 1 的 {@code RedisTokenRevocationChecker}）。
  *
- * <p>刻意不复用 {@code common-core} 的 {@code TokenRevocationChecker}：那个接口是命令式的，在 Netty EventLoop 上调用它就是
+ * <p>刻意不实现 {@code common-security} 的 {@link TokenRevocationChecker}：那个接口是命令式的，在 Netty EventLoop 上调用它就是
  * Phase 2 点名的第一个 BlockHound 类问题。实现必须返回**不会空完成**的 {@code Mono<Boolean>}（空完成会让请求既不放行也不拒绝，直接挂住），过滤器据此决定放行还是拒绝。
  */
 public interface TokenBlocklist {

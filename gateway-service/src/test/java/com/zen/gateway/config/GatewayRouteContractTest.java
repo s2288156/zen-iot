@@ -2,7 +2,7 @@ package com.zen.gateway.config;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import com.zen.common.core.jwt.JwtTokenVerifier;
+import com.zen.common.security.jwt.JwtTokenVerifier;
 import java.util.List;
 import java.util.Objects;
 import javax.sql.DataSource;
@@ -19,7 +19,7 @@ import org.springframework.context.ApplicationContext;
  * <p>{@link com.zen.gateway.GatewayRoutingTest} 只在 {@code /api/admin} 这一条路由上跑真实请求，另外三条（wcs/rcs/ecs）
  * 写错了一律没人发现——路径段与服务名各写一遍，正是最容易写岔的地方。这里逐条比对四段前缀。
  *
- * <p>顺带把 exclude 策略的启动期后果钉住：网关上下文里不许出现 {@code DataSource}，且 {@code common-core} 的 JWT
+ * <p>顺带把模块边界的启动期后果钉住：网关上下文里不许出现 {@code DataSource}，且 {@code common-core} 的 JWT
  * 自动装配要在排掉三个 starter 之后仍然生效。
  */
 @SpringBootTest(

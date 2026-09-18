@@ -1,8 +1,8 @@
 package com.zen.admin.service;
 
-import static com.zen.common.core.security.TokenRevocationChecker.blacklistKey;
+import static com.zen.common.security.auth.TokenRevocationChecker.blacklistKey;
 
-import com.zen.common.core.security.TokenRevocationChecker;
+import com.zen.common.security.auth.TokenRevocationChecker;
 import java.time.Duration;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;

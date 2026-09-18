@@ -1,5 +1,7 @@
 package com.zen.common.core.security;
 
+import com.zen.common.security.auth.TrustedHeaders;
+import com.zen.common.security.auth.UserPrincipal;
 import jakarta.servlet.http.HttpServletRequest;
 import java.util.Arrays;
 import java.util.List;

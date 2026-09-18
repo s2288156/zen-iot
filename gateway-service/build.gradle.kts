@@ -3,20 +3,14 @@ plugins {
 }
 
 dependencies {
-	// 网关只要 common-core 的 JWT 校验、统一响应与错误码。common-core 以 api 暴露的三个 starter 必须逐条排掉：
-	// - spring-boot-starter-web：上类路径后 Boot 把应用判成 Servlet 类型，WebFlux 网关启动即失败；
-	// - spring-boot-starter-data-jpa：无数据源时 DataSourceAutoConfiguration 直接炸，且 ZenJpaAuditingAutoConfiguration
-	//   是 matchIfMissing = true（缺省即开），会跟着注册 @EnableJpaAuditing；
-	// - spring-boot-starter-validation：网关不校验入参 DTO，用不到。
-	// 排完仍留在运行时类路径上的是 tracing bridge（P3-1 的 A 层：只生成/透传 traceId，span 不上报），这是本阶段要的。
-	// 类路径隔离由 GatewayDependencyIsolationTest 与 ArchitectureTest 共同把守。
-	// Phase 2「关键决策」推荐的长期正解是把 JWT 拆进无 Web 依赖的 common-security；本阶段先按备选走 exclude，见
-	// .ai/dev-plan/实施进度.md 的 Phase 2 未收口事项。
-	implementation(project(":common-core")) {
-		exclude(group = "org.springframework.boot", module = "spring-boot-starter-web")
-		exclude(group = "org.springframework.boot", module = "spring-boot-starter-validation")
-		exclude(group = "org.springframework.boot", module = "spring-boot-starter-data-jpa")
-	}
+	// 网关只要「Web 无关的安全内核」：JWT 验签、统一响应契约、错误码、身份头与黑名单契约。
+	// 拆模块前这里要逐条 exclude common-core 以 api 暴露的 starter-web/-validation/-data-jpa（漏一条网关就起不来），
+	// 现在 common-security 本身不带这些依赖，一条 implementation 就够——该事实由
+	// common-security 的 ArchitectureTest.moduleStaysFreeOfWebAndPersistence() 与本模块的
+	// GatewayDependencyIsolationTest 双向把守。
+	// 只引本项目模块、不引 common-core：网关是反应式应用，碰 Servlet 侧那套拦截器/ThreadLocal 身份上下文就是错的，
+	// 这条边界由 ArchitectureTest.neverDependsOnCommonCore() 钉住。
+	implementation(project(":common-security"))
 	// Cloud 2025.1 起网关拆成 webflux / webmvc 两套，反应式的是 -server-webflux 这个坐标（由 Cloud BOM 管到 5.0.3）
 	implementation("org.springframework.cloud:spring-cloud-starter-gateway-server-webflux")
 	// lb://{service} 需要客户端负载均衡；网关 starter 不传递该 starter，缺它 lb:// 解析不出实例
@@ -28,10 +22,12 @@ dependencies {
 	// 缺它时 Boot 只会静默少暴露一个端点，日志里表现为「Exposing 1 endpoint」
 	runtimeOnly("io.micrometer:micrometer-registry-prometheus")
 	implementation("com.alibaba.cloud:spring-cloud-starter-alibaba-nacos-discovery")
-	// 与 admin-service 同一份 jjwt：common-core 只以 api 暴露 jjwt-api，实现与序列化器要自己带上
-	runtimeOnly("io.jsonwebtoken:jjwt-impl")
-	runtimeOnly("io.jsonwebtoken:jjwt-jackson")
-
+	// P3-1 的 A 层：traceId 生成/透传/写 MDC + 由 SCG 向下游注入 traceparent。拆模块前它随 common-core 的
+	// implementation/runtimeOnly 传递进来，现在按「谁运行谁声明」自己带上——刻意不用
+	// spring-boot-starter-opentelemetry（它连带 otlp exporter，会真的外发 span；Phase 10 再换）。
+	// 少了这两条，网关日志的 trace 列会为空且不注入 traceparent，由 GatewayDependencyIsolationTest 拦下。
+	implementation("org.springframework.boot:spring-boot-micrometer-tracing-opentelemetry")
+	runtimeOnly("io.micrometer:micrometer-tracing-bridge-otel")
 	compileOnly("org.projectlombok:lombok")
 	annotationProcessor("org.projectlombok:lombok")
 
