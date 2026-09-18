@@ -36,14 +36,19 @@ class ArchitectureTest {
                 .check(COMMON_CORE);
     }
 
-    /** 公共模块不得反向依赖业务服务,否则模块边界就断了。 */
+    /**
+     * 公共模块不得反向依赖业务服务,否则模块边界就断了。
+     *
+     * <p>包名列表逐模块硬编码:每建一个新模块都要在这里补一条(Phase 0「新模块接入门禁清单」第 3 条),漏一项就是该模块的反向依赖无人拦。
+     */
     @Test
     void commonCoreNeverDependsOnBusinessServices() {
         noClasses()
                 .should()
                 .dependOnClassesThat()
-                .resideInAnyPackage("com.zen.admin..", "com.zen.ecs..", "com.zen.rcs..", "com.zen.wcs..")
-                .because("common-core 是被依赖方,不得引用任何业务服务的类型")
+                .resideInAnyPackage(
+                        "com.zen.admin..", "com.zen.ecs..", "com.zen.gateway..", "com.zen.rcs..", "com.zen.wcs..")
+                .because("common-core 是被依赖方,不得引用任何业务服务或网关的类型")
                 .check(COMMON_CORE);
     }
 

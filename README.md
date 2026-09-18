@@ -6,8 +6,9 @@
 
 ```text
 zen-iot/
+├── gateway-service/   # API 网关（路由 + JWT 鉴权 + 身份透传）
 ├── admin-service/     # 后台管理服务
-├── common-core/       # 公共模块（统一响应、异常、审计、分页）
+├── common-core/       # 公共模块（统一响应、异常、审计、分页、JWT）
 └── build.gradle.kts   # 根项目配置
 ```
 
@@ -56,13 +57,15 @@ zen-iot/
 
 | 命令                                   | 说明                         |
 | -------------------------------------- | ---------------------------- |
-| `./gradlew :admin-service:bootRun`     | 启动 admin-service           |
+| `./gradlew :gateway-service:bootRun`   | 启动 API 网关（28080）       |
+| `./gradlew :admin-service:bootRun`     | 启动 admin-service（28081）  |
 | `./gradlew :admin-service:bootTestRun` | 以测试配置启动 admin-service |
 
 ### 打包部署
 
 | 命令                                      | 说明                              |
 | ----------------------------------------- | --------------------------------- |
+| `./gradlew :gateway-service:bootJar`      | 打包网关为可执行 JAR              |
 | `./gradlew :admin-service:bootJar`        | 打包 admin-service 为可执行 JAR   |
 | `./gradlew :admin-service:bootBuildImage` | 构建 admin-service 的 Docker 镜像 |
 
@@ -84,6 +87,20 @@ zen-iot/
 | `./gradlew spotlessDiagnose` | 诊断 Spotless 配置问题       |
 
 ## 模块说明
+
+### gateway-service
+
+API 网关（端口 28080），承接 Phase 1 签发的 Token，对下游统一鉴权并透传身份。
+
+- **路由**：`/api/{admin,wcs,rcs,ecs}/**` → `lb://{service}`（经 Nacos 发现），`StripPrefix=2` 剥掉两段前缀；`/api/{service}` 前缀只存在于网关，服务内不写 `/api`
+- **鉴权**：`JwtAuthGlobalFilter`（最高优先级全局过滤器）按「白名单 → 取 Bearer Token → 验签/过期/`typ=access` → Redis 黑名单（`auth:blacklist:{jti}`，与 admin-service 共用）→ 覆写 `X-User-Id`/`X-Username`/`X-User-Roles`/`X-User-Modules`」执行；入站同名身份头一律先剥离，白名单路径也剥
+- **跨域**：`GatewayCorsWebFilter`（`CorsWebFilter` + 显式 order），预检请求在鉴权之前短路；刻意不使用网关的 `globalcors`，避免两处同时写 `Access-Control-*` 头
+- **统一异常**：鉴权失败由过滤器直接写出 `ApiResponse` JSON；路由级错误（无匹配路由、下游无实例 503）由 `GatewayErrorWebExceptionHandler` 承接（`common-core` 的 `GlobalExceptionHandler` 是 Servlet 专属，网关用不了）
+- **链路**：`spring.reactor.context-propagation: auto` + `common-core` 的 tracing bridge，使 traceId 进网关日志并由 SCG 注入 `traceparent` 到下游请求
+
+**主要依赖：** Spring Cloud Gateway（webflux）、Spring Cloud LoadBalancer、Nacos Discovery、Spring Data Redis Reactive、jjwt（运行时）
+
+> 该模块只依赖 `common-core` 的 JWT 与错误码，故 `build.gradle.kts` 里排掉了 `common-core` 以 `api` 暴露的 `spring-boot-starter-web`/`-validation`/`-data-jpa`——排漏一项，网关就起不来（Servlet 判定或无数据源）。`GatewayDependencyIsolationTest` 与 `ArchitectureTest` 共同把守。
 
 ### admin-service
 
@@ -135,7 +152,8 @@ zen-iot/
 现有架构约束（违反即 `architectureTest` 失败）：
 
 - `admin-service`：`controller → service → repository → entity` 单向；controller 不得依赖持久化实体；`@Transactional` 只出现在 `service` 层；`*Controller`/`*Service`/`*Repository`/`*Entity` 各归其包；包切片之间无循环依赖
-- `common-core`：不得依赖任何业务服务包；`com.zen.common.core.jwt` 不得引用 `jakarta.servlet`（Phase 2 网关要复用同一份 JWT 代码）；包切片之间无循环依赖
+- `gateway-service`：WebFlux 网关不套四层（无 JPA 层），但额外禁止——引用 Servlet/`spring-webmvc`/`jakarta.persistence`/Hibernate（网关是反应式应用）、引用 `common-core` 里 Servlet 专属的那几件（`AuthInterceptor`/`ModuleAuthInterceptor`/`UserContext`/`web` 包）、使用命令式 `StringRedisTemplate`/`RedisTemplate`、以及在任何地方调用 `Mono#block`/`Flux#blockFirst`/`blockLast`（Netty EventLoop 上阻塞会静默堵死事件循环）
+- `common-core`：不得依赖任何业务服务或网关包（`com.zen.{admin,ecs,gateway,rcs,wcs}`）；`com.zen.common.core.jwt` 不得引用 `jakarta.servlet`（网关复用同一份 JWT 代码）；包切片之间无循环依赖
 - 各模块（`ArchitectureTest` 逐模块断言）：禁止字段注入（`@Autowired`/`@Resource`/`@Inject` 落在字段上），一律构造器注入；禁止 `System.out`/`System.err` 与 `printStackTrace`，输出必须走日志框架，否则拿不到 P3-1 注入的 traceId；禁止 `new Date()`——只禁构造调用而不禁整个 `java.util.Date`，因为 jjwt 的 `issuedAt`/`expiration` 签名只收 `Date`
 - 全局：禁止使用 Spring Framework 7 已废弃的 `org.springframework.lang.Nullable` / `NonNull`，需要标注可空性时用 `org.jspecify.annotations.*`
 

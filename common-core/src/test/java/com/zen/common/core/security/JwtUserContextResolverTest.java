@@ -56,8 +56,8 @@ class JwtUserContextResolverTest {
     @Test
     void forgedIdentityHeadersAreIgnoredInJwtMode() {
         MockHttpServletRequest request = new MockHttpServletRequest();
-        request.addHeader(GatewayHeaderUserContextResolver.USER_ID_HEADER, "1");
-        request.addHeader(GatewayHeaderUserContextResolver.MODULES_HEADER, "ADMIN");
+        request.addHeader(TrustedHeaders.USER_ID, "1");
+        request.addHeader(TrustedHeaders.USER_MODULES, "ADMIN");
 
         assertThat(resolver.resolve(request)).isNull();
     }

@@ -1,0 +1,10 @@
+# 生产/容器部署 profile：与 admin-service 的 application-prod.yml 同一手法，唯一差异是日志形态。
+# traceId 跨服务串联要求两侧都是 JSON 且带 service 字段（P3-1 的 A 层），网关这一侧在本阶段随真启动一并验证。
+logging:
+  structured:
+    format:
+      console: logstash
+      file: logstash
+    json:
+      add:
+        service: ${spring.application.name}
