@@ -1,0 +1,10 @@
+# 生产/容器部署 profile：与本地唯一的差异是日志形态（与 admin-service、gateway-service 同一手法）。
+# traceId 跨服务串联要求两侧都是 JSON 且带 service 字段（P3-1 的 A 层）。
+logging:
+  structured:
+    format:
+      console: logstash
+      file: logstash
+    json:
+      add:
+        service: ${spring.application.name}

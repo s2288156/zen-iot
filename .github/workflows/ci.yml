@@ -79,6 +79,21 @@ jobs:
           --health-timeout 3s
           --health-retries 10
           --health-start-period 5s
+      # 与 docker/docker-compose.dev.yml 同一镜像与同一套 dev 口令：
+      # ecs-service 的指令中转消费者测试（@Tag("integration")）要真 broker，不能只在本机跑得绿
+      rabbitmq:
+        image: rabbitmq:4-management-alpine
+        env:
+          RABBITMQ_DEFAULT_USER: zen
+          RABBITMQ_DEFAULT_PASS: zen
+        ports:
+          - 5672:5672
+        options: >-
+          --health-cmd "rabbitmq-diagnostics -q ping"
+          --health-interval 5s
+          --health-timeout 10s
+          --health-retries 18
+          --health-start-period 20s
     steps:
       - uses: actions/checkout@v7
 
@@ -119,15 +134,36 @@ jobs:
           docker logs nacos-integration 2>&1 | tail -50
           exit 1
 
+      # service 容器的 MYSQL_DATABASE 同样只能建一个库，复用 compose 那份 init SQL 建 zen_ecs
+      # （用 docker exec 灌进容器，避免依赖 runner 上是否装了 mysql 客户端）
+      - name: Create business databases
+        run: |
+          mysql_id=$(docker ps --filter ancestor=mysql:8.0 --format '{{.ID}}' | head -1)
+          docker exec -i "$mysql_id" sh -c 'exec mysql -uroot -proot' < docker/initdb/01-create-business-databases.sql
+          docker exec "$mysql_id" mysql -uroot -proot -e 'SHOW DATABASES LIKE "zen_%"'
+
       # Flyway 空库回放：确保迁移脚本在完全空的 MySQL 上可以完整执行
+      # 镜像版本必须与运行时 flyway-core 对齐（当前 Boot BOM 管到 12.4.0，见 */build/reports/dependency-versions.txt）。
+      # 原先钉在 flyway/flyway:11 比运行时低一个 major，12.x 语法的迁移脚本会「本机过、CI 红」或反向假绿；
+      # 抬 Boot BOM 时要同步抬这里的 tag。
       - name: Verify Flyway migrations on empty DB
         run: |
           docker run --rm --network host \
-            flyway/flyway:11 \
+            flyway/flyway:12.4.0 \
             -url="jdbc:mysql://localhost:3306/zen_admin?useSSL=false&allowPublicKeyRetrieval=true" \
             -user=root \
             -password=root \
             -locations=filesystem:admin-service/src/main/resources/db/migration \
+            migrate
+
+      - name: Verify ECS Flyway migrations on empty DB
+        run: |
+          docker run --rm --network host \
+            flyway/flyway:12.4.0 \
+            -url="jdbc:mysql://localhost:3306/zen_ecs?useSSL=false&allowPublicKeyRetrieval=true" \
+            -user=root \
+            -password=root \
+            -locations=filesystem:ecs-service/src/main/resources/db/migration \
             migrate
 
       - name: Run check with integration tests
