@@ -1,0 +1,78 @@
+server:
+  # 端口按 Phase 0「端口规划」：ecs 28084 / 库 zen_ecs
+  port: 28084
+
+spring:
+  application:
+    name: ecs-service
+  # 与 admin-service 同一手法：仅靠 nacos-discovery starter 就能解析 nacos: 前缀，optional 保证 Nacos 上没有该 dataId 时照常启动
+  config:
+    import: optional:nacos:ecs-service.yaml
+  datasource:
+    url: jdbc:mysql://localhost:3306/zen_ecs?useUnicode=true&characterEncoding=utf-8&serverTimezone=Asia/Shanghai
+    username: root
+    password: root
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  jpa:
+    hibernate:
+      # 表结构归 Flyway，Hibernate 只校验；改回 update 会与迁移脚本双重所有权
+      ddl-auto: validate
+    show-sql: false
+    properties:
+      hibernate:
+        format_sql: true
+  data:
+    redis:
+      host: localhost
+      port: 6379
+  rabbitmq:
+    # dev 口令与 docker/docker-compose.dev.yml、CI integration job 的 rabbitmq service 一致（不用 guest：它被限制为仅 broker 本机登录）
+    host: ${RABBITMQ_HOST:localhost}
+    port: ${RABBITMQ_PORT:5672}
+    username: ${RABBITMQ_USER:zen}
+    password: ${RABBITMQ_PASSWORD:zen}
+  cloud:
+    nacos:
+      discovery:
+        # 网关按本服务名做 lb:// 发现（路由 /api/ecs/** → lb://ecs-service，StripPrefix=2）
+        server-addr: ${NACOS_SERVER_ADDR:localhost:8848}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        # 与 admin-service / 网关同口径：暴露面收敛为 health + prometheus
+        include:
+          - health
+          - prometheus
+  endpoint:
+    health:
+      # Phase 10 容器探针直接打 /actuator/health/liveness 与 /readiness
+      probes:
+        enabled: true
+
+zen:
+  # 本服务**刻意不配 zen.jwt.secret**：身份来自网关透传的 X-User-* 头。
+  # context-source 缺省是 jwt，而 jwt 分支在拿不到 JwtTokenVerifier（它以 zen.jwt.secret 为装配开关）时
+  # 会在启动期抛 IllegalStateException，所以这一行不是可选的风格声明，是启动前置条件。
+  security:
+    context-source: gateway-header
+    # 服务内白名单只放健康检查：ECS 的接口全部要身份，设备侧上报走协议适配器而非 HTTP 匿名入口。
+    # 注意这里与网关的 zen.gateway.auth.whitelist 是两套字符串（裸路径 / 带 /api/ecs 前缀），加公开接口要同时改两处。
+    whitelist:
+      - /actuator/**
+  ecs:
+    heartbeat:
+      # 超过该时长没收到心跳即判离线；判定用注入的 java.time.Clock，测试拨时钟即可复现，不必真等
+      timeout: 30s
+      # 超时探测周期，供 scheduler.HeartbeatTimeoutTask 的 @Scheduled 消费
+      probe-interval: 10s
+    command:
+      # 单次下发的等待上限与总尝试次数（含首次），超时/异常会重试到 max-attempts
+      timeout: 5s
+      max-attempts: 3
+    messaging:
+      exchange: zen.rcs.command
+      queue: ecs.rcs.command
+      # topic 交换器按「rcs.command.<目标模块>」路由，ECS 只绑自己这一条
+      routing-key: rcs.command.ecs

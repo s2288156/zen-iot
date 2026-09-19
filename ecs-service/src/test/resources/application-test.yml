@@ -1,0 +1,14 @@
+server:
+  port: 0 # 随机端口（这些测试不校验 HTTP 端口）
+
+spring:
+  application:
+    name: ecs-service
+  # 与 admin-service 的测试配置刻意不同：这里不关 Flyway、也不把 ddl-auto 降到 none。
+  # 迁移脚本与实体映射对不对得上，只有真跑一遍 schema 才测得出来；关掉 Flyway 等于把这条契约留给线上首次启动去发现。
+  cloud:
+    nacos:
+      discovery:
+        enabled: false # 测试不需要注册中心
+      config:
+        enabled: false

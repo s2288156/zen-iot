@@ -8,6 +8,7 @@
 zen-iot/
 ├── gateway-service/    # API 网关（路由 + JWT 鉴权 + 身份透传）
 ├── admin-service/      # 后台管理服务
+├── ecs-service/        # 外部设备管理（档案/分组、心跳、协议适配、指令中转）
 ├── common-core/        # 公共模块（Servlet Web、审计、分页）
 ├── common-security/    # Web 无关的安全内核（JWT、统一响应、错误码、身份头契约）
 └── build.gradle.kts    # 根项目配置
@@ -47,7 +48,7 @@ zen-iot/
 | 命令                                | 说明                                                                          |
 | ----------------------------------- | ----------------------------------------------------------------------------- |
 | `./gradlew test`                    | 运行所有模块的测试（默认排除 `@Tag("integration")`，无需本机中间件）          |
-| `./gradlew test -PintegrationTests` | 连同依赖本机 MySQL/Nacos/Redis 的集成测试一起跑                               |
+| `./gradlew test -PintegrationTests` | 连同依赖本机 MySQL/Nacos/Redis/RabbitMQ 的集成测试一起跑                      |
 | `./gradlew architectureTest`        | 只跑 ArchUnit 架构约束（秒级，不启动 Spring 上下文）                          |
 | `./gradlew spotbugsMain`            | SpotBugs 缺陷扫描（主代码）                                                   |
 | `./gradlew check`                   | 全量门禁：格式 + Markdown 规范 + 编译零告警 + SpotBugs + 架构约束 + 测试      |
@@ -60,6 +61,7 @@ zen-iot/
 | -------------------------------------- | ---------------------------- |
 | `./gradlew :gateway-service:bootRun`   | 启动 API 网关（28080）       |
 | `./gradlew :admin-service:bootRun`     | 启动 admin-service（28081）  |
+| `./gradlew :ecs-service:bootRun`       | 启动 ecs-service（28084）    |
 | `./gradlew :admin-service:bootTestRun` | 以测试配置启动 admin-service |
 
 ### 打包部署
@@ -116,6 +118,20 @@ API 网关（端口 28080），承接 Phase 1 签发的 Token，对下游统一�
 - MySQL Connector
 - Lombok
 
+### ecs-service
+
+外部设备服务（端口 28084，库 `zen_ecs`），管 AMR 之外的设备：PLC / 光栅 / 自动门 / 充电桩。
+
+- **身份来源是网关透传头**：`zen.security.context-source: gateway-header`，本服务**不配** `zen.jwt.secret`。这不是风格声明而是启动前置条件——`jwt` 分支拿不到 `JwtTokenVerifier` 会在装配期抛 `IllegalStateException`
+- **设备档案与分组**：都是逻辑删除（实体上的 `@SQLDelete` + `@SQLRestriction`），但唯一索引不区分 `deleted`，因此新建按全表查重并报业务码，而不是留给数据库抛 500
+- **心跳与上下线**：上报只写 Redis（键 `ecs:heartbeat:{deviceId}`，TTL 就等于超时阈值），超时探测由 `@Scheduled` 周期扫在线设备。判定一律读注入的 `java.time.Clock`，所以「超时自动离线」在单元测试里拨时钟就能复现，不必真等 30 秒
+- **协议适配抽象层**：`ProtocolSupport`（按协议类型认领 + 打开适配器）→ `DeviceAdapterFactory` → `DeviceAdapter`（`connect`/`read`/`write`/`close`）。Phase 3 只有 `loopback` 这一个回环实现，Modbus TCP / OPC UA 随 Phase 4 追加，插槽形态不变
+- **指令中转**：RCS 经 RabbitMQ topic 交换器（`zen.rcs.command` / `rcs.command.ecs`）投递，`RcsCommandListener` 消费后由 `CommandDispatchService` 落到设备。`commandNo` 是幂等键（唯一索引即判重），单次执行有超时与重试上限，结果回写 `t_device_command` 供 `GET /command/{commandNo}` 回读
+
+**主要依赖：** `common-core`、Spring Boot Web / Validation / Data JPA / Data Redis / AMQP / Flyway、Nacos Discovery、MySQL Connector
+
+> MQ 消息反序列化限定在 `com.zen.ecs.dto` 这一个受信包：`JacksonJsonMessageConverter` 按 `__TypeId__` 头选类，放开等于把「反序列化任意类」的攻击面交给任何能往队列写消息的一方。
+
 ### common-security
 
 Web 无关的**安全内核**：JWT 签发/校验、统一响应与错误码、身份透传头与黑名单契约。它刻意不依赖任何传输栈或持久化栈，因此反应式网关与 Servlet 业务服务复用同一份验签代码时，谁都不需要排依赖。
@@ -164,6 +180,7 @@ Web 无关的**安全内核**：JWT 签发/校验、统一响应与错误码、�
 现有架构约束（违反即 `architectureTest` 失败）：
 
 - `admin-service`：`controller → service → repository → entity` 单向；controller 不得依赖持久化实体；`@Transactional` 只出现在 `service` 层；`*Controller`/`*Service`/`*Repository`/`*Entity` 各归其包；包切片之间无循环依赖
+- `ecs-service`：`admin-service` 那 8 条（分层、实体不出入口层、`@Transactional` 只在 service、角色各归其包、切片无环、禁字段注入/标准流/`new Date()`）逐条照搬，另加三条——**导入类数非零**哨兵（包根改名或目录被挪走时，规则会拿到零个类；这条把「覆盖面缩水」变成明确断言，而不是留给各规则按自己的判定风格处理）、**禁止直接读系统时钟**（`LocalDateTime.now()`/`Instant.now()`/`System.currentTimeMillis()`，心跳超时判定与事件时刻一律取注入的 `Clock`，否则「超时自动离线」只能靠真等阈值来测）、以及不得引用其它业务服务或网关。协议适配（`protocol`）、心跳存储（`presence`）、MQ 消费者（`listener`）、定时探测（`scheduler`）都在四层之外，故 listener/scheduler 调 service 不被判跨层——反面同样成立：`controller → listener → repository` 这种绕层链路也不会变红，「消费者只调 service」是约定而非门禁
 - `gateway-service`：WebFlux 网关不套四层（无 JPA 层），但额外禁止——引用 Servlet/`spring-webmvc`/`jakarta.persistence`/Hibernate（网关是反应式应用）、引用 `common-core` 里 Servlet 专属的那几件（`AuthInterceptor`/`ModuleAuthInterceptor`/`UserContext`/`web` 包）、使用命令式 `StringRedisTemplate`/`RedisTemplate`、以及在任何地方调用 `Mono#block`/`Flux#blockFirst`/`blockLast`（Netty EventLoop 上阻塞会静默堵死事件循环）
 - `common-core`：不得依赖任何业务服务或网关包（`com.zen.{admin,ecs,gateway,rcs,wcs}`）；包切片之间无循环依赖
 - `common-security`：整个模块不得依赖 Servlet / Spring Web（两种传输栈）/ `jakarta.validation` / JPA / Spring Data / 事务，也不得反向依赖 `common-core`——这两条就是「网关可以直接复用它而不必排依赖」这件事的可执行形式；原 `common-core` 里只禁 `jakarta.servlet` 的 `jwtPackageStaysServletFree()` 被它们取代
@@ -183,7 +200,7 @@ Web 无关的**安全内核**：JWT 签发/校验、统一响应与错误码、�
 | `pre-push`   | `./gradlew prePushCheck`，格式 + Markdown 规范 + 全模块编译（`-Werror`）+ SpotBugs(main) + 架构约束，不跑测试   |
 
 - 钩子文件由构建脚本生成，不要手工编辑：每次 Gradle 调用都会按脚本声明覆盖回去。
-- 全量门禁仍是 `./gradlew check`（格式 + 编译 + SpotBugs + 架构约束 + 非集成测试）。pre-push 不跑测试只为省时间；`admin-service` 依赖本机 MySQL 8 / Nacos / Redis 的 `@SpringBootTest` 已打 `@Tag("integration")`，容器没起时也不会误报。
+- 全量门禁仍是 `./gradlew check`（格式 + 编译 + SpotBugs + 架构约束 + 非集成测试）。pre-push 不跑测试只为省时间；`admin-service` 与 `ecs-service` 依赖本机 MySQL 8 / Nacos / Redis / RabbitMQ 4 的 `@SpringBootTest` 已打 `@Tag("integration")`，容器没起时也不会误报。
 - `commit-msg` 的 scope 只接受字母、数字、空格与 `/ + -`，`.ai`、`common_core` 这类写法会被拒。
 - `.git` 不可写的环境（agent 沙箱、源码包）用 `./gradlew <task> -PskipGitHooks` 跳过钩子安装。
 - 插件只生成上述三个钩子，第三方工具已有的 `post-commit` / `post-checkout` 不受影响。
