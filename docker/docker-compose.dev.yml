@@ -1,6 +1,9 @@
-# 开发与测试基础设施：MySQL 8 + Redis 8 + Nacos 3.1.1（与 Spring Boot 4.1 / Spring Cloud Alibaba 2025.1.0.0 对齐）
+# 开发与测试基础设施：MySQL 8 + Redis 8 + Nacos 3.1.1 + RabbitMQ 4（与 Spring Boot 4.1 / Spring Cloud Alibaba 2025.1.0.0 对齐）
 # 启动：docker compose -f docker/docker-compose.dev.yml up -d
 # 停止：docker compose -f docker/docker-compose.dev.yml down
+#
+# 建库：initdb/*.sql 只在 MySQL 数据卷为空时执行。已有 zen_mysql_data 卷的开发机补一次即可：
+#   docker exec zen-mysql-dev mysql -uroot -proot -e "CREATE DATABASE IF NOT EXISTS zen_ecs CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci"
 services:
   mysql:
     image: mysql:8.0
@@ -13,6 +16,8 @@ services:
       - "3306:3306"
     volumes:
       - zen_mysql_data:/var/lib/mysql
+      # MYSQL_DATABASE 只能建一个库，业务库随各阶段用 init SQL 补；CI 侧同一份脚本（见 .github/workflows/ci.yml）
+      - ./initdb:/docker-entrypoint-initdb.d:ro
     healthcheck:
       test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-proot"]
       interval: 5s
@@ -64,6 +69,29 @@ services:
       retries: 18
       start_period: 30s
 
+  # Phase 3 的指令中转（RCS → ECS 消费）与 Phase 9 的全链路异步都打这里。
+  # 刻意不用 guest/guest：RabbitMQ 默认把 guest 限制为「只能从 broker 自身 loopback 登录」，
+  # 经发布端口进来的连接源地址是网桥网关而不是 127.0.0.1，会被直接拒。
+  rabbitmq:
+    image: rabbitmq:4-management-alpine
+    container_name: zen-rabbitmq-dev
+    restart: unless-stopped
+    environment:
+      RABBITMQ_DEFAULT_USER: zen
+      RABBITMQ_DEFAULT_PASS: zen
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    volumes:
+      - zen_rabbitmq_data:/var/lib/rabbitmq
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+      interval: 5s
+      timeout: 10s
+      retries: 18
+      start_period: 20s
+
 volumes:
   zen_mysql_data:
   zen_redis_data:
+  zen_rabbitmq_data:
