@@ -46,22 +46,27 @@ Every rule below has a gate behind it, so a workaround shows up as a failed push
 - **Coding hygiene** (ArchUnit, asserted per module): constructor injection only, so `@Autowired`/`@Resource`/`@Inject`
   never sit on a field; no `System.out`/`System.err`/`printStackTrace`, because only the logging framework carries the
   traceId from P3-1; no `new Date()`, while `java.util.Date` itself stays legal for jjwt's `issuedAt`/`expiration`.
-- **SpotBugs**: `Effort.DEFAULT` + `Confidence.MEDIUM`, failures block. Prefer fixing code; a new exemption belongs in
+- **SpotBugs**: `Effort.DEFAULT` + `Confidence.MEDIUM`, failures block. Reports land in
+  `<module>/build/reports/spotbugs/main.{html,xml}`. Prefer fixing code; a new exemption belongs in
   `gradle/spotbugs/exclude.xml` with a comment justifying it, and must stay narrow (rule + package, never a blanket
   category). `VerifiedToken` shed 4 findings by adding a `List.copyOf` compact constructor instead of an exemption.
 - **Tests**: anything needing local MySQL/Nacos/Redis carries `@Tag("integration")` so `test`/`check` stay runnable on a
   clean machine. New tests should avoid containers by default.
 - **Formatting**: Spotless covers `*.java` (palantir), `*.md` (Prettier + markdownlint), `*.gradle.kts` (whitespace and
   final newline only, existing tab indentation is kept) and `*.yml` (Prettier). Flyway `db/migration/*.sql` is
-  deliberately left unformatted so migration diffs stay reviewable.
+  deliberately left unformatted so migration diffs stay reviewable. `.editorconfig` matches what those formatters
+  actually emit: Java 4 spaces / 120 columns, YAML 2 spaces, kts keeps tabs, LF everywhere.
+- **Documentation placement**: the root `README.md` is project orientation only (what the platform is, module list, how
+  to run it locally). Module internals and that module's ArchUnit rule inventory belong in the module's own
+  `README.md`, and the gates below stay here — a rule written down in two places is a rule that will drift.
 
 ## Workflow
 
 - Inspect the working tree before editing. For an existing PR, check out its branch first.
 - Discuss architectural decisions such as framework changes, major refactoring, and system design before implementing them. Routine fixes and clear implementations do not need discussion.
 - When asked a question, answer the question instead of jumping to implementation.
-- Install the repository Git hooks once per clone: any Gradle invocation (e.g. `./gradlew help`) generates `.git/hooks/pre-commit` (`spotlessCheck`), `commit-msg` (conventional commits), and `pre-push` (`prePushCheck`) from the `gitHooks` block in `settings.gradle.kts`.
-- Never edit the generated hooks by hand, and never bypass them with `--no-verify`. Where `.git` is not writable (agent sandboxes, source archives) pass `-PskipGitHooks`. Wait for slow first runs while caches warm.
+- Install the repository Git hooks once per clone: any Gradle invocation (e.g. `./gradlew help`) generates `.git/hooks/pre-commit` (`spotlessCheck`, ~2s on a warm daemon), `commit-msg` (conventional commits), and `pre-push` (`prePushCheck`) from the `gitHooks` block in `settings.gradle.kts`.
+- Never edit the generated hooks by hand, and never bypass them with `--no-verify`. Every Gradle invocation regenerates them from the script declaration, so local edits are silently lost; only these three are generated, leaving a third-party `post-commit`/`post-checkout` alone. Where `.git` is not writable (agent sandboxes, source archives) pass `-PskipGitHooks`. Wait for slow first runs while caches warm.
 - Prefer targeted tests and checks while iterating. Run the broader checks required by the affected area before handoff.
 - Do not force-push unless explicitly requested.
 - Commit and PR titles use `type(scope): message`. A scope must be a real path containing every changed file. Use a broader scope or no scope for cross-cutting changes.
