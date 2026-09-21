@@ -19,7 +19,9 @@ services:
       # MYSQL_DATABASE 只能建一个库，业务库随各阶段用 init SQL 补；CI 侧同一份脚本（见 .github/workflows/ci.yml）
       - ./initdb:/docker-entrypoint-initdb.d:ro
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-proot"]
+      # -h 127.0.0.1 强制走 TCP：首启建卷阶段 entrypoint 会临时起 --skip-networking 实例，
+      # 走 socket 的 localhost 会在其初始化完成前就 ping 通，导致健康状态早报
+      test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "-uroot", "-proot"]
       interval: 5s
       timeout: 5s
       retries: 10
@@ -56,13 +58,19 @@ services:
     ports:
       - "8848:8848"
       - "9848:9848"
+      # Nacos 3.x 控制台与 API 分离：UI 在 8080，8848 的 /nacos/ 只剩一句跳转提示
+      - "8080:8080"
+    volumes:
+      # standalone 用内嵌 Derby，全部状态在 /home/nacos/data；不挂载则 down 一次即清空
+      # （admin/ecs 的 optional:nacos:* 配置会随之丢失）
+      - zen_nacos_data:/home/nacos/data
     healthcheck:
-      # Nacos 3.x 健康端点从 /v1/ 迁移到 /v3/，且需要额外配置兼容
-      # 简化：检查 8848 端口是否监听即可确认启动就绪
+      # Nacos 3.x 健康端点从 /v1/ 迁移到 /v3/；liveness 才是就绪探针，
+      # 首页 /nacos/ 在 3.x 只是「控制台在 8080」的提示文本，不表达就绪语义
       test:
         [
           "CMD-SHELL",
-          "curl -s -o /dev/null -w '%{http_code}' http://localhost:8848/nacos/ | grep -q 200 || exit 1",
+          "curl -s -o /dev/null -w '%{http_code}' http://localhost:8848/nacos/v3/admin/core/state/liveness | grep -q 200 || exit 1",
         ]
       interval: 5s
       timeout: 5s
@@ -93,5 +101,6 @@ services:
 
 volumes:
   zen_mysql_data:
+  zen_nacos_data:
   zen_redis_data:
   zen_rabbitmq_data:

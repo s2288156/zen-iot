@@ -41,7 +41,7 @@ zen-iot/
 ## 本地运行
 
 1. 起中间件：`docker compose -f docker/docker-compose.dev.yml up -d`
-   MySQL `3306`（root/root，建 `zen_admin`）、Redis `6379`、Nacos `8848`/`9848`、RabbitMQ `5672`（管理台 `15672`，zen/zen）。
+   MySQL `3306`（root/root，建 `zen_admin`）、Redis `6379`、Nacos `8848`/`9848`（控制台 `8080`）、RabbitMQ `5672`（管理台 `15672`，zen/zen）。
    `initdb/*.sql` 只在 MySQL 数据卷为空时执行，已有卷的机器需手工补一次 `zen_ecs` 建库，命令见该文件头注释。
 2. 装 Git 钩子：执行一次任意 Gradle 任务（如 `./gradlew help`）即按 `settings.gradle.kts` 生成 `.git/hooks`。
 3. 起服务：`./gradlew :admin-service:bootRun`、`:ecs-service:bootRun`、`:gateway-service:bootRun`。表结构与种子数据由 Flyway 自动灌（种子账号见 `admin-service/src/main/resources/db/migration/V2__seed_auth.sql`）。

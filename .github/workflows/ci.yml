@@ -64,7 +64,7 @@ jobs:
         ports:
           - 3306:3306
         options: >-
-          --health-cmd "mysqladmin ping -h localhost -uroot -proot"
+          --health-cmd "mysqladmin ping -h 127.0.0.1 -uroot -proot"
           --health-interval 5s
           --health-timeout 5s
           --health-retries 10
@@ -122,8 +122,8 @@ jobs:
             -p 9848:9848 \
             nacos/nacos-server:v3.1.1
           for i in $(seq 1 36); do
-            # Nacos 3.x 健康端点从 /v1/ 迁移到 /v3/，简化检查首页 200
-            if curl -sf http://localhost:8848/nacos/ > /dev/null 2>&1; then
+            # Nacos 3.x 健康端点从 /v1/ 迁移到 /v3/；liveness 才是就绪探针（首页只是跳转提示）
+            if curl -sf http://localhost:8848/nacos/v3/admin/core/state/liveness > /dev/null 2>&1; then
               echo "Nacos is ready after ${i} tries"
               exit 0
             fi
