@@ -20,6 +20,7 @@
 zen-iot/
 ├── {gateway,admin,ecs}-service/   # 可运行应用，各自 README 说明实现与约束
 ├── common-{core,security}/        # 库模块
+├── docs/                          # 框架与技术的学习/研究笔记（不讲规则，规则见 AGENTS.md）
 ├── docker/                        # 本地中间件 compose + initdb 建库脚本
 ├── gradle/                        # wrapper、SpotBugs 豁免、commit-msg 脚本
 ├── build.gradle.kts               # 跨模块公共配置与门禁任务
@@ -62,6 +63,7 @@ zen-iot/
 
 - 硬性约定与门禁（零告警编译、jspecify 可空性、分层与编码卫生、SpotBugs 豁免政策、集成测试打 tag、Conventional Commits）以 [`AGENTS.md`](AGENTS.md) 为唯一事实源，这里不重复。
 - 各模块的实现细节与架构约束写在**该模块目录的 `README.md`**，与本文件分工：这里回答「项目是什么、怎么跑起来」，模块文档回答「这个模块内部怎么实现、什么被禁」。
+- [`docs/`](docs/) 是框架与技术的研究笔记（某项门禁技术是什么、为什么这么接、产物去哪看），不承载规则；规则仍以 `AGENTS.md` 为唯一事实源。
 - 依赖本机中间件的测试一律打 `@Tag("integration")`，否则 `./gradlew check` 在干净机器上就是红的。
 
 ## 安全
