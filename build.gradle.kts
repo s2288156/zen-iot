@@ -51,7 +51,7 @@ subprojects {
 
 	configure<JavaPluginExtension> {
 		toolchain {
-			languageVersion.set(JavaLanguageVersion.of(21))
+			languageVersion.set(JavaLanguageVersion.of(25))
 		}
 	}
 
@@ -168,8 +168,8 @@ spotless {
 	}
 	format("markdown") {
 		target("**/*.md")
-		// .ai/ 是 gitignore 的临时笔记：Spotless 的 ** 会匹配到点开头的路径，未跟踪文件于是反过来卡住每一次提交
-		targetExclude("**/build/**", "**/.gradle/**", "**/node_modules/**", "**/.ai/**")
+		// .ai/ 与 .codex/ 是 gitignore 的本地笔记：Spotless 的 ** 会匹配到点开头的路径，未跟踪文件于是反过来卡住每一次提交
+		targetExclude("**/build/**", "**/.gradle/**", "**/node_modules/**", "**/.ai/**", "**/.codex/**")
 		prettier()
 			.config(
 				mapOf(

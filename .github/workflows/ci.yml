@@ -20,17 +20,17 @@ permissions:
 jobs:
   # ——— 静态门禁（现有，不变）———
   check:
-    name: ./gradlew check (JDK 21)
+    name: ./gradlew check (JDK 25)
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@v7
 
-      - name: Setup JDK 21
+      - name: Setup JDK 25
         uses: actions/setup-java@v6
         with:
           distribution: temurin
-          java-version: "21"
+          java-version: "25"
 
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v6
@@ -52,7 +52,7 @@ jobs:
 
   # ——— 集成测试（依赖 MySQL/Nacos/Redis 容器）———
   integration:
-    name: ./gradlew check -PintegrationTests (JDK 21)
+    name: ./gradlew check -PintegrationTests (JDK 25)
     runs-on: ubuntu-latest
     timeout-minutes: 30
     services:
@@ -97,11 +97,11 @@ jobs:
     steps:
       - uses: actions/checkout@v7
 
-      - name: Setup JDK 21
+      - name: Setup JDK 25
         uses: actions/setup-java@v6
         with:
           distribution: temurin
-          java-version: "21"
+          java-version: "25"
 
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v6

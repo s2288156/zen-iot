@@ -33,7 +33,7 @@ zen-iot/
 
 ## 环境要求
 
-- **Java**：JDK 21（`JAVA_HOME`）
+- **Java**：JDK 25（`JAVA_HOME`）
 - **Gradle**：9.7.1（已包含 wrapper）
 - **Node.js**：20 及以上——Markdown 格式化与 markdownlint 通过 `npx` 调用（Spotless 管理依赖，首次运行需联网）
 - **Docker**：跑本地中间件

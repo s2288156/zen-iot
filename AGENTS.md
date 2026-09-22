@@ -6,7 +6,7 @@ Prioritize correctness over agreement. State uncertainty instead of guessing, an
 
 ## Prerequisites
 
-- **Java**: JDK 21 via `JAVA_HOME`;
+- **Java**: JDK 25 via `JAVA_HOME`;
 - **Build tooling**: Gradle 9.7.1
 - **Node.js**: 20 or newer (Spotless Prettier and markdownlint-cli run through `npx`; the first run needs network)
 - Git
