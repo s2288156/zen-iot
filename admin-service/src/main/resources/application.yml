@@ -21,7 +21,9 @@ spring:
     show-sql: false
     properties:
       hibernate:
-        format_sql: true
+        # 含下划线的 key 在 map 里会被 IDE 提示"含特殊字符"，用 [xxx] 显式括起，
+        # 避免被松散绑定按分隔符拆成 format.sql
+        "[format_sql]": true
   flyway:
     placeholders:
       # 开发口令 Admin@123 / Demo@123 的 BCrypt 密文；生产由 SPRING_FLYWAY_PLACEHOLDERS_ADMINPASSWORD /
