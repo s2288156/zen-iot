@@ -78,3 +78,12 @@ springdoc:
     path: /v3/api-docs
   swagger-ui:
     path: /swagger-ui.html
+  # 只扫本模块，防止 common-core 的 @RestControllerAdvice/实体被当成本服务的接口模型
+  packages-to-scan: com.zen.admin
+  # 默认 */* 会让 Apifox 与 SDK 生成器拿不到 json 语义；接口实际只产 json
+  default-produces-media-type: application/json
+  # key 有序：文档 JSON 可作为 Apifox 定时同步与基线 diff 的稳定输入
+  writer-with-order-by-keys: true
+  # 刻意不开 use-fqn：模型名会变成 com.zen.admin.dto.LoginRequest 这种长串，每个工具里都要重读一遍。
+  # 跨服务并档靠 operationId 前缀（见 ZenAdminOpenApiConfiguration）防撞；真撞上同名 schema，
+  # 也只在涉事 DTO 上写 @Schema(name=...) 定点改，不全局切换命名策略。
