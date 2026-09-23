@@ -1,0 +1,205 @@
+{
+  "schema_version": 1,
+  "diagram_type": "architecture",
+  "meta": {
+    "title": "Zen IoT 平台架构",
+    "locale": "zh-CN",
+    "quality_profile": "showcase",
+    "repository": {
+      "url": "https://github.com/s2288156/zen-iot",
+      "provider": "github",
+      "revision": "099aa5157847ac4e93b579b41ad68a021092a726"
+    },
+    "views": [
+      {
+        "id": "request-path",
+        "label": "运行时请求主链路",
+        "focus": ["client", "gateway", "admin", "ecs", "mysql"],
+        "note": "浏览器经网关验签后按 StripPrefix=2 转发到下游服务，落到各自的库。"
+      },
+      {
+        "id": "shared-kernel",
+        "label": "共享内核与依赖方向",
+        "focus": ["gateway", "common-security", "common-core", "ecs"],
+        "note": "Web 无关的 common-security 被网关与 Servlet 服务复用，内核不反向依赖业务。"
+      },
+      {
+        "id": "device-mq",
+        "label": "设备侧与跨服务指令",
+        "focus": ["devices", "ecs", "redis", "rabbitmq"],
+        "note": "设备不走 HTTP，由 ecs 协议适配器接入并经 Redis/RabbitMQ 处理在线态与指令。"
+      }
+    ]
+  },
+  "components": [
+    {
+      "id": "client",
+      "type": "external",
+      "label": "浏览器 / 前端",
+      "sublabel": "运维与设备管理界面",
+      "pos": [70, 140],
+      "size": [150, 66]
+    },
+    {
+      "id": "nacos",
+      "type": "cloud",
+      "label": "Nacos",
+      "sublabel": "服务注册与发现",
+      "pos": [300, 50],
+      "size": [150, 58]
+    },
+    {
+      "id": "gateway",
+      "type": "backend",
+      "label": "gateway-service",
+      "sublabel": "SCG / WebFlux 反应式 · :28080",
+      "tag": "JWT 鉴权 · 身份透传",
+      "pos": [300, 230],
+      "size": [200, 86],
+      "sources": [
+        {
+          "path": "gateway-service/src/main/resources/application.yml",
+          "line": 30,
+          "end_line": 58,
+          "label": "路由 / StripPrefix"
+        },
+        {
+          "path": "gateway-service/src/main/java/com/zen/gateway/filter/JwtAuthGlobalFilter.java",
+          "label": "全局鉴权过滤器"
+        }
+      ]
+    },
+    {
+      "id": "common-security",
+      "type": "security",
+      "label": "common-security",
+      "sublabel": "Web 无关安全内核",
+      "tag": "JWT · ApiResponse · TrustedHeaders",
+      "pos": [300, 430],
+      "size": [200, 72],
+      "sources": [
+        { "path": "common-security/src/main/java/com/zen/common/security/auth/TrustedHeaders.java" },
+        { "path": "common-security/src/main/java/com/zen/common/security/api/ApiResponse.java" }
+      ]
+    },
+    {
+      "id": "common-core",
+      "type": "backend",
+      "label": "common-core",
+      "sublabel": "Servlet 业务服务公共模块",
+      "tag": "拦截器 · 用户上下文 · 全局异常",
+      "pos": [300, 545],
+      "size": [200, 68]
+    },
+    {
+      "id": "admin",
+      "type": "backend",
+      "label": "admin-service",
+      "sublabel": "Spring MVC · JPA · :28081",
+      "tag": "认证与授权基线",
+      "pos": [620, 240],
+      "size": [200, 86],
+      "sources": [
+        { "path": "admin-service/src/main/java/com/zen/admin/controller/AuthController.java" }
+      ]
+    },
+    {
+      "id": "ecs",
+      "type": "backend",
+      "label": "ecs-service",
+      "sublabel": "Spring MVC · JPA · :28084",
+      "tag": "设备档案 · 在线态 · 指令中转",
+      "pos": [620, 360],
+      "size": [200, 86],
+      "sources": [
+        { "path": "ecs-service/src/main/java/com/zen/ecs/controller/DeviceController.java" }
+      ]
+    },
+    {
+      "id": "devices",
+      "type": "external",
+      "label": "现场设备",
+      "sublabel": "PLC · 光栅 · 自动门 · 充电桩",
+      "pos": [635, 540],
+      "size": [170, 66]
+    },
+    {
+      "id": "redis",
+      "type": "database",
+      "label": "Redis",
+      "sublabel": "令牌黑名单 · 设备心跳",
+      "pos": [1030, 90],
+      "size": [160, 62],
+      "sources": [
+        { "path": "ecs-service/src/main/java/com/zen/ecs/service/HeartbeatService.java" }
+      ]
+    },
+    {
+      "id": "mysql",
+      "type": "database",
+      "label": "MySQL 8",
+      "sublabel": "每服务一库",
+      "tag": "zen_admin · zen_ecs",
+      "pos": [1030, 360],
+      "size": [160, 62]
+    },
+    {
+      "id": "rabbitmq",
+      "type": "messagebus",
+      "label": "RabbitMQ 4",
+      "sublabel": "跨服务指令",
+      "pos": [1030, 470],
+      "size": [160, 62]
+    }
+  ],
+  "boundaries": [
+    {
+      "kind": "region",
+      "label": "Spring Boot 4.1 · Gradle 多模块",
+      "wraps": ["gateway", "common-security", "common-core", "admin", "ecs"]
+    }
+  ],
+  "connections": [
+    { "id": "client-gateway", "from": "client", "to": "gateway", "label": "HTTPS /api/**", "variant": "emphasis", "labelAt": [245, 120] },
+    { "id": "gateway-admin", "from": "gateway", "to": "admin", "label": "StripPrefix=2" },
+    { "id": "gateway-ecs", "from": "gateway", "to": "ecs", "label": "StripPrefix=2" },
+    { "id": "devices-ecs", "from": "devices", "to": "ecs", "label": "协议适配 · 非 HTTP", "fromSide": "top", "toSide": "bottom" },
+    { "id": "gateway-nacos", "from": "gateway", "to": "nacos", "label": "服务发现", "fromSide": "top", "toSide": "bottom" },
+    { "id": "gateway-blocklist", "from": "gateway", "to": "redis", "label": "黑名单校验 jti", "variant": "security", "fromSide": "top", "toSide": "left" },
+    { "id": "admin-mysql", "from": "admin", "to": "mysql", "label": "zen_admin" },
+    { "id": "ecs-mysql", "from": "ecs", "to": "mysql", "label": "zen_ecs" },
+    { "id": "ecs-commands", "from": "ecs", "to": "rabbitmq", "label": "发布指令", "variant": "dashed" },
+    { "id": "gateway-kernel", "from": "gateway", "to": "common-security", "label": "复用验签", "variant": "security", "fromSide": "bottom", "toSide": "top", "labelAt": [400, 373] },
+    { "id": "ecs-core", "from": "ecs", "to": "common-core", "variant": "dashed", "fromSide": "left", "toSide": "right" },
+    { "id": "core-kernel", "from": "common-core", "to": "common-security", "variant": "dashed", "fromSide": "top", "toSide": "bottom" }
+  ],
+  "cards": [
+    {
+      "dot": "cyan",
+      "title": "运行时链路",
+      "items": [
+        "浏览器 → 网关 :28080 验签并覆写 X-User-* 身份头",
+        "StripPrefix=2 剥两段前缀，服务内只写裸路径",
+        "设备侧不走 HTTP，由 ecs 协议适配器接入"
+      ]
+    },
+    {
+      "dot": "rose",
+      "title": "共享内核",
+      "items": [
+        "common-security：JWT / ApiResponse / TrustedHeaders，Web 无关",
+        "网关与 Servlet 服务复用同一份验签代码",
+        "common-security 不依赖 common-core，依赖方向保持单向"
+      ]
+    },
+    {
+      "dot": "emerald",
+      "title": "中间件",
+      "items": [
+        "MySQL 8 每服务一库，Flyway 建库",
+        "Redis 承载令牌黑名单与设备心跳",
+        "RabbitMQ 跨服务指令，Nacos 服务发现"
+      ]
+    }
+  ]
+}
