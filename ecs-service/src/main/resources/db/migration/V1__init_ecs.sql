@@ -1,4 +1,5 @@
 -- Phase 3 ECS 设备管理与协议适配框架：设备档案、分组、上下线事件、指令中转
+-- 全库统一 utf8mb4 / utf8mb4_0900_ai_ci（与 admin-service 及 MySQL 8 服务器默认一致），建表不得省略 COLLATE
 -- 审计列名与 common-core 的 BaseEntity 一致：creator / create_time / updater / update_time
 -- deleted 不在实体上映射：DDL 默认 0，t_device / t_device_group 只通过 @SQLRestriction("deleted = 0") 过滤，
 -- 写入侧由同一批实体上的 @SQLDelete 把 delete 语句换成 UPDATE deleted = 1
@@ -16,7 +17,7 @@ CREATE TABLE t_device_group (
     deleted     TINYINT      NOT NULL DEFAULT 0 COMMENT '逻辑删除: 0否 1是',
     PRIMARY KEY (id),
     UNIQUE KEY uk_group_code (group_code)
-) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '设备分组表';
+) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '设备分组表';
 
 CREATE TABLE t_device (
     id                  BIGINT       NOT NULL AUTO_INCREMENT COMMENT '主键',
@@ -36,7 +37,7 @@ CREATE TABLE t_device (
     UNIQUE KEY uk_device_code (device_code),
     KEY idx_group_id (group_id),
     KEY idx_online (online)
-) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '设备档案表';
+) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '设备档案表';
 
 -- 上下线事件独立成表：t_device.online 只保留当前态，历史（谁在何时上线/离线、因何离线）靠它回答
 CREATE TABLE t_device_event (
@@ -51,7 +52,7 @@ CREATE TABLE t_device_event (
     update_time DATETIME    NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
     PRIMARY KEY (id),
     KEY idx_device_id_occurred_at (device_id, occurred_at)
-) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '设备上下线事件表';
+) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '设备上下线事件表';
 
 -- 指令中转的落库面：command_no 是幂等键，重复投递不会执行第二次
 CREATE TABLE t_device_command (
@@ -71,4 +72,4 @@ CREATE TABLE t_device_command (
     PRIMARY KEY (id),
     UNIQUE KEY uk_command_no (command_no),
     KEY idx_device_id (device_id)
-) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '设备指令中转表';
+) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '设备指令中转表';

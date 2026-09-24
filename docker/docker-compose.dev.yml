@@ -3,12 +3,17 @@
 # 停止：docker compose -f docker/docker-compose.dev.yml down
 #
 # 建库：initdb/*.sql 只在 MySQL 数据卷为空时执行。已有 zen_mysql_data 卷的开发机补一次即可：
-#   docker exec zen-mysql-dev mysql -uroot -proot -e "CREATE DATABASE IF NOT EXISTS zen_ecs CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci"
+#   docker exec zen-mysql-dev mysql -uroot -proot -e "CREATE DATABASE IF NOT EXISTS zen_ecs CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci"
+# 注意：旧卷里按 utf8mb4_unicode_ci 建的表不会自动转换，本仓库开发库请删卷重建：
+#   docker compose -f docker/docker-compose.dev.yml down && docker volume rm docker_zen_mysql_data && docker compose -f docker/docker-compose.dev.yml up -d
 services:
   mysql:
     image: mysql:8.0
     container_name: zen-mysql-dev
     restart: unless-stopped
+    # 显式钉死服务器默认字符集/排序规则（恰为 MySQL 8 默认值）：
+    # MYSQL_DATABASE 建的 zen_admin 直接继承它，与 initdb 脚本及各服务 Flyway 建表语句保持同一 collation
+    command: --character-set-server=utf8mb4 --collation-server=utf8mb4_0900_ai_ci
     environment:
       MYSQL_ROOT_PASSWORD: root
       MYSQL_DATABASE: zen_admin
