@@ -63,6 +63,9 @@ jobs:
           MYSQL_DATABASE: zen_admin
         ports:
           - 3306:3306
+        # 勿在此处传 --character-set-server/--collation-server：service 容器的 options 会被拼进
+        # docker create（镜像名之前），MySQL 服务端参数会让容器以 unknown flag 启动失败。
+        # utf8mb4 / utf8mb4_0900_ai_ci 即 mysql:8.0 内置默认值，表级 COLLATE 已在 Flyway 脚本显式钉死
         options: >-
           --health-cmd "mysqladmin ping -h 127.0.0.1 -uroot -proot"
           --health-interval 5s

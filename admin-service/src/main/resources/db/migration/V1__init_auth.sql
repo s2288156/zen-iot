@@ -1,4 +1,6 @@
 -- Phase 1 认证与模块级授权：用户 ↔ 角色 ↔ 模块 四表
+-- 全库统一 utf8mb4 / utf8mb4_0900_ai_ci（MySQL 8 默认，UCA 9.0）：建表语句不得省略 COLLATE，
+-- 否则未显式声明的表会落到库级默认值上，与其余表混用排序规则
 -- 审计列名与 common-core 的 BaseEntity 一致：creator / create_time / updater / update_time
 -- deleted 故意不在实体上映射：DDL 默认 0，实体只通过 @SQLRestriction("deleted = 0") 过滤
 
@@ -14,7 +16,7 @@ CREATE TABLE t_user (
     deleted     TINYINT      NOT NULL DEFAULT 0 COMMENT '逻辑删除: 0否 1是',
     PRIMARY KEY (id),
     UNIQUE KEY uk_username (username)
-) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '用户表';
+) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '用户表';
 
 CREATE TABLE t_role (
     id          BIGINT       NOT NULL AUTO_INCREMENT COMMENT '主键',
@@ -28,17 +30,17 @@ CREATE TABLE t_role (
     deleted     TINYINT      NOT NULL DEFAULT 0 COMMENT '逻辑删除: 0否 1是',
     PRIMARY KEY (id),
     UNIQUE KEY uk_role_code (role_code)
-) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '角色表';
+) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '角色表';
 
 CREATE TABLE t_user_role (
     user_id BIGINT NOT NULL COMMENT '用户ID',
     role_id BIGINT NOT NULL COMMENT '角色ID',
     PRIMARY KEY (user_id, role_id),
     KEY idx_role_id (role_id)
-) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '用户角色关联表';
+) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '用户角色关联表';
 
 CREATE TABLE t_role_module (
     role_id     BIGINT      NOT NULL COMMENT '角色ID',
     module_code VARCHAR(32) NOT NULL COMMENT '模块: admin/ecs/wcs/rcs',
     PRIMARY KEY (role_id, module_code)
-) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '角色模块权限关联表';
+) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '角色模块权限关联表';
