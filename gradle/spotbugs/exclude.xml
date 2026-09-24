@@ -39,4 +39,13 @@
     <Class name="~com\.zen\.ecs\.(controller|presence)\..*"/>
     <Bug pattern="EI_EXPOSE_REP2"/>
   </Match>
+  <!--
+    admin 的 controller 与上面是同一条理由：RoleController 构造参数只有容器注入的 RoleService，
+    而 @Transactional 需要 CGLIB 代理 RoleService 的子类，类型不可能被证明不可变（exclude 顶部注释
+    已说明 AuthController 只是碰巧没被命中）。范围仍限「这一条规则 + 这一个包」。
+  -->
+  <Match>
+    <Class name="~com\.zen\.admin\.controller\..*"/>
+    <Bug pattern="EI_EXPOSE_REP2"/>
+  </Match>
 </FindBugsFilter>
