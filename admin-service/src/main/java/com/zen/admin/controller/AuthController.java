@@ -1,9 +1,11 @@
 package com.zen.admin.controller;
 
 import com.zen.admin.config.ZenAdminOpenApiConfiguration;
+import com.zen.admin.dto.ChangePasswordRequest;
 import com.zen.admin.dto.LoginRequest;
 import com.zen.admin.dto.LogoutRequest;
 import com.zen.admin.dto.RefreshRequest;
+import com.zen.admin.dto.UserProfileView;
 import com.zen.admin.service.AuthService;
 import com.zen.common.security.api.ApiResponse;
 import com.zen.common.security.jwt.TokenPair;
@@ -11,6 +13,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -25,7 +28,7 @@ import org.springframework.web.bind.annotation.RestController;
  * {@link ZenAdminOpenApiConfiguration} 按请求体、鉴权要求与 {@code @RequireModule} 统一补齐——在方法上写
  * {@code @ApiResponses} 会让 springdoc 不再自动生成成功响应，连带 {@code ApiResponse*} 模型一起从文档消失。
  */
-@Tag(name = "认证", description = "登录、刷新与登出；只有 login/refresh 是免鉴权入口，logout 必须带身份。")
+@Tag(name = "认证", description = "登录、刷新、登出与个人中心；只有 login/refresh 是免鉴权入口，其余必须带身份。")
 @RestController
 @RequestMapping("/auth")
 public class AuthController {
@@ -55,6 +58,25 @@ public class AuthController {
     @PostMapping("/logout")
     public ApiResponse<Void> logout(@Valid @RequestBody LogoutRequest request) {
         authService.logout(request.refreshToken());
+        return ApiResponse.success();
+    }
+
+    @Operation(
+            summary = "当前登录用户资料",
+            description = "只要求登录，无模块权限要求。按身份回查库内最新资料（角色只回 roleIds），不含 modules 与审计列；用户已被逻辑删时返回 401。")
+    @SecurityRequirement(name = ZenAdminOpenApiConfiguration.BEARER_JWT_SCHEME)
+    @GetMapping("/me")
+    public ApiResponse<UserProfileView> me() {
+        return ApiResponse.success(authService.me());
+    }
+
+    @Operation(
+            summary = "自助改密",
+            description = "只要求登录。旧口令 BCrypt 比对，不符返回 400。改密成功不吊销既有会话与 Token：旧 Token 仍有效至自然过期（撤销基建在 Phase 5）。")
+    @SecurityRequirement(name = ZenAdminOpenApiConfiguration.BEARER_JWT_SCHEME)
+    @PostMapping("/change-password")
+    public ApiResponse<Void> changePassword(@Valid @RequestBody ChangePasswordRequest request) {
+        authService.changePassword(request);
         return ApiResponse.success();
     }
 }
