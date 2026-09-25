@@ -1,17 +1,21 @@
 package com.zen.admin.controller;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.zen.admin.dto.LoginRequest;
+import com.zen.admin.dto.UserProfileView;
 import com.zen.admin.service.AuthService;
 import com.zen.common.core.web.GlobalExceptionHandler;
 import com.zen.common.security.error.BusinessException;
 import com.zen.common.security.error.GlobalErrorCode;
 import com.zen.common.security.jwt.TokenPair;
+import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -156,5 +160,84 @@ class AuthControllerTest {
                         .content("{}"))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.code").value(400));
+    }
+
+    // ---------- /auth/me ----------
+
+    @Test
+    void meReturnsProfileWithoutPassword() throws Exception {
+        when(authService.me())
+                .thenReturn(new UserProfileView(
+                        1L, "admin", "平台管理员", "admin@zen.local", "13800000000", null, 1, List.of(1L, 2L)));
+
+        mockMvc.perform(get("/auth/me"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.code").value(200))
+                .andExpect(jsonPath("$.data.username").value("admin"))
+                .andExpect(jsonPath("$.data.roleIds").value(org.hamcrest.Matchers.contains(1, 2)))
+                .andExpect(jsonPath("$.data.password").doesNotExist());
+    }
+
+    @Test
+    void meWhenUserDeletedReturns401() throws Exception {
+        when(authService.me()).thenThrow(new BusinessException(GlobalErrorCode.UNAUTHORIZED));
+
+        mockMvc.perform(get("/auth/me"))
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.code").value(401))
+                .andExpect(jsonPath("$.message").value("未认证或登录已失效"));
+    }
+
+    // ---------- /auth/change-password ----------
+
+    @Test
+    void changePasswordReturnsSuccessOnValidRequest() throws Exception {
+        mockMvc.perform(post("/auth/change-password")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                { "oldPassword": "old-pwd", "newPassword": "new-password-8" }
+                                """))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.code").value(200));
+    }
+
+    @Test
+    void changePasswordWithShortNewPasswordReturns400() throws Exception {
+        mockMvc.perform(post("/auth/change-password")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                { "oldPassword": "old-pwd", "newPassword": "short" }
+                                """))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.code").value(400))
+                .andExpect(jsonPath("$.message").value(org.hamcrest.Matchers.containsString("newPassword")));
+    }
+
+    @Test
+    void changePasswordWithBlankOldPasswordReturns400() throws Exception {
+        mockMvc.perform(post("/auth/change-password")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                { "oldPassword": "", "newPassword": "new-password-8" }
+                                """))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.code").value(400))
+                .andExpect(jsonPath("$.message").value(org.hamcrest.Matchers.containsString("oldPassword")));
+    }
+
+    @Test
+    void changePasswordWithWrongOldPasswordReturns400() throws Exception {
+        doThrow(new BusinessException(GlobalErrorCode.BAD_REQUEST, "旧口令不正确"))
+                .when(authService)
+                .changePassword(any());
+
+        mockMvc.perform(post("/auth/change-password")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                { "oldPassword": "wrong", "newPassword": "new-password-8" }
+                                """))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.code").value(400))
+                .andExpect(jsonPath("$.message").value("旧口令不正确"));
     }
 }

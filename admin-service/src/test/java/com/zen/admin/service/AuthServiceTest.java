@@ -9,7 +9,9 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import com.zen.admin.dto.ChangePasswordRequest;
 import com.zen.admin.dto.LoginRequest;
+import com.zen.admin.dto.UserProfileView;
 import com.zen.admin.entity.RoleEntity;
 import com.zen.admin.entity.UserEntity;
 import com.zen.admin.repository.UserRepository;
@@ -202,7 +204,108 @@ class AuthServiceTest {
         UserContext.clear();
     }
 
+    // ---------- me ----------
+
+    @Test
+    void meReturnsLatestProfileWithSortedRoleIds() {
+        UserEntity user = profileUser();
+        when(userRepository.findById(1L)).thenReturn(Optional.of(user));
+        UserContext.set(principal());
+
+        UserProfileView view = authService.me();
+
+        assertThat(view.id()).isEqualTo(1L);
+        assertThat(view.username()).isEqualTo("admin");
+        assertThat(view.nickname()).isEqualTo("平台管理员");
+        assertThat(view.email()).isEqualTo("admin@zen.local");
+        assertThat(view.phone()).isEqualTo("13800000000");
+        assertThat(view.avatar()).isEqualTo("https://cdn/avatar.png");
+        assertThat(view.status()).isEqualTo(1);
+        // 两个角色乱序挂上，视图里必须升序
+        assertThat(view.roleIds()).containsExactly(2L, 9L);
+    }
+
+    @Test
+    void meWithoutUserContextThrowsUnauthorizedWithoutHittingRepository() {
+        UserContext.clear(); // 身份缺失只可能出现在拦截器之外的调用路径
+
+        assertThatThrownBy(() -> authService.me())
+                .isInstanceOfSatisfying(
+                        BusinessException.class,
+                        ex -> assertThat(ex.getErrorCode()).isEqualTo(GlobalErrorCode.UNAUTHORIZED));
+        verify(userRepository, never()).findById(any());
+    }
+
+    @Test
+    void meForSoftDeletedUserThrowsUnauthorized() {
+        // @SQLRestriction 让已删用户的 findById 返回 empty：等价于"登录已失效"，不透露账号是否存在
+        when(userRepository.findById(1L)).thenReturn(Optional.empty());
+        UserContext.set(principal());
+
+        assertThatThrownBy(() -> authService.me()).isInstanceOfSatisfying(BusinessException.class, ex -> {
+            assertThat(ex.getErrorCode()).isEqualTo(GlobalErrorCode.UNAUTHORIZED);
+            assertThat(ex.getMessage()).isEqualTo("未认证或登录已失效");
+        });
+    }
+
+    // ---------- change-password ----------
+
+    @Test
+    void changePasswordWithCorrectOldPasswordStoresNewHash() {
+        UserEntity user = profileUser();
+        when(userRepository.findById(1L)).thenReturn(Optional.of(user));
+        when(passwordEncoder.matches("old-pwd", "$2a$10$hash")).thenReturn(true);
+        when(passwordEncoder.encode("new-password")).thenReturn("$2a$10$newhash");
+        UserContext.set(principal());
+
+        authService.changePassword(new ChangePasswordRequest("old-pwd", "new-password"));
+
+        // 脏检查落库前，实体上的口令必须已被替换为新 hash
+        assertThat(user.getPassword()).isEqualTo("$2a$10$newhash");
+    }
+
+    @Test
+    void changePasswordWithWrongOldPasswordThrowsBadRequestAndKeepsHash() {
+        UserEntity user = profileUser();
+        when(userRepository.findById(1L)).thenReturn(Optional.of(user));
+        when(passwordEncoder.matches("wrong-old", "$2a$10$hash")).thenReturn(false);
+        UserContext.set(principal());
+
+        assertThatThrownBy(() -> authService.changePassword(new ChangePasswordRequest("wrong-old", "new-password")))
+                .isInstanceOfSatisfying(BusinessException.class, ex -> {
+                    assertThat(ex.getErrorCode()).isEqualTo(GlobalErrorCode.BAD_REQUEST);
+                    assertThat(ex.getMessage()).isEqualTo("旧口令不正确");
+                });
+        verify(passwordEncoder, never()).encode(any());
+        assertThat(user.getPassword()).isEqualTo("$2a$10$hash");
+    }
+
     // ---------- fixtures ----------
+
+    private static UserPrincipal principal() {
+        return new UserPrincipal(
+                1L,
+                "admin",
+                List.of("admin"),
+                List.of("ADMIN"),
+                "jti-access",
+                Instant.now().plus(Duration.ofMinutes(10)));
+    }
+
+    /** 带完整资料与两个乱序角色（id 9、2）的用户，口令 hash 与 {@link #principal()} 的 userId 对齐。 */
+    private static UserEntity profileUser() {
+        UserEntity user = userEntity(1L, "admin", "$2a$10$hash", (byte) 1, "admin", "ADMIN");
+        user.setNickname("平台管理员");
+        user.setEmail("admin@zen.local");
+        user.setPhone("13800000000");
+        user.setAvatar("https://cdn/avatar.png");
+        RoleEntity operatorRole = new RoleEntity();
+        operatorRole.setId(2L);
+        operatorRole.setRoleCode("operator");
+        user.getRoles().add(operatorRole);
+        user.getRoles().iterator().next().setId(9L);
+        return user;
+    }
 
     private static UserEntity userEntity(
             long id, String username, String password, byte status, String roleCode, String... modules) {

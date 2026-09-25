@@ -61,6 +61,8 @@ class OpenApiDocContractTest {
                         "POST /auth/login",
                         "POST /auth/refresh",
                         "POST /auth/logout",
+                        "GET /auth/me",
+                        "POST /auth/change-password",
                         "GET /demo/admin",
                         "GET /demo/ecs",
                         "POST /roles",
@@ -97,13 +99,18 @@ class OpenApiDocContractTest {
         assertThat(doc.at("/components/securitySchemes/bearerJwt/bearerFormat").asText())
                 .isEqualTo("JWT");
 
-        // 与服务内 zen.security.whitelist 同口径：只有 login/refresh 匿名，logout 虽然收 refreshToken 也要身份
+        // 与服务内 zen.security.whitelist 同口径：只有 login/refresh 匿名，logout/me/change-password 都要身份
         Map<String, JsonNode> operations = operations(doc);
         assertThat(operations.get("POST /auth/login").path("security").isMissingNode())
                 .isTrue();
         assertThat(operations.get("POST /auth/refresh").path("security").isMissingNode())
                 .isTrue();
-        for (String authed : List.of("POST /auth/logout", "GET /demo/admin", "GET /demo/ecs")) {
+        for (String authed : List.of(
+                "POST /auth/logout",
+                "GET /auth/me",
+                "POST /auth/change-password",
+                "GET /demo/admin",
+                "GET /demo/ecs")) {
             assertThat(operations.get(authed).path("security").toString())
                     .as(authed)
                     .contains("bearerJwt");

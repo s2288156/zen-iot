@@ -1,6 +1,8 @@
 package com.zen.admin.service;
 
+import com.zen.admin.dto.ChangePasswordRequest;
 import com.zen.admin.dto.LoginRequest;
+import com.zen.admin.dto.UserProfileView;
 import com.zen.admin.entity.RoleEntity;
 import com.zen.admin.entity.UserEntity;
 import com.zen.admin.repository.UserRepository;
@@ -19,6 +21,7 @@ import java.time.Duration;
 import java.util.List;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 /** 登录、登出。授权判定不在这里,由 {@code com.zen.common.security.auth.RequireModule} 拦截器按 Token 里的模块快照执行。 */
 @Service
@@ -79,6 +82,57 @@ public class AuthService {
             revoke(current.jti(), current.remainingTtl());
         }
         revoke(refresh.jti(), refresh.remainingTtl());
+    }
+
+    /**
+     * 个人中心:按 {@link UserContext} 里的身份回查库内最新资料,而不是回显 Token 快照——
+     * 角色改过后 Token 里是旧值,资料接口必须反映当前状态。
+     */
+    @Transactional(readOnly = true)
+    public UserProfileView me() {
+        return toProfileView(requireCurrentUser());
+    }
+
+    /**
+     * 自助改密:旧口令 BCrypt 比对,不符返回 400,不透露 stored 口令任何信息。
+     *
+     * <p>改密成功<b>不</b>吊销既有会话与 Token——撤销基建在 Phase 5,已知取舍是旧 Token 仍有效至自然过期。
+     */
+    @Transactional
+    public void changePassword(ChangePasswordRequest request) {
+        UserEntity user = requireCurrentUser();
+        if (!passwordEncoder.matches(request.oldPassword(), user.getPassword())) {
+            throw new BusinessException(GlobalErrorCode.BAD_REQUEST, "旧口令不正确");
+        }
+        user.setPassword(passwordEncoder.encode(request.newPassword()));
+    }
+
+    /**
+     * 身份缺失或用户查不到一律 401 默认文案:身份缺失只可能出现在拦截器之外的调用路径;
+     * 被逻辑删的用户 {@code @SQLRestriction} 让 findById 直接返回 empty,等价于"登录已失效",也不透露账号是否存在。
+     */
+    private UserEntity requireCurrentUser() {
+        UserPrincipal current = UserContext.get();
+        if (current == null) {
+            throw new BusinessException(GlobalErrorCode.UNAUTHORIZED);
+        }
+        return userRepository
+                .findById(current.userId())
+                .orElseThrow(() -> new BusinessException(GlobalErrorCode.UNAUTHORIZED));
+    }
+
+    private static UserProfileView toProfileView(UserEntity user) {
+        List<Long> roleIds =
+                user.getRoles().stream().map(RoleEntity::getId).sorted().toList();
+        return new UserProfileView(
+                user.getId(),
+                user.getUsername(),
+                user.getNickname(),
+                user.getEmail(),
+                user.getPhone(),
+                user.getAvatar(),
+                user.getStatus() == null ? null : Integer.valueOf(user.getStatus()),
+                roleIds);
     }
 
     private void revoke(String jti, Duration ttl) {
