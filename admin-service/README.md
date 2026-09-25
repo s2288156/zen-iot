@@ -33,7 +33,7 @@
 - Mockito 打桩 `findAll(Specification, Pageable)` 需 `ArgumentMatchers.<Specification<XxxEntity>>any()` 消解重载歧义。
 - IDE 自带 Java formatter 与仓库 palantir 不一致，会刷出纯格式 diff；一律以 `./gradlew spotlessApply` 为准，工作区出现意外格式噪音先归一再判断。
 - `ddl-auto: validate` 意味着实体加字段必须同步新增 Flyway 迁移，列名/长度/可空性要和实体完全一致，否则上下文起不来（`@SpringBootTest` 全挂而不是只挂新测试）。
-- 新增 controller **或在既有 controller 里加接口**都会打破 `OpenApiDocContractTest` 的硬编码断言：`containsKeys`、`authRequirementsMatchTheRuntimeWhitelist` 的 authed 路径列表、`moduleGated` 路径前缀三处要跟着加，`tags` 目录只在新 controller（新 tag）时改；本地不跑 integration 也会在 CI 挂。
+- `OpenApiDocContractTest` 的期望清单已从注解自动推导（接口集合取 `RequestMappingHandlerMapping`，403 集取方法上的 `@RequireModule`，security 取两级 `@SecurityRequirement`，tags 取类上 `@Tag`），新增 controller 或加接口**不再需要手改测试**。测试仍会拦住「注解与文档不一致」：给新接口漏标 `@SecurityRequirement`/`@Tag`、或 springdoc 升级改了生成口径，都会以集合差集的形式失败；`/v3/api-docs*`、`/swagger-ui*`、`/error` 三个框架端点由 `isDocInfrastructure` 剔除。
 - 「updater/creator 随 `UserContext` 更新」这类 JPA auditing 断言 mock 仓储观察不到（只在真实 flush 时生效），单测断言业务字段、审计字段放 `@Tag("integration")` 仓储测试兜底。
 - **Gradle 的 `-P` 属性不构成任务输入**：改过代码后 `./gradlew :admin-service:test -PintegrationTests` 可能整片 `UP-TO-DATE` 假绿（属性变了不等于输入变了，任务缓存判定只看声明的输入输出）。凡要确认 integration 真的跑过，加 `--rerun-tasks`。
 - **真实登录的集成用例必须在 `finally` 清理 `auth:fail:{username}`**：15 分钟窗口内累计 5 次失败会锁死共享开发库的 `admin` 并殃及后续所有登录用例。凡走真实登录流程、或改密/吊销路径可能产生失败尝试的用例（如 `AuthMeIntegrationTest`、`SessionRegistryIntegrationTest`）都要在收尾时 `DELETE` 该键。
