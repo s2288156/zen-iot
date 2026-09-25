@@ -20,6 +20,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
+import org.springframework.data.redis.core.StringRedisTemplate;
 
 /**
  * {@code /auth/me} 与 {@code /auth/change-password} 的端到端契约：走真实拦截器与真实库，验证「只要求登录、
@@ -49,6 +50,9 @@ class AuthMeIntegrationTest {
 
     @Autowired
     private UserRepository userRepository;
+
+    @Autowired
+    private StringRedisTemplate redisTemplate;
 
     @Test
     void meReturnsLatestProfileForLoggedInAdmin() throws Exception {
@@ -116,6 +120,9 @@ class AuthMeIntegrationTest {
                 user.setPassword(originalHash);
                 userRepository.save(user);
             });
+            // 用例里那次预期 401 会累计 auth:fail:admin（键前缀见 RedisLoginAttemptStore）：
+            // 不清掉的话，15 分钟窗口内反复跑满 5 次就会把共享开发库的 admin 锁死
+            redisTemplate.delete("auth:fail:admin");
         }
     }
 

@@ -3,8 +3,10 @@ package com.zen.admin.service;
 import com.zen.admin.dto.ChangePasswordRequest;
 import com.zen.admin.dto.LoginRequest;
 import com.zen.admin.dto.UserProfileView;
+import com.zen.admin.entity.LoginLogEntity;
 import com.zen.admin.entity.RoleEntity;
 import com.zen.admin.entity.UserEntity;
+import com.zen.admin.repository.LoginLogRepository;
 import com.zen.admin.repository.UserRepository;
 import com.zen.common.security.auth.TokenRevocationChecker;
 import com.zen.common.security.auth.UserContext;
@@ -18,43 +20,81 @@ import com.zen.common.security.jwt.TokenPrincipal;
 import com.zen.common.security.jwt.TokenType;
 import com.zen.common.security.jwt.VerifiedToken;
 import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.List;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.DataAccessException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-/** 登录、登出。授权判定不在这里,由 {@code com.zen.common.security.auth.RequireModule} 拦截器按 Token 里的模块快照执行。 */
+/** 登录（含失败锁定与审计日志）、登出。授权判定不在这里,由 {@code com.zen.common.security.auth.RequireModule} 拦截器按 Token 里的模块快照执行。 */
+@Slf4j
 @Service
 public class AuthService {
+
+    /** 登录日志 reason 词表（对外契约,V4 建表注释同步）。 */
+    static final String REASON_SUCCESS = "SUCCESS";
+
+    static final String REASON_BAD_CREDENTIALS = "BAD_CREDENTIALS";
+    static final String REASON_LOCKED = "LOCKED";
+    static final String REASON_DISABLED = "DISABLED";
+
+    /** 与 t_login_log.user_agent 的 VARCHAR(256) 耦合：超长 UA 在落库前截断,避免整条日志因宽度写不进。 */
+    static final int USER_AGENT_MAX_LENGTH = 256;
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtTokenIssuer tokenIssuer;
     private final JwtTokenVerifier tokenVerifier;
     private final TokenRevocationChecker revocationChecker;
+    private final LoginAttemptStore attemptStore;
+    private final LoginLogRepository loginLogRepository;
 
     public AuthService(
             UserRepository userRepository,
             PasswordEncoder passwordEncoder,
             JwtTokenIssuer tokenIssuer,
             JwtTokenVerifier tokenVerifier,
-            TokenRevocationChecker revocationChecker) {
+            TokenRevocationChecker revocationChecker,
+            LoginAttemptStore attemptStore,
+            LoginLogRepository loginLogRepository) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.tokenIssuer = tokenIssuer;
         this.tokenVerifier = tokenVerifier;
         this.revocationChecker = revocationChecker;
+        this.attemptStore = attemptStore;
+        this.loginLogRepository = loginLogRepository;
     }
 
-    /** 用户不存在与密码错误返回同一个 401,不透露账号是否存在。 */
-    public TokenPair login(LoginRequest request) {
-        UserEntity user = userRepository.findByUsername(request.username()).orElseThrow(AuthService::badCredentials);
-        if (!passwordEncoder.matches(request.password(), user.getPassword())) {
+    /**
+     * 登录：先判锁定,再验凭据,成功清计数。用户不存在与密码错误返回同一个 401,不透露账号是否存在。
+     *
+     * <p>锁定口径：锁定期内的尝试一律 429、不计数、不续期；达到阈值的那一次凭据失败按 BAD_CREDENTIALS
+     * 记日志、但响应给 429（G4-口径）——锁定生效的事实由响应表达,日志忠实记录该次尝试本身。
+     */
+    public TokenPair login(LoginRequest request, String ip, String userAgent) {
+        String username = request.username();
+        if (attemptStore.isLocked(username)) {
+            writeLoginLog(username, false, REASON_LOCKED, ip, userAgent);
+            throw new BusinessException(GlobalErrorCode.TOO_MANY_REQUESTS, "账号已锁定,请稍后重试");
+        }
+        UserEntity user = userRepository.findByUsername(username).orElse(null);
+        if (user == null || !passwordEncoder.matches(request.password(), user.getPassword())) {
+            boolean lockTriggered = attemptStore.recordFailure(username);
+            writeLoginLog(username, false, REASON_BAD_CREDENTIALS, ip, userAgent);
+            if (lockTriggered) {
+                throw new BusinessException(GlobalErrorCode.TOO_MANY_REQUESTS, "账号已锁定,请稍后重试");
+            }
             throw badCredentials();
         }
         if (!user.isEnabled()) {
+            writeLoginLog(username, false, REASON_DISABLED, ip, userAgent);
             throw new BusinessException(GlobalErrorCode.FORBIDDEN, "账号已停用");
         }
+        attemptStore.reset(username);
+        writeLoginLog(username, true, REASON_SUCCESS, ip, userAgent);
         return tokenIssuer.issue(principalOf(user));
     }
 
@@ -154,5 +194,28 @@ public class AuthService {
 
     private static BusinessException badCredentials() {
         return new BusinessException(GlobalErrorCode.UNAUTHORIZED, "用户名或密码错误");
+    }
+
+    /** 同步 best-effort 写登录日志：库故障只记 ERROR,绝不让审计能力反过来阻断认证主流程。 */
+    private void writeLoginLog(String username, boolean success, String reason, String ip, String userAgent) {
+        LoginLogEntity entry = new LoginLogEntity();
+        entry.setUsername(username);
+        entry.setSuccess(success ? LoginLogEntity.RESULT_SUCCESS : LoginLogEntity.RESULT_FAILURE);
+        entry.setReason(reason);
+        entry.setIp(ip);
+        entry.setUserAgent(truncate(userAgent, USER_AGENT_MAX_LENGTH));
+        entry.setLoginTime(LocalDateTime.now());
+        try {
+            loginLogRepository.save(entry);
+        } catch (DataAccessException e) {
+            log.error("登录日志写入失败,不阻断登录流程: username={}, reason={}", username, reason, e);
+        }
+    }
+
+    private static String truncate(String value, int maxLength) {
+        if (value == null || value.length() <= maxLength) {
+            return value;
+        }
+        return value.substring(0, maxLength);
     }
 }
