@@ -34,6 +34,18 @@ public class UserEntity extends BaseEntity {
     @Column(name = "status", nullable = false)
     private Byte status;
 
+    @Column(name = "nickname", length = 64)
+    private String nickname;
+
+    @Column(name = "email", length = 128)
+    private String email;
+
+    @Column(name = "phone", length = 32)
+    private String phone;
+
+    @Column(name = "avatar", length = 255)
+    private String avatar;
+
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
             name = "t_user_role",
