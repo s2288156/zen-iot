@@ -7,6 +7,9 @@ import com.zen.admin.dto.UserResetPasswordRequest;
 import com.zen.admin.dto.UserStatusRequest;
 import com.zen.admin.dto.UserUpdateRequest;
 import com.zen.admin.dto.UserView;
+import com.zen.admin.interceptor.OperationAction;
+import com.zen.admin.interceptor.OperationLog;
+import com.zen.admin.interceptor.OperationTargetType;
 import com.zen.admin.service.UserService;
 import com.zen.common.core.page.PageResult;
 import com.zen.common.security.api.ApiResponse;
@@ -50,6 +53,7 @@ public class UserController {
     @Operation(summary = "新建用户", description = "username 全库唯一，重复返回 409；建号即启用，口令以 BCrypt 密文落库。")
     @PostMapping
     @RequireModule(ModuleCode.ADMIN)
+    @OperationLog(action = OperationAction.CREATE, targetType = OperationTargetType.USER)
     public ApiResponse<UserView> create(@Valid @RequestBody UserCreateRequest request) {
         return ApiResponse.success(userService.create(request));
     }
@@ -57,6 +61,7 @@ public class UserController {
     @Operation(summary = "修改用户资料", description = "只改昵称/邮箱/手机号/头像，传 null 视为清空；username 不可改，状态/口令/角色走各自接口。")
     @PutMapping("/{id}")
     @RequireModule(ModuleCode.ADMIN)
+    @OperationLog(action = OperationAction.UPDATE, targetType = OperationTargetType.USER)
     public ApiResponse<UserView> update(@PathVariable Long id, @Valid @RequestBody UserUpdateRequest request) {
         return ApiResponse.success(userService.update(id, request));
     }
@@ -64,6 +69,7 @@ public class UserController {
     @Operation(summary = "启用/禁用用户", description = "status 只接受 1（启用）/ 0（禁用）；被禁用的用户无法登录。")
     @PatchMapping("/{id}/status")
     @RequireModule(ModuleCode.ADMIN)
+    @OperationLog(action = OperationAction.CHANGE_STATUS, targetType = OperationTargetType.USER)
     public ApiResponse<UserView> changeStatus(@PathVariable Long id, @Valid @RequestBody UserStatusRequest request) {
         return ApiResponse.success(userService.changeStatus(id, request));
     }
@@ -71,6 +77,7 @@ public class UserController {
     @Operation(summary = "删除用户", description = "逻辑删除（deleted=1），删除后所有查询立即不可见；有意不校验用户是否仍持有角色。")
     @DeleteMapping("/{id}")
     @RequireModule(ModuleCode.ADMIN)
+    @OperationLog(action = OperationAction.DELETE, targetType = OperationTargetType.USER)
     public ApiResponse<Void> delete(@PathVariable Long id) {
         userService.delete(id);
         return ApiResponse.success();
@@ -79,6 +86,7 @@ public class UserController {
     @Operation(summary = "重置用户口令", description = "管理员重置，不校验旧口令；新口令 8-72 字符，以 BCrypt 密文覆盖。")
     @PutMapping("/{id}/password")
     @RequireModule(ModuleCode.ADMIN)
+    @OperationLog(action = OperationAction.RESET_PASSWORD, targetType = OperationTargetType.USER)
     public ApiResponse<Void> resetPassword(
             @PathVariable Long id, @Valid @RequestBody UserResetPasswordRequest request) {
         userService.resetPassword(id, request);
@@ -88,6 +96,7 @@ public class UserController {
     @Operation(summary = "分配用户角色", description = "覆盖式写入 t_user_role：提交的集合整体替换现有角色，空数组收回全部角色；未知 roleId 返回 400。")
     @PutMapping("/{id}/roles")
     @RequireModule(ModuleCode.ADMIN)
+    @OperationLog(action = OperationAction.ASSIGN_ROLES, targetType = OperationTargetType.USER)
     public ApiResponse<UserView> assignRoles(@PathVariable Long id, @RequestBody Set<Long> roleIds) {
         return ApiResponse.success(userService.assignRoles(id, roleIds));
     }

@@ -5,6 +5,9 @@ import com.zen.admin.dto.RoleCreateRequest;
 import com.zen.admin.dto.RoleQuery;
 import com.zen.admin.dto.RoleUpdateRequest;
 import com.zen.admin.dto.RoleView;
+import com.zen.admin.interceptor.OperationAction;
+import com.zen.admin.interceptor.OperationLog;
+import com.zen.admin.interceptor.OperationTargetType;
 import com.zen.admin.service.RoleService;
 import com.zen.common.core.page.PageResult;
 import com.zen.common.security.api.ApiResponse;
@@ -47,6 +50,7 @@ public class RoleController {
     @Operation(summary = "新建角色", description = "roleCode 全库唯一，重复返回 409；modules 取值限 admin/wcs/rcs/ecs，非法值 400。")
     @PostMapping
     @RequireModule(ModuleCode.ADMIN)
+    @OperationLog(action = OperationAction.CREATE, targetType = OperationTargetType.ROLE)
     public ApiResponse<RoleView> create(@Valid @RequestBody RoleCreateRequest request) {
         return ApiResponse.success(roleService.create(request));
     }
@@ -54,6 +58,7 @@ public class RoleController {
     @Operation(summary = "修改角色", description = "只改名称与描述；roleCode 不可改，模块授权走 PUT /roles/{id}/modules。")
     @PutMapping("/{id}")
     @RequireModule(ModuleCode.ADMIN)
+    @OperationLog(action = OperationAction.UPDATE, targetType = OperationTargetType.ROLE)
     public ApiResponse<RoleView> update(@PathVariable Long id, @Valid @RequestBody RoleUpdateRequest request) {
         return ApiResponse.success(roleService.update(id, request));
     }
@@ -61,6 +66,7 @@ public class RoleController {
     @Operation(summary = "删除角色", description = "逻辑删除（deleted=1），删除后所有查询立即不可见；仍被有效用户引用返回 409。")
     @DeleteMapping("/{id}")
     @RequireModule(ModuleCode.ADMIN)
+    @OperationLog(action = OperationAction.DELETE, targetType = OperationTargetType.ROLE)
     public ApiResponse<Void> delete(@PathVariable Long id) {
         roleService.delete(id);
         return ApiResponse.success();
@@ -81,6 +87,7 @@ public class RoleController {
     @Operation(summary = "配置角色模块权限", description = "覆盖式写入 t_role_module：提交的集合整体替换现有授权，空数组收回全部模块；非法模块编码 400。")
     @PutMapping("/{id}/modules")
     @RequireModule(ModuleCode.ADMIN)
+    @OperationLog(action = OperationAction.ASSIGN_MODULES, targetType = OperationTargetType.ROLE)
     public ApiResponse<RoleView> assignModules(@PathVariable Long id, @RequestBody Set<String> modules) {
         return ApiResponse.success(roleService.assignModules(id, modules));
     }

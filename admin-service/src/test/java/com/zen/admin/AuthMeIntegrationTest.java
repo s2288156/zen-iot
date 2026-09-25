@@ -28,8 +28,9 @@ import org.springframework.data.redis.core.StringRedisTemplate;
  *
  * <p>取 {@code Admin@123} 作种子口令：它就是 {@code application.yml} 里 Flyway 开发占位符的明文，本测试与
  * {@code OpenApiDocContractTest} 同样只面向本机容器环境（共享库被生产口令覆盖时不适用）。改密用例会改 admin 的
- * 口令，finally 里把 hash 原样写回，避免污染共享开发库；已知取舍——改密不吊销旧 Token，用例顺带断言旧 access
- * Token 改密后仍可用（撤销基建在 Phase 5）。
+ * 口令，finally 里把 hash 原样写回，避免污染共享开发库；Phase 5 后的语义——改密连带吊销除当前会话外的全部会话，
+ * 本用例的 access Token 正是「当前会话」，所以「改密后旧 Token 仍可用」的断言依旧成立，且 finally 要顺手清掉
+ * 用例累计的失败计数。
  */
 @SpringBootTest(
         webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
@@ -106,7 +107,7 @@ class AuthMeIntegrationTest {
                     null);
             assertThat(stale.statusCode()).isEqualTo(401);
 
-            // 已知取舍：改密不吊销既有 access Token，它仍有效至自然过期
+            // 当前会话（本请求的 access jti）在连带吊销中被保留——Phase 5 语义：只吊销其余会话
             HttpResponse<String> stillValid =
                     send(HttpRequest.newBuilder(uri("/auth/me")).GET(), oldToken);
             assertThat(stillValid.statusCode()).isEqualTo(200);

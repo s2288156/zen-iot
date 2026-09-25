@@ -3,6 +3,7 @@ package com.zen.admin.service;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
@@ -61,11 +62,14 @@ class UserServiceTest {
 
     private final PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
+    @Mock
+    private SessionService sessionService;
+
     private UserService userService;
 
     @BeforeEach
     void setUp() {
-        userService = new UserService(userRepository, roleRepository, passwordEncoder);
+        userService = new UserService(userRepository, roleRepository, passwordEncoder, sessionService);
     }
 
     // ---------- create ----------
@@ -186,6 +190,21 @@ class UserServiceTest {
 
         assertThat(passwordEncoder.matches("Rotated@456", entity.getPassword())).isTrue();
         assertThat(passwordEncoder.matches(RAW_PASSWORD, entity.getPassword())).isFalse();
+        // 管理员重置口令要连带吊销该用户全部会话（G5-2）
+        verify(sessionService).revokeAllForUser(1L);
+    }
+
+    @Test
+    void resetPasswordRevokeFailurePropagatesAndRollsBack() {
+        UserEntity entity = user(1L, "demo");
+        entity.setPassword(passwordEncoder.encode(RAW_PASSWORD));
+        when(userRepository.findById(1L)).thenReturn(Optional.of(entity));
+        // 决策 (c)：吊销失败上抛回滚重置事务，旧谱系不许在新口令生效后仍能续期
+        doThrow(new IllegalStateException("redis down")).when(sessionService).revokeAllForUser(1L);
+
+        assertThatThrownBy(() -> userService.resetPassword(1L, new UserResetPasswordRequest("Rotated@456")))
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessage("redis down");
     }
 
     @Test
@@ -196,6 +215,8 @@ class UserServiceTest {
                 .isInstanceOfSatisfying(
                         BusinessException.class,
                         ex -> assertThat(ex.getErrorCode()).isEqualTo(GlobalErrorCode.NOT_FOUND));
+        // 用户不存在就不该有任何吊销动作
+        verifyNoInteractions(sessionService);
     }
 
     // ---------- assignRoles ----------
