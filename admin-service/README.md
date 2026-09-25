@@ -9,7 +9,7 @@
 - **不引 `spring-boot-starter-security`**：只用 `spring-security-crypto` 的 `BCryptPasswordEncoder`。装 starter 会拉起默认过滤器链，接管 401/403 并绕过 `GlobalExceptionHandler` 的统一响应。
 - **服务内白名单是裸路径**：`/auth/login`、`/auth/refresh`、`/actuator/**`、`/v3/api-docs/**`、`/swagger-ui/**`、`/swagger-ui.html`。经网关访问时要在 `zen.gateway.auth.whitelist` 里另写带 `/api/admin` 前缀的一份。
 - **OpenAPI 文档即对外契约**：`/v3/api-docs` 由 `ZenAdminOpenApiConfiguration` 补 `bearerJwt` 安全方案、直连与经网关两条 server、以及 400/401/403 响应；错误响应按「有请求体 / 有鉴权要求 / 有 `@RequireModule`」推导，**不在方法上写 `@ApiResponses`**——实测那会让 springdoc 不再自动生成成功响应、`ApiResponse*` 模型连带消失、文档里的 `$ref` 悬空。`OpenApiDocContractTest` 断言 200 仍在、每个 `$ref` 可解析、鉴权口径与上面的服务内白名单一致（它要完整上下文，标 `integration`：本机 `check` 不跑，CI 的 integration job 跑）。文档里的 server 与版本可用 `zen.api-docs.direct-url` / `gateway-url` / `version` 覆盖。
-- **接口**：`AuthController`（`/auth/login`、`/auth/refresh`、`/auth/logout`）与 `DemoController`（`/demo/admin`、`/demo/ecs`）。后者不是业务功能，用来验证 `@RequireModule` 的模块权限判定与网关透传身份接得上不上。
+- **接口**：`AuthController`（`/auth/login`、`/auth/refresh`、`/auth/logout`）、`RoleController`（`POST /roles`、`PUT /roles/{id}`、`DELETE /roles/{id}`、`GET /roles/page`、`GET /roles/{id}`、`PUT /roles/{id}/modules`）与 `DemoController`（`/demo/admin`、`/demo/ecs`）。`RoleController` 的写接口标 `@RequireModule(ModuleCode.ADMIN)`（403 由文档推导规则同步），读接口登录即可；`roleCode` 重复与删除仍被有效用户引用的角色都是 409，非法模块编码 / 排序字段是 400；删除是逻辑删除，走 native `UPDATE t_role SET deleted = 1`（`deleted` 列故意不映射到实体，见 `V1__init_auth.sql`）。`DemoController` 不是业务功能，用来验证 `@RequireModule` 的模块权限判定与网关透传身份接得上不上。
 - **表与种子数据**：Flyway `V1__init_auth.sql` 建表、`V2__seed_auth.sql` 灌角色/用户/`t_role_module` 授权，测试与本机起服务都靠它，不手建库。
 
 ## 架构约束
