@@ -9,6 +9,7 @@ import com.zen.common.security.jwt.TokenType;
 import com.zen.common.security.jwt.VerifiedToken;
 import com.zen.gateway.auth.TokenBlocklist;
 import com.zen.gateway.error.ApiJsonResponses;
+import java.net.InetSocketAddress;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cloud.gateway.filter.GatewayFilterChain;
@@ -31,6 +32,10 @@ import tools.jackson.databind.ObjectMapper;
  * {@code X-User-Id: 1}）。剥离写在过滤器里而不是路由的 {@code default-filters: RemoveRequestHeader}：两类过滤器合并后按
  * order 排序，声明式那条排在鉴权过滤器之后就会把网关刚写好的头再删一遍。
  *
+ * <p><b>{@code X-Forwarded-For} 与身份头同一步覆写</b>：剥离入站值，改写为网关连接的 remoteAddr。拓扑已确认客户端直达网关，
+ * remoteAddr 即真实客户端 IP，下游取 XFF 最后一个值即可信；登录日志（Phase 4）记录的 IP 依赖这一语义。remoteAddr 缺失时
+ * 只剥离不追加，宁缺毋伪。
+ *
  * <p>验签是纯 CPU 操作，刻意留在 EventLoop 上；黑名单查询走 {@link TokenBlocklist} 的反应式实现，全链路不出现 {@code block()}。
  *
  * <p>响应体由本过滤器直接写出，不经 {@code ErrorWebExceptionHandler}：全局过滤器抛出的错误能否走到异常处理器取决于框架的
@@ -42,6 +47,11 @@ import tools.jackson.databind.ObjectMapper;
 public final class JwtAuthGlobalFilter implements GlobalFilter, Ordered {
 
     private static final String BEARER_PREFIX = "Bearer ";
+
+    /**
+     * 标准转发头；刻意不并入 {@link TrustedHeaders}（那是 {@code common-security} 的私有身份约定，且保持只读）。
+     */
+    private static final String X_FORWARDED_FOR = "X-Forwarded-For";
 
     private static final List<String> TRUSTED_REQUEST_HEADERS = List.of(
             TrustedHeaders.USER_ID, TrustedHeaders.USERNAME, TrustedHeaders.USER_ROLES, TrustedHeaders.USER_MODULES);
@@ -106,11 +116,31 @@ public final class JwtAuthGlobalFilter implements GlobalFilter, Ordered {
         return whitelist.stream().anyMatch(pattern -> pattern.matches(path));
     }
 
-    /** 剥离客户端可能自带的身份头；{@code mutate()} 只影响后续链路，不改原始请求。 */
+    /**
+     * 剥离客户端可能自带的、只能由网关亲笔书写的头：身份头直接删除，{@code X-Forwarded-For} 删除后以网关连接的
+     * remoteAddr 重建（缺失则不重建）。放在白名单分流<b>之前</b>，免鉴权路径（如 {@code /auth/login}）同样只见到可信值。
+     * {@code mutate()} 只影响后续链路，不改原始请求。
+     */
     private ServerWebExchange withoutTrustedHeaders(ServerWebExchange exchange) {
+        String clientIp = remoteAddress(exchange.getRequest());
         return exchange.mutate()
-                .request(builder -> builder.headers(headers -> TRUSTED_REQUEST_HEADERS.forEach(headers::remove)))
+                .request(builder -> builder.headers(headers -> {
+                    TRUSTED_REQUEST_HEADERS.forEach(headers::remove);
+                    headers.remove(X_FORWARDED_FOR);
+                    if (clientIp != null) {
+                        headers.add(X_FORWARDED_FOR, clientIp);
+                    }
+                }))
                 .build();
+    }
+
+    /** 网关入站连接的对端地址；IPv6/IPv4 的字面量形式，无对端（如本地 mock）时返回 {@code null}。 */
+    private static String remoteAddress(ServerHttpRequest request) {
+        InetSocketAddress remote = request.getRemoteAddress();
+        if (remote == null || remote.getAddress() == null) {
+            return null;
+        }
+        return remote.getAddress().getHostAddress();
     }
 
     private ServerWebExchange withTrustedIdentity(ServerWebExchange sanitized, VerifiedToken verified) {

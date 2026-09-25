@@ -9,6 +9,7 @@ import com.zen.common.security.jwt.JwtTokenVerifier;
 import com.zen.common.security.jwt.TokenPair;
 import com.zen.common.security.jwt.TokenPrincipal;
 import com.zen.gateway.auth.TokenBlocklist;
+import java.net.InetSocketAddress;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 import org.junit.jupiter.api.BeforeEach;
@@ -68,6 +69,46 @@ class JwtAuthGlobalFilterTest {
         assertThat(forwarded.get().getRequest().getHeaders().get(TrustedHeaders.USER_ID))
                 .isNull();
         assertThat(forwarded.get().getRequest().getHeaders().get(TrustedHeaders.USER_MODULES))
+                .isNull();
+    }
+
+    @Test
+    void spoofedForwardedForIsReplacedWithTrustedClientIp() {
+        MockServerWebExchange exchange = exchange(MockServerHttpRequest.get(PROTECTED_PATH)
+                .header(HttpHeaders.AUTHORIZATION, "Bearer " + issueToken())
+                .header("X-Forwarded-For", "1.2.3.4, 5.6.7.8")
+                .remoteAddress(new InetSocketAddress("203.0.113.9", 54321)));
+
+        StepVerifier.create(filter.filter(exchange, chain)).verifyComplete();
+
+        // 入站伪造链整体作废：下游只见到网关连接 remoteAddr 这一个可信值
+        assertThat(forwarded.get().getRequest().getHeaders().get("X-Forwarded-For"))
+                .containsExactly("203.0.113.9");
+    }
+
+    @Test
+    void whitelistedLoginPathAlsoGetsTrustedForwardedFor() {
+        MockServerWebExchange exchange = exchange(MockServerHttpRequest.post("/api/admin/auth/login")
+                .header("X-Forwarded-For", "1.2.3.4")
+                .remoteAddress(new InetSocketAddress("203.0.113.7", 12345)));
+
+        StepVerifier.create(filter.filter(exchange, chain)).verifyComplete();
+
+        // 免鉴权路径同样覆写——登录日志（Phase 4）记的正是这条路径的 IP
+        assertThat(forwarded.get().getRequest().getHeaders().get("X-Forwarded-For"))
+                .containsExactly("203.0.113.7");
+    }
+
+    @Test
+    void missingRemoteAddressStripsForwardedForWithoutFabricatingOne() {
+        MockServerWebExchange exchange = exchange(MockServerHttpRequest.get(PROTECTED_PATH)
+                .header(HttpHeaders.AUTHORIZATION, "Bearer " + issueToken())
+                .header("X-Forwarded-For", "1.2.3.4"));
+
+        StepVerifier.create(filter.filter(exchange, chain)).verifyComplete();
+
+        // remoteAddr 缺失时宁缺毋伪：剥掉伪造值，也不凭空造一个
+        assertThat(forwarded.get().getRequest().getHeaders().get("X-Forwarded-For"))
                 .isNull();
     }
 
