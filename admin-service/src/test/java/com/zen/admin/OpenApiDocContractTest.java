@@ -68,7 +68,15 @@ class OpenApiDocContractTest {
                         "DELETE /roles/{id}",
                         "PUT /roles/{id}/modules",
                         "GET /roles/page",
-                        "GET /roles/{id}");
+                        "GET /roles/{id}",
+                        "POST /users",
+                        "PUT /users/{id}",
+                        "PATCH /users/{id}/status",
+                        "DELETE /users/{id}",
+                        "PUT /users/{id}/password",
+                        "PUT /users/{id}/roles",
+                        "GET /users/page",
+                        "GET /users/{id}");
         operations.forEach(
                 (key, operation) -> assertThat(operation.at("/responses/200").isMissingNode())
                         .as("%s 的 200 响应必须存在（被方法上的 @ApiResponses 顶掉就是回归）", key)
@@ -107,7 +115,7 @@ class OpenApiDocContractTest {
         JsonNode doc = loadDoc();
         Map<String, JsonNode> operations = operations(doc);
 
-        // 400 只属于有请求体的接口；401 所有接口都有；403 只属于带 @RequireModule 的接口（demo 样例 + 角色写接口）
+        // 400 只属于有请求体的接口；401 所有接口都有；403 只属于带 @RequireModule 的接口（demo 样例 + 角色/用户写接口）
         operations.forEach((key, operation) -> {
             assertThat(operation.at("/responses/401").isMissingNode()).as(key).isFalse();
             boolean hasBody = !operation.path("requestBody").isMissingNode();
@@ -115,7 +123,11 @@ class OpenApiDocContractTest {
             boolean moduleGated = key.startsWith("GET /demo/")
                     || key.startsWith("POST /roles")
                     || key.startsWith("PUT /roles")
-                    || key.startsWith("DELETE /roles");
+                    || key.startsWith("DELETE /roles")
+                    || key.startsWith("POST /users")
+                    || key.startsWith("PUT /users")
+                    || key.startsWith("PATCH /users")
+                    || key.startsWith("DELETE /users");
             assertThat(!operation.at("/responses/403").isMissingNode()).as(key).isEqualTo(moduleGated);
             for (Map.Entry<String, JsonNode> response :
                     operation.at("/responses").properties()) {
@@ -153,12 +165,12 @@ class OpenApiDocContractTest {
         assertThat(operationIds).allMatch(id -> id.startsWith("admin-service-")).doesNotHaveDuplicates();
 
         // 目录名来自 @Tag：auth-controller / demo-controller 这种派生名在 Apifox 树里读不出含义
-        assertThat(doc.at("/tags").findValuesAsText("name")).containsExactlyInAnyOrder("认证", "模块鉴权样例", "角色管理");
+        assertThat(doc.at("/tags").findValuesAsText("name")).containsExactlyInAnyOrder("认证", "模块鉴权样例", "角色管理", "用户管理");
         operations(doc).forEach((key, operation) -> {
             List<String> tags = new ArrayList<>();
             operation.path("tags").forEach(tag -> tags.add(tag.asText()));
             assertThat(tags).as(key).hasSize(1);
-            assertThat(List.of("认证", "模块鉴权样例", "角色管理")).as(key).contains(tags.getFirst());
+            assertThat(List.of("认证", "模块鉴权样例", "角色管理", "用户管理")).as(key).contains(tags.getFirst());
         });
     }
 
