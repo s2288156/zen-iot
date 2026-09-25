@@ -46,11 +46,17 @@ public class UserService {
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
     private final PasswordEncoder passwordEncoder;
+    private final SessionService sessionService;
 
-    public UserService(UserRepository userRepository, RoleRepository roleRepository, PasswordEncoder passwordEncoder) {
+    public UserService(
+            UserRepository userRepository,
+            RoleRepository roleRepository,
+            PasswordEncoder passwordEncoder,
+            SessionService sessionService) {
         this.userRepository = userRepository;
         this.roleRepository = roleRepository;
         this.passwordEncoder = passwordEncoder;
+        this.sessionService = sessionService;
     }
 
     /** 建号即启用；口令在此处编码，明文不落库、不出方法。 */
@@ -99,11 +105,18 @@ public class UserService {
         userRepository.softDeleteById(user.getId());
     }
 
-    /** 管理员重置口令：不校验旧口令；新密文覆盖 {@code password} 列。 */
+    /**
+     * 管理员重置口令：不校验旧口令；新密文覆盖 {@code password} 列。
+     *
+     * <p>连带吊销该用户全部在线会话（G5-2）：管理员既然用重置口令接管账号，旧谱系就不该还能续期；
+     * 被重置者下次登录重新建立会话。吊销失败上抛回滚改密事务（决策 (c)），与
+     * {@link AuthService#changePassword} 同一口径。
+     */
     @Transactional
     public void resetPassword(Long id, UserResetPasswordRequest request) {
         UserEntity user = requireActive(id);
         user.setPassword(passwordEncoder.encode(request.password()));
+        sessionService.revokeAllForUser(user.getId());
     }
 
     /** 覆盖式分配：提交的集合整体替换 {@code t_user_role} 关联；空集合表示收回全部角色，未知 roleId 返回 400。 */

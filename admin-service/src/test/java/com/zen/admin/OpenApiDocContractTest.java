@@ -78,7 +78,9 @@ class OpenApiDocContractTest {
                         "PUT /users/{id}/password",
                         "PUT /users/{id}/roles",
                         "GET /users/page",
-                        "GET /users/{id}");
+                        "GET /users/{id}",
+                        "GET /sessions",
+                        "DELETE /sessions/{sessionId}");
         operations.forEach(
                 (key, operation) -> assertThat(operation.at("/responses/200").isMissingNode())
                         .as("%s 的 200 响应必须存在（被方法上的 @ApiResponses 顶掉就是回归）", key)
@@ -110,7 +112,9 @@ class OpenApiDocContractTest {
                 "GET /auth/me",
                 "POST /auth/change-password",
                 "GET /demo/admin",
-                "GET /demo/ecs")) {
+                "GET /demo/ecs",
+                "GET /sessions",
+                "DELETE /sessions/{sessionId}")) {
             assertThat(operations.get(authed).path("security").toString())
                     .as(authed)
                     .contains("bearerJwt");
@@ -134,7 +138,9 @@ class OpenApiDocContractTest {
                     || key.startsWith("POST /users")
                     || key.startsWith("PUT /users")
                     || key.startsWith("PATCH /users")
-                    || key.startsWith("DELETE /users");
+                    || key.startsWith("DELETE /users")
+                    || key.startsWith("GET /sessions")
+                    || key.startsWith("DELETE /sessions");
             assertThat(!operation.at("/responses/403").isMissingNode()).as(key).isEqualTo(moduleGated);
             for (Map.Entry<String, JsonNode> response :
                     operation.at("/responses").properties()) {
@@ -172,12 +178,13 @@ class OpenApiDocContractTest {
         assertThat(operationIds).allMatch(id -> id.startsWith("admin-service-")).doesNotHaveDuplicates();
 
         // 目录名来自 @Tag：auth-controller / demo-controller 这种派生名在 Apifox 树里读不出含义
-        assertThat(doc.at("/tags").findValuesAsText("name")).containsExactlyInAnyOrder("认证", "模块鉴权样例", "角色管理", "用户管理");
+        assertThat(doc.at("/tags").findValuesAsText("name"))
+                .containsExactlyInAnyOrder("认证", "模块鉴权样例", "角色管理", "用户管理", "在线会话");
         operations(doc).forEach((key, operation) -> {
             List<String> tags = new ArrayList<>();
             operation.path("tags").forEach(tag -> tags.add(tag.asText()));
             assertThat(tags).as(key).hasSize(1);
-            assertThat(List.of("认证", "模块鉴权样例", "角色管理", "用户管理")).as(key).contains(tags.getFirst());
+            assertThat(List.of("认证", "模块鉴权样例", "角色管理", "用户管理", "在线会话")).as(key).contains(tags.getFirst());
         });
     }
 

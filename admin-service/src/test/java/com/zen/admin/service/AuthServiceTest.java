@@ -5,6 +5,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -75,6 +76,9 @@ class AuthServiceTest {
     @Mock
     private LoginLogRepository loginLogRepository;
 
+    @Mock
+    private SessionService sessionService;
+
     @InjectMocks
     private AuthService authService;
 
@@ -108,6 +112,9 @@ class AuthServiceTest {
         assertThat(logEntry.getIp()).isEqualTo("203.0.113.7");
         assertThat(logEntry.getUserAgent()).isEqualTo("junit-ua");
         assertThat(logEntry.getLoginTime()).isNotNull();
+
+        // 登录成功要拿刚签发的 Token 对建立会话登记（G5-2）
+        verify(sessionService).recordLogin(1L, "admin", "203.0.113.7", "junit-ua", expected);
     }
 
     @Test
@@ -248,6 +255,8 @@ class AuthServiceTest {
         assertThat(result).isSameAs(expected);
         // 旧 refresh Token 的 jti 应被吊销，TTL 取自其剩余有效期
         verify(revocationChecker).revoke(eq("jti-old"), any(Duration.class));
+        // 轮转后要迁移会话登记：新 jti 接棒，否则踢下线会被旧谱系复活
+        verify(sessionService).rotate("jti-old", expected);
     }
 
     @Test
@@ -285,6 +294,8 @@ class AuthServiceTest {
         // access Token 的 jti 来自 UserContext，refresh Token 的 jti 来自参数
         verify(revocationChecker).revoke(eq("jti-access"), any(Duration.class));
         verify(revocationChecker).revoke(eq("jti-refresh"), any(Duration.class));
+        // 双 jti 拉黑后还要删会话登记，否则列表里挂着一条永远踢不掉的死行
+        verify(sessionService).removeOnLogout("jti-refresh");
     }
 
     @Test
@@ -366,6 +377,23 @@ class AuthServiceTest {
 
         // 脏检查落库前，实体上的口令必须已被替换为新 hash
         assertThat(user.getPassword()).isEqualTo("$2a$10$newhash");
+        // 连带吊销除当前会话（本次请求的 access jti）外的全部会话（G5-2）
+        verify(sessionService).revokeAllForUserExcept(1L, "jti-access");
+    }
+
+    @Test
+    void changePasswordRevokeFailurePropagatesAndRollsBack() {
+        UserEntity user = profileUser();
+        when(userRepository.findById(1L)).thenReturn(Optional.of(user));
+        when(passwordEncoder.matches("old-pwd", "$2a$10$hash")).thenReturn(true);
+        when(passwordEncoder.encode("new-password")).thenReturn("$2a$10$newhash");
+        UserContext.set(principal());
+        // 决策 (c)：连带吊销失败上抛回滚改密事务——「吊销不了就不改密」
+        doThrow(new IllegalStateException("redis down")).when(sessionService).revokeAllForUserExcept(1L, "jti-access");
+
+        assertThatThrownBy(() -> authService.changePassword(new ChangePasswordRequest("old-pwd", "new-password")))
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessage("redis down");
     }
 
     @Test

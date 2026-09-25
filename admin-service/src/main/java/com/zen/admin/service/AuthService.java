@@ -50,6 +50,7 @@ public class AuthService {
     private final TokenRevocationChecker revocationChecker;
     private final LoginAttemptStore attemptStore;
     private final LoginLogRepository loginLogRepository;
+    private final SessionService sessionService;
 
     public AuthService(
             UserRepository userRepository,
@@ -58,7 +59,8 @@ public class AuthService {
             JwtTokenVerifier tokenVerifier,
             TokenRevocationChecker revocationChecker,
             LoginAttemptStore attemptStore,
-            LoginLogRepository loginLogRepository) {
+            LoginLogRepository loginLogRepository,
+            SessionService sessionService) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.tokenIssuer = tokenIssuer;
@@ -66,6 +68,7 @@ public class AuthService {
         this.revocationChecker = revocationChecker;
         this.attemptStore = attemptStore;
         this.loginLogRepository = loginLogRepository;
+        this.sessionService = sessionService;
     }
 
     /**
@@ -95,7 +98,10 @@ public class AuthService {
         }
         attemptStore.reset(username);
         writeLoginLog(username, true, REASON_SUCCESS, ip, userAgent);
-        return tokenIssuer.issue(principalOf(user));
+        TokenPair issued = tokenIssuer.issue(principalOf(user));
+        sessionService.recordLogin(
+                user.getId(), user.getUsername(), ip, truncate(userAgent, USER_AGENT_MAX_LENGTH), issued);
+        return issued;
     }
 
     /**
@@ -111,6 +117,7 @@ public class AuthService {
         TokenPair issued = tokenIssuer.issue(
                 new TokenPrincipal(refresh.userId(), refresh.username(), refresh.roles(), refresh.modules()));
         revoke(refresh.jti(), refresh.remainingTtl());
+        sessionService.rotate(refresh.jti(), issued);
         return issued;
     }
 
@@ -122,6 +129,7 @@ public class AuthService {
             revoke(current.jti(), current.remainingTtl());
         }
         revoke(refresh.jti(), refresh.remainingTtl());
+        sessionService.removeOnLogout(refresh.jti());
     }
 
     /**
@@ -136,7 +144,9 @@ public class AuthService {
     /**
      * 自助改密:旧口令 BCrypt 比对,不符返回 400,不透露 stored 口令任何信息。
      *
-     * <p>改密成功<b>不</b>吊销既有会话与 Token——撤销基建在 Phase 5,已知取舍是旧 Token 仍有效至自然过期。
+     * <p>改密成功后连带吊销该用户除当前会话外的全部会话(G5-2):旧谱系在新口令生效前不该还能续期;
+     * 当前会话按本次请求的 access jti 匹配保留,调用人不会被自己的改密踢下线。吊销失败上抛回滚改密事务
+     * (决策 (c):吊销不了就不改密),不再维持 Phase 4 的「改密不吊销」取舍。
      */
     @Transactional
     public void changePassword(ChangePasswordRequest request) {
@@ -145,6 +155,8 @@ public class AuthService {
             throw new BusinessException(GlobalErrorCode.BAD_REQUEST, "旧口令不正确");
         }
         user.setPassword(passwordEncoder.encode(request.newPassword()));
+        UserPrincipal current = UserContext.get();
+        sessionService.revokeAllForUserExcept(user.getId(), current == null ? null : current.jti());
     }
 
     /**
