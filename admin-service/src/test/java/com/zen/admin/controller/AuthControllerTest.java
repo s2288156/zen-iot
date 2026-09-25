@@ -1,7 +1,10 @@
 package com.zen.admin.controller;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -50,7 +53,8 @@ class AuthControllerTest {
 
     @Test
     void loginReturnsTokenPairOnValidRequest() throws Exception {
-        when(authService.login(any(LoginRequest.class))).thenReturn(new TokenPair("access-xyz", "refresh-xyz"));
+        when(authService.login(any(LoginRequest.class), any(), any()))
+                .thenReturn(new TokenPair("access-xyz", "refresh-xyz"));
 
         mockMvc.perform(post("/auth/login")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -61,6 +65,40 @@ class AuthControllerTest {
                 .andExpect(jsonPath("$.code").value(200))
                 .andExpect(jsonPath("$.data.accessToken").value("access-xyz"))
                 .andExpect(jsonPath("$.data.refreshToken").value("refresh-xyz"));
+    }
+
+    @Test
+    void loginExtractsLastForwardedForValueAndUserAgent() throws Exception {
+        when(authService.login(any(LoginRequest.class), any(), any()))
+                .thenReturn(new TokenPair("access-xyz", "refresh-xyz"));
+
+        mockMvc.perform(post("/auth/login")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .header("X-Forwarded-For", "203.0.113.7, 10.0.0.9")
+                        .header("User-Agent", "junit-agent")
+                        .content("""
+                                { "username": "admin", "password": "pwd123" }
+                                """))
+                .andExpect(status().isOk());
+
+        // 网关已剥离重建 XFF，尾段即客户端；UA 原样透传，截断归 service
+        verify(authService).login(any(LoginRequest.class), eq("10.0.0.9"), eq("junit-agent"));
+    }
+
+    @Test
+    void loginWithoutForwardedForFallsBackToRemoteAddr() throws Exception {
+        when(authService.login(any(LoginRequest.class), any(), any()))
+                .thenReturn(new TokenPair("access-xyz", "refresh-xyz"));
+
+        mockMvc.perform(post("/auth/login")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                { "username": "admin", "password": "pwd123" }
+                                """))
+                .andExpect(status().isOk());
+
+        // 无 XFF 回落连接对端（MockMvc 默认 127.0.0.1）；无 UA 头则传 null
+        verify(authService).login(any(LoginRequest.class), eq("127.0.0.1"), isNull());
     }
 
     @Test
@@ -89,7 +127,7 @@ class AuthControllerTest {
 
     @Test
     void loginWithBadCredentialsReturns401() throws Exception {
-        when(authService.login(any(LoginRequest.class)))
+        when(authService.login(any(LoginRequest.class), any(), any()))
                 .thenThrow(new BusinessException(GlobalErrorCode.UNAUTHORIZED, "用户名或密码错误"));
 
         mockMvc.perform(post("/auth/login")
@@ -100,6 +138,21 @@ class AuthControllerTest {
                 .andExpect(status().isUnauthorized())
                 .andExpect(jsonPath("$.code").value(401))
                 .andExpect(jsonPath("$.message").value("用户名或密码错误"));
+    }
+
+    @Test
+    void loginWhileLockedReturns429() throws Exception {
+        when(authService.login(any(LoginRequest.class), any(), any()))
+                .thenThrow(new BusinessException(GlobalErrorCode.TOO_MANY_REQUESTS, "账号已锁定,请稍后重试"));
+
+        mockMvc.perform(post("/auth/login")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                { "username": "admin", "password": "pwd123" }
+                                """))
+                .andExpect(status().isTooManyRequests())
+                .andExpect(jsonPath("$.code").value(429))
+                .andExpect(jsonPath("$.message").value("账号已锁定,请稍后重试"));
     }
 
     // ---------- /auth/refresh ----------

@@ -12,6 +12,7 @@ import com.zen.common.security.jwt.TokenPair;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -39,10 +40,31 @@ public class AuthController {
         this.authService = authService;
     }
 
-    @Operation(summary = "账号密码登录，签发双 Token", description = "免鉴权入口。用户不存在与密码错误返回同一个 401 响应体，不透露账号是否存在。")
+    @Operation(
+            summary = "账号密码登录，签发双 Token",
+            description = "免鉴权入口。用户不存在与密码错误返回同一个 401 响应体，不透露账号是否存在。"
+                    + "窗口内连续失败达阈值（默认 5 次）触发锁定：达阈值那次与锁定期内的尝试一律返回 429，锁定期不计数不续期，到期自动解锁。")
     @PostMapping("/login")
-    public ApiResponse<TokenPair> login(@Valid @RequestBody LoginRequest request) {
-        return ApiResponse.success(authService.login(request));
+    public ApiResponse<TokenPair> login(@Valid @RequestBody LoginRequest request, HttpServletRequest httpRequest) {
+        return ApiResponse.success(
+                authService.login(request, clientIp(httpRequest), httpRequest.getHeader("User-Agent")));
+    }
+
+    /**
+     * 真实客户端 IP：取 {@code X-Forwarded-For} 最后一个值——网关 {@code JwtAuthGlobalFilter} 已剥离入站伪造
+     * 并以连接对端重建（PR #30），最后一个值即网关认定的客户端。无 XFF 说明请求不经网关（本机直连/运维 curl），
+     * 回落 {@code getRemoteAddr()}，记的是连接对端而非浏览器（见 README 已知坑）。
+     */
+    private static String clientIp(HttpServletRequest request) {
+        String forwarded = request.getHeader("X-Forwarded-For");
+        if (forwarded != null && !forwarded.isBlank()) {
+            int comma = forwarded.lastIndexOf(',');
+            String last = (comma >= 0 ? forwarded.substring(comma + 1) : forwarded).trim();
+            if (!last.isEmpty()) {
+                return last;
+            }
+        }
+        return request.getRemoteAddr();
     }
 
     @Operation(
