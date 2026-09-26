@@ -37,7 +37,7 @@ subprojects {
 			mavenBom("org.springframework.boot:spring-boot-dependencies:4.1.1")
 			mavenBom("org.springframework.cloud:spring-cloud-dependencies:2025.1.3")
 			mavenBom("com.alibaba.cloud:spring-cloud-alibaba-dependencies:2025.1.0.0")
-			// common-core 以 api 暴露 jjwt 类型，版本必须在根统一管；模块局部 BOM 不会传递给消费方
+			// common-security 以 api 暴露 jjwt 类型，版本必须在根统一管；模块局部 BOM 不会传递给消费方
 			mavenBom("io.jsonwebtoken:jjwt-bom:0.13.0")
 		}
 		// ArchUnit 没有 BOM，用单条约束把版本留在根，模块仍不写版本号

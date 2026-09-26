@@ -17,8 +17,9 @@ import org.junit.jupiter.api.Test;
  * 网关模块的架构门禁。
  *
  * <p>WebFlux 网关没有 JPA 层，不套用 {@code controller → service → repository → entity} 四层（Phase 0「新模块接入门禁清单」
- * 第 2 条），但通用四条（禁字段注入、禁标准流、禁 {@code new Date()}、包切片无环）原样保留，另加三条只属于反应式网关的约束——它们正是
- * Phase 2「关键决策」里「依赖隔离」与「Redis 必须走反应式」两条的自动化版本。摘掉任一条都会退化成一句口头约定。
+ * 第 2 条），但通用五条（禁字段注入、禁标准流、禁 {@code new Date()}、可空性只用 JSpecify、包切片无环）原样保留，
+ * 另加五条只属于反应式网关的约束（禁 Servlet/WebMvc、禁持久化栈、禁依赖 common-core、禁命令式 Redis 模板、禁 block）——
+ * 后者正是 Phase 2「关键决策」里「依赖隔离」与「Redis 必须走反应式」两条的自动化版本。摘掉任一条都会退化成一句口头约定。
  */
 @Tag("architecture")
 class ArchitectureTest {

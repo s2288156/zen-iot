@@ -93,7 +93,7 @@
 **接入前后**，三个真实案例：
 
 1. **报告默认根本不生成**。6.5.x 不注册任何报告，失败时终端只有 `exit code 1`——一个"会拦人但不给理由"的门禁是不可维权的。所以 `tasks.withType<SpotBugsTask>()` 显式建了 HTML + XML 两类报告。这段配置本身就是它自己的前后对比。
-2. **能用代码修的绝不写豁免**。`VerifiedToken` 原本命中 4 条 `EI_EXPOSE_REP/EI_EXPOSE_REP2`（构造器存下了外部 `List`）。修法不是豁免而是加一个 `List.copyOf` 的紧凑构造器，4 条 finding 自动消失（`7bbd4b9 refactor(common-core): 构造期用 List.copyOf 固化 Token 的角色与模块列表`）。`exclude.xml` 的头注释把这条政策写死在文件里。
+2. **能用代码修的绝不写豁免**。`VerifiedToken` 原本命中 4 条 `EI_EXPOSE_REP/EI_EXPOSE_REP2`（构造器存下了外部 `List`）。修法不是豁免而是加一个 `List.copyOf` 的紧凑构造器，4 条 finding 自动消失（`7bbd4b9 refactor(common-core): 构造期用 List.copyOf 固化 Token 的角色与模块列表`——scope 是拆模块前的旧位置，该类型现住 `common-security`）。`exclude.xml` 的头注释把这条政策写死在文件里。
 3. **但有些东西确实只能豁免**。`EI_EXPOSE_REP2` 对"构造参数是 Spring 注入的共享单例"这个形状不成立：拷贝 `ObjectMapper` 会丢掉 `spring.jackson` 配置，而且这些 Bean 本来就由容器唯一持有。`exclude.xml` 为此做了三条窄豁免，每条只覆盖**一个 pattern + 一组具名包**，并写明理由；其中一条还记录了"更精确的 `<Class annotation="...Service"/>` 在 4.10.4 实测不生效，所以按包名收敛"。
 
 第 3 个案例里最有信息量的一句：SpotBugs 的不可变性推断在 `HeartbeatService` 上成立、在 `DeviceService` 上不成立（因为 `@Transactional` 需要 CGLIB 代理，service 不能 `final`）——**同一个代码形状两种结果**。这条观察决定了豁免只能按包收敛，不该指望"把代码写漂亮"去绕开静态分析。
