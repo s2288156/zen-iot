@@ -22,6 +22,8 @@ Web 无关的**安全内核**：JWT 签发/校验、统一响应与错误码、�
 - 另有 `new Date()`、字段注入、标准流、jspecify 与包切片无环等通用条，见 `AGENTS.md`。
 
 > 前两条就是「网关可以直接复用它而不必排依赖」的可执行形式。`common-core` 原来那条只禁 `jakarta.servlet` 的 `jwtPackageStaysServletFree()` 已被它们取代。
+>
+> SpotBugs 政策（豁免须写理由且尽量窄）见 `AGENTS.md`。本模块的样板是 `VerifiedToken`：它用 `List.copyOf` 紧凑构造器消掉 4 条告警，而不是申请豁免。
 
 ## 主要依赖
 

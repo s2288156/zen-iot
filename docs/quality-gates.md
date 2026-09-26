@@ -1,6 +1,6 @@
 # 代码质量与测试门禁
 
-> **这篇文档的位置**：`AGENTS.md` 是门禁规则的唯一事实源（哪些规则、什么约定），各模块 `README.md` 是该模块约束的清单。本文不重复那份清单，只回答另外三个问题——**这些技术本身是什么、本项目是怎么把它们接进去的、接上之后前后有什么不同，以及跑完去哪看结果**。凡是引用实现细节，都给 `文件:行号`，方便对着源码读。
+> **这篇文档的位置**：`AGENTS.md` 是门禁规则的唯一事实源（哪些规则、什么约定），各模块 `README.md` 是该模块约束的清单。本文不重复那份清单，只回答另外三个问题——**这些技术本身是什么、本项目是怎么把它们接进去的、接上之后前后有什么不同，以及跑完去哪看结果**。凡是引用实现细节，给「文件路径 + 任务名 / 配置键 / 类#方法」，不给行号——行号下一次编辑就漂，且漂了没人会去修。
 >
 > 阅读前提：本文假设你从没接触过 SpotBugs / ArchUnit / Spotless 这些东西。
 
@@ -17,9 +17,9 @@
 | `pre-push`           | 每次 `git push`       | `prePushCheck`：格式 + Markdown 规范 + 编译 `-Werror` + SpotBugs + 架构 + 版本一致性 | 见 §6               | 推送被拒，**不跑测试** |
 | CI（GitHub Actions） | PR / push main / 定时 | `check`（含测试）、集成测试 + 真中间件、gitleaks、OSV                                | 见 §6               | PR 红灯                |
 
-对应源码：`build.gradle.kts:266`（`prePushCheck`）、`settings.gradle.kts:24`（钩子声明）、`.github/workflows/ci.yml`。
+对应源码：根 `build.gradle.kts` 的 `prePushCheck` 任务、`settings.gradle.kts` 的 `gitHooks { }` 块、`.github/workflows/ci.yml`。
 
-关键设计取舍一句话：**推送闸不跑测试**。`build.gradle.kts:265` 的注释写着"不跑测试；全量门禁仍是 check"。理由是上面这六项覆盖了绝大多数"低级但会污染主干"的问题，而测试要连数据库、启动 Spring 上下文，放进 `pre-push` 会让人开始用 `--no-verify`。闸一旦被人绕过，它就比没有闸更糟。
+关键设计取舍一句话：**推送闸不跑测试**。`prePushCheck` 上方的注释写着"不跑测试；全量门禁仍是 check"。理由是上面这六项覆盖了绝大多数"低级但会污染主干"的问题，而测试要连数据库、启动 Spring 上下文，放进 `pre-push` 会让人开始用 `--no-verify`。闸一旦被人绕过，它就比没有闸更糟。
 
 三个钩子都由 `settings.gradle.kts` 的 `gitHooks { }` 块**生成**，不是手写文件：
 
@@ -27,7 +27,7 @@
 ./gradlew help          # 任意一次 Gradle 调用都会重新生成 .git/hooks/{pre-commit,commit-msg,pre-push}
 ```
 
-所以本地手改钩子文件是无效的（下次调用就被覆盖），这也是 `AGENTS.md` 禁止手改和禁止 `--no-verify` 的技术原因。`.git` 不可写时（沙箱、源码包）加 `-PskipGitHooks`（`settings.gradle.kts:22`）。
+所以本地手改钩子文件是无效的（下次调用就被覆盖），这也是 `AGENTS.md` 禁止手改和禁止 `--no-verify` 的技术原因。`.git` 不可写时（沙箱、源码包）加 `-PskipGitHooks`（该属性读自 `settings.gradle.kts` 的 `gitHooks` 块）。
 
 ---
 
@@ -39,19 +39,19 @@
 
 **是什么**：一个"格式化即构建步骤"的 Gradle 插件。它不配置编辑器，而是自己持有 formatter（Java 用 palantir-java-format，Markdown/YAML 用 Prettier），把"格式对不对"变成一个可执行断言。`spotlessApply` 改文件，`spotlessCheck` 只判定。
 
-**本项目怎么接**（`build.gradle.kts:161`）：四种语言各一条 target，注意每条都 `targetExclude("**/build/**")`：
+**本项目怎么接**（根 `build.gradle.kts` 的 `spotless { }` 块）：四种语言各一条 target，注意每条都 `targetExclude("**/build/**")`：
 
 - `java`：palantir-java-format 2.97.0 + `removeUnusedImports()` + `toggleOffOn()`（允许用 `// @formatter:off` 局部逃生，生成的代码、对齐的矩阵才用得上）。
 - `markdown`：Prettier，`printWidth: 120`、`singleQuote`、`proseWrap: preserve`。
 - `gradleScripts`：**只**定尾随空白与文件结尾换行，注释写明了原因——不引入 ktlint，否则既有 tab 缩进的构建脚本会被整体重排，一个改动淹没在几百行 diff 里。
 - `yaml`：Prettier。
-- 刻意**没有** SQL target：`build.gradle.kts:200` 那行注释说 Flyway 脚本是历史记录，重排会让迁移 diff 无法审查。
+- 刻意**没有** SQL target：`spotless` 块末尾那条注释说 Flyway 脚本是历史记录，重排会让迁移 diff 无法审查。
 
 **接入前后**：
 
 - 接之前，"缩进风格"是 code review 里反复出现的口水战，`.editorconfig` 只是建议——IDE 不装插件就不生效，成员换编辑器就漂移。
 - 接之后 diff 里再没有空白噪音。但它有两个真实的坑，本项目都踩过：
-  1. **Spotless 的 `**` 会匹配以点开头的路径**。`.ai/` 是 gitignore 的临时笔记目录，于是**未跟踪文件**反过来卡住了每一次提交——`check`会因为一个根本不在版本库里的 Markdown 文件而红。修法是把`**/.ai/**`加进`targetExclude`（`build.gradle.kts:172`），历史见 `2cbd5f8 fix(build): exclude gitignored .ai scratch docs from spotless markdown`。
+  1. **Spotless 的 `**` 会匹配以点开头的路径**。`.ai/` 是 gitignore 的临时笔记目录，于是**未跟踪文件**反过来卡住了每一次提交——`check`会因为一个根本不在版本库里的 Markdown 文件而红。修法是把 `**/.ai/**`加进`markdown`target 的`targetExclude`，历史见 `2cbd5f8 fix(build): exclude gitignored .ai scratch docs from spotless markdown`。
   2. 它管不了"内容是否还准确"。格式化通过 ≠ 文档没过期。
 
 **产物**：**没有报告文件**。失败信息只有标准输出里的"哪个文件哪一处不符合格式"，以及一行 `Run 'gradlew spotlessApply' to fix`。这是有意的——格式问题的正确修复动作是"应用"，不是"读报告"。
@@ -60,7 +60,7 @@
 
 **是什么**：Spotless 保证"看起来一致"，markdownlint 保证"写得规范"（标题层级不跳级、列表缩进、ATX 风格标题等）。它是 Node 工具，Gradle 通过 `Exec` 任务调 `npx markdownlint-cli`。
 
-**本项目怎么接**：`build.gradle.kts:209` 注册 `lintMarkdown`，`:215` 注册 `lintMarkdownFix`（`--fix`），并把前者挂到 `check` 与 `prePushCheck`、后者挂成 `spotlessApply` 的 `finalizedBy`（`:274`）。这个"Apply 之后自动 fix"的接法意味着：一条 `spotlessApply` 就同时满足 Prettier 和 markdownlint，不需要记两条命令。规则集在 `.markdownlint.json`（`default: true` 起步，逐条放宽：`MD013` 行长关闭、`MD033` 允许内联 HTML、`MD041` 允许首行非标题）。
+**本项目怎么接**：根 `build.gradle.kts` 的 `lintMarkdown` 与 `lintMarkdownFix`（后者带 `--fix`）两个 `Exec` 任务，前者挂到 `check` 与 `prePushCheck`、后者挂成 `spotlessApply` 的 `finalizedBy`。这个"Apply 之后自动 fix"的接法意味着：一条 `spotlessApply` 就同时满足 Prettier 和 markdownlint，不需要记两条命令。规则集在 `.markdownlint.json`（`default: true` 起步，逐条放宽：`MD013` 行长关闭、`MD033` 允许内联 HTML、`MD041` 允许首行非标题）。
 
 **接入前后**：这条最直观的前后对比就是本文档——手写 Markdown 的表格列宽是乱的，`spotlessApply` 之后所有表格对齐（本文所有表格都是这么生成的）。另外 `lintMarkdown` 依赖 `npx`，**首次运行需要联网**，这也是 `AGENTS.md` 把 Node.js 20+ 列为前置条件的原因。
 
@@ -70,11 +70,11 @@
 
 **是什么**：`javac -Xlint:deprecation,unchecked -Werror`。警告默认不阻断构建，于是废弃 API 会一辈子留在代码里；`-Werror` 让"用了 Spring 7 已废弃的东西"当场编译失败。
 
-**本项目怎么接**：`build.gradle.kts:62` 对**所有**模块的 `JavaCompile` 统一加三个参数，因此五个模块一条不落。
+**本项目怎么接**：`subprojects` 里的 `tasks.withType<JavaCompile>().configureEach` 对**所有**模块统一加三个参数，因此五个模块一条不落。
 
 这里有一条"选了 A 而不是 B"的重要记录，值得单独学：
 
-> **为什么不是 `-Xlint:all`？** Lombok 会发出 `No processor claimed any of these annotations` 这条警告，而 `-Werror` 把它变成构建失败——**稳定必红**。所以只取 `deprecation,unchecked`，而这两条已经足够拦住 Spring 7 的废弃 API（注释在 `build.gradle.kts:63`；同一条也写进了 `AGENTS.md`）。
+> **为什么不是 `-Xlint:all`？** Lombok 会发出 `No processor claimed any of these annotations` 这条警告，而 `-Werror` 把它变成构建失败——**稳定必红**。所以只取 `deprecation,unchecked`，而这两条已经足够拦住 Spring 7 的废弃 API（注释就写在那条 `compilerArgs` 上方；同一条也写进了 `AGENTS.md`）。
 
 **接入前后**：接之前 `org.springframework.lang.Nullable` 这种"能用但已废弃"的注解会无声扩散；接之后它与一条 ArchUnit 规则形成双保险（`@Tag("architecture")` 的 `neverUsesDeprecatedSpringNullabilityAnnotations`），必须改用 `org.jspecify.annotations.*`。
 
@@ -84,7 +84,7 @@
 
 **是什么**：Checkstyle/PMD 读源码，SpotBugs 读**编译后的字节码**，因此能看出源码里看不见的问题（可变对象被暴露、返回值可空却未检查、格式化参数不匹配等）。规则以 bug pattern 编码，如 `EI_EXPOSE_REP2`。
 
-**本项目怎么接**（`build.gradle.kts:91`）：
+**本项目怎么接**（`subprojects` 里的 `SpotBugsExtension` 配置）：
 
 - 版本只在根声明：SpotBugs 引擎 `toolVersion 4.10.4`，插件 `com.github.spotbugs 6.5.11`。
 - `effort = DEFAULT` + `reportLevel = Confidence.MEDIUM`，且 `ignoreFailures = false` —— 命中即构建失败。
@@ -92,7 +92,7 @@
 
 **接入前后**，三个真实案例：
 
-1. **报告默认根本不生成**。6.5.x 不注册任何报告，失败时终端只有 `exit code 1`——一个"会拦人但不给理由"的门禁是不可维权的。所以 `build.gradle.kts:89` 显式建了 HTML + XML 两类报告。这行配置本身就是它自己的前后对比。
+1. **报告默认根本不生成**。6.5.x 不注册任何报告，失败时终端只有 `exit code 1`——一个"会拦人但不给理由"的门禁是不可维权的。所以 `tasks.withType<SpotBugsTask>()` 显式建了 HTML + XML 两类报告。这段配置本身就是它自己的前后对比。
 2. **能用代码修的绝不写豁免**。`VerifiedToken` 原本命中 4 条 `EI_EXPOSE_REP/EI_EXPOSE_REP2`（构造器存下了外部 `List`）。修法不是豁免而是加一个 `List.copyOf` 的紧凑构造器，4 条 finding 自动消失（`7bbd4b9 refactor(common-core): 构造期用 List.copyOf 固化 Token 的角色与模块列表`）。`exclude.xml` 的头注释把这条政策写死在文件里。
 3. **但有些东西确实只能豁免**。`EI_EXPOSE_REP2` 对"构造参数是 Spring 注入的共享单例"这个形状不成立：拷贝 `ObjectMapper` 会丢掉 `spring.jackson` 配置，而且这些 Bean 本来就由容器唯一持有。`exclude.xml` 为此做了三条窄豁免，每条只覆盖**一个 pattern + 一组具名包**，并写明理由；其中一条还记录了"更精确的 `<Class annotation="...Service"/>` 在 4.10.4 实测不生效，所以按包名收敛"。
 
@@ -111,15 +111,15 @@
 
 **本项目怎么接**：每个模块一个 `ArchitectureTest`，共 50 个用例（`admin 11 / common-core 6 / common-security 9 / ecs 14 / gateway 10`），全部打 `@Tag("architecture")`，并且：
 
-- 根任务 `architectureTest` 用 `includeTags("architecture")` 单独跑这些（`build.gradle.kts:78`）。注释点明了动机：**秒级、不碰中间件、不启动 Spring 上下文**，因此可以安全放进 `pre-push`。
+- 根任务 `architectureTest` 用 `includeTags("architecture")` 单独跑这些（`subprojects` 里的 `tasks.register<Test>("architectureTest")`）。注释点明了动机：**秒级、不碰中间件、不启动 Spring 上下文**，因此可以安全放进 `pre-push`。
 - 内置规则直接用：`layeredArchitecture()`、`slices().matching("<root>.(*)..").beFreeOfCycles()`、`NO_CLASSES_SHOULD_USE_FIELD_INJECTION`、`NO_CLASSES_SHOULD_ACCESS_STANDARD_STREAMS`。
 - 自定义规则用 `noClasses().should().dependOnClassesThat()...` 与 `.callConstructor(...)` / `.callMethod(...)`。
 
 **接入前后**，四个案例：
 
 1. **分层规则有明确盲区，无环规则补上**。commit message 里记着实测：把 `config ↔ controller` 造个环，分层规则**仍然全绿**（它只约束 controller/service/repository/entity 四层之间的方向，config 不在任何层里），是 `packageSlicesAreFreeOfCycles()` 单独报的红灯（`c935dc2`）。这是一次典型的"规则之间不重叠"验证。
-2. **防"静默失效"的哨兵**。`noClasses()` 在**一个类都没导入**时也判通过。所以包根改名、目录误删、`importPackages` 写错，会让整个模块的架构规则一起变成零断言绿。`common-security` 与 `ecs-service` 各有一条 `importedClassesAreNeverEmpty()` 断言导入类数下限（`common-security/.../ArchitectureTest.java:36`），专门用来抓这种失效。**这条值得每个新项目抄**——它是唯一一条防守"门禁本身坏掉"的规则。
-3. **把模块的存在理由写成断言**。`common-security` 的全部意义是"Web 无关，所以反应式网关能直接复用同一份验签代码"。破坏方式只需要"有人往这个模块加了个用 `HttpServletRequest` 的类"，而编译和 IDE 都不会提醒。于是 `moduleStaysFreeOfWebAndPersistence()` 把这条存在理由变成测试（`common-security/.../ArchitectureTest.java:47`）。
+2. **防"静默失效"的哨兵**。`noClasses()` 在**一个类都没导入**时也判通过。所以包根改名、目录误删、`importPackages` 写错，会让整个模块的架构规则一起变成零断言绿。`common-security` 与 `ecs-service` 各有一条 `importedClassesAreNeverEmpty()` 断言导入类数下限（`common-security/src/test/java/**/ArchitectureTest.java`），专门用来抓这种失效。**这条值得每个新项目抄**——它是唯一一条防守"门禁本身坏掉"的规则。
+3. **把模块的存在理由写成断言**。`common-security` 的全部意义是"Web 无关，所以反应式网关能直接复用同一份验签代码"。破坏方式只需要"有人往这个模块加了个用 `HttpServletRequest` 的类"，而编译和 IDE 都不会提醒。于是 `common-security` 的 `ArchitectureTest#moduleStaysFreeOfWebAndPersistence()` 把这条存在理由变成测试。
 4. **一条规则被拆成两半**。拆模块之前，`common-core` 有一条只盯 `jakarta.servlet` 的 `jwtPackageStaysServletFree()`，网关侧靠 `build.gradle.kts` 里三个 `exclude` 维持隔离。拆出 `common-security` 之后：生产方按包禁全（Servlet / Spring Web / JPA / Spring Data / 事务 / validation），消费方网关再加一道 `GatewayDependencyIsolationTest`。于是同一条边界两端各有一次断言，**一边漏风也会被抓住**。
 
 `GatewayDependencyIsolationTest`（`gateway-service/src/test/java/com/zen/gateway/GatewayDependencyIsolationTest.java`）是 ArchUnit 之外另一种值得学的思路：它不用 ArchUnit，而用 `Class.forName` 从**消费方运行时视角**断言。理由写在类注释里——ArchUnit 看的是编译期依赖，而"某个 `starter-web` 被 Dependabot 抬版本时重新带进来"这种情况编译照样过、IDE 不报警，要等真启动才炸（Boot 一看 Servlet 在类路径上就把应用判成 Servlet 类型，WebFlux 网关启动即失败）。它甚至直接断言 `WebApplicationType.deduce() == REACTIVE`，把 Boot 那个"最容易因一个依赖整体翻车的开关"钉住。
@@ -135,7 +135,7 @@ Method <com.zen.ecs.controller.DeviceController.list()> calls method <...> in (D
 
 **是什么**：字节码插桩统计"哪些行被测试执行过"。
 
-**本项目怎么接**：`build.gradle.kts:152` 对所有 `JacocoReport` 打开 XML + HTML，`:158` 用 `tasks.named("test") { finalizedBy("jacocoTestReport") }` 让报告随每次 `test` 自动生成。
+**本项目怎么接**：`subprojects` 里的 `tasks.withType<JacocoReport>()` 打开 XML + HTML，紧接一条 `tasks.named("test") { finalizedBy("jacocoTestReport") }` 让报告随每次 `test` 自动生成。
 
 **接入前后 / 为什么没有门槛**：注释里那句"不设阈值门禁；数据由 test 任务产出"是这条配置的全部设计意图。百分比阈值是个可被博弈的数字（想达标就写断言弱的测试），而"看不到覆盖率"才是真问题——所以本项目选择只出报告不做门禁。**这意味着覆盖率红灯不会挡你，需要人去看**（§4.4 给了一行命令读 XML）。这是本文里最该被后来者知道的一个"故意留白"。
 
@@ -150,27 +150,27 @@ Method <com.zen.ecs.controller.DeviceController.list()> calls method <...> in (D
 
 **是什么**：不是插件，是自己写的两个 Gradle 任务。它解决的问题很具体：**同一份源码在不同模块里解析出不同版本的同一个库**。
 
-**本项目怎么接**（`build.gradle.kts:109` 与 `:235`）：
+**本项目怎么接**（`versionCoherenceCheck` 在 `subprojects` 里、`crossModuleVersionCheck` 在根）：
 
 - `versionCoherenceCheck`（每模块）：断言"同一 group 的构件在本模块各配置内同版本"，并把已解析版本写成一份报告。
 - `crossModuleVersionCheck`（根）：读各模块那份报告做跨模块比较，同一坐标出现多版本即失败。
 - 拆成两步是 Gradle 的硬约束逼出来的：`org.gradle.parallel=true`（`gradle.properties`）下根任务不能去解析别人的配置（"attempted without an exclusive lock"），所以只能让每个模块写自己的报告。
 
-监控的配置列表在 `build.gradle.kts:24`，其中 `testRuntimeClasspath` 是最有信号的一条——**库模块自测所用的一套依赖和真正部署的那套不是一套**时，CI 绿着也能藏住序列化行为差异。这正是本条门禁的由来：`common-core` 的 `testRuntimeClasspath` 曾解析到 Jackson `2.12.7.1`，而 `admin-service` 运行时是 `2.21.5`（注释在 `build.gradle.kts:231`）。
+监控的配置列表在根脚本顶部的 `coherenceConfigurations`，其中 `testRuntimeClasspath` 是最有信号的一条——**库模块自测所用的一套依赖和真正部署的那套不是一套**时，CI 绿着也能藏住序列化行为差异。这正是本条门禁的由来：`common-core` 的 `testRuntimeClasspath` 曾解析到 Jackson `2.12.7.1`，而 `admin-service` 运行时是 `2.21.5`（注释在 `crossModuleVersionCheck` 上方）。
 
 **接入前后**：根因是托管优先级——`spring-cloud-alibaba-dependencies` 直接声明的坐标只在**没挂 Boot 插件**的模块里生效。这条门禁把这个反直觉的行为变成了机器可查的断言；而它的触发源是 Dependabot：每周一它会抬"单条钉住组内一个构件"的约束，却不抬 BOM 管的兄弟构件，历史上把 SpotBugs 的配置拆成 `core 2.26.1` + `api 2.25.5` **两次**（`#15`、`#20`）。现在根脚本里不留这种约束，门禁守的是**将来再有人加**。
 
-一个值得注意的实现细节：这个任务**故意不声明 `outputs`**（`build.gradle.kts:107`）。理由是依赖版本变了但任务被判定 `UP-TO-DATE` 会留下过期报告——那比"门禁空转"更糟，因为过期报告会让跨模块比对基于错误数据得出绿。
+一个值得注意的实现细节：这个任务**故意不声明 `outputs`**（理由写在 `versionCoherenceCheck` 上方的注释里）。理由是依赖版本变了但任务被判定 `UP-TO-DATE` 会留下过期报告——那比"门禁空转"更糟，因为过期报告会让跨模块比对基于错误数据得出绿。
 
-**产物**：`<module>/build/reports/dependency-versions.txt`，格式 `配置|坐标|版本`，每模块一份（`common-core` 那份实测 343 行）。这份报告同时是**排障资料**：`.github/workflows/ci.yml:146` 就引用它来确定 Flyway CLI 镜像版本必须和运行时 `flyway-core` 对齐（CI 里原先钉 `flyway/flyway:11` 比运行时低一个 major，12.x 语法的迁移脚本会"本机过、CI 红"或反向假绿）。
+**产物**：`<module>/build/reports/dependency-versions.txt`，格式 `配置|坐标|版本`，每模块一份（`common-core` 那份实测 343 行）。这份报告同时是**排障资料**：`.github/workflows/ci.yml` 的 `integration` job 就引用它来确定 Flyway CLI 镜像版本必须和运行时 `flyway-core` 对齐（CI 里原先钉 `flyway/flyway:11` 比运行时低一个 major，12.x 语法的迁移脚本会"本机过、CI 红"或反向假绿）。
 
 ### 2.8 测试分层 —— `@Tag` 让门禁在干净机器上可执行
 
 **是什么**：JUnit 5 的标签 + `useJUnitPlatform { includeTags/excludeTags }`。
 
-**本项目怎么接**（`build.gradle.kts:12`）：任何依赖本机 MySQL/Nacos/Redis 的测试打 `@Tag("integration")`，默认从 `test`/`check` **排除**；容器就绪时用 `./gradlew test -PintegrationTests` 纳入。架构测试打 `@Tag("architecture")`，为的是让 `architectureTest` 能单独捞出来跑。
+**本项目怎么接**（根脚本的 `integrationTag` / `runIntegrationTests` 两个变量与 `tasks.withType<Test>()`）：任何依赖本机 MySQL/Nacos/Redis 的测试打 `@Tag("integration")`，默认从 `test`/`check` **排除**；容器就绪时用 `./gradlew test -PintegrationTests` 纳入。架构测试打 `@Tag("architecture")`，为的是让 `architectureTest` 能单独捞出来跑。
 
-**接入前后**：这是全套门禁**能不能落地**的前提。如果 `check` 需要本机起中间件，那么任何人换台机器、任何 agent 沙箱里跑一次都是红的，门禁立刻退化成"某个人的机器上才是绿的"。两个 tag 各解决一层：`architecture` 让"架构检查"能进 pre-push（秒级），`integration` 让"需要真环境"的测试既能在 CI 上跑、又不绑架本地 `check`。CI 因此拆成两个 job：`check`（无中间件）和 `check -PintegrationTests`（起 MySQL/Redis/RabbitMQ 容器 + 手工拉 Nacos，`.github/workflows/ci.yml:54`）。
+**接入前后**：这是全套门禁**能不能落地**的前提。如果 `check` 需要本机起中间件，那么任何人换台机器、任何 agent 沙箱里跑一次都是红的，门禁立刻退化成"某个人的机器上才是绿的"。两个 tag 各解决一层：`architecture` 让"架构检查"能进 pre-push（秒级），`integration` 让"需要真环境"的测试既能在 CI 上跑、又不绑架本地 `check`。CI 因此拆成两个 job：`check`（无中间件）和 `integration`（`./gradlew check -PintegrationTests`，起 MySQL/Redis/RabbitMQ 容器 + 手工拉 Nacos，见 `.github/workflows/ci.yml`）。
 
 **产物**：与普通测试同一份报告，按 tag 看不出来——要区分"哪条测试属于集成层"，看源码上的 `@Tag`。
 
@@ -186,7 +186,7 @@ Method <com.zen.ecs.controller.DeviceController.list()> calls method <...> in (D
 | 谁能发现   | 只有读过设计文档、知道"网关不能有 Servlet"的那个人                    | 决策写进代码；换人、换 IDE、Dependabot 抬版本都照样挡                |
 | 谁不会被挡 | ——                                                                    | 常规重构（改名、抽方法）不碰边界就不会红，所以闸不会被绕过           |
 | 反馈成本   | code review 里靠人眼，评论还会漂移                                    | 秒级到分钟级的机器判定，规则只有一处事实源                           |
-| 腐坏方向   | 规则散在文档/IDE 配置/口头约定里，随人员变动失效                      | 豁免必须写理由且窄（`exclude.xml`）；新增约束带 `文件:行号` 可回溯   |
+| 腐坏方向   | 规则散在文档/IDE 配置/口头约定里，随人员变动失效                      | 豁免必须写理由且窄（`exclude.xml`）；新增约束带可回溯的符号名        |
 
 同时要说清**代价与拦不住的**，否则这份对比就成了推销：
 
@@ -292,7 +292,7 @@ gh run list --workflow=ci.yml --limit 10
 gh run download <run-id> --name build-reports          # 解出 reports/ 目录树
 ```
 
-CI **不**上传版本一致性报告和 `problems-report.html`（`.github/workflows/ci.yml:46` 的 path 列表里没有）。要在 CI 上确认这两项，只能读 job 日志，或者本地跑 §4.5 / §4.6。
+CI **不**上传版本一致性报告和 `problems-report.html`（`check` job 的 `upload-artifact` 步骤里那份 path 列表没有它们）。要在 CI 上确认这两项，只能读 job 日志，或者本地跑 §4.5 / §4.6。
 
 ### 4.8 一次全绿的干净环境长什么样
 

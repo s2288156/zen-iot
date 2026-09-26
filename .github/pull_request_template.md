@@ -9,6 +9,7 @@
 - [ ] 数据库迁移文件在 `db/migration/`，Flyway 兼容旧版本；**未手动修改既有脚本**
 - [ ] 新增依赖不在模块脚本里写版本号；版本只在根 `build.gradle.kts` 声明一次（BOM 或 `dependencyManagement`）
 - [ ] 集成测试已加 `@Tag("integration")`，默认 `test` 阶段不依赖本地中间件
+- [ ] 文档同步：按 `AGENTS.md` 的文档分工更新了受影响的模块 `README.md` / `docs/architecture.md` / `docs/modules/*.md`，或确认无需更新
 
 ## 破坏性变更
 

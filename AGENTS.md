@@ -39,26 +39,50 @@ Every rule below has a gate behind it, so a workaround shows up as a failed push
 - **Layering** (ArchUnit, `architectureTest`): `controller → service → repository → entity` one-way, controllers never
   touch persistence entities, `@Transactional` only appears in `service`, each `*Controller`/`*Service`/`*Repository`/
   `*Entity` resides in its own package, package slices stay acyclic, `common-core` never depends on a business
-  service or on the gateway, and `common-security` (the web-free kernel: JWT, `ApiResponse`, error codes,
-  `TrustedHeaders`) stays free of any transport or persistence stack — no Servlet, no Spring Web, no JPA, no
-  Spring Data, no `@Transactional` — and never points back at `common-core`. That is what lets the reactive
-  gateway reuse Phase 1's signing code without a list of `exclude` rules.
+  service or on the gateway, and `common-security` stays free of any transport or persistence stack — no Servlet,
+  no Spring Web, no JPA, no Spring Data, no `@Transactional` — and never points back at `common-core`. That is what
+  lets the reactive gateway reuse the same signing code without a list of `exclude` rules; what the kernel contains
+  is inventoried in `common-security/README.md`, not here.
 - **Coding hygiene** (ArchUnit, asserted per module): constructor injection only, so `@Autowired`/`@Resource`/`@Inject`
   never sit on a field; no `System.out`/`System.err`/`printStackTrace`, because only the logging framework carries the
   traceId from P3-1; no `new Date()`, while `java.util.Date` itself stays legal for jjwt's `issuedAt`/`expiration`.
 - **SpotBugs**: `Effort.DEFAULT` + `Confidence.MEDIUM`, failures block. Reports land in
   `<module>/build/reports/spotbugs/main.{html,xml}`. Prefer fixing code; a new exemption belongs in
   `gradle/spotbugs/exclude.xml` with a comment justifying it, and must stay narrow (rule + package, never a blanket
-  category). `VerifiedToken` shed 4 findings by adding a `List.copyOf` compact constructor instead of an exemption.
+  category).
 - **Tests**: anything needing local MySQL/Nacos/Redis carries `@Tag("integration")` so `test`/`check` stay runnable on a
   clean machine. New tests should avoid containers by default.
 - **Formatting**: Spotless covers `*.java` (palantir), `*.md` (Prettier + markdownlint), `*.gradle.kts` (whitespace and
   final newline only, existing tab indentation is kept) and `*.yml` (Prettier). Flyway `db/migration/*.sql` is
   deliberately left unformatted so migration diffs stay reviewable. `.editorconfig` matches what those formatters
   actually emit: Java 4 spaces / 120 columns, YAML 2 spaces, kts keeps tabs, LF everywhere.
-- **Documentation placement**: the root `README.md` is project orientation only (what the platform is, module list, how
-  to run it locally). Module internals and that module's ArchUnit rule inventory belong in the module's own
-  `README.md`, and the gates below stay here — a rule written down in two places is a rule that will drift.
+
+## Documentation map
+
+This file is the entry point: the command table and the enforced conventions above exist nowhere else. Every other
+document has one job, and a fact written down in two places is a fact that will drift.
+
+| Document                   | Answers                                                     | Never contains                        |
+| -------------------------- | ----------------------------------------------------------- | ------------------------------------- |
+| `README.md` (root)         | What the platform is, the module panorama, how to run it    | Progress, plans, dates, gate rules    |
+| `AGENTS.md` (this file)    | Commands, gates, hard conventions, this routing table       | Module internals, design history      |
+| `docs/architecture.md`     | Cross-module contracts that fail silently if one side moves | Single-module implementation details  |
+| `<module>/README.md`       | Facts and conclusions of one module                         | Rationale, rejected options, pitfalls |
+| `docs/modules/<module>.md` | Why it was chosen, what was rejected, what bit us           | Anything already stated elsewhere     |
+| `docs/quality-gates.md`    | What a gate technology is and how it is wired in            | The rule inventory                    |
+| `SECURITY.md`              | Vulnerability reporting and secret handling                 | Architecture detail                   |
+
+- **Module README skeleton** — a lead paragraph stating the module's job, then `能力与接口口径` / `关键实现` /
+  `架构约束` / `主要依赖` / `命令`. Facts and conclusions only, every entry at most two lines; anything that needs a
+  "because" goes to `docs/modules/<module>.md`.
+- **No second inventory**: never hand-copy a list the code already publishes (routes and schemas come from
+  `/v3/api-docs`, the rule list from the module's `ArchitectureTest`). Link to the source of truth instead.
+- **A pitfall entry carries its own deletion condition**: once a gate or a test makes the mistake impossible, delete
+  the entry rather than let it age.
+- **No line-number references**: cite `path + class#method` or a configuration key. Line numbers rot on the next edit.
+- **Naming and layout**: prose in Chinese, file names in English kebab-case, one document per topic — no `v2` copies of
+  a directory, no index files over a closed document set (the table above is the whole inventory).
+- **Private workspaces** (`.ai/`, `.trae/`) are not tracked and are never referenced by committed documentation.
 
 ## Workflow
 
