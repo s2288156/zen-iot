@@ -86,6 +86,11 @@ public class CommandDispatchService {
             log.error("丢弃缺少 commandNo 的指令消息：幂等键缺失，既不能判重也无处留痕");
             return;
         }
+        // command_type 列是 NOT NULL：放进 register 会让 save 撞约束，DIVE 被当成「并发重复投递」吞掉，坏消息就此蒸发
+        if (isBlank(message.commandType())) {
+            log.error("丢弃指令 {} 缺少 commandType：无法落库也无法下发，且落库失败会被误判为重复投递", message.commandNo());
+            return;
+        }
         String commandNo = message.commandNo();
         Optional<DeviceEntity> device = deviceRepository.findByDeviceCode(message.deviceCode());
         DeviceCommandEntity command =

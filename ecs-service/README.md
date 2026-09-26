@@ -39,7 +39,7 @@
 | 消息体      | `RcsCommandMessage` | `commandNo` / `deviceCode` / `commandType` / `payload`  |
 
 - `commandNo` 由 RCS 生成且全局唯一，是消费侧幂等键；MQ 至少一次投递，缺了它就无从证明「重复投递不执行第二次」。
-- 消息**不带 Bean Validation 注解**：入口是 MQ，校验失败没有响应可回。缺 `commandNo` 直接丢弃（无留痕）；`deviceCode` 查无落 `FAILED`；`commandType` 为 null 会被误判成重复投递静默跳过（见 docs 坑清单）。
+- 消息**不带 Bean Validation 注解**：入口是 MQ，校验失败没有响应可回。缺 `commandNo` 或缺 `commandType` 在入口直接丢弃（error 日志、无留痕）；`deviceCode` 查无落 `FAILED`。
 - 消费者吞掉一切 `RuntimeException`，不重抛——重抛会让 broker requeue，一条注定失败的消息会把消费者卡死。
 
 ### 配置键

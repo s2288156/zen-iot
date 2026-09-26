@@ -171,6 +171,15 @@ class CommandDispatchServiceTest {
         verify(deviceRepository, never()).findByDeviceCode(anyString());
     }
 
+    /** command_type 是 NOT NULL 列：缺它的消息进 register 会撞约束、被唯一键捕获误判成重复投递，必须在入口丢弃。 */
+    @Test
+    void messageWithoutCommandTypeIsDropped() {
+        service().dispatch(new RcsCommandMessage(COMMAND_NO, DEVICE_CODE, null, "pos-3"));
+
+        verify(deviceCommandRepository, never()).save(any());
+        verify(deviceRepository, never()).findByDeviceCode(anyString());
+    }
+
     /** 协议无人认领时指令以失败终态收场，而不是被静默丢弃。 */
     @Test
     void unsupportedProtocolEndsAsFailedCommand() {

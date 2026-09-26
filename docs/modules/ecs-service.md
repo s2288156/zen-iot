@@ -95,7 +95,7 @@
 ### `RcsCommandMessage` 不带 Bean Validation 注解
 
 - 背景：同模块的 HTTP 请求 DTO 全都带 `@NotBlank` / `@Size`。
-- 结论：MQ 消息不带。这条链路的入口是队列，校验失败没有响应可回。字段非法的去向分三种——缺 `commandNo` 在 `dispatch` 开头直接丢弃（只记 error 日志，幂等键都没有，无处留痕）；`deviceCode` 查无落 `deviceId` 为空的 `FAILED` 行；`commandType` 为 null 撞 `command_type NOT NULL`，被 `register` 的唯一键捕获误判成「并发重复投递」静默跳过。
+- 结论：MQ 消息不带。这条链路的入口是队列，校验失败没有响应可回。字段非法的去向分三种——缺 `commandNo` 在 `dispatch` 开头直接丢弃（只记 error 日志，幂等键都没有，无处留痕）；缺 `commandType` 同样在入口丢弃（`command_type` 是 NOT NULL 列，放进 `register` 会撞约束、被唯一键捕获误判成重复投递）；`deviceCode` 查无落 `deviceId` 为空的 `FAILED` 行。
 - 理由：给一个不会抛 `ConstraintViolationException` 的入口标校验注解，是写给人看的假保证。
 
 ### 接口口径目前没有机器来源
@@ -122,4 +122,3 @@
 - **`recentEvents` 的条数不开放**：`RECENT_EVENT_LIMIT = 20` 写死。事件表只增不改，把 `size` 交给调用方等于允许一次拉走整张表。
 - **排序字段是白名单**：`PageQuery.orderBy` 是客户端传来的字符串，直接交给 `Sort` 等于把列名与查询形状交出去，而未映射的属性名会让整条查询报错。不在名单里明确 400，不静默回落默认排序。
 - **tracing 依赖不在本模块声明**：traceId 的装配随 `common-core` 的 `implementation` / `runtimeOnly` 到运行时类路径。它是一条隐式能力——从 `common-core` 删掉不会有任何编译错误，只会让日志里的 traceId 消失，而 ECS 这一侧没有网关那样的 `MUST_BE_PRESENT` 哨兵。
-- **`commandType` 为 null 的坏消息被误判成重复投递。** 现象：`command_type` 列 `NOT NULL`，`register` 插入时撞 `DataIntegrityViolationException`，而该异常按「已中转过」处理——消息既不执行也无 `FAILED` 留痕，日志里还写着「并发重复投递，跳过执行」。删除条件：`dispatch` 入口显式校验 `commandType` 非空（同 `commandNo`），或 `register` 把 NOT NULL 冲突与 `uk_command_no` 冲突区分开。
