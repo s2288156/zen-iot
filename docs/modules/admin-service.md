@@ -128,7 +128,7 @@
 
 - 背景：改密后旧谱系不该还能续期。但如果把调用人的会话也吊销，用户改完密码立刻被踢，表现为「改密失败」。
 - 结论：吊销该用户除当前会话外的全部会话（`revokeAllForUserExcept(userId, currentAccessJti)`）；管理员重置口令则吊销**全部**（`revokeAllForUser`）。
-- 这条取代了 Phase 4 的「改密不吊销」取舍——撤销基建在 Phase 5 才具备，早期那句承诺是能力缺失的包装，`AuthController` 上残留的旧文案见本文末尾坑清单。
+- 这条取代了 Phase 4 的「改密不吊销」取舍——撤销基建在 Phase 5 才具备，早期那句承诺是能力缺失的包装。`AuthController.changePassword` 的 `@Operation` 描述已同步为轮转后口径。
 
 ### 自助改密不校验旧口令的长度下限
 
@@ -258,5 +258,3 @@
 - **JPA auditing 断言在单测里观察不到。** 现象：「`creator`/`updater` 随 `UserContext` 更新」这类断言，mock 仓储永远看不到——它只在真实 flush 时生效。做法：单测断言业务字段，审计字段放 `@Tag("integration")` 仓储测试兜底。
 
 - **`UserStatusRequest` 之类的校验只挡 HTTP 入口。** 现象：`PATCH /users/{id}/status` 的 `0|1` 合法性来自 Bean Validation，service 内部直接调用不经过校验。做法：新增写路径时不要假设实体状态已被注解保证。
-
-- **`AuthController.changePassword` 的 `@Operation` 描述与实现不符。** 现象：文档里写着「改密成功不吊销既有会话与 Token：旧 Token 仍有效至自然过期（撤销基建在 Phase 5）」，而 `AuthService.changePassword` 在 Phase 5 之后已连带吊销除当前会话外的全部会话。这段文案是 Phase 4 的取舍残留，随 `/v3/api-docs` 对外输出，属于文档契约错误。做法：应改成与 `AuthService` Javadoc 一致的轮转后口径——这是代码文案修复，不在本次文档重构范围内，待确认后单独提交。

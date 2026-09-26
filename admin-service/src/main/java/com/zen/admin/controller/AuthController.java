@@ -94,7 +94,8 @@ public class AuthController {
 
     @Operation(
             summary = "自助改密",
-            description = "只要求登录。旧口令 BCrypt 比对，不符返回 400。改密成功不吊销既有会话与 Token：旧 Token 仍有效至自然过期（撤销基建在 Phase 5）。")
+            description = "只要求登录。旧口令 BCrypt 比对，不符返回 400。改密成功连带吊销该用户除当前会话外的全部会话："
+                    + "旧谱系在新口令生效后不能再续期，调用人不会被自己的改密踢下线。吊销失败则整个改密回滚。")
     @SecurityRequirement(name = ZenAdminOpenApiConfiguration.BEARER_JWT_SCHEME)
     @PostMapping("/change-password")
     public ApiResponse<Void> changePassword(@Valid @RequestBody ChangePasswordRequest request) {
