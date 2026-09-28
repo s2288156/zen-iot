@@ -84,6 +84,7 @@ doc/httpclient/MyLocal*.http
 .cursor/
 .continue/
 .aider/
+.apifox/
 .claude/
 .mimocode/
 .codex/
