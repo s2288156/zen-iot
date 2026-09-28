@@ -6,7 +6,7 @@
 
 ## 前置条件
 
-- **Java**：通过 `JAVA_HOME` 使用 JDK 25；
+- **Java**：JDK 25，由根 `build.gradle.kts` 的 `toolchain` 强制；仓库未配置工具链自动下载，本机没有 25 就直接失败
 - **构建工具**：Gradle 9.7.1
 - **Node.js**：20 或更新（Spotless 的 Prettier 与 markdownlint-cli 经 `npx` 运行；首次运行需要网络）
 
@@ -17,12 +17,11 @@
 | 全量格式化  | `./gradlew spotlessApply`           | 就地格式化 Java + Markdown + kts + YAML，随后自动修复 Markdown lint 问题 |
 | 检查格式    | `./gradlew spotlessCheck`           | 只校验格式，不修改文件                                                   |
 | 格式化 Java | `./gradlew spotlessJavaApply`       | 仅格式化 Java 文件                                                       |
-| Lint 文档   | `./gradlew lintMarkdown`            | 用 markdownlint 检查 Markdown 规范                                       |
-| 修复文档    | `./gradlew lintMarkdownFix`         | 用 markdownlint --fix 自动修复 Markdown 规范                             |
+| Lint 文档   | `./gradlew lintMarkdown`            | 用 markdownlint 检查 Markdown 规范（不在 `spotlessCheck` 内）            |
 | 单元测试    | `./gradlew test`                    | 运行不依赖本地中间件的测试（集成测试被标记排除）                         |
 | 集成测试    | `./gradlew test -PintegrationTests` | 包含 `@Tag("integration")` 测试；需要本地 MySQL/Nacos/Redis 容器         |
 | 架构约束    | `./gradlew architectureTest`        | ArchUnit 分层与依赖方向规则，不启动 Spring 上下文                        |
-| 缺陷扫描    | `./gradlew spotbugsMain`            | 对 main 源码跑 SpotBugs；`spotbugsTest` 在 `check` 中也会跑              |
+| 缺陷扫描    | `./gradlew spotbugsMain`            | 对 main 源码跑 SpotBugs                                                  |
 | 全量检查    | `./gradlew check`                   | 全量门禁，含测试                                                         |
 | 推送门禁    | `./gradlew prePushCheck`            | 推送闸，**不跑测试**                                                     |
 
@@ -45,11 +44,11 @@
 - **编码卫生**（ArchUnit，按模块断言）：只允许构造器注入，因此字段上绝不出现 `@Autowired`/`@Resource`/`@Inject`；
   不使用 `System.out`/`System.err`/`printStackTrace`，因为只有日志框架会传递 traceId；不使用 `new Date()`，
   而 `java.util.Date` 本身仍然合法，供 jjwt 的 `issuedAt`/`expiration` 使用。
-- **SpotBugs**：`Effort.DEFAULT` + `Confidence.MEDIUM`，失败即阻断。报告落在
-  `<module>/build/reports/spotbugs/main.{html,xml}`。优先改代码；新的豁免写进 `gradle/spotbugs/exclude.xml` 并附注释
-  说明理由，且必须保持狭窄（规则 + 包，绝不整类豁免；是否狭窄靠评审）。
+- **SpotBugs**：默认级别即阻断（绕过的表现同样是推送失败）。优先改代码；新的豁免写进
+  `gradle/spotbugs/exclude.xml` 并附注释说明理由，且必须保持狭窄（规则 + 包，绝不整类豁免；是否狭窄靠评审）。
+  级别配置与报告产物位置见 `docs/quality-gates.md`。
 - **测试**：任何需要本地 MySQL/Nacos/Redis 的测试都带 `@Tag("integration")`（漏打不会被拦，靠评审），让
-  `test`/`check` 在干净机器上依然可跑。新测试默认不要依赖容器。
+  `test`/`check` 在干净机器上依然可跑。
 - **格式化**：`*.java`（palantir）、`*.md`（Prettier + markdownlint）、`*.gradle.kts`、`*.yml`；范围与
   `db/migration/*.sql` 的豁免见根 `build.gradle.kts` 的 `spotless` 块，编辑器行为见 `.editorconfig`。
 
@@ -84,8 +83,8 @@
 - 被提问时，回答问题，而不是直接上手改代码。
 - 每次克隆安装一次仓库 Git 钩子：任意 Gradle 调用（例如 `./gradlew help`）都会依据 `settings.gradle.kts` 的
   `gitHooks` 块生成 `pre-commit`（`spotlessCheck`）、`commit-msg`（conventional commits）与 `pre-push`（`prePushCheck`）。
-- 绝不手工编辑这三个钩子文件，也绝不用 `--no-verify` 绕过。`.git` 不可写时（agent 沙箱、源码归档）传
-  `-PskipGitHooks`。
+  这三个文件每次都从脚本声明重建，所以绝不手工编辑，也绝不用 `--no-verify` 绕过；`.git` 不可写时（agent 沙箱、
+  源码归档）传 `-PskipGitHooks`。
 - 迭代期间优先跑针对性的测试与检查。交付前，跑受影响领域所要求的更大范围检查。
 - 除非明确要求，不要 force-push。
 - Commit 与 PR 标题使用 `type(scope): message`。scope 必须是真实路径，并且包含全部被改动的文件。跨领域改动用更大的

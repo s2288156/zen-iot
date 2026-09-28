@@ -26,7 +26,7 @@
 
 ## 环境要求
 
-JDK 25（`JAVA_HOME`）、Gradle 9.7.1（已含 wrapper）、Node.js 20+（Markdown 格式化经 `npx`，首次运行需联网）、Docker（本地中间件）。
+JDK 25（由根 `build.gradle.kts` 的 `toolchain` 强制，未装则构建失败）、Gradle 9.7.1（已含 wrapper）、Node.js 20+（Markdown 格式化经 `npx`，首次运行需联网）、Docker（本地中间件）。
 
 ## 本地运行
 
