@@ -35,18 +35,11 @@ JDK 25（`JAVA_HOME`）、Gradle 9.7.1（已含 wrapper）、Node.js 20+（Markd
 3. 起服务：`./gradlew :admin-service:bootRun`，同理 `:ecs-service:` / `:gateway-service:`。表结构与种子数据由 Flyway 自动灌，种子账号见 `admin-service/src/main/resources/db/migration/V2__seed_auth.sql`。
 4. 冒烟：经网关 `POST /api/admin/auth/login` 拿 Token，带 `Authorization: Bearer <token>` 访问 `GET /api/admin/demo/admin`；服务自己的 OpenAPI 文档在 `http://localhost:28081/swagger-ui.html`（不经网关）。
 
-命令与门禁矩阵（格式化、测试、架构约束、全量 `check`）以 [`AGENTS.md`](AGENTS.md) 为唯一事实源，本文件不重复。
+命令与门禁以 [`AGENTS.md`](AGENTS.md) 为唯一事实源，本文件不重复。
 
 ## 文档分工
 
-| 想搞清楚的事                     | 看哪里                     |
-| -------------------------------- | -------------------------- |
-| 项目是什么、怎么跑起来           | 本文件                     |
-| 命令、门禁、硬性约定             | `AGENTS.md`                |
-| 跨模块必须同时成立的约定         | `docs/architecture.md`     |
-| 某个模块内部怎么实现、什么被禁   | 该模块的 `README.md`       |
-| 某个模块为什么这样选、踩过什么坑 | `docs/modules/<module>.md` |
-| 某项门禁技术是什么、产物去哪看   | `docs/quality-gates.md`    |
+路由表只有 [`AGENTS.md`](AGENTS.md) 的「文档地图」那一张：每份文档回答什么、绝不写什么，在那里维护，本文件不抄一份。
 
 ## 安全
 

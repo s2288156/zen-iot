@@ -27,7 +27,7 @@
 ./gradlew help          # 任意一次 Gradle 调用都会重新生成 .git/hooks/{pre-commit,commit-msg,pre-push}
 ```
 
-所以本地手改钩子文件是无效的（下次调用就被覆盖），这也是 `AGENTS.md` 禁止手改和禁止 `--no-verify` 的技术原因。`.git` 不可写时（沙箱、源码包）加 `-PskipGitHooks`（该属性读自 `settings.gradle.kts` 的 `gitHooks` 块）。
+所以本地手改钩子文件是无效的（下次调用就被覆盖），这也是 `AGENTS.md` 禁止手改和禁止 `--no-verify` 的技术原因。生成器只写这三个，第三方的 `post-commit` / `post-checkout` 保持不动。`.git` 不可写时（沙箱、源码包）加 `-PskipGitHooks`（该属性读自 `settings.gradle.kts` 的 `gitHooks` 块）。
 
 ---
 
@@ -296,11 +296,7 @@ CI **不**上传版本一致性报告和 `problems-report.html`（`check` job �
 
 ### 4.8 一次全绿的干净环境长什么样
 
-```bash
-./gradlew clean check            # 全量
-./gradlew prePushCheck           # 推送闸（不跑测试）
-./gradlew test -PintegrationTests  # 需要本机 MySQL/Nacos/Redis/RabbitMQ
-```
+命令清单见 [`AGENTS.md`](../AGENTS.md) 的常用命令表，本文不重述。判断口径：`check` 全绿即代表本机门禁通过；`@Tag("integration")` 那批要本机中间件齐了才算，缺中间件时它们本来就不该跑。
 
 ---
 
