@@ -250,8 +250,10 @@ class OpenApiDocContractTest {
         // 400 的示例 message 必须落在该接口自己的字段上。改动前是全服务共用一串 username，
         // 表现就是 refresh/logout 在文档里说一个自己根本没有的字段；期望值不写清单，
         // 从该接口 requestBody 指向的 schema 的 properties/required 推导。
+        List<String> blankExamples = new ArrayList<>();
         operations(doc).forEach((key, operation) -> {
-            if (!operation.has("400")) {
+            // 状态码挂在 responses 下，直接对 operation 调 has("400") 恒为 false
+            if (!operation.path("responses").has("400")) {
                 return;
             }
             String message = operation
@@ -260,29 +262,49 @@ class OpenApiDocContractTest {
                     .path("example")
                     .path("message")
                     .asText();
-            assertThat(message).as("%s 的 400 示例文案", key).isIn(BAD_REQUEST_MESSAGE, blankMessageOf(operation, doc));
+            assertThat(message).as("%s 的 400 示例文案", key).isIn(acceptableBlankMessages(operation, doc));
+            blankExamples.add(message);
         });
+        // 只断「字段属于该接口」堵不住另一种塌法：@NotBlank 全取不到时 12 个接口集体退回
+        // 「请求参数有误」，逐条看依然成立。按字段推导必然留下多个不同值，故加指纹断言。
+        assertThat(blankExamples.stream().distinct().count())
+                .as("400 示例文案去重数：全体同一条就说明没按字段推导")
+                .isGreaterThan(1);
 
         // /v3/api-docs 匿名可读：开发口令不能出现在文档里
         assertThat(doc.toString()).doesNotContain("Admin@123").doesNotContain("Demo@123");
     }
 
     /**
-     * 该接口 400 示例唯一可接受的字段错误文案：{@code 请求体第一个必填字段 + " must not be blank"}。
+     * 该接口 400 示例可接受的文案集合。
      *
-     * <p>{@code required} 里的第一个属性即 springdoc 从 Bean Validation（{@code @NotBlank}）推出的必填字段，
-     * 与 {@code ZenAdminOpenApiConfiguration#fieldBlankMessage} 取的是同一个「第一个」，所以两边不会各说一遍。
+     * <p>改动前是全服务共用一串 {@code username}，于是 refresh/logout 在文档里说一个自己根本没有的字段；
+     * 这条断言拦的就是那种形态：字段名必须出自该接口请求体模型自己的 {@code required ∩ properties}。
+     * 同时允许「请求体确实没有 @NotBlank」的兜底——{@code UserStatusRequest} 只有 {@code @NotNull}、
+     * {@code UserUpdateRequest} 全部可空、覆盖式授权的请求体是字符串数组，那三种 Bean Validation
+     * 给不出字段错误，实际输出就是 {@code BAD_REQUEST} 的默认文案。
      */
-    private static String blankMessageOf(JsonNode operation, JsonNode doc) {
+    private static List<String> acceptableBlankMessages(JsonNode operation, JsonNode doc) {
+        List<String> accepted = new ArrayList<>();
+        accepted.add(BAD_REQUEST_MESSAGE);
         String ref = operation
                 .at("/requestBody/content")
                 .path("application/json")
                 .path("schema")
                 .path("$ref")
-                .asText();
+                .asText("");
+        if (ref.isEmpty()) {
+            return accepted;
+        }
         String modelName = ref.substring(ref.lastIndexOf('/') + 1);
-        JsonNode required = doc.at("/components/schemas/" + modelName + "/required");
-        return required.path(0).asText() + " must not be blank";
+        JsonNode schema = doc.at("/components/schemas/" + modelName);
+        JsonNode properties = schema.path("properties");
+        for (JsonNode field : schema.path("required")) {
+            if (properties.has(field.asText())) {
+                accepted.add(field.asText() + " must not be blank");
+            }
+        }
+        return accepted;
     }
 
     private JsonNode loadDoc() throws Exception {

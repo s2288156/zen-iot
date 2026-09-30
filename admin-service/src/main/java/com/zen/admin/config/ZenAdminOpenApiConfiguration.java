@@ -79,6 +79,25 @@ public class ZenAdminOpenApiConfiguration {
             "401", GlobalErrorCode.UNAUTHORIZED.getMessage(),
             "403", GlobalErrorCode.FORBIDDEN.getMessage());
 
+    /**
+     * record 组件上的 {@code @NotBlank}：只能从字段取。
+     *
+     * <p>{@code jakarta.validation.constraints.NotBlank} 的 {@code @Target} 不含 {@code RECORD_COMPONENT}，
+     * 所以写在 record 组件上的这个注解并不属于组件本身，{@code RecordComponent.getAnnotation} 取回来是 null——
+     * 实测表现是全部接口的 400 示例静默退回默认文案，比写错字段名更难发现。注解被传播到了同名字段上，故读字段。
+     */
+    private static NotBlank notBlankOf(Class<?> type, RecordComponent component) {
+        NotBlank onComponent = component.getAnnotation(NotBlank.class);
+        if (onComponent != null) {
+            return onComponent;
+        }
+        try {
+            return type.getDeclaredField(component.getName()).getAnnotation(NotBlank.class);
+        } catch (NoSuchFieldException absent) {
+            return null;
+        }
+    }
+
     /** Bean Validation 未覆盖 message 时的默认形态，与 {@code GlobalExceptionHandler} 的输出一致。 */
     private static final String MUST_NOT_BE_BLANK = "must not be blank";
 
@@ -177,16 +196,16 @@ public class ZenAdminOpenApiConfiguration {
             if (parameter.getAnnotation(RequestBody.class) == null) {
                 continue;
             }
-            RecordComponent[] components = parameter.getType().getRecordComponents();
+            Class<?> type = parameter.getType();
+            RecordComponent[] components = type.getRecordComponents();
             if (components == null) {
                 continue;
             }
             for (RecordComponent component : components) {
-                NotBlank notBlank = component.getAnnotation(NotBlank.class);
-                if (notBlank == null) {
-                    continue;
+                NotBlank notBlank = notBlankOf(type, component);
+                if (notBlank != null) {
+                    return component.getName() + " " + validationMessage(notBlank.message());
                 }
-                return component.getName() + " " + validationMessage(notBlank.message());
             }
         }
         return GlobalErrorCode.BAD_REQUEST.getMessage();
