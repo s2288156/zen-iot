@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.zen.admin.doc.DocError;
 import com.zen.common.security.auth.RequireModule;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import java.net.URI;
@@ -44,7 +45,8 @@ import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandl
  * </ul>
  *
  * <p>接口集合、403 路径集与 tag 目录三处清单不手写，而是从 {@link RequestMappingHandlerMapping} 注册的方法与代码
- * 注解（{@code @RequestMapping} / {@code @RequireModule} / {@code @SecurityRequirement} / {@code @Tag}）推导——
+ * 注解（{@code @RequestMapping} / {@code @RequireModule} / {@code @SecurityRequirement} / {@code @Tag} /
+ * {@code @DocError}）推导——
  * 与 springdoc builder 读同一批注解，新增 controller 不再需要改本测试。{@code @RequireModule} 的判定刻意与
  * {@code ZenAdminOpenApiConfiguration.apiErrorResponses()} 同口径（只看方法注解）。
  *
@@ -141,11 +143,15 @@ class OpenApiDocContractTest {
         // 400 只属于有请求体的接口；401 所有接口都有；403 只属于方法上带 @RequireModule 的接口
         // （派生口径与 ZenAdminOpenApiConfiguration.apiErrorResponses() 逐字一致：只看方法注解）
         Set<String> moduleGated = moduleGatedKeys();
+        Set<String> forbiddenExpected = new TreeSet<>(moduleGated);
+        forbiddenExpected.addAll(keysDeclaringStatus(403));
         operations.forEach((key, operation) -> {
             assertThat(operation.at("/responses/401").isMissingNode()).as(key).isFalse();
             boolean hasBody = !operation.path("requestBody").isMissingNode();
             assertThat(!operation.at("/responses/400").isMissingNode()).as(key).isEqualTo(hasBody);
-            assertThat(!operation.at("/responses/403").isMissingNode()).as(key).isEqualTo(moduleGated.contains(key));
+            assertThat(!operation.at("/responses/403").isMissingNode())
+                    .as(key)
+                    .isEqualTo(forbiddenExpected.contains(key));
             for (Map.Entry<String, JsonNode> response :
                     operation.at("/responses").properties()) {
                 assertThat(response.getValue()
@@ -156,6 +162,25 @@ class OpenApiDocContractTest {
                         .isFalse();
             }
         });
+
+        // @DocError 声明的错误码必须真进文档，且 example.message 与实际输出逐字一致。
+        // 登录缺 403/429 就是这条断言要拦的形态：README 与代码都有，文档没有。
+        for (DeclaredError declared : declaredErrors()) {
+            JsonNode example = operations
+                    .get(declared.key())
+                    .at("/responses/" + declared.status() + "/content")
+                    .path("application/json")
+                    .path("example");
+            assertThat(example.isMissingNode())
+                    .as("%s 缺 %d 响应", declared.key(), declared.status())
+                    .isFalse();
+            assertThat(example.at("/message").asText())
+                    .as("%s 的 %d 示例文案", declared.key(), declared.status())
+                    .isEqualTo(declared.message());
+        }
+        assertThat(operations).containsKeys("POST /auth/login");
+        assertThat(operations.get("POST /auth/login").at("/responses").has("429"))
+                .isTrue();
 
         // 信封模型必须在，否则上面那些 $ref 全是悬空的
         assertThat(doc.at("/components/schemas/" + ERROR_ENVELOPE).isMissingNode())
@@ -352,6 +377,34 @@ class OpenApiDocContractTest {
     }
 
     /** tag 目录：处理器 bean 类上声明的 {@code @Tag} 名去重集。 */
+    /** 方法上声明了某个错误码的全部接口键（{@code METHOD path}）。 */
+    private Set<String> keysDeclaringStatus(int status) {
+        Set<String> keys = new TreeSet<>();
+        declaredErrors().stream()
+                .filter(declared -> declared.status() == status)
+                .map(DeclaredError::key)
+                .forEach(keys::add);
+        return keys;
+    }
+
+    /** 处理器方法上的 {@code @DocError} 展开成 (接口键, 状态码, 期望文案)；新增声明自动进断言，不手写清单。 */
+    private List<DeclaredError> declaredErrors() {
+        List<DeclaredError> declared = new ArrayList<>();
+        handlerMapping.getHandlerMethods().forEach((mapping, handler) -> {
+            // 与 ZenAdminOpenApiConfiguration 读同一份声明，两边不会各说一遍
+            DocError[] annotations = handler.getMethod().getAnnotationsByType(DocError.class);
+            for (String key : handlerKeys(mapping)) {
+                for (DocError annotation : annotations) {
+                    declared.add(new DeclaredError(key, annotation.status(), annotation.message()));
+                }
+            }
+        });
+        return declared;
+    }
+
+    /** 一条错误声明落在哪个接口上。 */
+    private record DeclaredError(String key, int status, String message) {}
+
     private Set<String> tagCatalogue() {
         Set<String> tags = new LinkedHashSet<>();
         handlerMapping.getHandlerMethods().values().forEach(handler -> {

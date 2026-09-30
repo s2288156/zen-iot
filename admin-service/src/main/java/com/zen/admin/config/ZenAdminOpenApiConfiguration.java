@@ -1,5 +1,6 @@
 package com.zen.admin.config;
 
+import com.zen.admin.doc.DocError;
 import com.zen.common.security.auth.RequireModule;
 import com.zen.common.security.error.GlobalErrorCode;
 import io.swagger.v3.oas.models.Components;
@@ -43,7 +44,8 @@ import org.springframework.web.method.HandlerMethod;
  * <p>错误响应统一由 {@link #apiErrorResponses()} 补，而不是在方法上写 {@code @ApiResponses}：实测后者会让
  * springdoc 不再自动生成成功响应，连带 {@code ApiResponse*} 模型从 {@code components.schemas} 消失、文档里的
  * {@code $ref} 悬空。按「有请求体→400、有鉴权要求→401、有 {@link RequireModule}→403」推导，既绕开那个坑，
- * 又让文档口径直接来自驱动运行期行为的同一批注解，不会两处各写一份而漂移。悬空 {@code $ref} 由
+ * 又让文档口径直接来自驱动运行期行为的同一批注解（推不出的那部分由方法上的 {@code @DocError} 声明），
+ * 不会两处各写一份而漂移。悬空 {@code $ref} 由
  * {@code OpenApiDocContractTest} 断住。
  *
  * <p>{@link #namespacedOperationIds(String)} 给 operationId 加服务名前缀：springdoc 取的是裸方法名（{@code admin}、
@@ -135,6 +137,12 @@ public class ZenAdminOpenApiConfiguration {
                     requiresIdentity
                             ? "未带 Authorization，或 Token 签名/过期校验失败、已被登出与轮转撤销"
                             : "凭证或 Token 校验失败：免鉴权入口也要过各自那一关，响应体与「未登录」同形");
+            // 签名推不出来的错误码（登录的 403 停用、429 锁定）由方法上的 @DocError 声明，message 即实际输出。
+            // 展开走 getAnnotationsByType，容器由 javac 合成，不再另立一份清单。
+            for (DocError declared : handlerMethod.getMethod().getAnnotationsByType(DocError.class)) {
+                addErrorResponse(
+                        operation, String.valueOf(declared.status()), declared.description(), declared.message());
+            }
             // RequireModule 的 @Target 只有 METHOD，所以只看方法，不必回看类
             if (handlerMethod.getMethodAnnotation(RequireModule.class) != null) {
                 addErrorResponse(operation, "403", "身份有效，但 Token 的 modules 快照缺这个接口要求的模块——不是登录失效，重新拿 Token 也没用");
