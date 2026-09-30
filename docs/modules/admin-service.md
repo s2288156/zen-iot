@@ -258,3 +258,7 @@
 - **JPA auditing 断言在单测里观察不到。** 现象：「`creator`/`updater` 随 `UserContext` 更新」这类断言，mock 仓储永远看不到——它只在真实 flush 时生效。做法：单测断言业务字段，审计字段放 `@Tag("integration")` 仓储测试兜底。
 
 - **`UserStatusRequest` 之类的校验只挡 HTTP 入口。** 现象：`PATCH /users/{id}/status` 的 `0|1` 合法性来自 Bean Validation，service 内部直接调用不经过校验。做法：新增写路径时不要假设实体状态已被注解保证。
+
+- **Apifox 的「智能合并」导入不会把代码改过的接口文本带进去。** 现象：`/auth/login` 的 429 那句自 `41d693c` 起就在代码与线上 `/v3/api-docs` 里，Apifox 侧至今仍是缺它的前缀文本；`/auth/change-password` 也停在 `099561e` 之前的旧文案（旧文案说「不吊销既有会话」，与现在的行为相反）。原因：`apiOverwriteMode=merge` 的定义就是保留旧接口的中文名、参数说明与响应示例——代码为真源只保证结构，不保证文本。做法：改完 `@Operation` 文本后跑一次只读 diff（代码 spec vs Apifox 接口），差异用 `apifox endpoint update <id> --description` 定点补。删除条件：漂移 diff 成为 CI 门禁，或文档站改为直接消费 `/v3/api-docs`。
+
+- **`apifox run` 不带 `--carry-runtime-variables` 时，接口级后置写入的全局变量在下一个用例里解析为空。** 现象：套件跑 `/auth/refresh` 发出的是 `{"refreshToken":""}`，回 400 `refreshToken must not be blank`；同一份 token 用 curl 直接打网关是 200——失败看起来像网关或撤销链的问题，其实是变量没带过去。做法：跑套件一律 `--carry-runtime-variables`，并显式带 `-e <经网关的环境>` 与 `--branch main`。删除条件：CLI 默认让运行时全局变量跨用例携带。
