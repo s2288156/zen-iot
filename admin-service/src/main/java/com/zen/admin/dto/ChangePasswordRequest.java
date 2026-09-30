@@ -11,7 +11,7 @@ import jakarta.validation.constraints.Size;
 public record ChangePasswordRequest(
         @NotBlank
         @Schema(
-                description = "当前口令明文，服务端只做 BCrypt 比对、不回显；文档匿名可读，故此处不放真实开发口令",
+                description = "当前口令明文，服务端只做 BCrypt 比对、不回显；文档会被外发与复制，故此处不放真实开发口令",
                 format = "password",
                 example = "replace-with-your-dev-password")
         String oldPassword,

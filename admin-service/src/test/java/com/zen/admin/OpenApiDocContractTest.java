@@ -50,6 +50,9 @@ import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandl
  * 与 springdoc builder 读同一批注解，新增 controller 不再需要改本测试。{@code @RequireModule} 的判定刻意与
  * {@code ZenAdminOpenApiConfiguration.apiErrorResponses()} 同口径（只看方法注解）。
  *
+ * <p>取文档要带 Bearer：{@code /v3/api-docs} 不在免鉴权白名单里（见 {@code application.yml}），
+ * {@link #anonymousDocFetchIsRejected()} 专门守这条。
+ *
  * <p>取文档的方式是真 HTTP 而不是 MockMvc：Boot 4 把 {@code @AutoConfigureMockMvc} 拆进了
  * {@code spring-boot-webmvc-test}，不为一个测试给模块加依赖（{@code GatewayRoutingTest} 同一取向）。
  * 完整上下文要 JPA + 数据源，所以与 {@code JpaAuditingIntegrationTest} 同标 integration。
@@ -62,6 +65,9 @@ class OpenApiDocContractTest {
 
     private static final String ERROR_ENVELOPE = "ApiResponseVoid";
     private static final String SCHEMA_REF_PREFIX = "#/components/schemas/";
+
+    /** Flyway 开发占位符的明文，与 {@code AuthMeIntegrationTest} 同源。 */
+    private static final String ADMIN_DEV_PASSWORD = "Admin@123";
 
     /** {@code GlobalErrorCode.BAD_REQUEST} 的默认消息，即请求体没有 @NotBlank 时 400 的实际文案。 */
     private static final String BAD_REQUEST_MESSAGE = "请求参数有误";
@@ -271,7 +277,7 @@ class OpenApiDocContractTest {
                 .as("400 示例文案去重数：全体同一条就说明没按字段推导")
                 .isGreaterThan(1);
 
-        // /v3/api-docs 匿名可读：开发口令不能出现在文档里
+        // 文档要外发给 Apifox 与 SDK 生成器：开发口令不能出现在里面
         assertThat(doc.toString()).doesNotContain("Admin@123").doesNotContain("Demo@123");
     }
 
@@ -307,9 +313,11 @@ class OpenApiDocContractTest {
         return accepted;
     }
 
+    /** 取文档：文档端点不在免鉴权白名单里，所以先登录再带 Bearer——与 CI 和本机调试同一条路径。 */
     private JsonNode loadDoc() throws Exception {
         HttpRequest request = HttpRequest.newBuilder(URI.create("http://localhost:" + port + "/v3/api-docs"))
                 .timeout(Duration.ofSeconds(10))
+                .header("Authorization", "Bearer " + loginToken())
                 .GET()
                 .build();
         HttpResponse<String> response =
@@ -317,6 +325,34 @@ class OpenApiDocContractTest {
 
         assertThat(response.statusCode()).isEqualTo(200);
         return objectMapper.readTree(response.body());
+    }
+
+    /** 种子账号登录取 access Token（Flyway 开发占位符的明文，与 {@code AuthMeIntegrationTest} 同源）。 */
+    private String loginToken() throws Exception {
+        String body = "{\"username\": \"admin\", \"password\": \"" + ADMIN_DEV_PASSWORD + "\"}";
+        HttpResponse<String> response = client.send(
+                HttpRequest.newBuilder(URI.create("http://localhost:" + port + "/auth/login"))
+                        .timeout(Duration.ofSeconds(10))
+                        .header("Content-Type", "application/json")
+                        .POST(HttpRequest.BodyPublishers.ofString(body, StandardCharsets.UTF_8))
+                        .build(),
+                HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
+
+        assertThat(response.statusCode()).isEqualTo(200);
+        return objectMapper.readTree(response.body()).at("/data/accessToken").asText();
+    }
+
+    @Test
+    void anonymousDocFetchIsRejected() throws Exception {
+        HttpResponse<String> response = client.send(
+                HttpRequest.newBuilder(URI.create("http://localhost:" + port + "/v3/api-docs"))
+                        .timeout(Duration.ofSeconds(10))
+                        .GET()
+                        .build(),
+                HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
+
+        // 接口面（路径、字段、示例、schema）不再匿名可读；漏了白名单这条就会变回 200
+        assertThat(response.statusCode()).isEqualTo(401);
     }
 
     /** 按 {@code METHOD path} 收集全部操作，便于断言时一眼看出是哪个接口挂了。 */

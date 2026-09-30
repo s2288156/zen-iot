@@ -33,7 +33,7 @@ JDK 25（由根 `build.gradle.kts` 的 `toolchain` 强制，未装则构建失�
 1. 起中间件：`docker compose -f docker/docker-compose.dev.yml up -d` —— MySQL `3306`（root/root，建 `zen_admin`）、Redis `6379`、Nacos `8848`/`9848`（控制台 `8080`）、RabbitMQ `5672`（管理台 `15672`，zen/zen）。`initdb/*.sql` 只在 MySQL 数据卷为空时执行，已有卷的机器需手工补一次 `zen_ecs` 建库，命令见该文件头注释。
 2. 装 Git 钩子：跑一次任意 Gradle 任务（如 `./gradlew help`）即生成 `.git/hooks`。
 3. 起服务：`./gradlew :admin-service:bootRun`，同理 `:ecs-service:` / `:gateway-service:`。表结构与种子数据由 Flyway 自动灌，种子账号见 `admin-service/src/main/resources/db/migration/V2__seed_auth.sql`。
-4. 冒烟：经网关 `POST /api/admin/auth/login` 拿 Token，带 `Authorization: Bearer <token>` 访问 `GET /api/admin/demo/admin`；服务自己的 OpenAPI 文档在 `http://localhost:28081/swagger-ui.html`（不经网关）。
+4. 冒烟：经网关 `POST /api/admin/auth/login` 拿 Token，带 `Authorization: Bearer <token>` 访问 `GET /api/admin/demo/admin`；服务自己的 OpenAPI 文档在 `http://localhost:28081/swagger-ui.html`（不经网关，需先在 UI 里 Authorize 填 Token；`/v3/api-docs` 同样要带 `Authorization`）。
 
 命令与门禁以 [`AGENTS.md`](AGENTS.md) 为唯一事实源，本文件不重复。
 
