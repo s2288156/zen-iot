@@ -61,6 +61,9 @@ class OpenApiDocContractTest {
     private static final String ERROR_ENVELOPE = "ApiResponseVoid";
     private static final String SCHEMA_REF_PREFIX = "#/components/schemas/";
 
+    /** {@code GlobalErrorCode.BAD_REQUEST} 的默认消息，即请求体没有 @NotBlank 时 400 的实际文案。 */
+    private static final String BAD_REQUEST_MESSAGE = "请求参数有误";
+
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     private final HttpClient client =
@@ -219,8 +222,42 @@ class OpenApiDocContractTest {
                 .path("example");
         assertThat(unauthorized.at("/message").asText()).isEqualTo("未认证或登录已失效");
 
+        // 400 的示例 message 必须落在该接口自己的字段上。改动前是全服务共用一串 username，
+        // 表现就是 refresh/logout 在文档里说一个自己根本没有的字段；期望值不写清单，
+        // 从该接口 requestBody 指向的 schema 的 properties/required 推导。
+        operations(doc).forEach((key, operation) -> {
+            if (!operation.has("400")) {
+                return;
+            }
+            String message = operation
+                    .at("/responses/400/content")
+                    .path("application/json")
+                    .path("example")
+                    .path("message")
+                    .asText();
+            assertThat(message).as("%s 的 400 示例文案", key).isIn(BAD_REQUEST_MESSAGE, blankMessageOf(operation, doc));
+        });
+
         // /v3/api-docs 匿名可读：开发口令不能出现在文档里
         assertThat(doc.toString()).doesNotContain("Admin@123").doesNotContain("Demo@123");
+    }
+
+    /**
+     * 该接口 400 示例唯一可接受的字段错误文案：{@code 请求体第一个必填字段 + " must not be blank"}。
+     *
+     * <p>{@code required} 里的第一个属性即 springdoc 从 Bean Validation（{@code @NotBlank}）推出的必填字段，
+     * 与 {@code ZenAdminOpenApiConfiguration#fieldBlankMessage} 取的是同一个「第一个」，所以两边不会各说一遍。
+     */
+    private static String blankMessageOf(JsonNode operation, JsonNode doc) {
+        String ref = operation
+                .at("/requestBody/content")
+                .path("application/json")
+                .path("schema")
+                .path("$ref")
+                .asText();
+        String modelName = ref.substring(ref.lastIndexOf('/') + 1);
+        JsonNode required = doc.at("/components/schemas/" + modelName + "/required");
+        return required.path(0).asText() + " must not be blank";
     }
 
     private JsonNode loadDoc() throws Exception {
