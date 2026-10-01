@@ -1,3 +1,4 @@
+/* 全局基线：仅排版与盒模型重置；色值一律来自 src/theme/ 的 Design Tokens（经 AntD 组件消费），此处不出现颜色 */
 :root {
   color-scheme: light;
   font-family:
@@ -10,7 +11,6 @@
     'PingFang SC',
     'Microsoft YaHei',
     sans-serif;
-  color: rgb(29 33 41);
 }
 
 * {
@@ -20,80 +20,4 @@
 body {
   margin: 0;
   min-height: 100vh;
-  background-color: rgb(245 246 248);
-}
-
-.app-shell {
-  display: flex;
-  min-height: 100vh;
-}
-
-.app-sider {
-  display: flex;
-  flex-direction: column;
-  width: 220px;
-  padding: 16px 12px;
-  background-color: #fff;
-  border-right: 1px solid rgb(227 229 233);
-}
-
-.app-brand {
-  margin: 8px 8px 20px;
-  font-size: 18px;
-  font-weight: 600;
-}
-
-.app-nav {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-
-.app-nav a {
-  padding: 10px 12px;
-  color: inherit;
-  font-size: 14px;
-  text-decoration: none;
-  border-radius: 8px;
-}
-
-.app-nav a:hover {
-  background-color: rgb(238 244 255);
-}
-
-.app-nav a.active {
-  color: rgb(22 93 255);
-  background-color: rgb(232 240 255);
-}
-
-.app-main {
-  display: flex;
-  flex: 1;
-  flex-direction: column;
-  min-width: 0;
-}
-
-.app-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  height: 56px;
-  padding: 0 24px;
-  background-color: #fff;
-  border-bottom: 1px solid rgb(227 229 233);
-}
-
-.app-content {
-  flex: 1;
-  padding: 24px;
-}
-
-.placeholder-page {
-  padding: 24px;
-  background-color: #fff;
-  border-radius: 8px;
-}
-
-.placeholder-page p {
-  color: rgb(100 106 115);
 }

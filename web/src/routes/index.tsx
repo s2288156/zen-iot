@@ -17,6 +17,8 @@ export const router = createBrowserRouter([
       { path: 'roles', lazy: () => import('../features/roles') },
       { path: 'sessions', lazy: () => import('../features/sessions') },
       { path: 'profile', lazy: () => import('../features/profile') },
+      // 基调自检页（Task 2.3）：仅 dev 挂载，不进生产路由
+      ...(import.meta.env.DEV ? [{ path: 'theme-self-check', lazy: () => import('../theme/ThemeSelfCheck') }] : []),
     ],
   },
 ])
