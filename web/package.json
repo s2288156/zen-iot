@@ -25,7 +25,7 @@
     "zustand": "^5.0.15"
   },
   "devDependencies": {
-    "@ant-design/cli": "^6.6.5",
+    "@ant-design/cli": "6.6.5",
     "@eslint/js": "^10.0.1",
     "@testing-library/react": "^16.3.3",
     "@types/node": "^24.13.3",
