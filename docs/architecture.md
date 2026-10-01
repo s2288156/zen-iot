@@ -38,6 +38,8 @@
 
 新增公开接口必须同时改两处：只改服务内，网关会先把它拦掉；只改网关，服务内仍会返回 401。照抄另一侧的字符串是最常见的错法——两边路径形态不同。
 
+还有第三类面不受这两张表管辖：**actuator**。它是独立 handler，MVC 拦截器的 `excludePathPatterns` 覆盖不到它，所以往 `zen.security.whitelist` 里写 `/actuator/**` 不会产生任何效果。指标的真实闸门只有两个：服务侧的 `management.endpoints.web.exposure.include`（决定本端口匿名可读哪些端点），与网关侧的 `zen.gateway.auth.whitelist`（`/api/*/actuator/health` 放开、`prometheus` 需带身份）。结论：**容器探针与指标抓取走网关时才有鉴权，直连服务端口一律匿名可读**。
+
 ## 令牌生命周期与撤销链
 
 `zen.jwt.access-ttl: 30m`、`refresh-ttl: 7d`。access 只用于调用，refresh 只用于 `/auth/refresh`，`typ` 声明区分两者。

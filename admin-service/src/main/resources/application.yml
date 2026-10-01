@@ -44,8 +44,10 @@ management:
   endpoints:
     web:
       exposure:
-        # 白名单收敛：Boot 默认只开 health，此处仅补 prometheus，env/beans/configprops 一律不暴露
-        # /actuator/** 在 zen.security.whitelist 里免鉴权，暴露面就是匿名可读面
+        # 暴露面收敛：Boot 默认只开 health，此处仅补 prometheus，env/beans/configprops 一律不开。
+        # 这一份 include 就是本服务端口上的匿名可读清单——MVC 拦截器覆盖不到 actuator，
+        # 所以「少列一个端点」才是真的少一个面，改 zen.security.whitelist 对这个端口无效。
+        # 经网关时改由网关白名单把关：/api/*/actuator/health 放开，prometheus 要带身份。
         include:
           - health
           - prometheus
@@ -64,16 +66,15 @@ zen:
   security:
     # 本服务自解析 Token；Phase 2 之后不持密钥的业务服务改用 gateway-header
     context-source: jwt
-    # 免鉴权路径：只有登录/刷新入口与健康探针。
+    # 免鉴权路径 = MVC 拦截器的排除表，这里只有登录与刷新两个入口。
     # 文档端点刻意不再匿名：/v3/api-docs 会把整张接口面（含字段说明与示例）说清楚，匿名可读
     # 等于把它挂上公网；取文档一律先 POST /auth/login 拿 Token 再带 Authorization 拉。
-    # /actuator/** 也不再整体放开——那会连 prometheus 一起匿名可读，与网关侧「指标只走内网」矛盾。
+    # actuator 不写在这里：这张表只是给 AuthInterceptor 注册的 excludePathPatterns，
+    # 实测覆盖不到 actuator（同一实例上 /v3/api-docs 回 401、/actuator/prometheus 回 200）。
+    # 把 health 写进来不会「放开」也不会「收紧」它，留着只会给人一种假的安全感，故删。
     whitelist:
       - /auth/login
       - /auth/refresh
-      # 容器探针用 liveness/readiness 分组，都在 health 下面；prometheus 不放开
-      - /actuator/health
-      - /actuator/health/**
 
 springdoc:
   api-docs:

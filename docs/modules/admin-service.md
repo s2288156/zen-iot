@@ -266,3 +266,7 @@
 - **record 组件上的 `@NotBlank` 取不到，只能读同名字段。** 现象：文档推导按「请求体第一个 `@NotBlank` 字段」生成 400 文案，`RecordComponent.getAnnotation(NotBlank.class)` 却一律返回 null，全部接口静默退回默认文案——比写错字段名更难发现，因为每条断言看着都"成立"。原因：`jakarta.validation.constraints.NotBlank` 的 `@Target` 不含 `RECORD_COMPONENT`，javac 只把它传播到字段。做法：`ZenAdminOpenApiConfiguration#notBlankOf` 先取组件再取字段。删除条件：jakarta 给校验注解加上 `RECORD_COMPONENT` 目标；另外 `OpenApiDocContractTest` 的「400 文案去重数 > 1」指纹断言会先一步拦住这种整体塌陷。
 
 - **`JsonNode.has("400")` 判状态码恒为 false。** 现象：断言"每个有请求体的接口都有 400"永远不成立，收集到的样本是空集，于是"去重数 > 1"这种断言会以 0 失败而不是以想象中的 1 失败。原因：状态码挂在 `responses` 下，是 operation 的孙子节点。做法：一律 `operation.path("responses").has(code)` 或 `at("/responses/400/...")`。删除条件：无——这是 Jackson 的树模型形状，写进文档只为省下一次的半小时。
+
+- **`zen.security.whitelist` 管不到 actuator，写进去只会制造假安全感。** 现象：把 `/actuator/**` 收成 `/actuator/health` 之后，`/actuator/prometheus` 在本服务端口照样 200。原因：这张表是 `ZenSecurityAutoConfiguration` 给 `AuthInterceptor` 注册的 `excludePathPatterns`，只作用于 MVC 那条 handler 链；actuator 是独立 handler，不经这个拦截器。判定方法（同一实例的差分即可，无需读源码）：`/v3/api-docs` 回 401 而 `/actuator/prometheus` 回 200。做法：指标面由 `management.endpoints.web.exposure.include` 与服务端口是否对外决定，经网关时由网关白名单把关。删除条件：管理端口拆到独立内网端口（`management.server.port`），或鉴权改到 filter 层覆盖 actuator——任一落地后这条自动失效。
+
+- **`apifox test-suite list` 不返回 `tags`，`get` 才返回。** 现象：导入后 `list` 里套件 `tags` 显示 `null`，看起来像导入把标签抹了，实际 `test-suite get` 三个标签与 `priority` 都在。做法：核对套件元数据一律用 `get`。删除条件：无（这是读接口的形状差异，记下只为省下一次的虚惊）。
