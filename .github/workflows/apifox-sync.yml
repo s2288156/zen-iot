@@ -119,7 +119,8 @@ jobs:
             --overwrite-mode merge \
             --module-map "${APIFOX_SPEC_TITLE}=${APIFOX_MODULE_ID}"
 
-      # 导入后再比一次：merge 策略下文本仍需定点补，这里就是把「还差哪些」摊出来
+      # 导入后再比一次，且这次不放水：merge 会追加响应示例、也不会带回代码改过的文本，
+      # 让作业红掉就是把「这次同步留了尾巴」当场说出来
       - name: Re-check drift after import
         if: github.event.inputs.apply == 'true'
         run: |
@@ -131,5 +132,4 @@ jobs:
           python3 gradle/apifox/doc-drift-check.py \
             --spec admin-service/build/api-docs/openapi.json \
             --apifox endpoints-after.json \
-            --project "$APIFOX_PROJECT_ID" \
-            --warn-only
+            --project "$APIFOX_PROJECT_ID"

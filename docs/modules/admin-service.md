@@ -279,3 +279,7 @@
 - **`zen.security.whitelist` 管不到 actuator，写进去只会制造假安全感。** 现象：把 `/actuator/**` 收成 `/actuator/health` 之后，`/actuator/prometheus` 在本服务端口照样 200。原因：这张表是 `ZenSecurityAutoConfiguration` 给 `AuthInterceptor` 注册的 `excludePathPatterns`，只作用于 MVC 那条 handler 链；actuator 是独立 handler，不经这个拦截器。判定方法（同一实例的差分即可，无需读源码）：`/v3/api-docs` 回 401 而 `/actuator/prometheus` 回 200。做法：指标面由 `management.endpoints.web.exposure.include` 与服务端口是否对外决定，经网关时由网关白名单把关。删除条件：管理端口拆到独立内网端口（`management.server.port`），或鉴权改到 filter 层覆盖 actuator——任一落地后这条自动失效。
 
 - **`apifox test-suite list` 不返回 `tags`，`get` 才返回。** 现象：导入后 `list` 里套件 `tags` 显示 `null`，看起来像导入把标签抹了，实际 `test-suite get` 三个标签与 `priority` 都在。做法：核对套件元数据一律用 `get`。删除条件：无（这是读接口的形状差异，记下只为省下一次的虚惊）。
+
+- **`--overwrite-mode merge` 每次导入都会追加一份响应示例，而不是更新已有的。** 现象：23 个接口攒到 104 份示例，同一响应码上挂着 3–5 份，且名字全被写成 `Success Example`（400/401 的错误体也叫这个名字）。危害不止难看：Mock 的优先级里「响应示例」高于智能 Mock，留一份过期示例等于让 Mock 可能返回代码里已不存在的文案（实测确实留着 `username must not be blank` 那份旧的）。做法：示例不参与文本合并，只能整数组替换——`endpoint update --file` 传完整资源、`responseExamples` 收敛到每码一份，再由 spec 重新导入生成正确内容；`gradle/apifox/doc-drift-check.py` 现在每次都检重复与内容一致性。删除条件：Apifox 导入侧改为按响应码更新示例。
+
+- **`cli-schema validate` 与写入口径不一致：示例 id 读回来是 UUID，写回去要 integer，而校验器拒绝的载荷服务端照收。** 现象：`endpoint get` 返回的 `responseExamples[].id` 是 `01a0f549-…`，`validate endpoint-update` 报 `should be integer`，但同一份载荷 `endpoint update` 成功且就地改名。做法：不要为了过校验而剥掉 id——那样语义就从「就地改名」变成「新建示例」，正好重新制造重复。删除条件：CLI 让读回形状与写入 schema 对齐。

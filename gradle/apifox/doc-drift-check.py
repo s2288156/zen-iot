@@ -14,15 +14,15 @@ docs/modules/admin-service.md）。没有这支脚本，那种滞后只能靠人
         --spec admin-service/build/api-docs/openapi.json \\
         --apifox endpoints.json
 
-退出码：0 = 无漂移；1 = 有漂移（或 --fail-on-missing 时接口集合不一致）；2 = 输入不可用。
+退出码：0 = 无漂移；1 = 有文本漂移 / 示例重复或与 spec 不一致 / --fail-on-missing 时接口集合不一致；2 = 输入不可用。
 """
 
 import argparse
 import json
 import sys
 
-# 纳入比对的两个字段：代码写了、Apifox 也存了同一语义（spec 的 summary 已在下方归一化成 name）。
-# 参数、schema、示例不在范围内：它们随导入覆盖，滞后与否由导入本身负责。
+# 文本比对只看这两项（spec 的 summary 已归一化成 name）；参数与 schema 随导入覆盖，不在范围。
+# 响应示例另走 check_examples：它不会被 merge 导入更新，只会逐次追加，必须单独检。
 TEXT_FIELDS = ("name", "description")
 
 
@@ -68,6 +68,11 @@ def spec_operations(spec):
             operations[f"{method.upper()} {path}"] = {
                 "name": (operation.get("summary") or "").strip(),
                 "description": (operation.get("description") or "").strip(),
+                "examples": {
+                    code: content.get("application/json", {}).get("example")
+                    for code, resp in (operation.get("responses") or {}).items()
+                    for content in [resp.get("content") or {}]
+                },
             }
     return operations
 
@@ -89,8 +94,46 @@ def apifox_endpoints(payload):
             "id": row.get("id"),
             "name": (row.get("name") or "").strip(),
             "description": (row.get("description") or "").strip(),
+            "responses": row.get("responses") or [],
+            "responseExamples": row.get("responseExamples") or [],
         }
     return endpoints
+
+
+
+def check_examples(key, actual, expected):
+    """检查响应示例：同一个响应码上挂了几份、内容是否与 spec 一致。
+
+    <p>为什么必须查这个：`--overwrite-mode merge` 每次导入都会**追加**一份示例而不是更新已有的，
+    实测 23 个接口攒到 104 份示例（清理后应为 54 份，正好等于带 example 的响应数）。
+    重复示例不只是难看——Mock 的优先级里「响应示例」高于智能 Mock，留着一份内容过期的示例
+    等于让 Mock 可能返回一个代码里已经不存在的文案。
+    """
+    problems = []
+    by_response_id = {str(r.get("id")): str(r.get("code")) for r in actual["responses"]}
+    per_code = {}
+    for item in actual["responseExamples"]:
+        code = by_response_id.get(str(item.get("responseId")))
+        if code is None:
+            problems.append(f"{key}: 示例「{item.get('name')}」没有绑定到任何响应（responseId 对不上）")
+            continue
+        per_code.setdefault(code, []).append(item)
+    for code, items in sorted(per_code.items()):
+        if len(items) > 1:
+            problems.append(f"{key}: {code} 挂了 {len(items)} 份示例（重复导入攒出来的）")
+        want = (expected.get("examples") or {}).get(code)
+        if want is None:
+            continue
+        for item in items:
+            try:
+                got = json.loads(item.get("data") or "{}")
+            except json.JSONDecodeError:
+                problems.append(f"{key}: {code} 的示例「{item.get('name')}」不是合法 JSON")
+                continue
+            if got != want:
+                problems.append(f"{key}: {code} 的示例内容与 spec 不一致 —— 存的是 {json.dumps(got, ensure_ascii=False)[:60]}"
+                                f"，代码是 {json.dumps(want, ensure_ascii=False)[:60]}")
+    return problems
 
 
 def main():
@@ -128,9 +171,15 @@ def main():
     for key in only_in_spec:
         print(f"[仅代码]   {key}（尚未导入 Apifox）")
 
+    example_problems = []
+    for key in sorted(set(expected) & set(actual)):
+        example_problems.extend(check_examples(key, actual[key], expected[key]))
+    for line in example_problems:
+        print(f"[示例] {line}")
+
     set_mismatch = bool(only_in_apifox or only_in_spec)
-    if not drifts and not (args.fail_on_missing and set_mismatch):
-        print("无文本漂移。")
+    if not drifts and not example_problems and not (args.fail_on_missing and set_mismatch):
+        print("无文本漂移，示例也无重复且与 spec 一致。")
         return 0
     return 0 if args.warn_only else 1
 
