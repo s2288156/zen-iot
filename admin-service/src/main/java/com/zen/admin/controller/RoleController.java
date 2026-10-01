@@ -1,6 +1,7 @@
 package com.zen.admin.controller;
 
 import com.zen.admin.config.ZenAdminOpenApiConfiguration;
+import com.zen.admin.doc.DocError;
 import com.zen.admin.dto.RoleCreateRequest;
 import com.zen.admin.dto.RoleQuery;
 import com.zen.admin.dto.RoleUpdateRequest;
@@ -48,6 +49,8 @@ public class RoleController {
     }
 
     @Operation(summary = "新建角色", description = "roleCode 全库唯一，重复返回 409；modules 取值限 admin/wcs/rcs/ecs，非法值 400。")
+    // 同 UserController#create：409 来自 service 的显式检查，签名推不出来
+    @DocError(status = 409, message = "角色编码已存在: wcs-operator", description = "roleCode 全库唯一，撞车即 409，message 里带那个已存在的编码")
     @PostMapping
     @RequireModule(ModuleCode.ADMIN)
     @OperationLog(action = OperationAction.CREATE, targetType = OperationTargetType.ROLE)
@@ -64,6 +67,7 @@ public class RoleController {
     }
 
     @Operation(summary = "删除角色", description = "逻辑删除（deleted=1），删除后所有查询立即不可见；仍被有效用户引用返回 409。")
+    @DocError(status = 409, message = "角色仍被用户引用,无法删除", description = "该角色仍被有效用户引用；先解除引用再删，本接口不做级联解绑")
     @DeleteMapping("/{id}")
     @RequireModule(ModuleCode.ADMIN)
     @OperationLog(action = OperationAction.DELETE, targetType = OperationTargetType.ROLE)

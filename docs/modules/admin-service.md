@@ -233,6 +233,15 @@
 - 理由：迁移脚本里不出现任何明文口令，也不为了换口令去改已应用的脚本。
 - 代价：placeholder 值一旦变更，已建好的库不会重跑 `V2`，改种子口令要清库或补一条新迁移。
 
+### 签名推不出来的错误码用 `@DocError` 声明
+
+- 背景：错误响应全部由注解推导，但有一类推不出来——403「账号已停用」、429「账号已锁定」、409「已存在/仍被引用」都是 service 抛 `BusinessException` 带出的，controller 签名里没有痕迹。结果是 README 与运行期都有这些码，文档里没有。
+- 选项：① 方法上写 `@Operation(responses = ...)` / `@ApiResponses`；② 自定义 `@DocError(status, message, description)`（`@Repeatable`），由 `apiErrorResponses()` 原样写进文档；③ 文档里手写一份状态码清单。
+- 结论：②。
+- 理由：① 会踩本模块记录过的坑——方法级 `@ApiResponses` 让 springdoc 不再生成成功响应、`ApiResponse*` 组件随之消失、`$ref` 悬空；③ 是第二份清单，必然漂移。② 的 `message` 必须是实际输出：Apifox 的用例断言与 Mock 直接依赖 example。
+- 配套：`OpenApiDocContractTest#declaredErrors` 从同一批注解推导期望，所以新增声明自动进断言，不需要手改测试。
+- 边界：400 的 message 含字段名，由请求体的 `@NotBlank` 推导而非声明；`@DocError` 只用于「代码会返回但签名看不出来」的那些码。
+
 ## 坑
 
 - **`Pageable.withSort` 在本项目 Spring Data 版本不存在。** 做法：排序兜底照 `RoleService` 走 `query.setOrderBy`，不要写 `withSort`（编译期才发现）。

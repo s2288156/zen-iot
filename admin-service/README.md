@@ -38,7 +38,7 @@
 
 ### OpenAPI 即对外契约
 
-`/v3/api-docs` 由 `ZenAdminOpenApiConfiguration` 补 `bearerJwt` 安全方案、直连与经网关两条 server、按注解推导的 400/401/403，以及带服务名前缀的 `operationId`。
+`/v3/api-docs` 由 `ZenAdminOpenApiConfiguration` 补 `bearerJwt` 安全方案、直连与经网关两条 server、按注解推导的错误码（有请求体 →400、要身份 →401、`@RequireModule`→403、方法上 `@DocError` 声明的码原样进文档），以及带服务名前缀的 `operationId`。400 的示例 message 按该请求体第一个 `@NotBlank` 字段生成。
 
 - **方法上不写 `@ApiResponses`**：实测那会让 springdoc 不再自动生成成功响应、`ApiResponse*` 模型连带消失、文档里的 `$ref` 悬空。
 - `OpenApiDocContractTest` 的期望从注解自动推导，新增接口不需手改测试，但会拦住漏标 `@SecurityRequirement` / `@Tag`。它需要完整上下文，标 `@Tag("integration")`：本机 `check` 不跑，CI 的 integration job 跑。

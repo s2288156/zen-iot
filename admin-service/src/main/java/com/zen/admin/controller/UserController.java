@@ -1,6 +1,7 @@
 package com.zen.admin.controller;
 
 import com.zen.admin.config.ZenAdminOpenApiConfiguration;
+import com.zen.admin.doc.DocError;
 import com.zen.admin.dto.UserCreateRequest;
 import com.zen.admin.dto.UserQuery;
 import com.zen.admin.dto.UserResetPasswordRequest;
@@ -51,6 +52,9 @@ public class UserController {
     }
 
     @Operation(summary = "新建用户", description = "username 全库唯一，重复返回 409；建号即启用，口令以 BCrypt 密文落库。")
+    // 409 由 service 抛 BusinessException 带出来，方法签名推不出来，所以要显式声明；
+    // message 带那个已存在的用户名，实测形态是「用户名已存在: admin」，示例值取自本接口自己的 example
+    @DocError(status = 409, message = "用户名已存在: wcs-operator", description = "username 全库唯一，撞车即 409，message 里带那个已存在的用户名")
     @PostMapping
     @RequireModule(ModuleCode.ADMIN)
     @OperationLog(action = OperationAction.CREATE, targetType = OperationTargetType.USER)
