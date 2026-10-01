@@ -181,7 +181,7 @@ Method <com.zen.ecs.controller.DeviceController.list()> calls method <...> in (D
 - 技术：`gradle/apifox/doc-drift-check.py`，纯标准库、纯离线，吃两份 JSON（代码侧 `openapi.json` 与 Apifox 接口转储），只读不写。
 - 为什么需要：Apifox 的「智能合并」导入会保留接口侧已有的中文名与说明，所以**代码里改过的 `@Operation` 文本永远不会流进 Apifox**——`/auth/login` 那句 429 就是这么滞后了四天。这条不在任何编译期或单测能看见的地方。
 - 输入从哪来：spec 由 `./gradlew :admin-service:test --tests OpenApiExportTest -PintegrationTests` 产出（同一个测试还拦住"骨架产物冒充文档"）；Apifox 侧逐条 `endpoint get` 首尾相连即可，脚本能解析这种 JSON 流。
-- 判定：`name`↔`summary`、`description`↔`description` 两处文本；「代码领先」与「两边不同文」分开报，并为每条漂移打印可直接执行的 `endpoint update` 命令。接口集合差异只在 `--fail-on-missing` 下算失败——导入不做删除时，多出来的接口是正常状态。
+- 判定：文本看 `name`↔`summary`、`description`↔`description`，「代码领先」与「两边不同文」分开报，并为每条漂移打印可直接执行的 `endpoint update` 命令；响应示例单独检——同一响应码挂多份、示例内容与 spec 不等、示例绑不到响应，都算失败。接口集合差异只在 `--fail-on-missing` 下算失败（导入不删资源时，多出来的接口是正常状态）。
 - 现状：由 `.github/workflows/apifox-sync.yml` 在手动触发时执行，`--warn-only` 起步；接进 `check` 之前要先解决"它需要网络与 token"，那与 §2.8 的干净机器可执行原则冲突，所以**刻意不进 `check`**。
 
 ## 3. 前后对比：这套门禁整体换来了什么
