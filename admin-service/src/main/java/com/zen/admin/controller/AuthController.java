@@ -1,6 +1,7 @@
 package com.zen.admin.controller;
 
 import com.zen.admin.config.ZenAdminOpenApiConfiguration;
+import com.zen.admin.doc.DocError;
 import com.zen.admin.dto.ChangePasswordRequest;
 import com.zen.admin.dto.LoginRequest;
 import com.zen.admin.dto.LogoutRequest;
@@ -44,6 +45,10 @@ public class AuthController {
             summary = "账号密码登录，签发双 Token",
             description = "免鉴权入口。用户不存在与密码错误返回同一个 401 响应体，不透露账号是否存在。"
                     + "窗口内连续失败达阈值（默认 5 次）触发锁定：达阈值那次与锁定期内的尝试一律返回 429，锁定期不计数不续期，到期自动解锁。")
+    // 403/429 从方法签名推不出来（是 service 抛 BusinessException 带出来的），显式声明进文档，
+    // 文案与 AuthService 的实际输出逐字一致
+    @DocError(status = 403, message = "账号已停用", description = "凭证正确但账号被管理员停用；与 401 的区别是「验过了身份」，重试拿新 Token 也没用")
+    @DocError(status = 429, message = "账号已锁定,请稍后重试", description = "失败次数达阈值的那一次，以及锁定期内的任何尝试；锁定期不计数不续期，到期自动解锁")
     @PostMapping("/login")
     public ApiResponse<TokenPair> login(@Valid @RequestBody LoginRequest request, HttpServletRequest httpRequest) {
         return ApiResponse.success(

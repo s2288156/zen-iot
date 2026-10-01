@@ -1,0 +1,135 @@
+name: Apifox Sync
+
+# 手动触发：导出 admin-service 的 OpenAPI → 与 Apifox 比对文本漂移 → 可选执行导入。
+# 刻意不挂 push/PR：同步要联网与 token，且 Apifox 项目 8871910 的写入身份还没定
+# （见 docs/modules/admin-service.md 里「谁在改文档」那条未决项），让它先当一个人工步骤。
+on:
+  workflow_dispatch:
+    inputs:
+      apply:
+        description: "true = 真导入 Apifox；false = 只出漂移报告"
+        required: false
+        default: "false"
+        type: choice
+        options:
+          - "false"
+          - "true"
+
+env:
+  # 本地这份在 .apifox/settings.json（该目录被 .gitignore 忽略，所以这里必须自己写一份）
+  APIFOX_PROJECT_ID: "8871910"
+  # admin-service 模块 id；写入主干分支必须显式带 --branch，否则后端回 "Automation caller branch required"
+  APIFOX_MODULE_ID: "8626836"
+  APIFOX_BRANCH: main
+  # spec 的 info.title —— 它才是 --module-map 的源键，不写就会新建一个同名模块而不是并入既有模块
+  APIFOX_SPEC_TITLE: zen-iot admin-service API
+
+jobs:
+  sync:
+    name: 导出 spec 并比对/导入 Apifox
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    # 与 ci.yml 同一套容器：OpenApiExportTest 是 @Tag("integration")，要真 JPA 与数据源
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: root
+          MYSQL_DATABASE: zen_admin
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd "mysqladmin ping -h 127.0.0.1 -uroot -proot"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+          --health-start-period 10s
+      redis:
+        image: redis:8-alpine
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 5s
+          --health-timeout 3s
+          --health-retries 10
+          --health-start-period 5s
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Setup JDK 25
+        uses: actions/setup-java@v6
+        with:
+          distribution: temurin
+          java-version: "25"
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v6
+
+      - name: Setup Node and apifox-cli
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Install pinned apifox-cli
+        run: npm i -g apifox-cli@2.2.11 --registry=https://registry.npmmirror.com/
+
+      - name: Export OpenAPI spec from the app
+        env:
+          MYSQL_HOST: localhost
+          REDIS_HOST: localhost
+        # 这一条同时是门禁：产物是骨架（paths 为空）就直接失败，不会把空集喂给导入
+        run: ./gradlew --no-daemon :admin-service:test --tests OpenApiExportTest -PintegrationTests
+
+      - name: Dump current Apifox endpoints
+        env:
+          APIFOX_ACCESS_TOKEN: ${{ secrets.APIFOX_ACCESS_TOKEN }}
+        run: |
+          if [ -z "$APIFOX_ACCESS_TOKEN" ]; then
+            echo "未配置 secrets.APIFOX_ACCESS_TOKEN，跳过 Apifox 相关步骤"
+            echo "skipped=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          ids=$(apifox endpoint list --project "$APIFOX_PROJECT_ID" --page-size 500 \
+                  | python3 -c "import json,sys;print(' '.join(str(r['id']) for r in json.load(sys.stdin)['data']))")
+          for id in $ids; do
+            apifox endpoint get "$id" --project "$APIFOX_PROJECT_ID" --branch "$APIFOX_BRANCH"
+          done > endpoints.json
+          echo "skipped=false" >> "$GITHUB_OUTPUT"
+        id: dump
+
+      - name: Report text drift
+        if: steps.dump.outputs.skipped != 'true'
+        run: |
+          python3 gradle/apifox/doc-drift-check.py \
+            --spec admin-service/build/api-docs/openapi.json \
+            --apifox endpoints.json \
+            --project "$APIFOX_PROJECT_ID" \
+            --warn-only
+
+      - name: Import into Apifox
+        if: github.event.inputs.apply == 'true' && steps.dump.outputs.skipped != 'true'
+        env:
+          APIFOX_ACCESS_TOKEN: ${{ secrets.APIFOX_ACCESS_TOKEN }}
+        run: |
+          apifox import --project "$APIFOX_PROJECT_ID" \
+            --format openapi \
+            --file admin-service/build/api-docs/openapi.json \
+            --branch "$APIFOX_BRANCH" \
+            --overwrite-mode merge \
+            --module-map "${APIFOX_SPEC_TITLE}=${APIFOX_MODULE_ID}"
+
+      # 导入后再比一次：merge 策略下文本仍需定点补，这里就是把「还差哪些」摊出来
+      - name: Re-check drift after import
+        if: github.event.inputs.apply == 'true'
+        run: |
+          ids=$(apifox endpoint list --project "$APIFOX_PROJECT_ID" --page-size 500 \
+                  | python3 -c "import json,sys;print(' '.join(str(r['id']) for r in json.load(sys.stdin)['data']))")
+          for id in $ids; do
+            apifox endpoint get "$id" --project "$APIFOX_PROJECT_ID" --branch "$APIFOX_BRANCH"
+          done > endpoints-after.json
+          python3 gradle/apifox/doc-drift-check.py \
+            --spec admin-service/build/api-docs/openapi.json \
+            --apifox endpoints-after.json \
+            --project "$APIFOX_PROJECT_ID" \
+            --warn-only

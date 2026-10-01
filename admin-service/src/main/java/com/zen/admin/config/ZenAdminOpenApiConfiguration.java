@@ -1,6 +1,8 @@
 package com.zen.admin.config;
 
+import com.zen.admin.doc.DocError;
 import com.zen.common.security.auth.RequireModule;
+import com.zen.common.security.error.GlobalErrorCode;
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.Operation;
@@ -12,6 +14,10 @@ import io.swagger.v3.oas.models.responses.ApiResponse;
 import io.swagger.v3.oas.models.responses.ApiResponses;
 import io.swagger.v3.oas.models.security.SecurityScheme;
 import io.swagger.v3.oas.models.servers.Server;
+import jakarta.validation.constraints.NotBlank;
+import java.lang.reflect.Method;
+import java.lang.reflect.Parameter;
+import java.lang.reflect.RecordComponent;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -21,6 +27,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.Ordered;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.method.HandlerMethod;
 
 /**
  * OpenAPI 文档的鉴权、来源与错误响应声明。
@@ -36,7 +44,8 @@ import org.springframework.core.Ordered;
  * <p>错误响应统一由 {@link #apiErrorResponses()} 补，而不是在方法上写 {@code @ApiResponses}：实测后者会让
  * springdoc 不再自动生成成功响应，连带 {@code ApiResponse*} 模型从 {@code components.schemas} 消失、文档里的
  * {@code $ref} 悬空。按「有请求体→400、有鉴权要求→401、有 {@link RequireModule}→403」推导，既绕开那个坑，
- * 又让文档口径直接来自驱动运行期行为的同一批注解，不会两处各写一份而漂移。悬空 {@code $ref} 由
+ * 又让文档口径直接来自驱动运行期行为的同一批注解（推不出的那部分由方法上的 {@code @DocError} 声明），
+ * 不会两处各写一份而漂移。悬空 {@code $ref} 由
  * {@code OpenApiDocContractTest} 断住。
  *
  * <p>{@link #namespacedOperationIds(String)} 给 operationId 加服务名前缀：springdoc 取的是裸方法名（{@code admin}、
@@ -61,11 +70,36 @@ public class ZenAdminOpenApiConfiguration {
      */
     private static final String ERROR_ENVELOPE_REF = "#/components/schemas/ApiResponseVoid";
 
-    /** 各状态码的真实响应文案（{@code GlobalErrorCode} 默认消息；400 是字段错误的实际形态）。 */
+    /**
+     * 401/403 的示例文案：直接取 {@link GlobalErrorCode} 的默认消息，文档侧不再抄一份。
+     *
+     * <p>400 不在这里：它的 message 含字段名，只能按接口的请求体推导，见 {@link #fieldBlankMessage}。
+     */
     private static final Map<String, String> EXAMPLE_MESSAGES = Map.of(
-            "400", "username must not be blank",
-            "401", "未认证或登录已失效",
-            "403", "无访问权限");
+            "401", GlobalErrorCode.UNAUTHORIZED.getMessage(),
+            "403", GlobalErrorCode.FORBIDDEN.getMessage());
+
+    /**
+     * record 组件上的 {@code @NotBlank}：只能从字段取。
+     *
+     * <p>{@code jakarta.validation.constraints.NotBlank} 的 {@code @Target} 不含 {@code RECORD_COMPONENT}，
+     * 所以写在 record 组件上的这个注解并不属于组件本身，{@code RecordComponent.getAnnotation} 取回来是 null——
+     * 实测表现是全部接口的 400 示例静默退回默认文案，比写错字段名更难发现。注解被传播到了同名字段上，故读字段。
+     */
+    private static NotBlank notBlankOf(Class<?> type, RecordComponent component) {
+        NotBlank onComponent = component.getAnnotation(NotBlank.class);
+        if (onComponent != null) {
+            return onComponent;
+        }
+        try {
+            return type.getDeclaredField(component.getName()).getAnnotation(NotBlank.class);
+        } catch (NoSuchFieldException absent) {
+            return null;
+        }
+    }
+
+    /** Bean Validation 未覆盖 message 时的默认形态，与 {@code GlobalExceptionHandler} 的输出一致。 */
+    private static final String MUST_NOT_BE_BLANK = "must not be blank";
 
     private static final String DESCRIPTION = """
             认证与授权基线服务。响应统一包在 `ApiResponse` 里：`code` / `message` / `data`，\
@@ -108,7 +142,11 @@ public class ZenAdminOpenApiConfiguration {
     public OperationCustomizer apiErrorResponses() {
         return (operation, handlerMethod) -> {
             if (operation.getRequestBody() != null) {
-                addErrorResponse(operation, "400", "请求体校验失败（如 LoginRequest 的 @NotBlank），message 里带字段名");
+                addErrorResponse(
+                        operation,
+                        "400",
+                        "请求体校验失败（如 @NotBlank 未过），message 是出错字段名加校验文案",
+                        fieldBlankMessage(handlerMethod));
             }
             boolean requiresIdentity =
                     operation.getSecurity() != null && !operation.getSecurity().isEmpty();
@@ -118,6 +156,12 @@ public class ZenAdminOpenApiConfiguration {
                     requiresIdentity
                             ? "未带 Authorization，或 Token 签名/过期校验失败、已被登出与轮转撤销"
                             : "凭证或 Token 校验失败：免鉴权入口也要过各自那一关，响应体与「未登录」同形");
+            // 签名推不出来的错误码（登录的 403 停用、429 锁定）由方法上的 @DocError 声明，message 即实际输出。
+            // 展开走 getAnnotationsByType，容器由 javac 合成，不再另立一份清单。
+            for (DocError declared : handlerMethod.getMethod().getAnnotationsByType(DocError.class)) {
+                addErrorResponse(
+                        operation, String.valueOf(declared.status()), declared.description(), declared.message());
+            }
             // RequireModule 的 @Target 只有 METHOD，所以只看方法，不必回看类
             if (handlerMethod.getMethodAnnotation(RequireModule.class) != null) {
                 addErrorResponse(operation, "403", "身份有效，但 Token 的 modules 快照缺这个接口要求的模块——不是登录失效，重新拿 Token 也没用");
@@ -128,9 +172,48 @@ public class ZenAdminOpenApiConfiguration {
 
     /** swagger 模型只在 {@code ApiResponses} 上有 add 方法，Operation 这边只有 get/set。 */
     private static void addErrorResponse(Operation operation, String code, String description) {
+        addErrorResponse(operation, code, description, EXAMPLE_MESSAGES.get(code));
+    }
+
+    /** example 的 message 需要按接口推导（400）或由声明带上（429）时走这个重载。 */
+    private static void addErrorResponse(Operation operation, String code, String description, String exampleMessage) {
         ApiResponses responses = operation.getResponses() == null ? new ApiResponses() : operation.getResponses();
-        responses.addApiResponse(code, errorResponse(code, description));
+        responses.addApiResponse(code, errorResponse(code, description, exampleMessage));
         operation.setResponses(responses);
+    }
+
+    /**
+     * 400 的示例 message：按该接口 {@code @RequestBody} 请求体里第一个带 {@code @NotBlank} 的字段生成。
+     *
+     * <p>此前这里是全服务写死的一串 {@code username must not be blank}，于是 refresh/logout/change-password
+     * 的 400 示例在说一个自己根本没有的字段。实测真实输出就是 {@code 字段名 + " " + 校验文案}，
+     * 而 {@code GlobalExceptionHandler} 取的是第一条字段错误——所以取第一个带 {@code @NotBlank} 的组件。
+     * 请求体不是 record 或没有 {@code @NotBlank} 时退回 {@link GlobalErrorCode#BAD_REQUEST} 的默认文案。
+     */
+    private static String fieldBlankMessage(HandlerMethod handlerMethod) {
+        Method method = handlerMethod.getMethod();
+        for (Parameter parameter : method.getParameters()) {
+            if (parameter.getAnnotation(RequestBody.class) == null) {
+                continue;
+            }
+            Class<?> type = parameter.getType();
+            RecordComponent[] components = type.getRecordComponents();
+            if (components == null) {
+                continue;
+            }
+            for (RecordComponent component : components) {
+                NotBlank notBlank = notBlankOf(type, component);
+                if (notBlank != null) {
+                    return component.getName() + " " + validationMessage(notBlank.message());
+                }
+            }
+        }
+        return GlobalErrorCode.BAD_REQUEST.getMessage();
+    }
+
+    /** 注解没自定义 message 时，Bean Validation 给的是 {@code {jakarta...NotBlank.message}} 占位串。 */
+    private static String validationMessage(String declared) {
+        return declared.startsWith("{") ? MUST_NOT_BE_BLANK : declared;
     }
 
     /**
@@ -139,10 +222,10 @@ public class ZenAdminOpenApiConfiguration {
      * <p>example 文案取自 {@code GlobalErrorCode} 与 {@code GlobalExceptionHandler} 的实际输出（本机逐条验过），
      * 不是编的示例值——Apifox 的用例断言与 mock 会直接依赖它，写错比不写更糟。
      */
-    private static ApiResponse errorResponse(String code, String description) {
+    private static ApiResponse errorResponse(String code, String description, String exampleMessage) {
         Map<String, Object> example = new LinkedHashMap<>();
         example.put("code", Integer.parseInt(code));
-        example.put("message", EXAMPLE_MESSAGES.getOrDefault(code, ""));
+        example.put("message", exampleMessage == null ? "" : exampleMessage);
         return new ApiResponse()
                 .description(description)
                 .content(new Content()

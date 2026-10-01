@@ -106,6 +106,15 @@
 - 桩后端用 `HttpServer` 而非 WireMock/MockWebServer：本阶段不为测试引入新依赖，P3-2 定案后再补契约测试。
 - 顺带利用：`missingDownstreamInstanceIsServiceUnavailableNot500` 走 `wcs-service` 这条没注册实例的路由，白拿一个 503 场景。
 
+### 不在 Apifox 为网关建模块与接口
+
+- 背景：admin-service 的接口与回归用例已进 Apifox 项目，而网关作为浏览器唯一的入口在里面没有任何位置，「要不要给 gateway-service 建模块、把 `/api/{service}/**` 录成接口」会被反复问起。
+- 选项：① 不建，前缀只活在环境的「前置 URL」里；② 网关占一个模块，按带前缀的路径把下游接口再录一遍作为对外入口视图；③ 网关占一个空模块或把路由清单抄进去。
+- 结论：①。本模块在 Apifox 里既不建模块也不建接口。
+- 理由：Apifox 的「模块」定义是「一个服务 = 一份完整独立的 OpenAPI 规范」，而本模块不提供业务接口、没有自己的 `/v3/api-docs`，没有可导入的东西。② 把 `/api/admin` 这个只应存在于网关的字符串抄进第二处，而 Apifox 不支持批量修改接口 URL 前缀，抄进去就改不动；Mock 又按裸路径匹配，带前缀的 path 会让 Mock 直接失效。③ 的路由清单真身在 `application.yml`，并由 `GatewayRouteContractTest` 逐条比对前缀，抄一份就是等着漂移的第二真源。
+- 触发条件：本模块出现自己实现的 controller、也就是拥有独立 `/v3/api-docs` 时，改按模块导入为它建模块。在那之前，任何「入口视图」都不得手工录入下游接口。
+- 代价：从 Apifox 复制出的示例不带前缀直接打网关会失败，这一段只由环境的「前置 URL」承担。调用方规则写在 Apifox 项目文档《统一入口与鉴权口径（调用方须知）》，那份文档只写规则，不抄路由与白名单清单。
+
 ## 坑
 
 - **Boot 4 里 `spring.reactor.context-propagation` 默认是 `limited`，网关链路会静默断 trace。** 现象：网关日志有 trace 列，admin 却是另一条 trace。原因：`Tracer.currentSpan()` 在这条链上取不到 span，SCG 的 `observedRequestHttpHeadersFilter` 无 trace 可注入。做法：`application.yml` 显式设 `auto`。删除条件：Boot 把默认值改回 `auto`，或链路追踪改用显式的 `Context` 写入。

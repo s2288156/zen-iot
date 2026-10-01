@@ -24,7 +24,7 @@
 
 `DemoController` 不是业务功能，只用来验证 `@RequireModule` 的判定与网关透传身份接得上。
 
-- 免鉴权白名单：`/auth/login`、`/auth/refresh`、`/actuator/**`、`/v3/api-docs/**`、`/swagger-ui/**`、`/swagger-ui.html`。
+- 免鉴权白名单：`/auth/login`、`/auth/refresh`、`/actuator/health`、`/actuator/health/**`。文档端点与 `prometheus` 都要带身份：`/v3/api-docs` 会说清整张接口面，匿名可读等于挂上公网；指标匿名可读与网关侧「只走内网」矛盾。
 - 错误码口径：401 一律同码同体，不透露账号是否存在；唯一性冲突与被引用的删除一律 409；非法枚举与非法排序字段 400。
 - 口令只进不出：BCrypt 密文落库，任何视图都不回传；改密与重置的会话吊销范围见下表。
 

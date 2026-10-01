@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.zen.admin.doc.DocError;
 import com.zen.common.security.auth.RequireModule;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import java.net.URI;
@@ -44,9 +45,13 @@ import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandl
  * </ul>
  *
  * <p>接口集合、403 路径集与 tag 目录三处清单不手写，而是从 {@link RequestMappingHandlerMapping} 注册的方法与代码
- * 注解（{@code @RequestMapping} / {@code @RequireModule} / {@code @SecurityRequirement} / {@code @Tag}）推导——
+ * 注解（{@code @RequestMapping} / {@code @RequireModule} / {@code @SecurityRequirement} / {@code @Tag} /
+ * {@code @DocError}）推导——
  * 与 springdoc builder 读同一批注解，新增 controller 不再需要改本测试。{@code @RequireModule} 的判定刻意与
  * {@code ZenAdminOpenApiConfiguration.apiErrorResponses()} 同口径（只看方法注解）。
+ *
+ * <p>取文档要带 Bearer：{@code /v3/api-docs} 不在免鉴权白名单里（见 {@code application.yml}），
+ * {@link #anonymousDocFetchIsRejected()} 专门守这条。
  *
  * <p>取文档的方式是真 HTTP 而不是 MockMvc：Boot 4 把 {@code @AutoConfigureMockMvc} 拆进了
  * {@code spring-boot-webmvc-test}，不为一个测试给模块加依赖（{@code GatewayRoutingTest} 同一取向）。
@@ -60,6 +65,12 @@ class OpenApiDocContractTest {
 
     private static final String ERROR_ENVELOPE = "ApiResponseVoid";
     private static final String SCHEMA_REF_PREFIX = "#/components/schemas/";
+
+    /** Flyway 开发占位符的明文，与 {@code AuthMeIntegrationTest} 同源。 */
+    private static final String ADMIN_DEV_PASSWORD = "Admin@123";
+
+    /** {@code GlobalErrorCode.BAD_REQUEST} 的默认消息，即请求体没有 @NotBlank 时 400 的实际文案。 */
+    private static final String BAD_REQUEST_MESSAGE = "请求参数有误";
 
     private final ObjectMapper objectMapper = new ObjectMapper();
 
@@ -138,11 +149,15 @@ class OpenApiDocContractTest {
         // 400 只属于有请求体的接口；401 所有接口都有；403 只属于方法上带 @RequireModule 的接口
         // （派生口径与 ZenAdminOpenApiConfiguration.apiErrorResponses() 逐字一致：只看方法注解）
         Set<String> moduleGated = moduleGatedKeys();
+        Set<String> forbiddenExpected = new TreeSet<>(moduleGated);
+        forbiddenExpected.addAll(keysDeclaringStatus(403));
         operations.forEach((key, operation) -> {
             assertThat(operation.at("/responses/401").isMissingNode()).as(key).isFalse();
             boolean hasBody = !operation.path("requestBody").isMissingNode();
             assertThat(!operation.at("/responses/400").isMissingNode()).as(key).isEqualTo(hasBody);
-            assertThat(!operation.at("/responses/403").isMissingNode()).as(key).isEqualTo(moduleGated.contains(key));
+            assertThat(!operation.at("/responses/403").isMissingNode())
+                    .as(key)
+                    .isEqualTo(forbiddenExpected.contains(key));
             for (Map.Entry<String, JsonNode> response :
                     operation.at("/responses").properties()) {
                 assertThat(response.getValue()
@@ -153,6 +168,25 @@ class OpenApiDocContractTest {
                         .isFalse();
             }
         });
+
+        // @DocError 声明的错误码必须真进文档，且 example.message 与实际输出逐字一致。
+        // 登录缺 403/429 就是这条断言要拦的形态：README 与代码都有，文档没有。
+        for (DeclaredError declared : declaredErrors()) {
+            JsonNode example = operations
+                    .get(declared.key())
+                    .at("/responses/" + declared.status() + "/content")
+                    .path("application/json")
+                    .path("example");
+            assertThat(example.isMissingNode())
+                    .as("%s 缺 %d 响应", declared.key(), declared.status())
+                    .isFalse();
+            assertThat(example.at("/message").asText())
+                    .as("%s 的 %d 示例文案", declared.key(), declared.status())
+                    .isEqualTo(declared.message());
+        }
+        assertThat(operations).containsKeys("POST /auth/login");
+        assertThat(operations.get("POST /auth/login").at("/responses").has("429"))
+                .isTrue();
 
         // 信封模型必须在，否则上面那些 $ref 全是悬空的
         assertThat(doc.at("/components/schemas/" + ERROR_ENVELOPE).isMissingNode())
@@ -219,13 +253,71 @@ class OpenApiDocContractTest {
                 .path("example");
         assertThat(unauthorized.at("/message").asText()).isEqualTo("未认证或登录已失效");
 
-        // /v3/api-docs 匿名可读：开发口令不能出现在文档里
+        // 400 的示例 message 必须落在该接口自己的字段上。改动前是全服务共用一串 username，
+        // 表现就是 refresh/logout 在文档里说一个自己根本没有的字段；期望值不写清单，
+        // 从该接口 requestBody 指向的 schema 的 properties/required 推导。
+        List<String> blankExamples = new ArrayList<>();
+        operations(doc).forEach((key, operation) -> {
+            // 状态码挂在 responses 下，直接对 operation 调 has("400") 恒为 false
+            if (!operation.path("responses").has("400")) {
+                return;
+            }
+            String message = operation
+                    .at("/responses/400/content")
+                    .path("application/json")
+                    .path("example")
+                    .path("message")
+                    .asText();
+            assertThat(message).as("%s 的 400 示例文案", key).isIn(acceptableBlankMessages(operation, doc));
+            blankExamples.add(message);
+        });
+        // 只断「字段属于该接口」堵不住另一种塌法：@NotBlank 全取不到时 12 个接口集体退回
+        // 「请求参数有误」，逐条看依然成立。按字段推导必然留下多个不同值，故加指纹断言。
+        assertThat(blankExamples.stream().distinct().count())
+                .as("400 示例文案去重数：全体同一条就说明没按字段推导")
+                .isGreaterThan(1);
+
+        // 文档要外发给 Apifox 与 SDK 生成器：开发口令不能出现在里面
         assertThat(doc.toString()).doesNotContain("Admin@123").doesNotContain("Demo@123");
     }
 
+    /**
+     * 该接口 400 示例可接受的文案集合。
+     *
+     * <p>改动前是全服务共用一串 {@code username}，于是 refresh/logout 在文档里说一个自己根本没有的字段；
+     * 这条断言拦的就是那种形态：字段名必须出自该接口请求体模型自己的 {@code required ∩ properties}。
+     * 同时允许「请求体确实没有 @NotBlank」的兜底——{@code UserStatusRequest} 只有 {@code @NotNull}、
+     * {@code UserUpdateRequest} 全部可空、覆盖式授权的请求体是字符串数组，那三种 Bean Validation
+     * 给不出字段错误，实际输出就是 {@code BAD_REQUEST} 的默认文案。
+     */
+    private static List<String> acceptableBlankMessages(JsonNode operation, JsonNode doc) {
+        List<String> accepted = new ArrayList<>();
+        accepted.add(BAD_REQUEST_MESSAGE);
+        String ref = operation
+                .at("/requestBody/content")
+                .path("application/json")
+                .path("schema")
+                .path("$ref")
+                .asText("");
+        if (ref.isEmpty()) {
+            return accepted;
+        }
+        String modelName = ref.substring(ref.lastIndexOf('/') + 1);
+        JsonNode schema = doc.at("/components/schemas/" + modelName);
+        JsonNode properties = schema.path("properties");
+        for (JsonNode field : schema.path("required")) {
+            if (properties.has(field.asText())) {
+                accepted.add(field.asText() + " must not be blank");
+            }
+        }
+        return accepted;
+    }
+
+    /** 取文档：文档端点不在免鉴权白名单里，所以先登录再带 Bearer——与 CI 和本机调试同一条路径。 */
     private JsonNode loadDoc() throws Exception {
         HttpRequest request = HttpRequest.newBuilder(URI.create("http://localhost:" + port + "/v3/api-docs"))
                 .timeout(Duration.ofSeconds(10))
+                .header("Authorization", "Bearer " + loginToken())
                 .GET()
                 .build();
         HttpResponse<String> response =
@@ -233,6 +325,34 @@ class OpenApiDocContractTest {
 
         assertThat(response.statusCode()).isEqualTo(200);
         return objectMapper.readTree(response.body());
+    }
+
+    /** 种子账号登录取 access Token（Flyway 开发占位符的明文，与 {@code AuthMeIntegrationTest} 同源）。 */
+    private String loginToken() throws Exception {
+        String body = "{\"username\": \"admin\", \"password\": \"" + ADMIN_DEV_PASSWORD + "\"}";
+        HttpResponse<String> response = client.send(
+                HttpRequest.newBuilder(URI.create("http://localhost:" + port + "/auth/login"))
+                        .timeout(Duration.ofSeconds(10))
+                        .header("Content-Type", "application/json")
+                        .POST(HttpRequest.BodyPublishers.ofString(body, StandardCharsets.UTF_8))
+                        .build(),
+                HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
+
+        assertThat(response.statusCode()).isEqualTo(200);
+        return objectMapper.readTree(response.body()).at("/data/accessToken").asText();
+    }
+
+    @Test
+    void anonymousDocFetchIsRejected() throws Exception {
+        HttpResponse<String> response = client.send(
+                HttpRequest.newBuilder(URI.create("http://localhost:" + port + "/v3/api-docs"))
+                        .timeout(Duration.ofSeconds(10))
+                        .GET()
+                        .build(),
+                HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
+
+        // 接口面（路径、字段、示例、schema）不再匿名可读；漏了白名单这条就会变回 200
+        assertThat(response.statusCode()).isEqualTo(401);
     }
 
     /** 按 {@code METHOD path} 收集全部操作，便于断言时一眼看出是哪个接口挂了。 */
@@ -315,6 +435,34 @@ class OpenApiDocContractTest {
     }
 
     /** tag 目录：处理器 bean 类上声明的 {@code @Tag} 名去重集。 */
+    /** 方法上声明了某个错误码的全部接口键（{@code METHOD path}）。 */
+    private Set<String> keysDeclaringStatus(int status) {
+        Set<String> keys = new TreeSet<>();
+        declaredErrors().stream()
+                .filter(declared -> declared.status() == status)
+                .map(DeclaredError::key)
+                .forEach(keys::add);
+        return keys;
+    }
+
+    /** 处理器方法上的 {@code @DocError} 展开成 (接口键, 状态码, 期望文案)；新增声明自动进断言，不手写清单。 */
+    private List<DeclaredError> declaredErrors() {
+        List<DeclaredError> declared = new ArrayList<>();
+        handlerMapping.getHandlerMethods().forEach((mapping, handler) -> {
+            // 与 ZenAdminOpenApiConfiguration 读同一份声明，两边不会各说一遍
+            DocError[] annotations = handler.getMethod().getAnnotationsByType(DocError.class);
+            for (String key : handlerKeys(mapping)) {
+                for (DocError annotation : annotations) {
+                    declared.add(new DeclaredError(key, annotation.status(), annotation.message()));
+                }
+            }
+        });
+        return declared;
+    }
+
+    /** 一条错误声明落在哪个接口上。 */
+    private record DeclaredError(String key, int status, String message) {}
+
     private Set<String> tagCatalogue() {
         Set<String> tags = new LinkedHashSet<>();
         handlerMapping.getHandlerMethods().values().forEach(handler -> {
