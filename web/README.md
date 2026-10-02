@@ -8,6 +8,8 @@
 - 响应信封为 `{ code, message, data }`，`code` 是 int 且成功码为 `200`；`code != 200` 一律抛 `ApiError{code, message}`。
 - 可匿名调用的业务接口只有 `/auth/login` 与 `/auth/refresh`，其余全部要求 Bearer。
 - `GET /auth/me` 返回 `UserProfileView`，含 `roleIds` 但**不含** modules；模块权限由逐个 `GET /roles/{id}` 的 `modules` 求并集得出。
+- 分页响应为 `PageResult{list,total,pageNum,pageSize,pages}`；请求参数为 `PageQuery{pageNum,pageSize,orderBy,orderDirection}`，`pageSize` 默认 10、上限 200，`orderDirection` 取 `asc|desc` 且默认 `asc`。
+- 列表接口口径不一致：`/users/page` 与 `/roles/page` 支持过滤条件和排序白名单，`/sessions` 路径不含 `/page` 且不接受任何过滤参数。
 
 ## 关键实现
 
@@ -39,15 +41,32 @@
 - `RequireAuth` 未登录时重定向 `/login`，并把 `pathname + search` 存进 `location.state.from` 供登录后回跳。
 - `RequireModule` 无权限时渲染 403 状态页而非重定向；`DefaultHome` 让不含 admin 的账号落到 `/profile`，避免首屏即 403。
 
+### 布局与导航（`src/components/AppLayout.tsx`、`src/routes/navigation.tsx`）
+
+- Sider 与 Menu 统一 light 基调，折叠宽度取 `theme/tokens.ts` 的 `layout.siderCollapsedWidth`；折叠状态由顶栏按钮控制，Sider 自带 trigger 关掉。
+- 菜单项集中在 `NAV_ITEMS` 声明并按 `auth.modules` 过滤，`module: null` 的项不受权限约束；`handle.fullScreen` 是路由级隐藏侧栏开关，当前无页面挂载它。
+
+### 列表页数据约定（TanStack Query）
+
+- 列表统一走 `PageTable`（`src/components/PageTable.tsx`）：服务端分页 + 查询表单 + loading/error/empty 三态，queryKey 由封装内部生成为 `[domain, 'page', params]`，页面不手写 key。
+- 翻页与排序由 `Table.onChange` 的 `extra.action` 分支归一到 `PageQuery`；跨页保留数据用 `placeholderData: keepPreviousData`，据此以 `isPlaceholderData` 区分新旧数据。
+- 写操作后按 domain 前缀失效（`api/queryKeys.ts` 的 `invalidateDomain`），不精确到 `page` 段。
+
+### 错误处理两层（`src/routes/errorElement.tsx`、`src/components/ErrorBoundary.tsx`）
+
+- 路由层 `errorElement` 为主，抓 lazy 装载失败与 loader/action rejection；渲染期异常由 `ErrorBoundary` 兜底，两层渲染同一套 `StatusPage`。
+- 404 由 catch-all `path: '*'` 指向 `NotFound`；提示层经 AntD `App` 上下文取用（`main.tsx` 顺序为 `ThemeProvider > QueryClientProvider > App`），`logout` 服务端撤销失败以 `message.warning` 明示「本地已登出、服务端未撤销」后照常回 `/login`。
+
 ## 架构约束
 
 - 色值唯一事实源是 `src/theme/tokens.ts`，业务代码不得硬编码色值。
 - 路由模块必须具名导出 `Component`；dev-only 路由用 `import.meta.env.DEV` 条件挂载。
 - api 层不得依赖 store 与 router，跨层通知通过 `setSessionExpiredHandler` 反向注册。
+- 公共组件留在 `src/components`，不拆独立组件库包；列表页不得绕过 `PageTable` 直连 `useQuery`。
 
 ## 主要依赖
 
-`antd@6.6.5`、`@ant-design/icons@6.3.4`、`react-router@8`、`zustand@5`；测试为 `vitest` + `@testing-library/react` + jsdom。
+`antd@6.6.5`、`@ant-design/icons@6.3.4`、`react-router@8`、`@tanstack/react-query@5`、`zustand@5`；测试为 `vitest` + `@testing-library/react` + jsdom。
 
 ## 命令
 

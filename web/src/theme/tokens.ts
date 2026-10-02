@@ -51,6 +51,8 @@ export const layout = {
   loginCardWidth: 380,
   /** 侧栏展开宽度 */
   siderWidth: 224,
+  /** 侧栏折叠后的图标条宽度：4 个一级菜单项 + 品牌缩写可容纳 */
+  siderCollapsedWidth: 64,
 } as const
 
 /** AntD v6 Design Tokens 主题配置：seed 层集中定义，派生层级交由 algorithm */
@@ -67,7 +69,8 @@ export const antdTheme: ThemeConfig = {
   },
   components: {
     Menu: {
-      // v6 口径：itemSelectedBg/itemSelectedColor（colorItemBgSelected 系已废弃）
+      // 侧栏与菜单统一 light（Task 4 口径 A）：只定制 `item*` 系，`dark*` 系（16 个）刻意不补，
+      // 否则深色菜单会绕过这里（两套是独立命名空间）。v6 口径：itemSelectedBg（colorItemBgSelected 系已废弃）
       itemSelectedBg: palette.blue1,
       itemSelectedColor: palette.blue7,
       activeBarBorderWidth: 0,
