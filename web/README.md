@@ -41,6 +41,13 @@
 - `RequireAuth` 未登录时重定向 `/login`，并把 `pathname + search` 存进 `location.state.from` 供登录后回跳。
 - `RequireModule` 无权限时渲染 403 状态页而非重定向；`DefaultHome` 让不含 admin 的账号落到 `/profile`，避免首屏即 403。
 
+### 视觉基调口径（`src/theme/`）
+
+- 色系：科技蓝。完整色阶集中在 `palette`（blue1 最浅 → blue10 最深），`colorPrimary` 取 blue6 `#1677ff`；中性灰阶在 `neutrals`；success/warning/danger 沿用 AntD 语义默认值，不覆写。
+- 布局：左侧可收起 Sider 展开 224 / 折叠 64（`layout.siderWidth` / `siderCollapsedWidth`），顶栏白底、内容区灰底，圆角 8、字号 14、控件高 32。菜单只定制 `item*` 系（`itemSelectedBg` = blue1、`itemSelectedColor` = blue7、`activeBarBorderWidth: 0`），Sider 与 Menu 统一 light。
+- 暗色预留：本轮不做切换控件、不做双态校验。`theme/index.tsx` 注明接入点——把 `algorithm: theme.darkAlgorithm` 并入 `antdTheme` 即可，`token` 仍作浅色 seed、派生交给 algorithm。
+- 自检路由：`/theme-self-check` 用 Button/Table/Form 合成页验证 token 贯通，仅经 `import.meta.env.DEV` 挂载，不进生产路由。
+
 ### 布局与导航（`src/components/AppLayout.tsx`、`src/routes/navigation.tsx`）
 
 - Sider 与 Menu 统一 light 基调，折叠宽度取 `theme/tokens.ts` 的 `layout.siderCollapsedWidth`；折叠状态由顶栏按钮控制，Sider 自带 trigger 关掉。
