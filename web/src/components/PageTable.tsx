@@ -4,15 +4,15 @@ import type { TableColumnsType, TableProps } from 'antd'
 import { useState } from 'react'
 import type { ReactNode } from 'react'
 import type { PageFilters, PageRequest } from '../api'
-import { fetchPage, pageKey } from '../api'
+import { fetchPage, MAX_PAGE_SIZE, pageKey } from '../api'
 import type { OrderDirection } from '../types/api'
 import { spacing } from '../theme/tokens'
 
-/** 后端 `PageQuery` 的默认页容量，与 `pageSize` 上限 200 同源的口径由调用方列配置负责 */
+/** 后端 `PageQuery` 的默认页容量 */
 const DEFAULT_PAGE_SIZE = 10
 
-/** 页容量候选：上限 200 是后端 `PageQuery` 的硬约束，不得给出更大的选项 */
-const PAGE_SIZE_OPTIONS = [10, 20, 50, 100, 200]
+/** 页容量候选：最大档取 `MAX_PAGE_SIZE`（后端 `PageQuery` 的硬约束），不得给出更大的选项 */
+const PAGE_SIZE_OPTIONS = [10, 20, 50, 100, MAX_PAGE_SIZE]
 
 /** 查询表单的一个条件项；`name` 直接作为 query 参数名，故必须与后端字段名逐字一致 */
 export interface PageTableFilter {
@@ -27,7 +27,7 @@ export interface PageTableFilter {
 export interface PageTableProps<T> {
   /** 缓存域：参与 queryKey 首段，写操作后按此前缀失效整域 */
   domain: string
-  /** 列表接口路径，如 `/admin/users/page`；`/sessions` 这类无 `/page` 后缀的接口照此原样传入 */
+  /** 列表接口路径，如 `/users/page`（不含 `/api/admin` 前缀，由 `http.ts#API_BASE` 补） */
   path: string
   /**
    * 需要排序的列设 `sorter: true`，并把 `key` 写成后端排序白名单里的字段名（如 `createTime`）。
@@ -38,6 +38,8 @@ export interface PageTableProps<T> {
   filters?: PageTableFilter[]
   /** 表格右上角的操作区（如「新建」按钮） */
   toolbar?: ReactNode
+  /** 透传给 antd `Table`：列多的管理页需要 `{{ x: … }}` 横向滚动，否则窄屏会把操作列挤出可视区 */
+  scroll?: TableProps<T>['scroll']
 }
 
 /**
@@ -47,7 +49,15 @@ export interface PageTableProps<T> {
  * queryKey 一律由 `pageKey(domain, params)` 生成（约定见 `web/README.md`）。
  * 排序/换页容量回到第 1 页，避免「第 8 页换个排序方式」这类后端根本不该出现的请求。
  */
-export function PageTable<T extends object>({ domain, path, columns, rowKey, filters, toolbar }: PageTableProps<T>) {
+export function PageTable<T extends object>({
+  domain,
+  path,
+  columns,
+  rowKey,
+  filters,
+  toolbar,
+  scroll,
+}: PageTableProps<T>) {
   const [pageNum, setPageNum] = useState(1)
   const [pageSize, setPageSize] = useState(DEFAULT_PAGE_SIZE)
   const [orderBy, setOrderBy] = useState<string | undefined>(undefined)
@@ -149,6 +159,7 @@ export function PageTable<T extends object>({ domain, path, columns, rowKey, fil
           dataSource={result?.list ?? []}
           loading={query.isPending || query.isPlaceholderData}
           onChange={handleTableChange}
+          scroll={scroll}
           pagination={{
             current: result?.pageNum ?? pageNum,
             pageSize,

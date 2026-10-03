@@ -7,6 +7,21 @@ export const MODULE_CODES = ['admin', 'wcs', 'rcs', 'ecs'] as const
 export type ModuleCode = (typeof MODULE_CODES)[number]
 
 /**
+ * 模块码的中文显示名。后端 `ModuleCode` 只有 `getCode()`，**没有任何中文名**，也无 `/modules` 字典接口，
+ * 所以这份映射只能由前端自维；语义取自根 README 的模块职责描述。
+ * 后端新增模块码时，`Record<ModuleCode, string>` 会让这里在 typecheck 阶段直接报错，而不是静默漏显示。
+ */
+export const MODULE_LABELS: Record<ModuleCode, string> = {
+  admin: '管理后台',
+  wcs: '仓库控制',
+  rcs: '机器人调度',
+  ecs: '设备控制',
+}
+
+/** `Checkbox.Group` / `Select` 的模块候选项；顺序固定按 `MODULE_CODES`，与后端枚举声明序一致 */
+export const MODULE_OPTIONS = MODULE_CODES.map((code) => ({ label: MODULE_LABELS[code], value: code }))
+
+/**
  * 一次登录签发的双 Token（`common-security` `TokenPair`）。
  * 后端**不返回** `expiresIn`，前端无法提前续期，只能在 access 失效收到 401 时轮转。
  */

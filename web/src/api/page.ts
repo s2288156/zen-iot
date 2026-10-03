@@ -4,6 +4,9 @@ import { request } from './http'
 /** 业务过滤条件：值域与 `request` 的 query 一致，`undefined` 由 `http.ts#buildUrl` 剔除 */
 export type PageFilters = Record<string, string | number | boolean | undefined>
 
+/** 每页上限，与 `PageQuery` 的 `@Max` 一致；既是分页器最大档，也是「拉全量做下拉选项」的兜底口径 */
+export const MAX_PAGE_SIZE = 200
+
 /** 列表接口入参 = `PageQuery` 四参数 + 该接口自己的过滤条件 */
 export type PageRequest = PageQuery & PageFilters
 
