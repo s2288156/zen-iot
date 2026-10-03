@@ -24,6 +24,9 @@
 | 缺陷扫描    | `./gradlew spotbugsMain`            | 对 main 源码跑 SpotBugs                                                  |
 | 全量检查    | `./gradlew check`                   | 全量门禁，含测试                                                         |
 | 推送门禁    | `./gradlew prePushCheck`            | 推送闸，**不跑测试**                                                     |
+| 起本机栈    | `./gradlew devUp`                   | docker 中间件 + gateway/admin/ecs + 前端，已在运行的跳过                 |
+| 停本机栈    | `./gradlew devDown`                 | 只停 devUp 拉起的应用进程，不动容器；没在跑时是 no-op                    |
+| 看本机栈    | `./gradlew devStatus`               | 各目标进程/端口状态与中间件健康，日志在 `build/dev/logs/`                |
 
 各门禁跑到哪一步、包含哪几项，以 `./gradlew tasks` 输出的任务 description 与根 `build.gradle.kts` 为准，本表不重述。
 

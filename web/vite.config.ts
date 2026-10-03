@@ -5,6 +5,9 @@ import { defineConfig } from 'vitest/config'
 export default defineConfig({
   plugins: [react()],
   server: {
+    // 端口显式钉死：Vite 默认会在 5173 被占时静默换端，`./gradlew devUp` 的端口探测会因此失效
+    port: 5173,
+    strictPort: true,
     proxy: {
       '/api': {
         target: 'http://localhost:28080',

@@ -10,6 +10,7 @@
 - 选项：把 `web/` 注册为 Gradle 模块（靠 node 插件拉前端任务）/ 保持独立 pnpm 工程、CI 另开 workflow。
 - 结论：后者。`settings.gradle.kts` 不含 `web`，前端门禁落在 `.github/workflows/web-ci.yml`，与 `ci.yml` 靠 `paths` 过滤器互不触发。
 - 理由：把 Node 工具链塞进 Gradle 会让 `./gradlew check` 的语义变成「还依赖 Node 与网络」；独立后只改 Java 的 PR 完全不跑前端 job。
+- 边界：`./gradlew devUp` 会拉起 Vite 进程，但它只在本机跑、不被任何门禁依赖——这条决策约束的是工具链归属与 `check` 语义，不是「Gradle 不许碰前端进程」。
 - 代价：门禁入口有两个，`./gradlew check` 不再覆盖前端——改 `web/**` 必须另跑四件套（见 `web/README.md` 命令表）。
 
 ### AntD 6 + TanStack Query 管服务端状态 + Zustand 管会话
