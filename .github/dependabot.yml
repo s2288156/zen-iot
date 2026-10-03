@@ -2,6 +2,7 @@
 # gradle ecosystem 直接解析 build.gradle.kts / settings.gradle.kts 里硬编码的坐标
 # （含 dependencyManagement 的 mavenBom 字符串与单条 dependency 约束）与插件版本；
 # 所有 PR 自动触发 .github/workflows/ci.yml，失败即人工介入，不自动合并
+# npm ecosystem 只覆盖 web/（不进 Gradle 的前端子工程），其 PR 由 .github/workflows/web-ci.yml 把关
 
 version: 2
 
@@ -24,6 +25,37 @@ updates:
     labels:
       - dependencies
       - gradle
+    commit-message:
+      prefix: build
+      include: scope
+
+  # 前端依赖（只认 web/ 这一份 package.json 与 pnpm-lock.yaml）
+  - package-ecosystem: npm
+    directory: "/web"
+    schedule:
+      interval: weekly
+      day: monday
+      time: "09:00"
+      timezone: Asia/Hong_Kong
+    groups:
+      # 必须排在 patch-and-minor 之前：Dependabot 把同时命中多个分组的依赖归入**配置中靠前**的那个，
+      # 放后面这条规则会被 patch-and-minor 先吃掉
+      # antd 三件套同进同出：@ant-design/cli 的检查规则冲着某个 antd 版本写、@ant-design/icons 要与
+      # antd 同 major，分开升会让检查器与被检对象错位
+      antd:
+        patterns:
+          - "antd"
+          - "@ant-design/icons"
+          - "@ant-design/cli"
+      # 其余依赖：minor/patch 自动成组 PR，major 升级单独 PR（破坏性风险）
+      patch-and-minor:
+        update-types:
+          - patch
+          - minor
+    open-pull-requests-limit: 10
+    labels:
+      - dependencies
+      - npm
     commit-message:
       prefix: build
       include: scope

@@ -1,0 +1,79 @@
+name: Web CI
+
+# web/ 不进 Gradle，故前端门禁单独一个 workflow；ci.yml 的 Java jobs 完全不感知前端改动，
+# 二者靠 paths 过滤器互不触发。
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - "web/**"
+      - ".github/workflows/web-ci.yml"
+  push:
+    branches: [main]
+    paths:
+      - "web/**"
+      - ".github/workflows/web-ci.yml"
+
+# 同 PR 新运行取消旧运行
+concurrency:
+  group: web-ci-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+defaults:
+  run:
+    working-directory: web
+
+jobs:
+  web:
+    name: web lint / typecheck / test / build (Node 24)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v7
+
+      # pnpm 必须先装：setup-node 的 `cache: pnpm` 靠 `pnpm store path` 定位缓存目录。
+      # 版本不在这里写死，由 web/package.json 的 packageManager 字段提供（故要显式指定该文件，
+      # 它在子目录里而不是仓库根），避免出现第二份版本清单。
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v6
+        with:
+          package_json_file: web/package.json
+          run_install: false
+
+      # node-version 与 web/package.json 的 engines.node（>=24.0.0）同源，抬版本时两处一起改
+      - name: Setup Node 24
+        uses: actions/setup-node@v7
+        with:
+          node-version: "24"
+          cache: pnpm
+          cache-dependency-path: web/pnpm-lock.yaml
+
+      - name: Install dependencies (frozen lockfile)
+        run: pnpm install --frozen-lockfile
+
+      - name: Lint (eslint)
+        run: pnpm lint
+
+      # antd CLI 退出码恒为 0，门禁语义（含 CLI 与 antd 同版校验）由 scripts/antd-lint-gate.mjs 补
+      - name: antd v6 usage gate
+        run: node scripts/antd-lint-gate.mjs
+
+      - name: Typecheck (tsc -b)
+        run: pnpm typecheck
+
+      - name: Test (vitest)
+        run: pnpm test
+
+      - name: Build (tsc -b && vite build)
+        run: pnpm build
+
+      - name: Upload dist
+        uses: actions/upload-artifact@v7
+        with:
+          name: web-dist
+          path: web/dist
+          if-no-files-found: error
+          retention-days: 7
