@@ -192,7 +192,8 @@ spotless {
 	}
 	format("yaml") {
 		target("**/*.yml", "**/*.yaml")
-		targetExclude("**/build/**", "**/.gradle/**", "**/bin/**", "**/node_modules/**")
+		// lockfile 由包管理器生成：Prettier 重排会让每次 install 产生无意义 churn
+		targetExclude("**/build/**", "**/.gradle/**", "**/bin/**", "**/node_modules/**", "**/pnpm-lock.yaml")
 		prettier()
 		trimTrailingWhitespace()
 		endWithNewline()

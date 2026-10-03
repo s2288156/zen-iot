@@ -58,6 +58,11 @@ Thumbs.db
 # Node
 node_modules/
 
+# Web 管理控制台（web/）
+web/node_modules/
+web/dist/
+web/coverage/
+
 # Logs
 *.log
 npm-debug.log*
