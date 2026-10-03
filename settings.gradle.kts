@@ -4,7 +4,7 @@
 // 未写 pluginManagement 块：目前没有自定义解析源的需求，真要接私有插件仓库时在此声明
 
 plugins {
-	id("org.danilopianini.gradle-pre-commit-git-hooks") version "2.1.24"
+	id("org.danilopianini.gradle-pre-commit-git-hooks") version "2.1.25"
 }
 
 // 集中式仓库声明：根项目（Spotless detached configuration）与所有子项目自动继承；

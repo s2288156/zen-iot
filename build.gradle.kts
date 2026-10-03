@@ -2,8 +2,8 @@ plugins {
 	java
 	id("io.spring.dependency-management") version "1.1.7" apply false
 	id("org.springframework.boot") version "4.1.1" apply false
-	id("com.diffplug.spotless") version "8.10.2"
-	id("com.github.spotbugs") version "6.5.11" apply false
+	id("com.diffplug.spotless") version "8.10.3"
+	id("com.github.spotbugs") version "6.5.12" apply false
 }
 
 group = "com.zen"
@@ -42,7 +42,7 @@ subprojects {
 		}
 		// ArchUnit 没有 BOM，用单条约束把版本留在根，模块仍不写版本号
 		dependencies {
-			dependency("com.tngtech.archunit:archunit-junit5:1.5.0")
+			dependency("com.tngtech.archunit:archunit-junit5:1.5.1")
 		}
 	}
 
