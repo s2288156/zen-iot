@@ -279,3 +279,7 @@ tasks.named("spotlessApply") {
 tasks.named("check") {
 	dependsOn(lintMarkdown, crossModuleVersionCheck)
 }
+
+// 本机开发栈编排（devUp / devDown / devStatus / devComposeDown）：逻辑独立成文件，根脚本不长；
+// 只被开发者手动调用，不进 check 也不进 prePushCheck
+apply(from = "gradle/dev-orchestration.gradle.kts")
