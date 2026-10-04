@@ -62,6 +62,8 @@
 
 **本项目怎么接**：根 `build.gradle.kts` 的 `lintMarkdown` 与 `lintMarkdownFix`（后者带 `--fix`）两个 `Exec` 任务，前者挂到 `check` 与 `prePushCheck`、后者挂成 `spotlessApply` 的 `finalizedBy`。这个"Apply 之后自动 fix"的接法意味着：一条 `spotlessApply` 就同时满足 Prettier 和 markdownlint，不需要记两条命令。规则集在 `.markdownlint.json`（`default: true` 起步，逐条放宽：`MD013` 行长关闭、`MD033` 允许内联 HTML、`MD041` 允许首行非标题）。
 
+经 `prePushCheck` 触发（或显式 `-PmdBase=<ref>`）时 `lintMarkdown` 是增量的：只查相对该比较基（默认 `origin/main`）变更的 Markdown，无变更则整任务跳过；`check` 与 CI 不带这两个条件，仍是全量。
+
 **接入前后**：这条最直观的前后对比就是本文档——手写 Markdown 的表格列宽是乱的，`spotlessApply` 之后所有表格对齐（本文所有表格都是这么生成的）。另外 `lintMarkdown` 依赖 `npx`，**首次运行需要联网**，这也是 `AGENTS.md` 把 Node.js 20+ 列为前置条件的原因。
 
 **产物**：无文件产物，结果在标准输出。

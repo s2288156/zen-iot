@@ -158,14 +158,17 @@ subprojects {
 	tasks.named("test") { finalizedBy("jacocoTestReport") }
 }
 
-// pre-push 触发的增量模式：Spotless 与 lintMarkdown 都只处理相对比较基变更的文件，
-// 把推送门禁从全仓 30+ 分钟降到秒级；check/CI（taskNames 不含 prePushCheck）保持全量兜底
+// pre-push 触发的增量模式：lintMarkdown 只查相对比较基变更的 md（Spotless 的增量见下方注释，已被否决）
 val prePushInvoked = gradle.startParameter.taskNames.map { it.substringAfterLast(':') }.contains("prePushCheck")
 
 spotless {
-	if (prePushInvoked) {
-		ratchetFrom("origin/main")
-	}
+	// 不启用 ratchetFrom：pre-push 的耗时几乎全在 4 个 worker 任务上，与待格式化文件数无关。
+	// ./gradlew prePushCheck --profile 实测：不带 ratchet 40m29s（spotlessYaml 13m49s FROM-CACHE、
+	// spotlessMarkdown 12m11s FROM-CACHE、spotlessGradleScripts 7m57s、spotlessJava 6m20s FROM-CACHE），
+	// 带 ratchet 34m26s —— 命中构建缓存也一样慢。ratchet 只把 worker 的输入集合变成随分支漂移
+	// （跨分支不再复用缓存条目），并把 pre-push 的格式化覆盖缩到变更文件，收益为零，故否决。
+	// 慢的是这些任务对仓库级 `**/*` target 的逐文件快照：web/node_modules 有 29344 个文件，
+	// 而裸遍历只花 2s、全树顺序读 1m17s，所以嫌疑是 Windows 上的逐文件元数据与哈希开销，尚未证实。
 	java {
 		target("**/*.java")
 		targetExclude("**/build/**", "**/bin/**")
@@ -300,7 +303,7 @@ val crossModuleVersionCheck = tasks.register("crossModuleVersionCheck") {
 // 推送前轻量门禁：格式 + 编译零告警 + 架构约束 + SpotBugs 缺陷扫描，不跑测试；全量门禁仍是 check
 val prePushCheck = tasks.register("prePushCheck") {
 	group = "verification"
-	description = "推送前门禁（Spotless/lintMarkdown 增量：只查相对 origin/main 变更文件）：Java/Markdown/kts/YAML 格式 + Markdown 规范 + 编译(-Werror) + SpotBugs(main) + 架构约束 + 版本一致性"
+	description = "推送前门禁（lintMarkdown 增量：只查相对 origin/main 变更的 md）：Java/Markdown/kts/YAML 格式 + Markdown 规范 + 编译(-Werror) + SpotBugs(main) + 架构约束 + 版本一致性"
 	dependsOn(tasks.named("spotlessCheck"), lintMarkdown)
 	dependsOn(compileGate)
 	dependsOn(crossModuleVersionCheck)
