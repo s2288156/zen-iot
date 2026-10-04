@@ -158,7 +158,14 @@ subprojects {
 	tasks.named("test") { finalizedBy("jacocoTestReport") }
 }
 
+// pre-push 触发的增量模式：Spotless 与 lintMarkdown 都只处理相对比较基变更的文件，
+// 把推送门禁从全仓 30+ 分钟降到秒级；check/CI（taskNames 不含 prePushCheck）保持全量兜底
+val prePushInvoked = gradle.startParameter.taskNames.map { it.substringAfterLast(':') }.contains("prePushCheck")
+
 spotless {
+	if (prePushInvoked) {
+		ratchetFrom("origin/main")
+	}
 	java {
 		target("**/*.java")
 		targetExclude("**/build/**", "**/bin/**")
@@ -207,10 +214,37 @@ val npx = if (isWindows) "npx.cmd" else "npx"
 // .ai/ 是 gitignore 的临时笔记：和 Spotless 一样排除，未跟踪文件不该卡住 pre-push
 val markdownTargets = listOf("**/*.md")
 
+// pre-push 是增量场景：只查相对比较基（默认 origin/main 合并基）变更的 Markdown，避免每次推送
+// 都为全仓 md 付一遍 npx 冷启动；check/CI 仍是全量。-PmdBase=<ref> 可覆盖比较基。
+// --diff-filter=ACMR 排除删除的 md（文件已不在，markdownlint 会因路径不存在直接报错）。
+// git 不可用或解析不出比较基时返回 null，回退全量
+fun changedMarkdownSince(base: String): List<String>? = try {
+	val process = ProcessBuilder("git", "diff", "--name-only", "--diff-filter=ACMR", "$base...HEAD", "--", "*.md")
+		.directory(rootDir)
+		.start()
+	val names = process.inputStream.bufferedReader().readText()
+	if (process.waitFor() != 0) null else names.trim().lines().filter { it.isNotBlank() }
+} catch (_: Exception) {
+	null
+}
+
+val mdBase = providers.gradleProperty("mdBase")
+val lintIncrementally = mdBase.isPresent || prePushInvoked
+val changedMarkdown = if (lintIncrementally) changedMarkdownSince(mdBase.getOrElse("origin/main")) else null
+
 val lintMarkdown = tasks.register<Exec>("lintMarkdown") {
 	group = "verification"
-	description = "检查 Markdown 规范"
+	description = "检查 Markdown 规范（默认全量；经 prePushCheck 或 -PmdBase 触发时只查变更的 Markdown）"
 	commandLine(listOf(npx, "markdownlint-cli") + markdownTargets)
+	changedMarkdown?.let { files ->
+		val base = mdBase.getOrElse("origin/main")
+		onlyIf("相对 $base 无 Markdown 变更") { files.isNotEmpty() }
+		if (files.isNotEmpty()) {
+			doFirst {
+				commandLine = listOf(npx, "markdownlint-cli") + files
+			}
+		}
+	}
 }
 
 val lintMarkdownFix = tasks.register<Exec>("lintMarkdownFix") {
@@ -266,7 +300,7 @@ val crossModuleVersionCheck = tasks.register("crossModuleVersionCheck") {
 // 推送前轻量门禁：格式 + 编译零告警 + 架构约束 + SpotBugs 缺陷扫描，不跑测试；全量门禁仍是 check
 val prePushCheck = tasks.register("prePushCheck") {
 	group = "verification"
-	description = "推送前门禁：Java/Markdown/kts/YAML 格式 + Markdown 规范 + 编译(-Werror) + SpotBugs(main) + 架构约束 + 版本一致性"
+	description = "推送前门禁（Spotless/lintMarkdown 增量：只查相对 origin/main 变更文件）：Java/Markdown/kts/YAML 格式 + Markdown 规范 + 编译(-Werror) + SpotBugs(main) + 架构约束 + 版本一致性"
 	dependsOn(tasks.named("spotlessCheck"), lintMarkdown)
 	dependsOn(compileGate)
 	dependsOn(crossModuleVersionCheck)
