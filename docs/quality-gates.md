@@ -170,7 +170,7 @@ Method <com.zen.ecs.controller.DeviceController.list()> calls method <...> in (D
 
 **是什么**：JUnit 5 的标签 + `useJUnitPlatform { includeTags/excludeTags }`。
 
-**本项目怎么接**（根脚本的 `integrationTag` / `runIntegrationTests` 两个变量与 `tasks.withType<Test>()`）：任何依赖本机 MySQL/Nacos/Redis 的测试打 `@Tag("integration")`，默认从 `test`/`check` **排除**；容器就绪时用 `./gradlew test -PintegrationTests` 纳入。架构测试打 `@Tag("architecture")`，为的是让 `architectureTest` 能单独捞出来跑。
+**本项目怎么接**（根脚本的 `integrationTag` / `runIntegrationTests` 两个变量与 `tasks.withType<Test>()`）：任何依赖本机中间件（MySQL/Nacos/Redis/RabbitMQ）的测试打 `@Tag("integration")`，默认从 `test`/`check` **排除**；容器就绪时用 `./gradlew test -PintegrationTests` 纳入。架构测试打 `@Tag("architecture")`，为的是让 `architectureTest` 能单独捞出来跑。
 
 **接入前后**：这是全套门禁**能不能落地**的前提。如果 `check` 需要本机起中间件，那么任何人换台机器、任何 agent 沙箱里跑一次都是红的，门禁立刻退化成"某个人的机器上才是绿的"。两个 tag 各解决一层：`architecture` 让"架构检查"能进 pre-push（秒级），`integration` 让"需要真环境"的测试既能在 CI 上跑、又不绑架本地 `check`。CI 因此拆成两个 job：`check`（无中间件）和 `integration`（`./gradlew check -PintegrationTests`，起 MySQL/Redis/RabbitMQ 容器 + 手工拉 Nacos，见 `.github/workflows/ci.yml`）。
 

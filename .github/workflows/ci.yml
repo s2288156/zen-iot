@@ -50,7 +50,7 @@ jobs:
           if-no-files-found: ignore
           retention-days: 7
 
-  # ——— 集成测试（依赖 MySQL/Nacos/Redis 容器）———
+  # ——— 集成测试（依赖 MySQL/Redis/RabbitMQ 容器与单独拉起的 Nacos）———
   integration:
     name: ./gradlew check -PintegrationTests (JDK 25)
     runs-on: ubuntu-latest
