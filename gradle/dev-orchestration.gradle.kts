@@ -44,20 +44,20 @@ fun readServerPort(module: String): Int {
 			if (line.isNotBlank() && !line.startsWith(" ") && !line.startsWith("\t")) inServer = false
 		}
 	}
-	throw GradleException("$yml 里没有 server.port")
+	throw GradleException("$yml has no server.port")
 }
 
 fun readVitePort(): Int {
 	val ts = File(rootDir, "$devWebName/vite.config.ts")
 	return Regex("""\bport:\s*(\d+)""").find(ts.readText())?.groupValues?.get(1)?.toInt()
-		?: throw GradleException("$ts 的 server 块里没有 port：dev 需要固定端口，否则探测会跟着 Vite 的自动换端漂走")
+		?: throw GradleException("$ts has no port in its server block: dev needs a fixed port, otherwise probing drifts when Vite falls back to another port")
 }
 
 fun runCapture(args: List<String>): Pair<Int, String> {
 	val process = try {
 		ProcessBuilder(args).redirectErrorStream(true).start()
 	} catch (e: Exception) {
-		throw GradleException("命令执行失败：${args.joinToString(" ")}（${e.message}）", e)
+		throw GradleException("command failed: ${args.joinToString(" ")} (${e.message})", e)
 	}
 	val output = process.inputStream.bufferedReader(Charsets.UTF_8).readText()
 	return process.waitFor() to output
@@ -83,11 +83,11 @@ fun bootTarget(module: String) = DevTarget(
 	command = {
 		val spec = Properties().apply {
 			val file = File(rootDir, "$module/build/dev/spec.properties")
-			if (!file.isFile) throw GradleException("缺少 $file，先跑 ./gradlew :$module:devSpec")
+			if (!file.isFile) throw GradleException("$file is missing; run ./gradlew :$module:devSpec first")
 			file.inputStream().use { load(it.reader(Charsets.UTF_8)) }
 		}
 		val args = File(rootDir, "$module/build/dev/java.args")
-		if (!args.isFile) throw GradleException("缺少 $args，先跑 ./gradlew :$module:devSpec")
+		if (!args.isFile) throw GradleException("$args is missing; run ./gradlew :$module:devSpec first")
 		listOf(spec.getProperty("java"), "@${args.absolutePath}")
 	},
 	workingDir = { File(rootDir, module) },
@@ -101,7 +101,7 @@ fun webTarget() = DevTarget(
 	// 直接 node + vite.js，不经 pnpm.cmd：单进程 PID 干净、不需要 shell；--strictPort 让端口被占时显式失败
 	command = {
 		val entry = File(rootDir, "$devWebName/node_modules/vite/bin/vite.js")
-		if (!entry.isFile) throw GradleException("未找到 $entry，先在 web/ 跑 pnpm install")
+		if (!entry.isFile) throw GradleException("cannot find $entry; run pnpm install in web/ first")
 		listOf("node", entry.absolutePath, "--port", readVitePort().toString(), "--strictPort")
 	},
 	workingDir = { File(rootDir, devWebName) },
@@ -138,8 +138,8 @@ fun portOwner(port: Int): String {
 	} else {
 		Regex("""pid=(\d+)""").find(runCapture(listOf("sh", "-c", "ss -ltnp 'sport = :$port'")).second)
 			?.groupValues?.get(1)?.toLongOrNull()
-	} ?: return "未知"
-	return "PID $pid（${ProcessHandle.of(pid).flatMap { h -> h.info().command() }.orElse("命令未知")}）"
+	} ?: return "unknown"
+	return "PID $pid (${ProcessHandle.of(pid).flatMap { h -> h.info().command() }.orElse("command unknown")})"
 }
 
 fun ready(target: DevTarget): Boolean = devLoopbackHosts.any { host ->
@@ -161,7 +161,7 @@ fun awaitReady(target: DevTarget) {
 	var tick = 0L
 	while (System.currentTimeMillis() < deadline) {
 		if (ready(target)) {
-			logger.lifecycle("  READY   {} 端口 {}", target.name, target.port)
+			logger.lifecycle("  READY   {} port {}", target.name, target.port)
 			return
 		}
 		if (System.currentTimeMillis() - tick > 5000) {
@@ -170,10 +170,10 @@ fun awaitReady(target: DevTarget) {
 		}
 		Thread.sleep(500)
 	}
-	val tail = target.logFile.takeIf { it.isFile }?.readLines()?.takeLast(20)?.joinToString("\n") ?: "（还没有日志）"
+	val tail = target.logFile.takeIf { it.isFile }?.readLines()?.takeLast(20)?.joinToString("\n") ?: "(no log yet)"
 	throw GradleException(
-		"${target.name} 在 ${target.waitSeconds}s 内没有就绪（端口 ${target.port}）。日志尾部：\n$tail\n" +
-			"完整日志：${target.logFile}",
+		"${target.name} did not become ready within ${target.waitSeconds}s (port ${target.port}). Log tail:\n$tail\n" +
+			"Full log: ${target.logFile}",
 	)
 }
 
@@ -186,7 +186,7 @@ fun spawn(target: DevTarget) {
 	val process = try {
 		builder.start()
 	} catch (e: Exception) {
-		throw GradleException("启动 ${target.name} 失败：${e.message}", e)
+		throw GradleException("failed to start ${target.name}: ${e.message}", e)
 	}
 	target.pidFile.writeText(process.pid().toString())
 }
@@ -204,22 +204,22 @@ fun startTarget(target: DevTarget) {
 	val pid = pidFileValue(target)
 	if (portListening(target.port)) {
 		if (pid != null && pidAlive(pid)) {
-			logger.lifecycle("  SKIPPED {} 已在运行（PID {}）", target.name, pid)
+			logger.lifecycle("  SKIPPED {} already running (PID {})", target.name, pid)
 			return
 		}
 		throw GradleException(
-			"端口 ${target.port} 被占用，且不是 devUp 起的进程：${portOwner(target.port)}。" +
-				"请先自行释放端口，再重跑 ./gradlew devUp",
+			"port ${target.port} is occupied by a process devUp did not start: ${portOwner(target.port)}. " +
+				"Free the port yourself, then re-run ./gradlew devUp",
 		)
 	}
 	if (pid != null && pidAlive(pid)) {
 		throw GradleException(
-			"${target.name} 的进程还在（PID $pid）但端口 ${target.port} 没监听，通常是启动失败后 JVM 挂住。" +
-				"看日志 ${target.logFile}",
+			"${target.name} still has a live process (PID $pid) but port ${target.port} is not listening - usually a JVM left hanging after a failed startup. " +
+				"Check the log ${target.logFile}",
 		)
 	}
 	pid?.let { target.pidFile.delete() }
-	logger.lifecycle("  START   {} 端口 {}", target.name, target.port)
+	logger.lifecycle("  START   {} port {}", target.name, target.port)
 	spawn(target)
 	awaitReady(target)
 }
@@ -231,13 +231,13 @@ fun composeCommand(vararg args: String): List<String> =
 // 所以服务清单一律以 config --services 为准，只看本文件声明的服务
 fun composeServices(): List<String> {
 	val (code, output) = runCapture(composeCommand("config", "--services"))
-	if (code != 0) throw GradleException("docker compose config 失败：$output")
+	if (code != 0) throw GradleException("docker compose config failed: $output")
 	return output.lines().map { it.trim() }.filter { it.isNotEmpty() }
 }
 
 fun composeStates(): Map<String, String> {
 	val (code, output) = runCapture(composeCommand("ps", "--format", "{{json .}}"))
-	if (code != 0) throw GradleException("docker compose ps 失败：$output")
+	if (code != 0) throw GradleException("docker compose ps failed: $output")
 	return output.lineSequence().filter { it.isNotBlank() }.mapNotNull { line ->
 		val service = Regex(""""Service":"([^"]+)"""").find(line)?.groupValues?.get(1) ?: return@mapNotNull null
 		val state = Regex(""""State":"([^"]*)"""").find(line)?.groupValues?.get(1) ?: "none"
@@ -257,12 +257,12 @@ fun awaitMiddleware() {
 	while (System.currentTimeMillis() < deadline) {
 		val report = middlewareReport()
 		if (report.isNotEmpty() && report.all { it.endsWith("=healthy") || it.endsWith("=running") }) {
-			logger.lifecycle("  READY   中间件 {}", report.joinToString(", "))
+			logger.lifecycle("  READY   middleware {}", report.joinToString(", "))
 			return
 		}
 		Thread.sleep(1000)
 	}
-	throw GradleException("中间件在 ${devMiddlewareTimeout}s 内没有全部就绪，当前：${middlewareReport().joinToString(", ")}")
+	throw GradleException("middleware did not all become ready within ${devMiddlewareTimeout}s, current: ${middlewareReport().joinToString(", ")}")
 }
 
 subprojects {
@@ -282,7 +282,7 @@ subprojects {
 		// 故意不声明 outputs：class 或依赖变了却被判定 UP-TO-DATE 会留下过期 spec，比每次多跑一次贵。
 		tasks.register("devSpec") {
 			group = "dev"
-			description = "写出本机启动本服务所需的 java 路径、主类与运行时 classpath"
+			description = "Write the java path, main class and runtime classpath needed to start this service locally"
 			inputs.files(runtimeClasspath)
 			inputs.file(applicationYml)
 			// 主类由 resolveMainClassName 产出，必须先跑完再取值。
@@ -307,8 +307,8 @@ subprojects {
 				val classpath = runtimeClasspath.asPath
 				if (classpath.contains(' ')) {
 					throw GradleException(
-						"${project.name} 的 classpath 含空格（$classpath），而 java @argfile 需要不加引号才能被正确解析。" +
-							"把 Gradle 缓存/JDK 挪到无空格路径，或改回 -cp 直传。",
+						"${project.name} has spaces in its classpath ($classpath), and java @argfile parses entries correctly only when unquoted. " +
+							"Move the Gradle cache/JDK to a path without spaces, or go back to passing -cp directly.",
 					)
 				}
 				argsFile.get().asFile.apply {
@@ -321,7 +321,7 @@ subprojects {
 						).joinToString("\n") + "\n",
 					)
 				}
-				logger.lifecycle("  devSpec {} 主类 {}", project.name, mainClass)
+				logger.lifecycle("  devSpec {} main class {}", project.name, mainClass)
 			}
 		}
 	}
@@ -329,22 +329,22 @@ subprojects {
 
 tasks.register("devUp") {
 	group = "dev"
-	description = "一键起本机开发栈：docker 中间件 + gateway/admin/ecs + 前端，已在运行的跳过"
+	description = "Start the local dev stack in one go: docker middleware + gateway/admin/ecs + web, skipping what already runs"
 	dependsOn(devBootModules.map { ":$it:devSpec" })
 	doLast {
 		devPidDir.get().mkdirs()
-		logger.lifecycle("devUp：$devBootModules + $devWebName")
+		logger.lifecycle("devUp: $devBootModules + $devWebName")
 		val (code, output) = runCapture(composeCommand("up", "-d"))
-		if (code != 0) throw GradleException("docker compose up -d 失败：\n$output")
+		if (code != 0) throw GradleException("docker compose up -d failed:\n$output")
 		awaitMiddleware()
 		devTargets().forEach { startTarget(it) }
-		logger.lifecycle("devUp 完成：./gradlew devStatus 看状态，./gradlew devDown 停应用")
+		logger.lifecycle("devUp done: ./gradlew devStatus to check state, ./gradlew devDown to stop the apps")
 	}
 }
 
 tasks.register("devDown") {
 	group = "dev"
-	description = "停掉 devUp 拉起的应用进程（不动 docker 中间件）；没在跑时是 no-op"
+	description = "Stop the app processes started by devUp (docker middleware untouched); no-op when nothing is running"
 	doLast {
 		val targets = devTargets().reversed()
 		var stopped = 0
@@ -356,7 +356,7 @@ tasks.register("devDown") {
 			}
 			if (!pidAlive(pid)) {
 				target.pidFile.delete()
-				logger.lifecycle("  STALE   {} PID {} 已退出，清掉状态文件", target.name, pid)
+				logger.lifecycle("  STALE   {} PID {} exited, clearing state file", target.name, pid)
 				return@forEach
 			}
 			killTree(pid)
@@ -364,23 +364,23 @@ tasks.register("devDown") {
 			stopped++
 			logger.lifecycle("  STOPPED {} PID {}", target.name, pid)
 		}
-		if (stopped == 0) logger.lifecycle("devDown：没有在跑的应用进程")
+		if (stopped == 0) logger.lifecycle("devDown: no app processes running")
 	}
 }
 
 tasks.register("devStatus") {
 	group = "dev"
-	description = "报告 devUp 各目标的进程与端口状态，以及中间件健康"
+	description = "Report process and port state for each devUp target, plus middleware health"
 	doLast {
 		devTargets().forEach { target ->
 			val pid = pidFileValue(target)
 			val state = when {
 				pid == null -> "stopped"
-				!pidAlive(pid) -> "stale (PID $pid 已退出)"
-				!portListening(target.port) -> "no-port (PID $pid, 端口 ${target.port} 未监听)"
-				else -> "running (PID $pid, 端口 ${target.port}, ready=${ready(target)})"
+				!pidAlive(pid) -> "stale (PID $pid exited)"
+				!portListening(target.port) -> "no-port (PID $pid, port ${target.port} not listening)"
+				else -> "running (PID $pid, port ${target.port}, ready=${ready(target)})"
 			}
-			logger.lifecycle("  {}  {}  日志 {}", target.name, state, target.logFile)
+			logger.lifecycle("  {}  {}  log {}", target.name, state, target.logFile)
 		}
 		middlewareReport().forEach { logger.lifecycle("  middleware {}", it) }
 	}
@@ -388,11 +388,11 @@ tasks.register("devStatus") {
 
 tasks.register("devComposeDown") {
 	group = "dev"
-	description = "清场：只停本 compose 文件声明的中间件容器（容器与卷都保留）。devDown 不做这件事"
+	description = "Teardown: stop only the middleware containers this compose file declares (containers and volumes kept); devDown never does this"
 	doLast {
 		// 刻意不用 down：项目名由目录名推导，本机存在同名 compose 项目，down 会连带删掉无关容器
 		val (code, output) = runCapture(composeCommand("stop") + composeServices())
-		if (code != 0) throw GradleException("docker compose stop 失败：\n$output")
+		if (code != 0) throw GradleException("docker compose stop failed:\n$output")
 		logger.lifecycle(output.trim())
 	}
 }

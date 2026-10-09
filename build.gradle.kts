@@ -77,7 +77,7 @@ subprojects {
 	val testSourceSet = sourceSets.getByName("test")
 	tasks.register<Test>("architectureTest") {
 		group = "verification"
-		description = "架构约束测试（ArchUnit，无需本机中间件）"
+		description = "Architecture constraint tests (ArchUnit, no local middleware needed)"
 		testClassesDirs = testSourceSet.output.classesDirs
 		classpath = testSourceSet.runtimeClasspath
 		dependsOn(tasks.named("testClasses"))
@@ -108,7 +108,7 @@ subprojects {
 	val versionReport = layout.buildDirectory.file(versionReportPath)
 	val versionCoherenceCheck = tasks.register("versionCoherenceCheck") {
 		group = "verification"
-		description = "断言 $sameVersionGroups 在本模块各配置内同版本，并写出已解析版本报告"
+		description = "Assert $sameVersionGroups is version-coherent in this module and write the resolved-version report"
 		val resolved = provider {
 			coherenceConfigurations.mapNotNull { name ->
 				val cfg = configurations.findByName(name)
@@ -134,8 +134,8 @@ subprojects {
 				}
 			if (split.isNotEmpty()) {
 				throw GradleException(
-					"${project.name}: 同组构件解析出多个版本\n${split.joinToString("\n")}" +
-						"\n单条钉住的约束要连 BOM 管的兄弟构件一起对齐，Dependabot 只会抬前者。",
+					"${project.name}: same-group artifacts resolved to multiple versions\n${split.joinToString("\n")}" +
+						"\nA single pinned constraint must be aligned with its BOM-managed siblings; Dependabot only bumps the pinned one.",
 				)
 			}
 			versionReport.get().asFile.apply {
@@ -161,6 +161,11 @@ subprojects {
 // pre-push 触发的增量模式：lintMarkdown 只查相对比较基变更的 md（Spotless 的增量见下方注释，已被否决）
 val prePushInvoked = gradle.startParameter.taskNames.map { it.substringAfterLast(':') }.contains("prePushCheck")
 
+// Markdown 门禁的覆盖面是白名单，不是 `**/*.md` 减去一串排除：私有工作区目录只增不减，减法名单每多一个
+// 就要再红一次提交。这里列受控文档的全部位置——根、每个模块的 README、.github 模板、docs/ 全树。
+// 白名单的代价是新位置的文档会静默逃过门禁，由下方 trackedMarkdownOutsideTargets() 兜底成显式失败。
+val markdownTargets = listOf("*.md", "*/README.md", ".github/*.md", "docs/**/*.md")
+
 spotless {
 	// 不启用 ratchetFrom：pre-push 的耗时几乎全在 4 个 worker 任务上，与待格式化文件数无关。
 	// ./gradlew prePushCheck --profile 实测：不带 ratchet 40m29s（spotlessYaml 13m49s FROM-CACHE、
@@ -177,9 +182,9 @@ spotless {
 		toggleOffOn()
 	}
 	format("markdown") {
-		target("**/*.md")
-		// .ai/ 与 .codex/ 是 gitignore 的本地笔记：Spotless 的 ** 会匹配到点开头的路径，未跟踪文件于是反过来卡住每一次提交
-		targetExclude("**/build/**", "**/.gradle/**", "**/node_modules/**", "**/.ai/**", "**/.codex/**")
+		// 白名单里没有 node_modules、build 与各私有工作区目录，它们不需要再被逐个排除
+		target(markdownTargets)
+		targetExclude("**/build/**", "**/node_modules/**")
 		prettier()
 			.config(
 				mapOf(
@@ -214,8 +219,26 @@ spotless {
 val isWindows = System.getProperty("os.name").lowercase().contains("windows")
 val npx = if (isWindows) "npx.cmd" else "npx"
 
-// .ai/ 是 gitignore 的临时笔记：和 Spotless 一样排除，未跟踪文件不该卡住 pre-push
-val markdownTargets = listOf("**/*.md")
+// 白名单把「每次提交都红」换成「新位置的文档静默逃过门禁」，所以要用 git 的跟踪清单兜底：
+// 被跟踪的 *.md 只要落不进 markdownTargets 就显式失败。下面的判定与 markdownTargets 逐条对齐，改一处必须同步另一处。
+fun escapesMarkdownTargets(path: String): Boolean {
+	val parts = path.split('/')
+	return when {
+		parts.size == 1 -> false // *.md
+		parts.size == 2 && (parts[0] == ".github" || parts[1] == "README.md") -> false // .github/*.md、*/README.md
+		parts[0] == "docs" -> false // docs/**/*.md：** 匹配零层目录，docs/ 直属文件同样覆盖
+		else -> true
+	}
+}
+
+// .git 不可用时（源码归档、沙箱）返回 null，跳过这条检查，与 changedMarkdownSince 的处理一致
+fun trackedMarkdownOutsideTargets(): List<String>? = try {
+	val process = ProcessBuilder("git", "ls-files", "-z", "--", "*.md").directory(rootDir).start()
+	val paths = process.inputStream.bufferedReader().readText().split('\u0000')
+	if (process.waitFor() != 0) null else paths.filter { it.isNotBlank() && escapesMarkdownTargets(it) }
+} catch (_: Exception) {
+	null
+}
 
 // pre-push 是增量场景：只查相对比较基（默认 origin/main 合并基）变更的 Markdown，避免每次推送
 // 都为全仓 md 付一遍 npx 冷启动；check/CI 仍是全量。-PmdBase=<ref> 可覆盖比较基。
@@ -237,11 +260,21 @@ val changedMarkdown = if (lintIncrementally) changedMarkdownSince(mdBase.getOrEl
 
 val lintMarkdown = tasks.register<Exec>("lintMarkdown") {
 	group = "verification"
-	description = "检查 Markdown 规范（默认全量；经 prePushCheck 或 -PmdBase 触发时只查变更的 Markdown）"
+	description = "Check Markdown rules (full repo by default; only changed files under prePushCheck or -PmdBase)"
 	commandLine(listOf(npx, "markdownlint-cli") + markdownTargets)
+	doFirst {
+		val outside = trackedMarkdownOutsideTargets()
+		if (outside != null && outside.isNotEmpty()) {
+			throw GradleException(
+				"tracked Markdown sits outside the allowlist, so it would silently skip the format and lint gate:\n" +
+					outside.sorted().joinToString("\n") { "  $it" } +
+					"\nList its location in markdownTargets (build.gradle.kts), or move the document under docs/.",
+			)
+		}
+	}
 	changedMarkdown?.let { files ->
 		val base = mdBase.getOrElse("origin/main")
-		onlyIf("相对 $base 无 Markdown 变更") { files.isNotEmpty() }
+		onlyIf("no Markdown changes vs $base") { files.isNotEmpty() }
 		if (files.isNotEmpty()) {
 			doFirst {
 				commandLine = listOf(npx, "markdownlint-cli") + files
@@ -252,7 +285,7 @@ val lintMarkdown = tasks.register<Exec>("lintMarkdown") {
 
 val lintMarkdownFix = tasks.register<Exec>("lintMarkdownFix") {
 	group = "verification"
-	description = "自动修复 Markdown 规范问题（markdownlint --fix）"
+	description = "Auto-fix Markdown rule violations (markdownlint --fix)"
 	commandLine(listOf(npx, "markdownlint-cli") + markdownTargets + listOf("--fix"))
 }
 
@@ -272,7 +305,7 @@ val compileGate = subprojects.flatMap { subproject ->
 // 数据来自各模块 versionCoherenceCheck 写的报告（并行执行下根任务不能直接解析别人的配置）。
 val crossModuleVersionCheck = tasks.register("crossModuleVersionCheck") {
 	group = "verification"
-	description = "比对各模块已解析版本报告，同一坐标出现多个版本即失败"
+	description = "Compare resolved-version reports across modules; fail if one coordinate has multiple versions"
 	dependsOn(subprojects.map { it.tasks.named("versionCoherenceCheck") })
 	val reports = subprojects.map { it.name to it.layout.buildDirectory.file(versionReportPath) }
 	doLast {
@@ -281,7 +314,7 @@ val crossModuleVersionCheck = tasks.register("crossModuleVersionCheck") {
 		reports.forEach { (moduleName, report) ->
 			val file = report.get().asFile
 			if (!file.isFile) {
-				throw GradleException("缺少 $moduleName 的已解析版本报告：$file。先跑 ./gradlew versionCoherenceCheck")
+				throw GradleException("missing resolved-version report for $moduleName: $file. Run ./gradlew versionCoherenceCheck first")
 			}
 			file.readLines().filter { it.isNotBlank() }.forEach { line ->
 				val (configurationName, coordinate, version) = line.split('|')
@@ -295,7 +328,7 @@ val crossModuleVersionCheck = tasks.register("crossModuleVersionCheck") {
 				"  $key -> " + hits.sortedBy { it.first }.joinToString(", ") { (moduleName, version) -> "$moduleName=$version" }
 			}
 		if (drift.isNotEmpty()) {
-			throw GradleException("同一坐标在不同模块解析到了不同版本：\n${drift.joinToString("\n")}")
+			throw GradleException("the same coordinate resolved to different versions in different modules:\n${drift.joinToString("\n")}")
 		}
 	}
 }
@@ -303,7 +336,7 @@ val crossModuleVersionCheck = tasks.register("crossModuleVersionCheck") {
 // 推送前轻量门禁：格式 + 编译零告警 + 架构约束 + SpotBugs 缺陷扫描，不跑测试；全量门禁仍是 check
 val prePushCheck = tasks.register("prePushCheck") {
 	group = "verification"
-	description = "推送前门禁（lintMarkdown 增量：只查相对 origin/main 变更的 md）：Java/Markdown/kts/YAML 格式 + Markdown 规范 + 编译(-Werror) + SpotBugs(main) + 架构约束 + 版本一致性"
+	description = "Pre-push gate (Markdown check is incremental): format + Markdown rules + compile (-Werror) + SpotBugs + architecture + version coherence"
 	dependsOn(tasks.named("spotlessCheck"), lintMarkdown)
 	dependsOn(compileGate)
 	dependsOn(crossModuleVersionCheck)
