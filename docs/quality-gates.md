@@ -39,19 +39,19 @@
 
 **是什么**：一个"格式化即构建步骤"的 Gradle 插件。它不配置编辑器，而是自己持有 formatter（Java 用 palantir-java-format，Markdown/YAML 用 Prettier），把"格式对不对"变成一个可执行断言。`spotlessApply` 改文件，`spotlessCheck` 只判定。
 
-**本项目怎么接**（根 `build.gradle.kts` 的 `spotless { }` 块）：四种语言各一条 target，注意每条都 `targetExclude("**/build/**")`：
+**本项目怎么接**（根 `build.gradle.kts` 的 `spotless { }` 块）：四种语言各一条 target，**四条都是白名单/锚定形状，没有任何 `targetExclude`**（排除为什么是负收益见坑 1）：
 
-- `java`：palantir-java-format 2.97.0 + `removeUnusedImports()` + `toggleOffOn()`（允许用 `// @formatter:off` 局部逃生，生成的代码、对齐的矩阵才用得上）。
+- `java`：target 锚定在 `*/src/**/*.java`，不是仓库根裸 `**/*.java`——裸 `**/*` 的输入快照与命中文件数无关，锚定后 include 侧才走目录剪枝（机制与实测数字见根 `build.gradle.kts` 的 `spotless { }` 块内注释）。palantir-java-format 2.97.0 + `removeUnusedImports()` + `toggleOffOn()`（允许用 `// @formatter:off` 局部逃生，生成的代码、对齐的矩阵才用得上）。
 - `markdown`：Prettier，`printWidth: 120`、`singleQuote`、`proseWrap: preserve`；target 是 `markdownTargets` 白名单，不是 `**/*.md` 减去一串排除（坑 1）。
-- `gradleScripts`：**只**定尾随空白与文件结尾换行，注释写明了原因——不引入 ktlint，否则既有 tab 缩进的构建脚本会被整体重排，一个改动淹没在几百行 diff 里。
-- `yaml`：Prettier。
+- `gradleScripts`：target 是 `gradleScriptTargets`——根 `*.gradle.kts`、各模块 `*/build.gradle.kts`、`gradle/*.gradle.kts` 三个位置；**只**定尾随空白与文件结尾换行，注释写明了原因——不引入 ktlint，否则既有 tab 缩进的构建脚本会被整体重排，一个改动淹没在几百行 diff 里。
+- `yaml`：Prettier，target 是 `yamlTargets`——`.github/**`、`docker/**`、`*/src/**` 下的 yml 与 yaml。`web/pnpm-lock.yaml` 刻意不在名单里：lockfile 由包管理器生成，Prettier 重排会让每次 install 产生无意义 churn。
 - 刻意**没有** SQL target：`spotless` 块末尾那条注释说 Flyway 脚本是历史记录，重排会让迁移 diff 无法审查。
 
 **接入前后**：
 
 - 接之前，"缩进风格"是 code review 里反复出现的口水战，`.editorconfig` 只是建议——IDE 不装插件就不生效，成员换编辑器就漂移。
 - 接之后 diff 里再没有空白噪音。但它有两个真实的坑，本项目都踩过：
-  1. **Spotless 的 `**` 会匹配以点开头的路径**。`.ai/` 是 gitignore 的临时笔记目录，于是**未跟踪文件**反过来卡住了每一次提交——`check`会因为一个根本不在版本库里的 Markdown 文件而红。第一版修法是往`targetExclude`里补目录（历史见`2cbd5f8 fix(build): exclude gitignored .ai scratch docs from spotless markdown`），但私有工作区已经长出三个（`.ai/`、`.codex/`、`.qoder/`），减法名单意味着每多一个新目录就要再红一次提交。现在 `markdown`的 target 是白名单`markdownTargets`：只列文档的受控位置，`node_modules`和私有目录不在名单里，自然进不来。代价换到另一边——新位置的文档会**静默逃过门禁**，所以`lintMarkdown`用`git ls-files` 的实际跟踪清单比对白名单，有 md 落不进去就失败并列出路径。
+  1. **Spotless 的 `**` 会匹配以点开头的路径**。`.ai/` 是 gitignore 的临时笔记目录，于是**未跟踪文件**反过来卡住了每一次提交——`check`会因为一个根本不在版本库里的 Markdown 文件而红。第一版修法是往`targetExclude`里补目录（历史见`2cbd5f8 fix(build): exclude gitignored .ai scratch docs from spotless markdown`），但私有工作区已经长出三个（`.ai/`、`.codex/`、`.qoder/`），减法名单意味着每多一个新目录就要再红一次提交。现在 `markdown`的 target 是白名单`markdownTargets`：只列文档的受控位置，`node_modules`和私有目录不在名单里，自然进不来。代价换到另一边——新位置的文档会**静默逃过门禁**，所以`lintMarkdown`用`git ls-files` 的实际跟踪清单比对白名单，有 md 落不进去就失败并列出路径。白名单落地后残留的`targetExclude("**/build/**", "**/node_modules/**")`已删：Spotless 把排除实现成 `target.minus(targetExclude)`，`FormatExtension` 里两边各自解析成一棵文件树（include 侧才走 Gradle 的目录剪枝），所以排除侧只会多走一遍全树、从不剪枝——白名单够不到的目录写进来是负收益。
   2. 它管不了"内容是否还准确"。格式化通过 ≠ 文档没过期。
 
 **产物**：**没有报告文件**。失败信息只有标准输出里的"哪个文件哪一处不符合格式"，以及一行 `Run 'gradlew spotlessApply' to fix`。这是有意的——格式问题的正确修复动作是"应用"，不是"读报告"。
