@@ -86,8 +86,7 @@ subprojects {
 		}
 	}
 
-	// 6.5.x 默认不生成任何报告文件，必须显式打开，否则失败时只有一句 exit code 1
-	// 插件默认不注册任何报告，失败时只会看到 exit code 1；这里显式建 HTML + XML 两类报告
+	// 6.5.x 默认不注册任何报告，失败时只会看到 exit code 1；这里显式建 HTML + XML 两类报告
 	tasks.withType<com.github.spotbugs.snom.SpotBugsTask>().configureEach {
 		reports.create("html") { required.set(true) }
 		reports.create("xml") { required.set(true) }
@@ -166,25 +165,37 @@ val prePushInvoked = gradle.startParameter.taskNames.map { it.substringAfterLast
 // 白名单的代价是新位置的文档会静默逃过门禁，由下方 trackedMarkdownOutsideTargets() 兜底成显式失败。
 val markdownTargets = listOf("*.md", "*/README.md", ".github/*.md", "docs/**/*.md")
 
+// yaml 与 gradleScripts 的 target 同样列受控位置，而不是从仓库根写 `**/*`：裸 `**/*` 的输入快照与命中文件数
+// 无关，Gradle 为判定"无变更"要枚举整棵树（实测见下方 spotless 块内注释），锚定后 include 侧才走目录剪枝。
+val yamlTargets = listOf(
+	".github/**/*.yml",
+	".github/**/*.yaml",
+	"docker/**/*.yml",
+	"docker/**/*.yaml",
+	"*/src/**/*.yml",
+	"*/src/**/*.yaml",
+)
+val gradleScriptTargets = listOf("*.gradle.kts", "*/build.gradle.kts", "gradle/*.gradle.kts")
+
 spotless {
-	// 不启用 ratchetFrom：pre-push 的耗时几乎全在 4 个 worker 任务上，与待格式化文件数无关。
-	// ./gradlew prePushCheck --profile 实测：不带 ratchet 40m29s（spotlessYaml 13m49s FROM-CACHE、
-	// spotlessMarkdown 12m11s FROM-CACHE、spotlessGradleScripts 7m57s、spotlessJava 6m20s FROM-CACHE），
-	// 带 ratchet 34m26s —— 命中构建缓存也一样慢。ratchet 只把 worker 的输入集合变成随分支漂移
-	// （跨分支不再复用缓存条目），并把 pre-push 的格式化覆盖缩到变更文件，收益为零，故否决。
-	// 慢的是这些任务对仓库级 `**/*` target 的逐文件快照：web/node_modules 有 29344 个文件，
-	// 而裸遍历只花 2s、全树顺序读 1m17s，所以嫌疑是 Windows 上的逐文件元数据与哈希开销，尚未证实。
+	// 不启用 ratchetFrom：当时 pre-push 的耗时全在三个仓库级 `**/*` target 的输入快照上，与待格式化
+	// 文件数无关——Gradle 为判定"无变更"要枚举整棵树（31394 个文件里有 29988 个在 web/node_modules；
+	// 15 个文件的 yaml 8m31s 比 181 个文件的 java 3m47s 还慢，而白名单形状的 markdown 只要 1s；
+	// `targetExclude` 也从不剪枝，yaml 已排除 node_modules 仍最慢。ratchet 缩输入集合对这笔开销收益为零，
+	// 却让输入随分支漂移、跨分支不再复用缓存条目，故当时否决（不带 40m29s、带 34m26s）。
+	// 这笔开销已随下面的锚定 target 消掉（java 实测 3m47s → 12.8s），格式检查现在是秒级，更没有 ratchet 的位置。
 	java {
-		target("**/*.java")
-		targetExclude("**/build/**", "**/bin/**")
+		// 锚定后 include 侧才走 Gradle 的目录剪枝；同样不写 targetExclude，理由同下面 markdown 那条
+		target("*/src/**/*.java")
 		palantirJavaFormat("2.97.0")
 		removeUnusedImports()
 		toggleOffOn()
 	}
 	format("markdown") {
-		// 白名单里没有 node_modules、build 与各私有工作区目录，它们不需要再被逐个排除
+		// 白名单里没有 node_modules、build 与各私有工作区目录，它们不需要再被逐个排除；
+		// 也刻意不写 targetExclude：Spotless 把它实现成 target.minus(targetExclude)（两边各自解析成文件树），
+		// 排除侧只会多走一遍全树，从不剪枝
 		target(markdownTargets)
-		targetExclude("**/build/**", "**/node_modules/**")
 		prettier()
 			.config(
 				mapOf(
@@ -200,15 +211,13 @@ spotless {
 	}
 	// 只定空白与文件结尾，不引入 ktlint：避免把既有 tab 缩进的构建脚本整体重排
 	format("gradleScripts") {
-		target("**/*.gradle.kts")
-		targetExclude("**/build/**", "**/.gradle/**")
+		target(gradleScriptTargets)
 		trimTrailingWhitespace()
 		endWithNewline()
 	}
 	format("yaml") {
-		target("**/*.yml", "**/*.yaml")
-		// lockfile 由包管理器生成：Prettier 重排会让每次 install 产生无意义 churn
-		targetExclude("**/build/**", "**/.gradle/**", "**/bin/**", "**/node_modules/**", "**/pnpm-lock.yaml")
+		// web/pnpm-lock.yaml 不在 yamlTargets 里：lockfile 由包管理器生成，Prettier 重排会让每次 install 产生无意义 churn
+		target(yamlTargets)
 		prettier()
 		trimTrailingWhitespace()
 		endWithNewline()
@@ -333,7 +342,7 @@ val crossModuleVersionCheck = tasks.register("crossModuleVersionCheck") {
 	}
 }
 
-// 推送前轻量门禁：格式 + 编译零告警 + 架构约束 + SpotBugs 缺陷扫描，不跑测试；全量门禁仍是 check
+// 推送前轻量门禁：格式 + Markdown 规则 + 编译零告警 + SpotBugs + 架构约束 + 版本一致性，不跑测试；全量门禁仍是 check
 val prePushCheck = tasks.register("prePushCheck") {
 	group = "verification"
 	description = "Pre-push gate (Markdown check is incremental): format + Markdown rules + compile (-Werror) + SpotBugs + architecture + version coherence"
