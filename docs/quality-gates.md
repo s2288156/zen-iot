@@ -42,7 +42,7 @@
 **本项目怎么接**（根 `build.gradle.kts` 的 `spotless { }` 块）：四种语言各一条 target，注意每条都 `targetExclude("**/build/**")`：
 
 - `java`：palantir-java-format 2.97.0 + `removeUnusedImports()` + `toggleOffOn()`（允许用 `// @formatter:off` 局部逃生，生成的代码、对齐的矩阵才用得上）。
-- `markdown`：Prettier，`printWidth: 120`、`singleQuote`、`proseWrap: preserve`。
+- `markdown`：Prettier，`printWidth: 120`、`singleQuote`、`proseWrap: preserve`；target 是 `markdownTargets` 白名单，不是 `**/*.md` 减去一串排除（坑 1）。
 - `gradleScripts`：**只**定尾随空白与文件结尾换行，注释写明了原因——不引入 ktlint，否则既有 tab 缩进的构建脚本会被整体重排，一个改动淹没在几百行 diff 里。
 - `yaml`：Prettier。
 - 刻意**没有** SQL target：`spotless` 块末尾那条注释说 Flyway 脚本是历史记录，重排会让迁移 diff 无法审查。
@@ -51,7 +51,7 @@
 
 - 接之前，"缩进风格"是 code review 里反复出现的口水战，`.editorconfig` 只是建议——IDE 不装插件就不生效，成员换编辑器就漂移。
 - 接之后 diff 里再没有空白噪音。但它有两个真实的坑，本项目都踩过：
-  1. **Spotless 的 `**` 会匹配以点开头的路径**。`.ai/` 是 gitignore 的临时笔记目录，于是**未跟踪文件**反过来卡住了每一次提交——`check`会因为一个根本不在版本库里的 Markdown 文件而红。修法是把 `**/.ai/**`加进`markdown`target 的`targetExclude`，历史见 `2cbd5f8 fix(build): exclude gitignored .ai scratch docs from spotless markdown`。
+  1. **Spotless 的 `**` 会匹配以点开头的路径**。`.ai/` 是 gitignore 的临时笔记目录，于是**未跟踪文件**反过来卡住了每一次提交——`check`会因为一个根本不在版本库里的 Markdown 文件而红。第一版修法是往`targetExclude`里补目录（历史见`2cbd5f8 fix(build): exclude gitignored .ai scratch docs from spotless markdown`），但私有工作区已经长出三个（`.ai/`、`.codex/`、`.qoder/`），减法名单意味着每多一个新目录就要再红一次提交。现在 `markdown`的 target 是白名单`markdownTargets`：只列文档的受控位置，`node_modules`和私有目录不在名单里，自然进不来。代价换到另一边——新位置的文档会**静默逃过门禁**，所以`lintMarkdown`用`git ls-files` 的实际跟踪清单比对白名单，有 md 落不进去就失败并列出路径。
   2. 它管不了"内容是否还准确"。格式化通过 ≠ 文档没过期。
 
 **产物**：**没有报告文件**。失败信息只有标准输出里的"哪个文件哪一处不符合格式"，以及一行 `Run 'gradlew spotlessApply' to fix`。这是有意的——格式问题的正确修复动作是"应用"，不是"读报告"。
@@ -60,7 +60,7 @@
 
 **是什么**：Spotless 保证"看起来一致"，markdownlint 保证"写得规范"（标题层级不跳级、列表缩进、ATX 风格标题等）。它是 Node 工具，Gradle 通过 `Exec` 任务调 `npx markdownlint-cli`。
 
-**本项目怎么接**：根 `build.gradle.kts` 的 `lintMarkdown` 与 `lintMarkdownFix`（后者带 `--fix`）两个 `Exec` 任务，前者挂到 `check` 与 `prePushCheck`、后者挂成 `spotlessApply` 的 `finalizedBy`。这个"Apply 之后自动 fix"的接法意味着：一条 `spotlessApply` 就同时满足 Prettier 和 markdownlint，不需要记两条命令。规则集在 `.markdownlint.json`（`default: true` 起步，逐条放宽：`MD013` 行长关闭、`MD033` 允许内联 HTML、`MD041` 允许首行非标题）。
+**本项目怎么接**：根 `build.gradle.kts` 的 `lintMarkdown` 与 `lintMarkdownFix`（后者带 `--fix`）两个 `Exec` 任务，前者挂到 `check` 与 `prePushCheck`、后者挂成 `spotlessApply` 的 `finalizedBy`。这个"Apply 之后自动 fix"的接法意味着：一条 `spotlessApply` 就同时满足 Prettier 和 markdownlint，不需要记两条命令。规则集在 `.markdownlint.json`（`default: true` 起步，逐条放宽：`MD013` 行长关闭、`MD033` 允许内联 HTML、`MD041` 允许首行非标题）。这两个任务与 Spotless 的 `markdown` target 共用同一份 `markdownTargets`，所以 lint 的覆盖面严格等于格式化的覆盖面。
 
 经 `prePushCheck` 触发（或显式 `-PmdBase=<ref>`）时 `lintMarkdown` 是增量的：只查相对该比较基（默认 `origin/main`）变更的 Markdown，无变更则整任务跳过；`check` 与 CI 不带这两个条件，仍是全量。
 
