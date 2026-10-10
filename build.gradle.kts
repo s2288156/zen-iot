@@ -347,14 +347,15 @@ val lintMarkdownFix = tasks.register<Exec>("lintMarkdownFix") {
 }
 
 // TaskProvider 懒加载，避免配置期急切解析所有子项目
+val versionChecks = subprojects.map { it.tasks.named("versionCoherenceCheck") }
+
 val compileGate = subprojects.flatMap { subproject ->
 	listOf(
 		subproject.tasks.named("testClasses"),
 		subproject.tasks.named("spotbugsMain"),
 		subproject.tasks.named("architectureTest"),
-		subproject.tasks.named("versionCoherenceCheck"),
 	)
-}
+} + versionChecks
 
 // 同一坐标在各模块必须解析到同一版本。common-core 的 testRuntimeClasspath 曾在 Jackson 2.12.7.1 上跑，
 // 而 admin-service 运行时是 2.21.5——库模块自测的版本和部署不是一套，CI 绿着也藏得住。
@@ -363,7 +364,7 @@ val compileGate = subprojects.flatMap { subproject ->
 val crossModuleVersionCheck = tasks.register("crossModuleVersionCheck") {
 	group = "verification"
 	description = "Compare resolved-version reports across modules; fail if one coordinate has multiple versions"
-	dependsOn(subprojects.map { it.tasks.named("versionCoherenceCheck") })
+	dependsOn(versionChecks)
 	val reports = subprojects.map { it.name to it.layout.buildDirectory.file(versionReportPath) }
 	doLast {
 		// key = "配置 坐标"，value = 各模块解析到的版本
