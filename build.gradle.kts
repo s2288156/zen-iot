@@ -288,28 +288,29 @@ fun escapesMarkdownTargets(path: String): Boolean {
 	}
 }
 
-// .git 不可用时（源码归档、沙箱）返回 null，跳过这条检查，与 changedMarkdownSince 的处理一致
-fun trackedMarkdownOutsideTargets(): List<String>? = try {
-	val process = ProcessBuilder("git", "ls-files", "-z", "--", "*.md").directory(rootDir).start()
-	val paths = process.inputStream.bufferedReader().readText().split('\u0000')
-	if (process.waitFor() != 0) null else paths.filter { it.isNotBlank() && escapesMarkdownTargets(it) }
+// git 的两类降级原因（git 不可用 / 命令非零退出）刻意不区分：本文件的 git 用法都是可选优化，
+// 拿不到结果就退回全量。ls-files 用 -z（NUL 分隔）、diff 用换行分隔，这里一并处理。
+fun gitOutput(vararg args: String): List<String>? = try {
+	val process = ProcessBuilder(listOf("git") + args).directory(rootDir).start()
+	val output = process.inputStream.bufferedReader().readText()
+	if (process.waitFor() != 0) {
+		null
+	} else {
+		output.split('\u0000', '\n').filter { it.isNotBlank() }
+	}
 } catch (_: Exception) {
 	null
 }
 
+// .git 不可用时（源码归档、沙箱）返回 null，跳过这条检查
+fun trackedMarkdownOutsideTargets(): List<String>? =
+	gitOutput("ls-files", "-z", "--", "*.md")?.filter { escapesMarkdownTargets(it) }
+
 // pre-push 是增量场景：只查相对比较基（默认 origin/main 合并基）变更的 Markdown，避免每次推送
 // 都为全仓 md 付一遍 npx 冷启动；check/CI 仍是全量。-PmdBase=<ref> 可覆盖比较基。
 // --diff-filter=ACMR 排除删除的 md（文件已不在，markdownlint 会因路径不存在直接报错）。
-// git 不可用或解析不出比较基时返回 null，回退全量
-fun changedMarkdownSince(base: String): List<String>? = try {
-	val process = ProcessBuilder("git", "diff", "--name-only", "--diff-filter=ACMR", "$base...HEAD", "--", "*.md")
-		.directory(rootDir)
-		.start()
-	val names = process.inputStream.bufferedReader().readText()
-	if (process.waitFor() != 0) null else names.trim().lines().filter { it.isNotBlank() }
-} catch (_: Exception) {
-	null
-}
+fun changedMarkdownSince(base: String): List<String>? =
+	gitOutput("diff", "--name-only", "--diff-filter=ACMR", "$base...HEAD", "--", "*.md")
 
 val mdBase = providers.gradleProperty("mdBase")
 val lintIncrementally = mdBase.isPresent || prePushInvoked
