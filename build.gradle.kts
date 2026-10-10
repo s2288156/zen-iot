@@ -140,7 +140,8 @@ subprojects {
 			if (split.isNotEmpty()) {
 				throw GradleException(
 					"${project.name}: same-group artifacts resolved to multiple versions\n${split.joinToString("\n")}" +
-						"\nA single pinned constraint must be aligned with its BOM-managed siblings; Dependabot only bumps the pinned one.",
+						"\nA single pinned constraint must be aligned with its BOM-managed siblings;" +
+							" Dependabot only bumps the pinned one.",
 				)
 			}
 			versionReport.get().asFile.apply {
@@ -169,7 +170,12 @@ val prePushInvoked = gradle.startParameter.taskNames.map { it.substringAfterLast
 // Markdown 门禁的覆盖面是白名单，不是 `**/*.md` 减去一串排除：私有工作区目录只增不减，减法名单每多一个
 // 就要再红一次提交。这里列受控文档的全部位置——根、每个模块的 README、.github 模板、docs/ 全树。
 // 白名单的代价是新位置的文档会静默逃过门禁，由下方 trackedMarkdownOutsideTargets() 兜底成显式失败。
-val markdownTargets = listOf("*.md", "*/README.md", ".github/*.md", "docs/**/*.md")
+val markdownTargets = listOf(
+	"*.md",
+	"*/README.md",
+	".github/*.md",
+	"docs/**/*.md",
+)
 
 // yaml 与 gradleScripts 的 target 同样列受控位置，而不是从仓库根写 `**/*`：裸 `**/*` 的输入快照与命中文件数
 // 无关，Gradle 为判定"无变更"要枚举整棵树（实测见下方 spotless 块内注释），锚定后 include 侧才走目录剪枝。
@@ -181,7 +187,11 @@ val yamlTargets = listOf(
 	"*/src/**/*.yml",
 	"*/src/**/*.yaml",
 )
-val gradleScriptTargets = listOf("*.gradle.kts", "*/build.gradle.kts", "gradle/*.gradle.kts")
+val gradleScriptTargets = listOf(
+	"*.gradle.kts",
+	"*/build.gradle.kts",
+	"gradle/*.gradle.kts",
+)
 
 spotless {
 	// 不启用 ratchetFrom：当时 pre-push 的耗时全在三个仓库级 `**/*` target 的输入快照上，与待格式化
@@ -329,7 +339,10 @@ val crossModuleVersionCheck = tasks.register("crossModuleVersionCheck") {
 		reports.forEach { (moduleName, report) ->
 			val file = report.get().asFile
 			if (!file.isFile) {
-				throw GradleException("missing resolved-version report for $moduleName: $file. Run ./gradlew versionCoherenceCheck first")
+				throw GradleException(
+					"missing resolved-version report for $moduleName: $file." +
+						" Run ./gradlew versionCoherenceCheck first",
+				)
 			}
 			file.readLines().filter { it.isNotBlank() }.forEach { line ->
 				val (configurationName, coordinate, version) = line.split('|')
@@ -343,7 +356,9 @@ val crossModuleVersionCheck = tasks.register("crossModuleVersionCheck") {
 				"  $key -> " + hits.sortedBy { it.first }.joinToString(", ") { (moduleName, version) -> "$moduleName=$version" }
 			}
 		if (drift.isNotEmpty()) {
-			throw GradleException("the same coordinate resolved to different versions in different modules:\n${drift.joinToString("\n")}")
+			throw GradleException(
+				"the same coordinate resolved to different versions in different modules:\n${drift.joinToString("\n")}",
+			)
 		}
 	}
 }
@@ -351,7 +366,9 @@ val crossModuleVersionCheck = tasks.register("crossModuleVersionCheck") {
 // 推送前轻量门禁：格式 + Markdown 规则 + 编译零告警 + SpotBugs + 架构约束 + 版本一致性，不跑测试；全量门禁仍是 check
 val prePushCheck = tasks.register("prePushCheck") {
 	group = "verification"
-	description = "Pre-push gate (Markdown check is incremental): format + Markdown rules + compile (-Werror) + SpotBugs + architecture + version coherence"
+	description =
+		"Pre-push gate (Markdown check is incremental): format + Markdown rules + compile (-Werror) + " +
+			"SpotBugs + architecture + version coherence"
 	dependsOn(tasks.named("spotlessCheck"), lintMarkdown)
 	dependsOn(compileGate)
 	dependsOn(crossModuleVersionCheck)
