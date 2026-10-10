@@ -1,3 +1,9 @@
+import com.github.spotbugs.snom.Confidence
+import com.github.spotbugs.snom.Effort
+import com.github.spotbugs.snom.SpotBugsExtension
+import com.github.spotbugs.snom.SpotBugsTask
+import io.spring.gradle.dependencymanagement.dsl.DependencyManagementExtension
+
 plugins {
 	java
 	id("io.spring.dependency-management") version "1.1.7" apply false
@@ -32,7 +38,7 @@ subprojects {
 	apply(plugin = "com.github.spotbugs")
 
 	// 版本只在根声明一次，子模块依赖一律不写版本号；接入新的第三方栈时在此追加 BOM
-	configure<io.spring.gradle.dependencymanagement.dsl.DependencyManagementExtension> {
+	configure<DependencyManagementExtension> {
 		imports {
 			mavenBom("org.springframework.boot:spring-boot-dependencies:4.1.1")
 			mavenBom("org.springframework.cloud:spring-cloud-dependencies:2025.1.3")
@@ -87,16 +93,16 @@ subprojects {
 	}
 
 	// 6.5.x 默认不注册任何报告，失败时只会看到 exit code 1；这里显式建 HTML + XML 两类报告
-	tasks.withType<com.github.spotbugs.snom.SpotBugsTask>().configureEach {
+	tasks.withType<SpotBugsTask>().configureEach {
 		reports.create("html") { required.set(true) }
 		reports.create("xml") { required.set(true) }
 	}
 
 	// 缺陷扫描：6.5.x 的 Threshold 已改名 Confidence
-	configure<com.github.spotbugs.snom.SpotBugsExtension> {
+	configure<SpotBugsExtension> {
 		toolVersion.set("4.10.4")
-		effort.set(com.github.spotbugs.snom.Effort.DEFAULT)
-		reportLevel.set(com.github.spotbugs.snom.Confidence.MEDIUM)
+		effort.set(Effort.DEFAULT)
+		reportLevel.set(Confidence.MEDIUM)
 		ignoreFailures.set(false)
 		excludeFilter.set(rootProject.layout.projectDirectory.file("gradle/spotbugs/exclude.xml"))
 	}
