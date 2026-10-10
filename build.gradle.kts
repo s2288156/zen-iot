@@ -1,3 +1,9 @@
+import com.github.spotbugs.snom.Confidence
+import com.github.spotbugs.snom.Effort
+import com.github.spotbugs.snom.SpotBugsExtension
+import com.github.spotbugs.snom.SpotBugsTask
+import io.spring.gradle.dependencymanagement.dsl.DependencyManagementExtension
+
 plugins {
 	java
 	id("io.spring.dependency-management") version "1.1.7" apply false
@@ -12,6 +18,7 @@ version = "0.0.1-SNAPSHOT"
 // 依赖本机中间件（MySQL/Nacos/Redis/RabbitMQ）的测试一律打 @Tag("integration")，默认从 test/check 排除，
 // 这样 check 在干净环境下也是可执行的真门禁；容器就绪时用 ./gradlew test -PintegrationTests 纳入
 val integrationTag = "integration"
+val architectureTag = "architecture"
 val runIntegrationTests = project.hasProperty("integrationTests")
 
 // 版本一致性门禁的两个输入：
@@ -23,6 +30,35 @@ val runIntegrationTests = project.hasProperty("integrationTests")
 val sameVersionGroups = listOf("org.apache.logging.log4j")
 val coherenceConfigurations =
 	listOf("annotationProcessor", "compileClasspath", "runtimeClasspath", "testRuntimeClasspath", "spotbugs")
+// 一条已解析的构件：某个配置下，某个 group:artifact 解析到了哪个版本。
+// resolved-version 报告（build/reports/dependency-versions.txt）的写与读都只走这里，
+// 免得「配置|坐标|版本」的三段格式在两个任务里各拼一遍、各拆一遍。
+data class ResolvedArtifact(
+	val configuration: String,
+	val coordinate: String,
+	val version: String,
+) {
+	val group: String get() = coordinate.substringBefore(':')
+	val artifactId: String get() = coordinate.substringAfter(':')
+	val reportKey: String get() = "$configuration $coordinate"
+
+	fun toReportLine(): String = "$configuration|$coordinate|$version"
+
+	companion object {
+		// displayName 是 group:name:version，去掉版本段就剩坐标
+		fun fromComponent(configuration: String, id: ModuleComponentIdentifier): ResolvedArtifact =
+			ResolvedArtifact(configuration, id.displayName.removeSuffix(":${id.version}"), id.version)
+
+		fun parse(line: String): ResolvedArtifact? {
+			val parts = line.split('|')
+			if (parts.size != 3) {
+				return null
+			}
+			return ResolvedArtifact(parts[0], parts[1], parts[2])
+		}
+	}
+}
+
 val versionReportPath = "reports/dependency-versions.txt"
 
 subprojects {
@@ -32,7 +68,7 @@ subprojects {
 	apply(plugin = "com.github.spotbugs")
 
 	// 版本只在根声明一次，子模块依赖一律不写版本号；接入新的第三方栈时在此追加 BOM
-	configure<io.spring.gradle.dependencymanagement.dsl.DependencyManagementExtension> {
+	configure<DependencyManagementExtension> {
 		imports {
 			mavenBom("org.springframework.boot:spring-boot-dependencies:4.1.1")
 			mavenBom("org.springframework.cloud:spring-cloud-dependencies:2025.1.3")
@@ -82,21 +118,21 @@ subprojects {
 		classpath = testSourceSet.runtimeClasspath
 		dependsOn(tasks.named("testClasses"))
 		useJUnitPlatform {
-			includeTags("architecture")
+			includeTags(architectureTag)
 		}
 	}
 
 	// 6.5.x 默认不注册任何报告，失败时只会看到 exit code 1；这里显式建 HTML + XML 两类报告
-	tasks.withType<com.github.spotbugs.snom.SpotBugsTask>().configureEach {
+	tasks.withType<SpotBugsTask>().configureEach {
 		reports.create("html") { required.set(true) }
 		reports.create("xml") { required.set(true) }
 	}
 
 	// 缺陷扫描：6.5.x 的 Threshold 已改名 Confidence
-	configure<com.github.spotbugs.snom.SpotBugsExtension> {
+	configure<SpotBugsExtension> {
 		toolVersion.set("4.10.4")
-		effort.set(com.github.spotbugs.snom.Effort.DEFAULT)
-		reportLevel.set(com.github.spotbugs.snom.Confidence.MEDIUM)
+		effort.set(Effort.DEFAULT)
+		reportLevel.set(Confidence.MEDIUM)
 		ignoreFailures.set(false)
 		excludeFilter.set(rootProject.layout.projectDirectory.file("gradle/spotbugs/exclude.xml"))
 	}
@@ -109,37 +145,40 @@ subprojects {
 		group = "verification"
 		description = "Assert $sameVersionGroups is version-coherent in this module and write the resolved-version report"
 		val resolved = provider {
-			coherenceConfigurations.mapNotNull { name ->
+			coherenceConfigurations.flatMap { name ->
 				val cfg = configurations.findByName(name)
 				if (cfg == null || !cfg.isCanBeResolved) {
-					null
+					emptyList()
 				} else {
 					cfg.incoming.artifacts.artifacts.mapNotNull { artifact ->
 						val id = artifact.id.componentIdentifier as? ModuleComponentIdentifier ?: return@mapNotNull null
-						Triple(name, id.displayName.removeSuffix(":${id.version}"), id.version)
+						ResolvedArtifact.fromComponent(name, id)
 					}
 				}
-			}.flatten().distinct()
+			}.distinct()
 		}
 		doLast {
 			val rows = resolved.get()
-			val split = rows.filter { it.second.substringBefore(':') in sameVersionGroups }
-				.groupBy({ it.first }, { it })
-				.mapNotNull { (name, hits) ->
-					if (hits.map { it.third }.distinct().size < 2) null else {
-						"  $name ${hits.first().second.substringBefore(':')} -> " +
-							hits.sortedBy { it.second }.joinToString(", ") { "${it.second.substringAfter(':')}:${it.third}" }
+			val split = rows.filter { it.group in sameVersionGroups }
+				.groupBy { it.configuration }
+				.mapNotNull { (configuration, hits) ->
+					if (hits.map { it.version }.distinct().size < 2) {
+						null
+					} else {
+						"  $configuration ${hits.first().group} -> " +
+							hits.sortedBy { it.coordinate }.joinToString(", ") { "${it.artifactId}:${it.version}" }
 					}
 				}
 			if (split.isNotEmpty()) {
 				throw GradleException(
 					"${project.name}: same-group artifacts resolved to multiple versions\n${split.joinToString("\n")}" +
-						"\nA single pinned constraint must be aligned with its BOM-managed siblings; Dependabot only bumps the pinned one.",
+						"\nA single pinned constraint must be aligned with its BOM-managed siblings;" +
+							" Dependabot only bumps the pinned one.",
 				)
 			}
 			versionReport.get().asFile.apply {
 				parentFile.mkdirs()
-				writeText(rows.joinToString("\n") { "${it.first}|${it.second}|${it.third}" } + "\n")
+				writeText(rows.joinToString("\n") { it.toReportLine() } + "\n")
 			}
 		}
 	}
@@ -163,7 +202,12 @@ val prePushInvoked = gradle.startParameter.taskNames.map { it.substringAfterLast
 // Markdown 门禁的覆盖面是白名单，不是 `**/*.md` 减去一串排除：私有工作区目录只增不减，减法名单每多一个
 // 就要再红一次提交。这里列受控文档的全部位置——根、每个模块的 README、.github 模板、docs/ 全树。
 // 白名单的代价是新位置的文档会静默逃过门禁，由下方 trackedMarkdownOutsideTargets() 兜底成显式失败。
-val markdownTargets = listOf("*.md", "*/README.md", ".github/*.md", "docs/**/*.md")
+val markdownTargets = listOf(
+	"*.md",
+	"*/README.md",
+	".github/*.md",
+	"docs/**/*.md",
+)
 
 // yaml 与 gradleScripts 的 target 同样列受控位置，而不是从仓库根写 `**/*`：裸 `**/*` 的输入快照与命中文件数
 // 无关，Gradle 为判定"无变更"要枚举整棵树（实测见下方 spotless 块内注释），锚定后 include 侧才走目录剪枝。
@@ -175,7 +219,11 @@ val yamlTargets = listOf(
 	"*/src/**/*.yml",
 	"*/src/**/*.yaml",
 )
-val gradleScriptTargets = listOf("*.gradle.kts", "*/build.gradle.kts", "gradle/*.gradle.kts")
+val gradleScriptTargets = listOf(
+	"*.gradle.kts",
+	"*/build.gradle.kts",
+	"gradle/*.gradle.kts",
+)
 
 spotless {
 	// 不启用 ratchetFrom：当时 pre-push 的耗时全在三个仓库级 `**/*` target 的输入快照上，与待格式化
@@ -240,28 +288,29 @@ fun escapesMarkdownTargets(path: String): Boolean {
 	}
 }
 
-// .git 不可用时（源码归档、沙箱）返回 null，跳过这条检查，与 changedMarkdownSince 的处理一致
-fun trackedMarkdownOutsideTargets(): List<String>? = try {
-	val process = ProcessBuilder("git", "ls-files", "-z", "--", "*.md").directory(rootDir).start()
-	val paths = process.inputStream.bufferedReader().readText().split('\u0000')
-	if (process.waitFor() != 0) null else paths.filter { it.isNotBlank() && escapesMarkdownTargets(it) }
+// git 的两类降级原因（git 不可用 / 命令非零退出）刻意不区分：本文件的 git 用法都是可选优化，
+// 拿不到结果就退回全量。ls-files 用 -z（NUL 分隔）、diff 用换行分隔，这里一并处理。
+fun gitOutput(vararg args: String): List<String>? = try {
+	val process = ProcessBuilder(listOf("git") + args).directory(rootDir).start()
+	val output = process.inputStream.bufferedReader().readText()
+	if (process.waitFor() != 0) {
+		null
+	} else {
+		output.split('\u0000', '\n').filter { it.isNotBlank() }
+	}
 } catch (_: Exception) {
 	null
 }
 
+// .git 不可用时（源码归档、沙箱）返回 null，跳过这条检查
+fun trackedMarkdownOutsideTargets(): List<String>? =
+	gitOutput("ls-files", "-z", "--", "*.md")?.filter { escapesMarkdownTargets(it) }
+
 // pre-push 是增量场景：只查相对比较基（默认 origin/main 合并基）变更的 Markdown，避免每次推送
 // 都为全仓 md 付一遍 npx 冷启动；check/CI 仍是全量。-PmdBase=<ref> 可覆盖比较基。
 // --diff-filter=ACMR 排除删除的 md（文件已不在，markdownlint 会因路径不存在直接报错）。
-// git 不可用或解析不出比较基时返回 null，回退全量
-fun changedMarkdownSince(base: String): List<String>? = try {
-	val process = ProcessBuilder("git", "diff", "--name-only", "--diff-filter=ACMR", "$base...HEAD", "--", "*.md")
-		.directory(rootDir)
-		.start()
-	val names = process.inputStream.bufferedReader().readText()
-	if (process.waitFor() != 0) null else names.trim().lines().filter { it.isNotBlank() }
-} catch (_: Exception) {
-	null
-}
+fun changedMarkdownSince(base: String): List<String>? =
+	gitOutput("diff", "--name-only", "--diff-filter=ACMR", "$base...HEAD", "--", "*.md")
 
 val mdBase = providers.gradleProperty("mdBase")
 val lintIncrementally = mdBase.isPresent || prePushInvoked
@@ -299,14 +348,15 @@ val lintMarkdownFix = tasks.register<Exec>("lintMarkdownFix") {
 }
 
 // TaskProvider 懒加载，避免配置期急切解析所有子项目
+val versionChecks = subprojects.map { it.tasks.named("versionCoherenceCheck") }
+
 val compileGate = subprojects.flatMap { subproject ->
 	listOf(
 		subproject.tasks.named("testClasses"),
 		subproject.tasks.named("spotbugsMain"),
 		subproject.tasks.named("architectureTest"),
-		subproject.tasks.named("versionCoherenceCheck"),
 	)
-}
+} + versionChecks
 
 // 同一坐标在各模块必须解析到同一版本。common-core 的 testRuntimeClasspath 曾在 Jackson 2.12.7.1 上跑，
 // 而 admin-service 运行时是 2.21.5——库模块自测的版本和部署不是一套，CI 绿着也藏得住。
@@ -315,7 +365,7 @@ val compileGate = subprojects.flatMap { subproject ->
 val crossModuleVersionCheck = tasks.register("crossModuleVersionCheck") {
 	group = "verification"
 	description = "Compare resolved-version reports across modules; fail if one coordinate has multiple versions"
-	dependsOn(subprojects.map { it.tasks.named("versionCoherenceCheck") })
+	dependsOn(versionChecks)
 	val reports = subprojects.map { it.name to it.layout.buildDirectory.file(versionReportPath) }
 	doLast {
 		// key = "配置 坐标"，value = 各模块解析到的版本
@@ -323,21 +373,27 @@ val crossModuleVersionCheck = tasks.register("crossModuleVersionCheck") {
 		reports.forEach { (moduleName, report) ->
 			val file = report.get().asFile
 			if (!file.isFile) {
-				throw GradleException("missing resolved-version report for $moduleName: $file. Run ./gradlew versionCoherenceCheck first")
+				throw GradleException(
+					"missing resolved-version report for $moduleName: $file." +
+						" Run ./gradlew versionCoherenceCheck first",
+				)
 			}
 			file.readLines().filter { it.isNotBlank() }.forEach { line ->
-				val (configurationName, coordinate, version) = line.split('|')
-				seen.getOrPut("$configurationName $coordinate") { mutableListOf() } += moduleName to version
+				val row = ResolvedArtifact.parse(line)
+					?: throw GradleException("malformed resolved-version report line in $moduleName: $line")
+				seen.getOrPut(row.reportKey) { mutableListOf() } += moduleName to row.version
 			}
 		}
 		val drift = seen.toList()
-			.filter { it.second.map { (_, version) -> version }.distinct().size > 1 }
+			.filter { (_, hits) -> hits.map { it.second }.distinct().size > 1 }
 			.sortedBy { it.first }
 			.map { (key, hits) ->
 				"  $key -> " + hits.sortedBy { it.first }.joinToString(", ") { (moduleName, version) -> "$moduleName=$version" }
 			}
 		if (drift.isNotEmpty()) {
-			throw GradleException("the same coordinate resolved to different versions in different modules:\n${drift.joinToString("\n")}")
+			throw GradleException(
+				"the same coordinate resolved to different versions in different modules:\n${drift.joinToString("\n")}",
+			)
 		}
 	}
 }
@@ -345,7 +401,9 @@ val crossModuleVersionCheck = tasks.register("crossModuleVersionCheck") {
 // 推送前轻量门禁：格式 + Markdown 规则 + 编译零告警 + SpotBugs + 架构约束 + 版本一致性，不跑测试；全量门禁仍是 check
 val prePushCheck = tasks.register("prePushCheck") {
 	group = "verification"
-	description = "Pre-push gate (Markdown check is incremental): format + Markdown rules + compile (-Werror) + SpotBugs + architecture + version coherence"
+	description =
+		"Pre-push gate (Markdown check is incremental): format + Markdown rules + compile (-Werror) + " +
+			"SpotBugs + architecture + version coherence"
 	dependsOn(tasks.named("spotlessCheck"), lintMarkdown)
 	dependsOn(compileGate)
 	dependsOn(crossModuleVersionCheck)
