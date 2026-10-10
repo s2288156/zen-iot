@@ -30,6 +30,35 @@ val runIntegrationTests = project.hasProperty("integrationTests")
 val sameVersionGroups = listOf("org.apache.logging.log4j")
 val coherenceConfigurations =
 	listOf("annotationProcessor", "compileClasspath", "runtimeClasspath", "testRuntimeClasspath", "spotbugs")
+// 一条已解析的构件：某个配置下，某个 group:artifact 解析到了哪个版本。
+// resolved-version 报告（build/reports/dependency-versions.txt）的写与读都只走这里，
+// 免得「配置|坐标|版本」的三段格式在两个任务里各拼一遍、各拆一遍。
+data class ResolvedArtifact(
+	val configuration: String,
+	val coordinate: String,
+	val version: String,
+) {
+	val group: String get() = coordinate.substringBefore(':')
+	val artifactId: String get() = coordinate.substringAfter(':')
+	val reportKey: String get() = "$configuration $coordinate"
+
+	fun toReportLine(): String = "$configuration|$coordinate|$version"
+
+	companion object {
+		// displayName 是 group:name:version，去掉版本段就剩坐标
+		fun fromComponent(configuration: String, id: ModuleComponentIdentifier): ResolvedArtifact =
+			ResolvedArtifact(configuration, id.displayName.removeSuffix(":${id.version}"), id.version)
+
+		fun parse(line: String): ResolvedArtifact? {
+			val parts = line.split('|')
+			if (parts.size != 3) {
+				return null
+			}
+			return ResolvedArtifact(parts[0], parts[1], parts[2])
+		}
+	}
+}
+
 val versionReportPath = "reports/dependency-versions.txt"
 
 subprojects {
@@ -123,19 +152,21 @@ subprojects {
 				} else {
 					cfg.incoming.artifacts.artifacts.mapNotNull { artifact ->
 						val id = artifact.id.componentIdentifier as? ModuleComponentIdentifier ?: return@mapNotNull null
-						Triple(name, id.displayName.removeSuffix(":${id.version}"), id.version)
+						ResolvedArtifact.fromComponent(name, id)
 					}
 				}
 			}.distinct()
 		}
 		doLast {
 			val rows = resolved.get()
-			val split = rows.filter { it.second.substringBefore(':') in sameVersionGroups }
-				.groupBy { it.first }
-				.mapNotNull { (name, hits) ->
-					if (hits.map { it.third }.distinct().size < 2) null else {
-						"  $name ${hits.first().second.substringBefore(':')} -> " +
-							hits.sortedBy { it.second }.joinToString(", ") { "${it.second.substringAfter(':')}:${it.third}" }
+			val split = rows.filter { it.group in sameVersionGroups }
+				.groupBy { it.configuration }
+				.mapNotNull { (configuration, hits) ->
+					if (hits.map { it.version }.distinct().size < 2) {
+						null
+					} else {
+						"  $configuration ${hits.first().group} -> " +
+							hits.sortedBy { it.coordinate }.joinToString(", ") { "${it.artifactId}:${it.version}" }
 					}
 				}
 			if (split.isNotEmpty()) {
@@ -147,7 +178,7 @@ subprojects {
 			}
 			versionReport.get().asFile.apply {
 				parentFile.mkdirs()
-				writeText(rows.joinToString("\n") { "${it.first}|${it.second}|${it.third}" } + "\n")
+				writeText(rows.joinToString("\n") { it.toReportLine() } + "\n")
 			}
 		}
 	}
@@ -346,12 +377,13 @@ val crossModuleVersionCheck = tasks.register("crossModuleVersionCheck") {
 				)
 			}
 			file.readLines().filter { it.isNotBlank() }.forEach { line ->
-				val (configurationName, coordinate, version) = line.split('|')
-				seen.getOrPut("$configurationName $coordinate") { mutableListOf() } += moduleName to version
+				val row = ResolvedArtifact.parse(line)
+					?: throw GradleException("malformed resolved-version report line in $moduleName: $line")
+				seen.getOrPut(row.reportKey) { mutableListOf() } += moduleName to row.version
 			}
 		}
 		val drift = seen.toList()
-			.filter { it.second.map { (_, version) -> version }.distinct().size > 1 }
+			.filter { (_, hits) -> hits.map { it.second }.distinct().size > 1 }
 			.sortedBy { it.first }
 			.map { (key, hits) ->
 				"  $key -> " + hits.sortedBy { it.first }.joinToString(", ") { (moduleName, version) -> "$moduleName=$version" }
