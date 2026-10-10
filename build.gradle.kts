@@ -18,6 +18,7 @@ version = "0.0.1-SNAPSHOT"
 // 依赖本机中间件（MySQL/Nacos/Redis/RabbitMQ）的测试一律打 @Tag("integration")，默认从 test/check 排除，
 // 这样 check 在干净环境下也是可执行的真门禁；容器就绪时用 ./gradlew test -PintegrationTests 纳入
 val integrationTag = "integration"
+val architectureTag = "architecture"
 val runIntegrationTests = project.hasProperty("integrationTests")
 
 // 版本一致性门禁的两个输入：
@@ -88,7 +89,7 @@ subprojects {
 		classpath = testSourceSet.runtimeClasspath
 		dependsOn(tasks.named("testClasses"))
 		useJUnitPlatform {
-			includeTags("architecture")
+			includeTags(architectureTag)
 		}
 	}
 
@@ -115,22 +116,22 @@ subprojects {
 		group = "verification"
 		description = "Assert $sameVersionGroups is version-coherent in this module and write the resolved-version report"
 		val resolved = provider {
-			coherenceConfigurations.mapNotNull { name ->
+			coherenceConfigurations.flatMap { name ->
 				val cfg = configurations.findByName(name)
 				if (cfg == null || !cfg.isCanBeResolved) {
-					null
+					emptyList()
 				} else {
 					cfg.incoming.artifacts.artifacts.mapNotNull { artifact ->
 						val id = artifact.id.componentIdentifier as? ModuleComponentIdentifier ?: return@mapNotNull null
 						Triple(name, id.displayName.removeSuffix(":${id.version}"), id.version)
 					}
 				}
-			}.flatten().distinct()
+			}.distinct()
 		}
 		doLast {
 			val rows = resolved.get()
 			val split = rows.filter { it.second.substringBefore(':') in sameVersionGroups }
-				.groupBy({ it.first }, { it })
+				.groupBy { it.first }
 				.mapNotNull { (name, hits) ->
 					if (hits.map { it.third }.distinct().size < 2) null else {
 						"  $name ${hits.first().second.substringBefore(':')} -> " +
