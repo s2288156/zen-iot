@@ -8,7 +8,7 @@ plugins {
 	java
 	id("io.spring.dependency-management") version "1.1.7" apply false
 	id("org.springframework.boot") version "4.1.1" apply false
-	id("com.diffplug.spotless") version "8.10.3"
+	id("com.diffplug.spotless") version "8.10.4"
 	id("com.github.spotbugs") version "6.5.12" apply false
 }
 
