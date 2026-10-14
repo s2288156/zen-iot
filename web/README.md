@@ -77,11 +77,14 @@
 
 ## 命令
 
-| 任务     | 命令                                            |
-| -------- | ----------------------------------------------- |
-| 开发     | `pnpm dev`                                      |
-| 类型检查 | `pnpm typecheck`                                |
-| Lint     | `pnpm lint`                                     |
-| 单元测试 | `pnpm test`                                     |
-| 构建     | `pnpm build`                                    |
-| 联调前置 | 网关与 admin-service 已启动在 `localhost:28080` |
+| 任务      | 命令                                            |
+| --------- | ----------------------------------------------- |
+| 开发      | `pnpm dev`                                      |
+| 类型检查  | `pnpm typecheck`                                |
+| Lint      | `pnpm lint`                                     |
+| AntD 门禁 | `node scripts/antd-lint-gate.mjs`               |
+| 单元测试  | `pnpm test`                                     |
+| 构建      | `pnpm build`                                    |
+| 联调前置  | 网关与 admin-service 已启动在 `localhost:28080` |
+
+Lint、AntD 门禁、类型检查、单元测试、构建五项都是 `.github/workflows/web-ci.yml` 的阻断步骤。
