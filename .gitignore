@@ -82,6 +82,7 @@ doc/httpclient/MyLocal*.http
 
 # AI Tools
 .qoder/
+.qoder-cn/
 .trae/
 .cursor/
 .continue/
