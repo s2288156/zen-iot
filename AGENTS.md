@@ -8,7 +8,9 @@
 
 - **Java**：JDK 25，由根 `build.gradle.kts` 的 `toolchain` 强制；仓库未配置工具链自动下载，本机没有 25 就直接失败。
 - **构建工具**：Gradle 9.7.1。
-- **Node.js**：20 或更新（Spotless 的 Prettier 与 markdownlint-cli 经 `npx` 运行；首次运行需要网络）。
+- **Node.js**：20 或更新，只约束 Gradle 侧（Spotless 的 Prettier 与 markdownlint-cli 经 `npx` 运行；首次运行需要网络）。
+- **前端**：`web/` 是 Gradle 之外的独立 pnpm 工程，Node 与 pnpm 版本以 `web/package.json` 的 `engines` 和
+  `packageManager` 为准，高于上一条；用 pnpm 而非 npm——`web/pnpm-lock.yaml` 没有 npm 等价物。
 
 ## 常用命令
 
@@ -27,8 +29,12 @@
 | 起本机栈    | `./gradlew devUp`                   | 已在运行的跳过                       |
 | 停本机栈    | `./gradlew devDown`                 | 不动容器                             |
 | 看本机栈    | `./gradlew devStatus`               | 日志在 `build/dev/logs/`             |
+| 前端门禁    | 见 `web/README.md`                  | 不在任何 `./gradlew` 任务里          |
 
 各门禁跑到哪一步、包含哪几项，以 `./gradlew tasks` 输出的任务 description 为准，本表不重述。
+
+改 `web/**` 时 Gradle 门禁只命中 `web/README.md` 的 Markdown 检查，代码、类型与测试一律不覆盖；前端那套由
+`.github/workflows/web-ci.yml` 单独执行，命令表在 `web/README.md`，理由与代价见 `docs/modules/web.md`。
 
 ## 强制约定
 
