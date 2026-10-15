@@ -88,6 +88,8 @@
 
 ## Agent skills
 
+本仓库期望的技能集合由根 `skills-lock.json` 锁定，它是一份**只读清单**：每条记录技能的 `source` 与 `skillPath`，只用来查看有哪些技能，**既不自动安装也不校验 `computedHash`**；需要取回某个技能，按条目的 `source`/`skillPath` 去上游手动获取。运行时加载技能的是工作区/用户级技能目录，**不是仓库里的 `.agents/`**（后者被 `.gitignore` 忽略），所以提交 `skills-lock.json` 不等于技能就在本机生效。下面的每仓库配置供这些技能读取：
+
 ### Issue tracker
 
 本仓库的 issue 以 GitHub issue 形式存在，读写走 `gh` CLI。见 `docs/agents/issue-tracker.md`。
