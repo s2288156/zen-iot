@@ -80,6 +80,9 @@ doc/httpclient/MyLocal*.http
 # ai temp docs
 .ai/
 
+# 个人教材 workspace（不提交）
+docs/teaching/
+
 # AI Tools
 .qoder/
 .qoder-cn/
