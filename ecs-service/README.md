@@ -70,15 +70,12 @@
 
 ## 架构约束
 
-`./gradlew :ecs-service:architectureTest`，规则清单以该测试类为准：11 条规则，参数化展开后 14 个用例。分层四条（四层单向、实体不出入口层、`@Transactional` 只在 service、角色后缀各归其包 ×4）与通用四条（构造器注入、禁标准流、禁 `new Date()`、包切片无环）合计 11 个用例，其余 3 个只属于本模块：
+`./gradlew :ecs-service:architectureTest`，规则清单见 `ecs-service/src/test/java/**/ArchitectureTest.java`。
 
-- **导入类数非零哨兵**（`importedClassesAreNeverEmpty`）：包根改名或目录被挪走时规则会拿到零个类而安静通过，这条把「覆盖面缩水」变成明确断言。
-- **禁止直接读系统时钟**（`neverReadsTheSystemClockDirectly`）：时间源必须是注入的 `Clock`。
-- **不得引用其它业务服务或网关**（`neverDependsOnOtherServicesOrGateway`）：编译期只允许 `common-core` / `common-security`。
+- **JSpecify 可空性条不适用**：该条只在 `common-core` / `common-security` / `gateway-service` 三个模块断言，`admin-service` 与 `ecs-service` 尚未纳入。
+- **禁止依赖的业务包名列表是硬编码的**：新建业务模块必须在该测试类里补一条。
 
-本模块未套用 JSpecify 可空性条（`neverUsesDeprecatedSpringNullabilityAnnotations`）——它只在 `common-core` / `common-security` / `gateway-service` 三个模块断言，`admin-service` 与 `ecs-service` 尚未纳入。
-
-> **分层规则的盲区**：`layersOnlyDependDownwards` 带 `.consideringOnlyDependenciesInLayers()`，而 `protocol` / `presence` / `listener` / `scheduler` 四个包都在四层之外。因此 `listener → service` 不被判跨层，反面同样成立——`controller → listener → repository` 这种绕层链路也不会变红。「消费者只调 service」是约定而非门禁。
+> **分层规则的盲区**：分层条带 `.consideringOnlyDependenciesInLayers()`，而 `protocol` / `presence` / `listener` / `scheduler` 四个包都在四层之外。因此 `listener → service` 不被判跨层，反面同样成立——`controller → listener → repository` 这种绕层链路也不会变红。「消费者只调 service」是约定而非门禁。
 
 ## 主要依赖
 

@@ -69,15 +69,10 @@ yml 里的白名单：`/api/admin/auth/login`、`/api/admin/auth/refresh`、`/ap
 
 ## 架构约束
 
-`./gradlew :gateway-service:architectureTest`，规则清单见 `gateway-service/src/test/java/**/ArchitectureTest.java`（10 条）。本模块不套用 `controller → service → repository → entity` 四层，模块通用五条（禁字段注入、禁标准流、禁 `new Date()`、可空性只用 JSpecify、包切片无环）原样保留，另加五条只属于反应式网关的约束：
+`./gradlew :gateway-service:architectureTest`，规则清单见 `gateway-service/src/test/java/**/ArchitectureTest.java`。
 
-- 禁依赖 `jakarta.servlet..` / `jakarta.validation..` / `org.springframework.web.servlet..`。
-- 禁依赖 `jakarta.persistence..` / `org.springframework.data.jpa..` / `org.hibernate..`。
-- 禁依赖 `com.zen.common.core..`、任何 `*Interceptor`、以及 `com.zen.common.security.auth.UserContext`（ThreadLocal 在反应式链路里会读到上一个请求的用户）。
-- 禁按 FQN 使用命令式 `StringRedisTemplate` / `RedisTemplate`（`ReactiveStringRedisTemplate` 同包，故不能整包禁）。
-- 禁调用 `Mono` / `Flux` 上任何以 `block` 开头的算子。
-
-`GatewayDependencyIsolationTest` 从消费方视角补一类 ArchUnit 看不见的失效：按 `Class.forName` 断言 Servlet/JPA 栈整包不在类路径、且 `lb://` 与 tracing 所需类型确实在，并断言 `WebApplicationType.deduce()` 判成 `REACTIVE`。
+- **不套用四层模型**：网关没有 `controller → service → repository → entity` 分层；模块通用条（禁字段注入、禁标准流、禁 `new Date()`、可空性只用 JSpecify、包切片无环）原样保留，另有反应式专有约束。
+- `GatewayDependencyIsolationTest` 从消费方视角补一类 ArchUnit 看不见的失效：按 `Class.forName` 断言 Servlet/JPA 栈整包不在类路径、且 `lb://` 与 tracing 所需类型确实在，并断言 `WebApplicationType.deduce()` 判成 `REACTIVE`。
 
 ## 主要依赖
 
