@@ -62,12 +62,7 @@
 
 ## 架构约束
 
-`./gradlew :admin-service:architectureTest`，规则清单见 `admin-service/src/test/java/**/ArchitectureTest.java`：
-
-- `controller → service → repository → entity` 单向；controller 不得依赖持久化实体。
-- `@Transactional` 只出现在 `service` 层。
-- `*Controller` / `*Service` / `*Repository` / `*Entity` 各归其包；包切片之间无循环依赖。
-- 模块级通用条（构造器注入、禁 `System.out`/`printStackTrace`、禁 `new Date()`）见 [`AGENTS.md`](../AGENTS.md)。
+`./gradlew :admin-service:architectureTest`，规则清单见 `admin-service/src/test/java/**/ArchitectureTest.java`。通用条见 [`AGENTS.md`](../AGENTS.md)。
 
 ## 主要依赖
 

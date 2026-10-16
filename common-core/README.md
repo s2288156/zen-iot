@@ -52,14 +52,10 @@ Servlet 业务服务的公共模块：统一异常出口、鉴权拦截的自动
 
 ## 架构约束
 
-`./gradlew :common-core:architectureTest`，规则清单见 `common-core/src/test/java/com/zen/common/core/ArchitectureTest.java`：
+`./gradlew :common-core:architectureTest`，规则清单见 `common-core/src/test/java/com/zen/common/core/ArchitectureTest.java`。
 
-- `commonCoreNeverDependsOnBusinessServices`：不得依赖 `com.zen.{admin,ecs,gateway,rcs,wcs}`。**该包名列表逐模块硬编码**，新建模块必须在这里补一条。
-- `packageSlicesAreFreeOfCycles`：`com.zen.common.core.(*)..` 包切片无循环依赖。
-- `neverUsesDeprecatedSpringNullabilityAnnotations`：可空性只用 `org.jspecify.annotations.*`。
-- 编码卫生三条：禁字段注入、禁标准流输出、禁 `new Date()`（`java.util.Date` 本身仍合法，jjwt 边界要用）。
-
-不启动 Spring 上下文，只导入主代码，因此无中间件也能跑。
+- **禁止依赖的业务包名列表是硬编码的**：新建业务模块必须在该测试类里补一条，否则新模块对 `common-core` 的依赖不会被拦。
+- 不启动 Spring 上下文，只导入主代码，因此无中间件也能跑。
 
 ## 主要依赖
 

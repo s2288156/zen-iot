@@ -62,7 +62,7 @@
 
 - **表结构**：Flyway `V1__init_ecs.sql` 建 `t_device` / `t_device_group` / `t_device_event` / `t_device_command`；`ddl-auto: validate`，Hibernate 只校验不建表。
 - **在线态与档案分离**：`/heartbeat` 往 `DevicePresenceStore` 记「活着」（Redis 键 `ecs:heartbeat:{deviceId}`，值 ISO-8601 文本，TTL 等于超时阈值），同时更新 `last_heartbeat_time`（MySQL，仅展示）；离线转在线时写标记并留 `ONLINE` 事件。`HeartbeatTimeoutTask` 按 `probe-interval` 跑 `HeartbeatService#detectTimeouts`，判离线才写 `OFFLINE` 事件并清键——置离线只发生在探测里，一次上报只证明那一刻活着。
-- **时间源统一注入 `java.time.Clock`**：超时判定与事件时刻都读它，拨时钟就能测「超时自动离线」；直接调 `LocalDateTime.now()` / `Instant.now()` / `System.currentTimeMillis()` 由 `neverReadsTheSystemClockDirectly` 拦下。
+- **时间源统一注入 `java.time.Clock`**：超时判定与事件时刻都读它，拨时钟就能测「超时自动离线」；直接调 `LocalDateTime.now()` / `Instant.now()` / `System.currentTimeMillis()` 由架构测试拦下。
 - **协议适配是可插拔插槽**：`ProtocolSupport`（认领 `protocolType` + 打开适配器）→ `DeviceAdapterFactory` → `DeviceAdapter`（`connect` / `status` / `read` / `write` / `close`）。当前只有 `loopback`；无人认领的协议类型抛 1006，不静默丢指令。
 - **指令中转**：`CommandDispatchService#dispatch` 先插 `PENDING` 行再执行，结果写终态 `SUCCESS` / `FAILED`；重试只针对「没拿到结论」的轮次（连不上、超时、被中断），设备明确拒绝直接终态；`retry_count` 不含首次，`error_message` 截断到 255。
 - **新建档案即离线**：`markOnline(false)`，只有心跳能置起在线标记。
@@ -70,15 +70,12 @@
 
 ## 架构约束
 
-`./gradlew :ecs-service:architectureTest`，规则清单以该测试类为准：11 条规则，参数化展开后 14 个用例。分层四条（四层单向、实体不出入口层、`@Transactional` 只在 service、角色后缀各归其包 ×4）与通用四条（构造器注入、禁标准流、禁 `new Date()`、包切片无环）合计 11 个用例，其余 3 个只属于本模块：
+`./gradlew :ecs-service:architectureTest`，规则清单见 `ecs-service/src/test/java/**/ArchitectureTest.java`。
 
-- **导入类数非零哨兵**（`importedClassesAreNeverEmpty`）：包根改名或目录被挪走时规则会拿到零个类而安静通过，这条把「覆盖面缩水」变成明确断言。
-- **禁止直接读系统时钟**（`neverReadsTheSystemClockDirectly`）：时间源必须是注入的 `Clock`。
-- **不得引用其它业务服务或网关**（`neverDependsOnOtherServicesOrGateway`）：编译期只允许 `common-core` / `common-security`。
+- **JSpecify 可空性条不适用**：本模块尚未纳入该条的断言范围。
+- **禁止依赖的业务包名列表是硬编码的**：新建业务模块必须在该测试类里补一条。
 
-本模块未套用 JSpecify 可空性条（`neverUsesDeprecatedSpringNullabilityAnnotations`）——它只在 `common-core` / `common-security` / `gateway-service` 三个模块断言，`admin-service` 与 `ecs-service` 尚未纳入。
-
-> **分层规则的盲区**：`layersOnlyDependDownwards` 带 `.consideringOnlyDependenciesInLayers()`，而 `protocol` / `presence` / `listener` / `scheduler` 四个包都在四层之外。因此 `listener → service` 不被判跨层，反面同样成立——`controller → listener → repository` 这种绕层链路也不会变红。「消费者只调 service」是约定而非门禁。
+> **分层规则的盲区**：分层条带 `.consideringOnlyDependenciesInLayers()`，而 `protocol` / `presence` / `listener` / `scheduler` 四个包都在四层之外。因此 `listener → service` 不被判跨层，反面同样成立——`controller → listener → repository` 这种绕层链路也不会变红。「消费者只调 service」是约定而非门禁。
 
 ## 主要依赖
 
