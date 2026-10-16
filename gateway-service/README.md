@@ -23,16 +23,16 @@ API 网关（端口 `28080`，WebFlux 反应式）：统一路由与剥前缀、
 
 ### 配置键
 
-| 键                                         | 默认值                                 | 口径                                                     |
-| ------------------------------------------ | -------------------------------------- | -------------------------------------------------------- |
-| `zen.jwt.secret`                           | dev 常量，生产由 `ZEN_JWT_SECRET` 覆盖 | 必须与 admin-service 完全一致，按 UTF-8 字节数 ≥ 32      |
-| `zen.gateway.auth.whitelist`               | `List.of()`（yml 另配 6 条）           | 免鉴权路径，匹配**带前缀的入站路径**，`PathPattern` 风格 |
-| `zen.gateway.cors.allowed-origin-patterns` | `*`                                    | 用 patterns 而非 origins                                 |
-| `zen.gateway.cors.allowed-methods`         | `GET/POST/PUT/PATCH/DELETE/OPTIONS`    | yml 显式配了同值                                         |
-| `zen.gateway.cors.allowed-headers`         | `*`                                    | yml 显式配了同值                                         |
-| `zen.gateway.cors.allow-credentials`       | `false`                                | 前端凭 Bearer Token，不带 Cookie；开它必须同时收窄来源   |
-| `zen.gateway.cors.max-age`                 | `1h`                                   | 预检结果缓存                                             |
-| `spring.reactor.context-propagation`       | `auto`（Boot 默认 `limited`）          | traceId 进日志与 `traceparent` 注入下游的共同前提        |
+| 键                                         | 默认值                                 | 口径                                                            |
+| ------------------------------------------ | -------------------------------------- | --------------------------------------------------------------- |
+| `zen.jwt.secret`                           | dev 常量，生产由 `ZEN_JWT_SECRET` 覆盖 | 必须与 admin-service 完全一致，按 UTF-8 字节数 ≥ 32             |
+| `zen.gateway.auth.whitelist`               | `List.of()`（yml 另配 6 条）           | 免鉴权路径，匹配**带前缀的入站路径**，`PathPattern` 风格        |
+| `zen.gateway.cors.allowed-origin-patterns` | `*`                                    | 用 patterns 而非 origins                                        |
+| `zen.gateway.cors.allowed-methods`         | `GET/POST/PUT/PATCH/DELETE/OPTIONS`    | yml 显式配了同值                                                |
+| `zen.gateway.cors.allowed-headers`         | `*`                                    | yml 显式配了同值                                                |
+| `zen.gateway.cors.allow-credentials`       | `false`                                | 前端凭 Bearer Token，不带 Cookie；开它必须同时收窄来源          |
+| `zen.gateway.cors.max-age`                 | `1h`                                   | 预检结果缓存                                                    |
+| `spring.reactor.context-propagation`       | `auto`（Boot 默认 `limited`）          | 网关日志带 traceId 的前提；链路与断点见 `docs/observability.md` |
 
 yml 里的白名单：`/api/admin/auth/login`、`/api/admin/auth/refresh`、`/api/*/actuator/health`、`/api/*/actuator/health/**`，以及 `/actuator/health`、`/actuator/health/**`（后两条只作意图声明——网关自身的 actuator 不是路由请求，不经全局过滤器）。`prometheus` 不放开，指标只走内网。
 
@@ -65,7 +65,7 @@ yml 里的白名单：`/api/admin/auth/login`、`/api/admin/auth/refresh`、`/ap
 - **不提供「关闭网关鉴权」的开关**：它是透传身份的唯一签发点，能被配置关掉就等于 `gateway-header` 模式的下游没有鉴权。
 - **不复用 `common-security` 的 `SecurityProperties`**（前缀 `zen.security`），另立 `zen.gateway.*`；理由与两侧差异见 [`docs/modules/gateway-service.md`](../docs/modules/gateway-service.md)。
 - **白名单在构造期解析成 `PathPattern`**，解析失败直接抛——宁可启动失败也不留一个永不匹配的白名单。
-- **追踪只做 A 层**：traceId 生成 / 透传 / 写 MDC + 由 SCG 向下游注入 `traceparent`，不外发 span。
+- **追踪只做 A 层**（定义见 [`GLOSSARY.md`](../GLOSSARY.md)）：网关这一段的出口是 SCG 向下游注入 `traceparent`。完整链路、`actuator` 可见性与断点见 [`docs/observability.md`](../docs/observability.md)。
 
 ## 架构约束
 

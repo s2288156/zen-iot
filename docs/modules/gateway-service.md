@@ -117,7 +117,7 @@
 
 ## 坑
 
-- **Boot 4 里 `spring.reactor.context-propagation` 默认是 `limited`，网关链路会静默断 trace。** 现象：网关日志有 trace 列，admin 却是另一条 trace。原因：`Tracer.currentSpan()` 在这条链上取不到 span，SCG 的 `observedRequestHttpHeadersFilter` 无 trace 可注入。做法：`application.yml` 显式设 `auto`。删除条件：Boot 把默认值改回 `auto`，或链路追踪改用显式的 `Context` 写入。
+- **Boot 4 里 `spring.reactor.context-propagation` 默认 `limited`，网关日志会静默丢掉 traceId。** 现象：给下游的 `traceparent` 是对的，网关自己的日志却一行都不带 traceId。做法：`gateway-service/src/main/resources/application.yml` 显式设 `auto`。为什么这两段会分岔、实测数据见 [`docs/observability.md`](../observability.md) §3，此处不重述。删除条件：Boot 把默认值改回 `auto`，或网关不再依赖 ThreadLocal 写 MDC。
 
 - **`@Order` 写在 `@Bean` 方法上对 `CorsWebFilter` 无效。** 现象：跨域预检回 401，浏览器只报「CORS 失败」，看起来像 CORS 配置写错。原因：`WebHttpHandlerBuilder` 收集 `WebFilter` Bean 后用 `AnnotationAwareOrderComparator` 排序，而 `CorsWebFilter` 既没实现 `Ordered` 也没有类级 `@Order`，方法上的注解不在这条排序路径上，它会落到 `LOWEST_PRECEDENCE` 排到路由转发之后。做法：`GatewayCorsWebFilter` 继承它并显式实现 `Ordered`。删除条件：上游给 `CorsWebFilter` 加上 `Ordered`。
 

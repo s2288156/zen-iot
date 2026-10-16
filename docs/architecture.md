@@ -23,6 +23,7 @@
 - 前缀所有权见 [`GLOSSARY.md`](../GLOSSARY.md)。
 - OpenAPI 文档里同时声明两条 server：直连与经网关（`zen.api-docs.direct-url` / `gateway-url`）。
 - 设备侧不走 HTTP，由 `ecs-service` 的协议适配器接入。
+- 同一条链路上还并行传 `traceparent`（由网关重新注入，不透传入站原值；入站值只决定续用哪个 traceId）。它的完整走法与断点见 [`docs/observability.md`](observability.md)，此处不重述。
 
 ## 鉴权：身份来源与两套白名单
 

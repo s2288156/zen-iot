@@ -50,8 +50,9 @@
   传输层或持久化栈（被禁包清单见其 README 的 `moduleStaysFreeOfWebAndPersistence`），也绝不反向指向
   `common-core`。
 - **编码卫生**（ArchUnit，按模块断言）：只允许构造器注入，因此字段上绝不出现 `@Autowired`/`@Resource`/`@Inject`；
-  不使用 `System.out`/`System.err`/`printStackTrace`，因为只有日志框架会传递 traceId；不使用 `new Date()`，
-  而 `java.util.Date` 本身仍然合法，供 jjwt 的 `issuedAt`/`expiration` 使用。
+  不使用 `System.out`/`System.err`/`printStackTrace`，因为只有日志框架会传递 traceId（链路与断点见
+  `docs/observability.md`）；不使用 `new Date()`，而 `java.util.Date` 本身仍然合法，供 jjwt 的
+  `issuedAt`/`expiration` 使用。
 - **SpotBugs**：默认级别即阻断。优先改代码；新的豁免写进 `gradle/spotbugs/exclude.xml`，附理由且保持狭窄
   （规则 + 包，绝不整类豁免；是否狭窄靠评审）。政策、级别配置与报告产物位置见 `docs/quality-gates.md`。
 - **测试**：任何需要本地中间件（MySQL/Nacos/Redis/RabbitMQ）的测试都带 `@Tag("integration")`（漏打不会被拦，靠评审），让
@@ -65,18 +66,19 @@
 本文件是入口：命令表和强制约定的规则清单只在这里。每份文档只写一件事，而写在两处的事实一定会漂移——所以理由、机制和
 被否决的方案都留在它自己的文档里，本文件只留规则加指针。
 
-| 文档                            | 回答什么问题                                   | 绝不包含                   |
-| ------------------------------- | ---------------------------------------------- | -------------------------- |
-| `README.md`（根）               | 平台是什么、模块全景、如何运行                 | 进度、计划、日期、门禁规则 |
-| `AGENTS.md`（本文件）           | 命令、门禁、硬性约定、这张路由表               | 模块内部实现、设计沿革     |
-| `GLOSSARY.md`（根）             | 平台术语的唯一出处                             | 实现细节、字段名单         |
-| `docs/architecture.md`          | 某一侧一动就会静默失效的跨模块契约             | 单模块实现细节             |
-| `<module>/README.md`            | 单个模块的事实与结论                           | 理由、被否决的方案、坑     |
-| `docs/modules/<module>.md`      | 为什么这样选、否决过什么、哪里坑过我们         | 别处已经写过的任何内容     |
-| `docs/quality-gates.md`         | 某项门禁技术是什么、如何接进来                 | 规则清单                   |
-| `docs/dependency-governance.md` | 依赖放哪一层、版本耦合在哪、自动升版抬到哪一步 | 坐标与版本号清单           |
-| `docs/agents/*.md`              | Agent 技能怎么读 tracker、标签、领域文档       | 命令、门禁规则             |
-| `SECURITY.md`                   | 漏洞上报与密钥处置                             | 架构细节                   |
+| 文档                            | 回答什么问题                                               | 绝不包含                   |
+| ------------------------------- | ---------------------------------------------------------- | -------------------------- |
+| `README.md`（根）               | 平台是什么、模块全景、如何运行                             | 进度、计划、日期、门禁规则 |
+| `AGENTS.md`（本文件）           | 命令、门禁、硬性约定、这张路由表                           | 模块内部实现、设计沿革     |
+| `GLOSSARY.md`（根）             | 平台术语的唯一出处                                         | 实现细节、字段名单         |
+| `docs/architecture.md`          | 某一侧一动就会静默失效的跨模块契约                         | 单模块实现细节             |
+| `<module>/README.md`            | 单个模块的事实与结论                                       | 理由、被否决的方案、坑     |
+| `docs/modules/<module>.md`      | 为什么这样选、否决过什么、哪里坑过我们                     | 别处已经写过的任何内容     |
+| `docs/quality-gates.md`         | 某项门禁技术是什么、如何接进来                             | 规则清单                   |
+| `docs/dependency-governance.md` | 依赖放哪一层、版本耦合在哪、自动升版抬到哪一步             | 坐标与版本号清单           |
+| `docs/observability.md`         | 一个 traceId 怎么穿过链路、哪里是断的、actuator 能看到什么 | 为什么只做 A 层、门禁规则  |
+| `docs/agents/*.md`              | Agent 技能怎么读 tracker、标签、领域文档                   | 命令、门禁规则             |
+| `SECURITY.md`                   | 漏洞上报与密钥处置                                         | 架构细节                   |
 
 - **模块 README 骨架** —— 开头一段交代模块职责，随后是 `能力与接口口径` / `关键实现` /
   `架构约束` / `主要依赖` / `命令`。只写事实与结论，每条至多两行；任何需要写「因为」的内容进
