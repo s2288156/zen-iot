@@ -58,7 +58,7 @@ Token 声明（`username` / `typ` / `roles` / `modules` 四个字面量集中在
 - `neverDependsOnServicesOrGateway`：不得引用 `com.zen.{admin,ecs,gateway,rcs,wcs}`，同 `common-core` 一样是硬编码包名列表。
 - 通用五条：禁字段注入、禁标准流、禁 `new Date()` 构造、可空性只用 jspecify、包切片无环，见 [`AGENTS.md`](../AGENTS.md)。
 
-消费方视角还有一道独立复核：`gateway-service` 的 `GatewayDependencyIsolationTest`。同一边界两端各断言一次，一边漏风也会被抓住。
+消费方视角还有一道独立复核：`gateway-service` 的 `GatewayDependencyIsolationTest`。同一边界两端各断言一次，一边漏风也会被抓住。这条边界为什么值得两端各守一次，以及 Boot 据此如何推断网关的 Web 类型，见 [`docs/architecture.md`](../docs/architecture.md) 的「类路径与 Web 类型」——那里也写明哪类改动会推翻它。
 
 ## 主要依赖
 

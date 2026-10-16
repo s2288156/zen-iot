@@ -4,6 +4,18 @@
 
 判据只有一条：一条约束如果「只在一侧成立就会静默失效」，它就属于本文件，不属于任何单个模块的 README。
 
+## 类路径与 Web 类型：反应式网关与 Servlet 服务共存
+
+全仓唯一一处「同一份代码被反应式栈与 Servlet 栈同时复用」的地方：`common-security` 的安全内核在 WebFlux 网关与 Servlet 业务服务两侧各装配一次。拆出这个模块之前，这条边界靠网关逐条 `exclude` 维持；拆出之后两边各依赖自己需要的栈，网关侧不再有 `exclude`。
+
+它成立的前提只有一句：**`common-security` 只放不含传输层与持久化栈的东西**——被禁包清单在 [`common-security/README.md`](../common-security/README.md)，此处不抄。生产侧与消费侧都得守住它，任何一侧漏风这条边界就不成立。
+
+网关**不声明自己的 Web 类型**，交给 Boot 依据类路径推断（`WebApplicationType.deduce()`）：类路径上没有 Servlet/MVC 栈时判 `REACTIVE`。因此只要把 Servlet 栈带回网关类路径——生产侧混进 Servlet 类，或消费侧自己加一条 Servlet starter、把 `common-core` 引回来——推断就翻成 `SERVLET`。这个开关没有配置可以兜底，判定依据就是类路径本身。
+
+翻车的形态不指向根因：网关在启动期直接失败，而报错只说 Servlet 栈与反应式网关不兼容（带 JPA 进来时则是无数据源炸 `DataSourceAutoConfiguration`），不会指出是哪条依赖把类路径污染的。
+
+守护它的是三段互补的断言：生产侧 `common-security/ArchitectureTest.moduleStaysFreeOfWebAndPersistence` 按包禁**编译期依赖图**；消费侧 `gateway-service` 的 `GatewayDependencyIsolationTest` 先用 `Class.forName` 查已知的 Servlet/JPA 类型确实不在运行期类路径上，再用 `bootDeducesAReactiveApplication` 断言 `WebApplicationType.deduce()` 就是 `REACTIVE`。按包的一段守生产侧、按类型的一段守消费侧，各自列名单；最后一段直接断言后果本身——它不依赖改依赖的人想不想得起往名单里补哪几个类。
+
 ## 请求链路与前缀所有权
 
 浏览器 → 网关 `28080` `/api/{admin,wcs,rcs,ecs}/**` → Nacos 发现 → `lb://{service}` → `StripPrefix=2` 剥掉两段前缀 → 服务。
