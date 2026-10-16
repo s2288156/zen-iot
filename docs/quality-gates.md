@@ -50,8 +50,8 @@
 **接入前后**：
 
 - 接之前，"缩进风格"是 code review 里反复出现的口水战，`.editorconfig` 只是建议——IDE 不装插件就不生效，成员换编辑器就漂移。
-- 接之后 diff 里再没有空白噪音。但它有两个真实的坑，本项目都踩过：
-  1. **Spotless 的 `**` 会匹配以点开头的路径**。`.ai/` 是 gitignore 的临时笔记目录，于是**未跟踪文件**反过来卡住了每一次提交——`check`会因为一个根本不在版本库里的 Markdown 文件而红。第一版修法是往`targetExclude`里补目录（历史见`2cbd5f8 fix(build): exclude gitignored .ai scratch docs from spotless markdown`），但私有工作区已经长出三个（`.ai/`、`.codex/`、`.qoder/`），减法名单意味着每多一个新目录就要再红一次提交。现在 `markdown`的 target 是白名单`markdownTargets`：只列文档的受控位置，`node_modules`和私有目录不在名单里，自然进不来。代价换到另一边——新位置的文档会**静默逃过门禁**，所以`lintMarkdown`用`git ls-files` 的实际跟踪清单比对白名单，有 md 落不进去就失败并列出路径。白名单落地后残留的`targetExclude("**/build/**", "**/node_modules/**")`已删：Spotless 把排除实现成 `target.minus(targetExclude)`，`FormatExtension` 里两边各自解析成一棵文件树（include 侧才走 Gradle 的目录剪枝），所以排除侧只会多走一遍全树、从不剪枝——白名单够不到的目录写进来是负收益。
+- 接之后 diff 里再没有空白噪音。它有两个真实的坑，本项目都踩过：
+  1. **Spotless 的 `**` 会匹配以点开头的路径**，未跟踪的私有笔记目录会反过来卡住每一次提交。结论：`markdown`的 target 用白名单`markdownTargets`（只列受控位置），不用 `targetExclude`减法——排除侧只会多走一遍全树、从不剪枝，白名单够不到的目录写进去是负收益。代价换到另一边：新位置的文档会**静默逃过门禁**，所以`lintMarkdown`用`git ls-files` 的实际跟踪清单比对白名单，有 md 落不进去就失败并列出路径。
   2. 它管不了"内容是否还准确"。格式化通过 ≠ 文档没过期。
 
 **产物**：**没有报告文件**。失败信息只有标准输出里的"哪个文件哪一处不符合格式"，以及一行 `Run 'gradlew spotlessApply' to fix`。这是有意的——格式问题的正确修复动作是"应用"，不是"读报告"。
@@ -337,11 +337,3 @@ CI **不**上传版本一致性报告和 `problems-report.html`（`check` job �
 | `./gradlew clean check --no-build-cache`            | 75.9s | 全量门禁的真实成本：5 模块编译 + SpotBugs + 架构 + 测试 |
 
 那对 8 秒 / 76 秒的差值本身就是结论：**日常反馈几乎免费，全量成本只在缓存失效时付**（`org.gradle.caching=true`，`gradle.properties`）。CI 上通过 `gradle/actions/setup-gradle` 复用同一套缓存，`timeout-minutes: 20` 是给冷启动留的余量。
-
-## 7. 后续文档计划
-
-本文件夹按主题展开，每篇一个对象，不与 `AGENTS.md` 抢事实源。候选：
-
-- 依赖与版本治理：BOM 优先级、`spring-cloud-alibaba` 与 Boot 插件的交互、Dependabot 的边界。
-- 反应式网关与 Servlet 业务服务共存：`common-security` 拆分史、`WebApplicationType.deduce` 那条启动期开关。
-- 可观测性：traceId 如何从网关穿到日志与 actuator（P3-1）。

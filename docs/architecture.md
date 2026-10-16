@@ -4,13 +4,11 @@
 
 判据只有一条：一条约束如果「只在一侧成立就会静默失效」，它就属于本文件，不属于任何单个模块的 README。
 
-可交互架构图（请求主链路 / 共享内核 / 设备 MQ 三个视图）：[`docs/architecture/v2/zen-iot-architecture.html`](architecture/v2/zen-iot-architecture.html)。**它是某一时刻的快照，不与代码同步维护**，与本文冲突时以本文和代码为准。
-
 ## 请求链路与前缀所有权
 
 浏览器 → 网关 `28080` `/api/{admin,wcs,rcs,ecs}/**` → Nacos 发现 → `lb://{service}` → `StripPrefix=2` 剥掉两段前缀 → 服务。
 
-- `/api/{service}` 前缀**只存在于网关侧**。服务内一律写裸路径（`/auth/login`，不是 `/api/admin/auth/login`）。
+- 前缀所有权见 [`GLOSSARY.md`](../GLOSSARY.md)。
 - OpenAPI 文档里同时声明两条 server：直连与经网关（`zen.api-docs.direct-url` / `gateway-url`）。
 - 设备侧不走 HTTP，由 `ecs-service` 的协议适配器接入。
 
@@ -79,9 +77,9 @@ Redis 三处布局（`RedisSessionRegistry`）：
 
 ## 模块权限判定
 
-授权依据是 **Token 里的 `modules` 快照**，不落库回查：`@RequireModule(ModuleCode.X)` 判定缺模块即 403。因此改角色授权不会影响已签出的 Token，需要 403 变成 200 就得重新登录或刷新。
+`@RequireModule`（见 [`GLOSSARY.md`](../GLOSSARY.md)）的判定不落库回查，依据是 Token 快照。因此改角色授权不会影响已签出的 Token，需要 403 变成 200 就得重新登录或刷新。
 
-`ModuleCode` 枚举 `admin` / `wcs` / `rcs` / `ecs`；`t_role_module.module_code` 存的就是这四个字符串。样例接口 `DemoController`（`/demo/admin`、`/demo/ecs`）存在的唯一目的是验证这条判定链与网关透传身份接得上。
+`t_role_module.module_code` 存的就是 `ModuleCode` 的四个字符串（见 [`GLOSSARY.md`](../GLOSSARY.md)）。样例接口 `DemoController`（`/demo/admin`、`/demo/ecs`）存在的唯一目的是验证这条判定链与网关透传身份接得上。
 
 ## 身份头透传与伪造防护
 

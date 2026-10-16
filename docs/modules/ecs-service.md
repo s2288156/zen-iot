@@ -1,5 +1,7 @@
 # ecs-service 决策与坑
 
+> **设计未确认，可能重写。** 本文件记录的选择可能整体推翻，见 [#67](https://github.com/s2288156/zen-iot/issues/67)。
+
 [`ecs-service/README.md`](../../ecs-service/README.md) 只放事实与结论，本文放**为什么这样选、否掉了什么、代价在哪**。跨模块必须同时成立的约定在 [`docs/architecture.md`](../architecture.md)，这里不重复。
 
 ## 决策

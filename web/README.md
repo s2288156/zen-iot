@@ -30,8 +30,7 @@
 
 - accessToken 只驻内存（模块变量），不落任何持久化存储：刷新页面即丢，由 refreshToken 静默轮转重建。
 - refreshToken 落 localStorage，键名 `zen.admin.refresh-token`，以支撑刷新与多标签页保持会话。
-- 代价是 refreshToken 暴露在 XSS 之下；后端不发 httpOnly Cookie 且本任务不改 Java，localStorage 是现有契约下唯一可行的持久化位置。
-- 因此 refreshToken 只用于 `/auth/refresh`，任何业务请求都不携带它；泄露的可利用窗口等于 `refresh-ttl`，撤销依赖 `/auth/logout` 拉黑。
+- refreshToken 只用于 `/auth/refresh`，任何业务请求都不携带它；泄露的可利用窗口等于 `refresh-ttl`，撤销依赖 `/auth/logout` 拉黑。
 - 部署侧 MUST 配 CSP 收敛注入面；本模块不引入任何 `dangerouslySetInnerHTML`。
 
 ### 会话与权限（`src/stores/auth.ts`、`src/routes/guards.tsx`）

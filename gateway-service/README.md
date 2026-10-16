@@ -10,7 +10,7 @@ API 网关（端口 `28080`，WebFlux 反应式）：统一路由与剥前缀、
 
 ### 路由
 
-`/api/{service}/**` → `lb://{service}`，`StripPrefix=2` 剥掉两段前缀，下游服务内一律写裸路径。
+`/api/{service}/**` → `lb://{service}`，`StripPrefix=2` 剥掉两段前缀（前缀所有权见 [`GLOSSARY.md`](../GLOSSARY.md)）。
 
 | 入站前缀        | 目标                 | URI 可覆盖          |
 | --------------- | -------------------- | ------------------- |
@@ -63,7 +63,7 @@ yml 里的白名单：`/api/admin/auth/login`、`/api/admin/auth/refresh`、`/ap
 - **code↔HTTP 映射与 Servlet 侧同规则**：`ApiJsonResponses.statusFor` 只在 code 是合法 HTTP 错误码时对齐状态码，否则回落 200 由 body 的 `code` 表达错误。
 - **CORS 用 `GatewayCorsWebFilter`**（`CorsWebFilter` 子类 + 显式 `Ordered`）而非网关的 `globalcors`，预检在鉴权之前短路。
 - **不提供「关闭网关鉴权」的开关**：它是透传身份的唯一签发点，能被配置关掉就等于 `gateway-header` 模式的下游没有鉴权。
-- **不复用 `common-security` 的 `SecurityProperties`**（前缀 `zen.security`）：那份由 `@ConditionalOnWebApplication(SERVLET)` 的自动配置绑定，反应式网关里根本不装配，且两侧白名单匹配的字符串不同。
+- **不复用 `common-security` 的 `SecurityProperties`**（前缀 `zen.security`），另立 `zen.gateway.*`；理由与两侧差异见 [`docs/modules/gateway-service.md`](../docs/modules/gateway-service.md)。
 - **白名单在构造期解析成 `PathPattern`**，解析失败直接抛——宁可启动失败也不留一个永不匹配的白名单。
 - **追踪只做 A 层**：traceId 生成 / 透传 / 写 MDC + 由 SCG 向下游注入 `traceparent`，不外发 span。
 

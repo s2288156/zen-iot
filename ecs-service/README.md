@@ -1,5 +1,7 @@
 # ecs-service
 
+> **设计未确认，可能重写。** 边界与实现均未定案，见 [#67](https://github.com/s2288156/zen-iot/issues/67)。
+
 外部设备服务（端口 `28084`，库 `zen_ecs`）：管 AMR 之外的设备——PLC / 光栅 / 自动门 / 充电桩。设备档案与分组、心跳在线态、协议适配抽象层、RCS 指令中转。
 
 本文只写事实与结论。**为什么这样选、否掉了什么、踩过什么坑**见 [`docs/modules/ecs-service.md`](../docs/modules/ecs-service.md)；跨模块必须同时成立的约定（前缀所有权、身份头、两套白名单、业务码与 HTTP 状态码的映射）见 [`docs/architecture.md`](../docs/architecture.md)。

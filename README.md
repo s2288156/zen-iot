@@ -6,23 +6,22 @@
 
 ## 全景
 
-| 模块              | 端口  | 已落地能力                                                                            | 文档                                |
-| ----------------- | ----- | ------------------------------------------------------------------------------------- | ----------------------------------- |
-| `gateway-service` | 28080 | 路由、JWT 验签与黑名单、身份头透传、CORS、统一异常                                    | [README](gateway-service/README.md) |
-| `admin-service`   | 28081 | 登录 / 刷新 / 登出、会话与强制下线、用户与角色、两类审计（库 `zen_admin`）            | [README](admin-service/README.md)   |
-| `ecs-service`     | 28084 | 设备档案与分组、心跳在线态、协议适配（当前 `loopback`）、RCS 指令中转（库 `zen_ecs`） | [README](ecs-service/README.md)     |
-| `common-core`     | —     | Servlet 业务服务的公共件：响应契约、全局异常、用户上下文、拦截器                      | [README](common-core/README.md)     |
-| `common-security` | —     | Web 无关的安全内核：JWT、错误码、`ApiResponse`、`TrustedHeaders`                      | [README](common-security/README.md) |
-
-`WCS` / `RCS` 尚未建模块，网关路由已为它们预留 `/api/wcs`、`/api/rcs` 前缀。
+| 模块              | 端口  | 能力                                                                                    | 文档                                |
+| ----------------- | ----- | --------------------------------------------------------------------------------------- | ----------------------------------- |
+| `gateway-service` | 28080 | 路由、JWT 验签与黑名单、身份头透传、CORS、统一异常                                      | [README](gateway-service/README.md) |
+| `admin-service`   | 28081 | 登录 / 刷新 / 登出、会话与强制下线、用户与角色、两类审计（库 `zen_admin`）              | [README](admin-service/README.md)   |
+| `web`             | 5173  | 管理控制台前端：Vite + React + TypeScript strict + Ant Design，经网关访问 admin-service | [README](web/README.md)             |
+| `ecs-service`     | 28084 | 设备档案与分组、心跳在线态、协议适配（当前 `loopback`）、RCS 指令中转（库 `zen_ecs`）   | [README](ecs-service/README.md)     |
+| `common-core`     | —     | Servlet 业务服务的公共件：响应契约、全局异常、用户上下文、拦截器                        | [README](common-core/README.md)     |
+| `common-security` | —     | Web 无关的安全内核：JWT、错误码、`ApiResponse`、`TrustedHeaders`                        | [README](common-security/README.md) |
 
 另有 `docs/`（跨模块契约、模块决策与坑、门禁技术笔记）、`docker/`（本地中间件 compose + `initdb` 建库脚本）、`gradle/`（wrapper、SpotBugs 豁免、commit-msg 脚本）；跨模块公共配置与门禁任务在 `build.gradle.kts`。
 
 ## 请求链路
 
-浏览器 → 网关 `28080` 的 `/api/{service}/**` → Nacos 发现 → `lb://{service}`，`StripPrefix=2` 剥掉两段前缀，**服务内只写裸路径**。设备侧不走 HTTP，由 `ecs-service` 的协议适配器接入。
+浏览器 → 网关 `28080` 的 `/api/{service}/**` → Nacos 发现 → `lb://{service}`，`StripPrefix=2` 剥掉两段前缀（前缀所有权见 [`GLOSSARY.md`](GLOSSARY.md)）。设备侧不走 HTTP，由 `ecs-service` 的协议适配器接入。
 
-链路成立依赖一批「只在一侧改就静默失效」的跨模块约定（密钥一致、两套白名单、撤销链、身份头、可信 IP），集中在 [`docs/architecture.md`](docs/architecture.md)。[架构图](docs/architecture/v2/zen-iot-architecture.html) 是某一时刻的快照，不与代码同步维护。
+链路成立依赖一批「只在一侧改就静默失效」的跨模块约定（密钥一致、两套白名单、撤销链、身份头、可信 IP），集中在 [`docs/architecture.md`](docs/architecture.md)。
 
 ## 环境要求
 

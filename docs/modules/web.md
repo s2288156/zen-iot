@@ -28,6 +28,15 @@
 - 理由：改主色只改一处并全站即时生效；违规也可评审——grep 十六进制色值即可发现。
 - 代价：`tokens.ts` 是唯一事实源，任何「就地写个色值更省事」都是退化；antd CLI 不检查色值，只能靠评审兜住。
 
+### refreshToken 落 localStorage，accessToken 只驻内存
+
+- 背景：后端 `TokenPair` 不返回 `expiresIn`，也没有 httpOnly Cookie 通道；本轮不改 Java 侧。
+- 选项：两个 Token 都只驻内存 / refreshToken 落 localStorage / 改走 httpOnly Cookie（需后端配合）。
+- 结论：accessToken 只驻内存、刷新即丢并靠 refreshToken 静默轮转重建；refreshToken 落 localStorage（键名 `zen.admin.refresh-token`），支撑刷新与多标签页保持会话。
+- 理由：要跨刷新与多标签页保持会话就必须落一处持久化，而现有后端契约下 localStorage 是唯一可行的那个位置。
+- 代价：refreshToken 暴露在 XSS 之下；这就是 `web/README.md`「部署侧 MUST 配 CSP」那条约束的由来。
+- 否决：httpOnly Cookie——需要后端改动，不在本轮范围。
+
 ### 错误处理分两层：路由 `errorElement` 为主，`ErrorBoundary` 兜渲染期
 
 - 结论：lazy 装载失败与 loader/action rejection 由路由 `errorElement` 抓，渲染期异常由 `ErrorBoundary` 兜底，两层渲染同一套 `StatusPage`。

@@ -33,8 +33,8 @@ Servlet 业务服务的公共模块：统一异常出口、鉴权拦截的自动
 
 - **HTTP 状态只在 code 能解析成 4xx/5xx 时对齐**；业务码段（如 1xxx）回 HTTP 200，错误由响应体 `code` 表达。见 `GlobalExceptionHandler#build`。
 - 白名单是**路径级排除**，同时作用于两个拦截器：命中的路径既不建立身份，也不校验 `@RequireModule`。
-- `ModuleAuthInterceptor` 对非 `HandlerMethod`（静态资源、`/error`）直接放行；注解只支持方法级，缺注解即不校验模块、仍要求已登录。
-- 分页入参 1-based：`pageNum` 默认 1、`pageSize` 默认 10 且上限 `PageQuery.MAX_PAGE_SIZE = 200`；`orderBy` 取自客户端，**属性白名单校验是调用方的责任**。
+- `ModuleAuthInterceptor` 对非 `HandlerMethod`（静态资源、`/error`）直接放行。
+- 分页入参 1-based：`pageNum` 默认 1、`pageSize` 默认 10 且上限 `PageQuery.MAX_PAGE_SIZE = 200`；`orderBy` 取自客户端（见 [`GLOSSARY.md`](../GLOSSARY.md) 的「排序字段白名单」）。
 - `BaseEntity` 提供 `id`（IDENTITY）与 `create_time` / `update_time` / `creator` / `updater`，`create_time` 标了 `updatable = false`。
 
 ## 关键实现
