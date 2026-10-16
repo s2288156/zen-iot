@@ -4,7 +4,7 @@
 
 ## 1. 链路终点在哪里
 
-A 层做到「traceId 进日志 + 向下游注入 `traceparent`」，**span 不外发**。终点是确定的，而且不是配置漏了一半：类路径上没有 `SpanExporter` 实现（刻意不用 `spring-boot-starter-opentelemetry`，它连带 otlp exporter），但 `OpenTelemetryTracingAutoConfiguration#otelSpanProcessor` 照样装出一个 `BatchSpanProcessor`，它包的 `CompositeSpanExporter` 导出器列表为空——**span 在进程内被丢弃**。
+A 层做到「traceId 进日志 + 向下游注入 `traceparent`」，**span 不外发**。终点是确定的，而且不是配置漏了一半：类路径上没有 `SpanExporter` 实现（依赖怎么选的理由见 [`docs/modules/common-core.md`](modules/common-core.md)），但 `OpenTelemetryTracingAutoConfiguration#otelSpanProcessor` 照样装出一个 `BatchSpanProcessor`，它包的 `CompositeSpanExporter` 导出器列表为空——**span 在进程内被丢弃**。
 
 于是排查手段只有两种：按 traceId 查日志，读 `/actuator/prometheus` 里的 exemplar。「打开追踪后端看这条请求的瀑布图」在 Phase 10 接上 collector 之前不成立。
 
@@ -29,7 +29,7 @@ Boot 4 默认 `limited`，网关在 `gateway-service/src/main/resources/applicat
 
 实测（网关真启动 + JDK `HttpServer` 桩后端，`TokenBlocklist` 返回 `Mono.delay(...)` 以制造 scheduler 跳，把 `org.springframework.cloud.gateway.filter.headers.observation` 开到 DEBUG 才有可读的行）：四个请求跑完，同一份结构化日志累计 44 行。`limited` 下 **0** 行带 traceId；`auto` 下 16 行带——每请求 4 行，发送侧过滤器 2 行、响应侧过滤器 2 行。带身份那次请求的发送侧 2 行落在 `parallel-1` 线程上，正是那次 scheduler 跳之后；免鉴权路径的 4 行都留在 netty 线程上。两种模式注入给下游的 `traceparent` 都对。
 
-**所以症状是「下游跟得上、网关查不到」，不是「网关有 trace 列、admin 另起一条」**。按 id grep 网关日志查不到这条请求时，先确认这个键，再怀疑日志级别。删除条件：Boot 把默认值改回 `auto`，或网关不再依赖 ThreadLocal 写 MDC。
+**所以症状是「下游跟得上、网关查不到」**，而不是早年记下的「网关有 trace 列、admin 另起一条」。按 id grep 网关日志查不到这条请求时，先确认这个键，再怀疑日志级别。这条坑本身归 [`docs/modules/gateway-service.md`](modules/gateway-service.md)。
 
 ## 4. 下游侧：同一个 traceId 怎么落到日志行
 

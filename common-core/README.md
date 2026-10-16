@@ -46,7 +46,7 @@ Servlet 业务服务的公共模块：统一异常出口、鉴权拦截的自动
 - **`TokenRevocationChecker` 的缺省实现是 `disabled()`**：消费方不自定义时撤销检查恒为「未撤销」。admin 侧的 `RedisTokenRevocationChecker` 因该退让机制而生效。
 - **透传模式的 principal 不完整**：`GatewayHeaderUserContextResolver` 的 `jti` 与 `expiresAt` 为 null，`UserPrincipal#remainingTtl()` 随之返回 null；缺或非数字 `X-User-Id` 即无身份（401），`roles` / `modules` 按 CSV trim 解析。
 - **MDC 只加 `userId`**，由 `AuthInterceptor` 写入、`afterCompletion` 连同 `UserContext` 一起清理；`traceId` 来自 micrometer-tracing，不是本模块写的。
-- **链路追踪只做 A 层**：`spring-boot-micrometer-tracing-opentelemetry` + `micrometer-tracing-bridge-otel`，traceId 进日志可串联，span 不上报。下游这一段的机制与字段见 [`docs/observability.md`](../docs/observability.md) §4。
+- **链路追踪只做 A 层**（定义见 [`GLOSSARY.md`](../GLOSSARY.md)），依赖声明见下面的「主要依赖」。下游那一段的机制与字段见 [`docs/observability.md`](../docs/observability.md) §4。
 - **两个 Bean 之外的公共类型不可漏**：`PageResult` 是不可变普通类（私有构造 + 只读访问器），工厂只有 `of(Page)` / `of(Page, mappedList)` / `empty()`，`pageNum` 由 `page.getNumber() + 1` 还原成 1-based。
 - **构建侧**：`common-core/build.gradle.kts` 刻意挂了 `org.springframework.boot` 插件只为拿托管版本，同时关掉 `bootJar` 并把 `jar` 的 classifier 复位成默认产物名。
 

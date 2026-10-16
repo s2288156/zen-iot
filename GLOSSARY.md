@@ -46,7 +46,7 @@
 
 ### A 层追踪
 
-追踪只做两层：traceId 进日志、跨服务向下游注入 `traceparent`；span 不外发，没有追踪后端可查。日志与指标 exemplar 因此是唯一的查询面。
+追踪只做到这一层：traceId 进日志、跨服务向下游注入 `traceparent`；span 不外发，也没有追踪后端可查。日志与指标 exemplar 因此是唯一的查询面。
 
 链路的走法、前提与断点见 [`docs/observability.md`](docs/observability.md)；为什么停在这一层见 `docs/modules/common-core.md`。
 

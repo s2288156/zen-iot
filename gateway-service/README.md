@@ -65,7 +65,7 @@ yml 里的白名单：`/api/admin/auth/login`、`/api/admin/auth/refresh`、`/ap
 - **不提供「关闭网关鉴权」的开关**：它是透传身份的唯一签发点，能被配置关掉就等于 `gateway-header` 模式的下游没有鉴权。
 - **不复用 `common-security` 的 `SecurityProperties`**（前缀 `zen.security`），另立 `zen.gateway.*`；理由与两侧差异见 [`docs/modules/gateway-service.md`](../docs/modules/gateway-service.md)。
 - **白名单在构造期解析成 `PathPattern`**，解析失败直接抛——宁可启动失败也不留一个永不匹配的白名单。
-- **追踪只做 A 层**（见 [`GLOSSARY.md`](../GLOSSARY.md)）：traceId 生成 / 透传 / 写 MDC + 由 SCG 向下游注入 `traceparent`，不外发 span。完整链路、`actuator` 可见性与断点见 [`docs/observability.md`](../docs/observability.md)。
+- **追踪只做 A 层**（定义见 [`GLOSSARY.md`](../GLOSSARY.md)）：网关这一段的出口是 SCG 向下游注入 `traceparent`。完整链路、`actuator` 可见性与断点见 [`docs/observability.md`](../docs/observability.md)。
 
 ## 架构约束
 
