@@ -79,6 +79,8 @@ subprojects {
 		// ArchUnit 没有 BOM，用单条约束把版本留在根，模块仍不写版本号
 		dependencies {
 			dependency("com.tngtech.archunit:archunit-junit5:1.5.1")
+			// springdoc 同样不在任何已 import 的 BOM 里，就地钉住会让版本脱离根这一处真源
+			dependency("org.springdoc:springdoc-openapi-starter-webmvc-ui:3.1.1")
 		}
 	}
 
