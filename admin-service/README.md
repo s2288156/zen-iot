@@ -62,7 +62,7 @@
 
 ## 架构约束
 
-`./gradlew :admin-service:architectureTest`，规则清单见 `admin-service/src/test/java/**/ArchitectureTest.java`。分层四条与通用四条（构造器注入、禁标准流、禁 `new Date()`、包切片无环）见 [`AGENTS.md`](../AGENTS.md)。
+`./gradlew :admin-service:architectureTest`，规则清单见 `admin-service/src/test/java/**/ArchitectureTest.java`。通用条见 [`AGENTS.md`](../AGENTS.md)。
 
 ## 主要依赖
 

@@ -25,6 +25,7 @@
 - 背景：Phase 0 的「新模块接入门禁清单」要求 `controller → service → repository → entity` 单向。
 - 结论：网关没有 JPA 层，不套用；通用五条（禁字段注入、禁标准流、禁 `new Date()`、可空性只用 JSpecify、包切片无环）原样保留，另加五条反应式专属约束。
 - 代价：网关没有「分层」这一说，包结构（`filter` / `auth` / `error` / `config`）只按职责切，靠切片无环兜住。
+- 反应式专属约束的理由：禁 `UserContext` 是因为 ThreadLocal 在反应式链路里会读到上一个请求的用户；禁 `block*` 算子是因为 Netty EventLoop 上阻塞就是 BlockHound 要拦的第一类问题；禁命令式 `StringRedisTemplate` / `RedisTemplate` 同理，但 `ReactiveStringRedisTemplate` 与之同包，故只能按 FQN 精确拦而非整包禁。
 
 ### 可信头剥离写在 `GlobalFilter` 里，不用路由的 `default-filters`
 

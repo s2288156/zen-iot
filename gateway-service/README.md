@@ -71,7 +71,7 @@ yml 里的白名单：`/api/admin/auth/login`、`/api/admin/auth/refresh`、`/ap
 
 `./gradlew :gateway-service:architectureTest`，规则清单见 `gateway-service/src/test/java/**/ArchitectureTest.java`。
 
-- **不套用四层模型**：网关没有 `controller → service → repository → entity` 分层；模块通用条（禁字段注入、禁标准流、禁 `new Date()`、可空性只用 JSpecify、包切片无环）原样保留，另有反应式专有约束。
+- **不套用四层模型**：网关没有 `controller → service → repository → entity` 分层；通用条见 [`AGENTS.md`](../AGENTS.md)，另有反应式专有约束。
 - `GatewayDependencyIsolationTest` 从消费方视角补一类 ArchUnit 看不见的失效：按 `Class.forName` 断言 Servlet/JPA 栈整包不在类路径、且 `lb://` 与 tracing 所需类型确实在，并断言 `WebApplicationType.deduce()` 判成 `REACTIVE`。
 
 ## 主要依赖
