@@ -18,6 +18,14 @@
 - 理由：只禁 Servlet 挡不住 `spring-webmvc`、JPA 与 validation 混进来，而那三者同样会把 `exclude` 清单还给消费方。
 - 配套：消费方视角另有 `gateway-service` 的 `GatewayDependencyIsolationTest`，同一条边界两端各断言一次。
 
+### 不写死网关的 Web 类型，让 Boot 的类路径推断就是事实
+
+- 背景：本模块存在的全部意义，是让 Boot 在网关侧把应用判成反应式，而这个判断由 `WebApplicationType.deduce()` 依据类路径给出，没有任何配置项直接表达它。
+- 选项：① 在网关 `application.yml` 显式写 `spring.main.web-application-type: REACTIVE`；② 不写，推断出什么就是什么，再用一条断言把结果钉住。
+- 结论：②。两端的 `application.yml` 都没有这个键，结果由 `gateway-service` 的 `GatewayDependencyIsolationTest.bootDeducesAReactiveApplication` 断言。
+- 理由：写死取值会让「类路径里混进了 Servlet 栈」这件事不再有任何信号——应用照常按反应式启动，污染只在别处以不相干的形态冒头。让推断结果当事实，等于把这条边界留在可执行断言里。
+- 代价：推断是隐式的，改依赖的人看不到「改了哪一行触发了它」；完整契约（含哪类改动会把推断翻成 `SERVLET`）见 [`docs/architecture.md`](../architecture.md) 的「类路径与 Web 类型」。
+
 ### JWT Bean 以「有没有密钥」为开关，而不是「哪种 Web」
 
 - 背景：网关和 Servlet 服务都要能装配 `JwtTokenVerifier`，但只有签发方需要密钥。
