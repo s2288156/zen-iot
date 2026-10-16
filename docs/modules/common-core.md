@@ -63,6 +63,7 @@
 - 背景：Phase 10 才有 OTLP collector，现在把 span 发出去就是往不存在的端点投递。
 - 结论：`spring-boot-micrometer-tracing-opentelemetry` + `micrometer-tracing-bridge-otel`，只让 traceId 进日志；刻意不用 `spring-boot-starter-opentelemetry`——它连带 `opentelemetry-exporter-otlp` 与 `micrometer-registry-otlp`，会真的开始外发数据。
 - 代价：Boot 4 起自动配置独立成模块，少了前者就连 `Tracer`/traceId 的装配都没有；这条依赖是「隐式能力」，从 `build.gradle.kts` 删掉不会有任何编译错误，只会让日志里的 traceId 消失。
+- 边界：本文只留取舍。traceId 从网关到这条日志的完整链路、`actuator` 可见性与断点写在 [`docs/observability.md`](../observability.md)。
 
 ### 审计人给 `"system"`，不给真实用户
 

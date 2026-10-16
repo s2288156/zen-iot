@@ -8,10 +8,10 @@ spring:
   # 与 admin-service 同一手法：仅靠 nacos-discovery starter 就能解析 nacos: 前缀，optional 保证 Nacos 上没有该 dataId 时照常启动
   config:
     import: optional:nacos:gateway-service.yaml
-  # traceId 进网关日志 + traceparent 注入下游请求头，都依赖 Reactor 的自动上下文传播：
-  # Boot 4 默认是 limited（只在部分算子恢复 ThreadLocal），网关这条链路上 Tracer.currentSpan() 取不到 span，
-  # 于是 SCG 的 observedRequestHttpHeadersFilter 无 trace 可注入，admin-service 只能另起一条 trace（实测）。
-  # 代价是每个操作符多一次上下文快照恢复，网关这种薄链路可以接受。
+  # Boot 4 默认是 limited（只在部分算子恢复 ThreadLocal），于是网关日志一行都不带 traceId：
+  # MDC 由 observation 的 scope 所在线程写，而日志语句常常已经跳到别的线程（黑名单那次 scheduler 跳就是）。
+  # 注入给下游的 traceparent 反而不受影响——它读 Reactor Context。所以断的是「网关自己查不到」，不是跨服务串联。
+  # 链路与实测见 docs/observability.md §3。代价是每个操作符多一次上下文快照恢复，网关这种薄链路可以接受。
   reactor:
     context-propagation: auto
   data:

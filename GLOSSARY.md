@@ -42,6 +42,14 @@
 
 分页查询的排序字段由客户端指定；服务端不内建允许清单，校验与否由各调用方自己决定。
 
+## 可观测性
+
+### A 层追踪
+
+追踪只做两层：traceId 进日志、跨服务向下游注入 `traceparent`；span 不外发，没有追踪后端可查。日志与指标 exemplar 因此是唯一的查询面。
+
+链路的走法、前提与断点见 [`docs/observability.md`](docs/observability.md)；为什么停在这一层见 `docs/modules/common-core.md`。
+
 ## 边界未确认
 
 设备侧的域边界尚未定案。下列四条只占位、不含定义，定案前不得据此做实现决策；结论见 [#67](https://github.com/s2288156/zen-iot/issues/67)。

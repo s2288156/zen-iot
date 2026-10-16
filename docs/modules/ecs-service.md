@@ -124,3 +124,4 @@
 - **`recentEvents` 的条数不开放**：`RECENT_EVENT_LIMIT = 20` 写死。事件表只增不改，把 `size` 交给调用方等于允许一次拉走整张表。
 - **排序字段是白名单**：`PageQuery.orderBy` 是客户端传来的字符串，直接交给 `Sort` 等于把列名与查询形状交出去，而未映射的属性名会让整条查询报错。不在名单里明确 400，不静默回落默认排序。
 - **tracing 依赖不在本模块声明**：traceId 的装配随 `common-core` 的 `implementation` / `runtimeOnly` 到运行时类路径。它是一条隐式能力——从 `common-core` 删掉不会有任何编译错误，只会让日志里的 traceId 消失，而 ECS 这一侧没有网关那样的 `MUST_BE_PRESENT` 哨兵。
+- **本模块有三处 traceId 断点**：`@Scheduled` 的 `HeartbeatTimeoutTask`、`CommandDispatchService` 的虚拟线程派发、`@RabbitListener` 的 MQ 入口。成因与接法统一记在 [`docs/observability.md`](../observability.md) §6，本模块不再各写一半。
