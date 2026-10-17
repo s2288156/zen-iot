@@ -10,16 +10,16 @@
 
 门禁不是"一个 CI 任务"，而是按**反馈速度**分层的四道闸。越靠左的闸越快、拦得越浅，越靠右越慢、拦得越深。
 
-| 关口                 | 触发时机              | 执行内容                                                                             | 单进程实测耗时      | 失败后果               |
-| -------------------- | --------------------- | ------------------------------------------------------------------------------------ | ------------------- | ---------------------- |
-| `pre-commit`         | 每次 `git commit`     | `spotlessCheck`（Java/MD/kts/YAML 格式）                                             | 约 2s（热守护进程） | 提交被拒               |
-| `commit-msg`         | 提交信息写完之后      | Conventional Commits 校验（`gradle/git-hooks/commit-msg.sh`）                        | 毫秒                | 提交被拒               |
-| `pre-push`           | 每次 `git push`       | `prePushCheck`：格式 + Markdown 规范 + 编译 `-Werror` + SpotBugs + 架构 + 版本一致性 | 见 §6               | 推送被拒，**不跑测试** |
-| CI（GitHub Actions） | PR / push main / 定时 | `check`（含测试）、集成测试 + 真中间件、gitleaks、OSV                                | 见 §6               | PR 红灯                |
+| 关口                 | 触发时机              | 执行内容                                                                                                 | 单进程实测耗时      | 失败后果               |
+| -------------------- | --------------------- | -------------------------------------------------------------------------------------------------------- | ------------------- | ---------------------- |
+| `pre-commit`         | 每次 `git commit`     | `spotlessCheck`（Java/MD/kts/YAML 格式）                                                                 | 约 2s（热守护进程） | 提交被拒               |
+| `commit-msg`         | 提交信息写完之后      | Conventional Commits 校验（`gradle/git-hooks/commit-msg.sh`）                                            | 毫秒                | 提交被拒               |
+| `pre-push`           | 每次 `git push`       | `prePushCheck`：格式 + Markdown 规范 + README/规则名漂移 + 编译 `-Werror` + SpotBugs + 架构 + 版本一致性 | 见 §6               | 推送被拒，**不跑测试** |
+| CI（GitHub Actions） | PR / push main / 定时 | `check`（含测试）、集成测试 + 真中间件、gitleaks、OSV                                                    | 见 §6               | PR 红灯                |
 
 对应源码：根 `build.gradle.kts` 的 `prePushCheck` 任务、`settings.gradle.kts` 的 `gitHooks { }` 块、`.github/workflows/ci.yml`。
 
-关键设计取舍一句话：**推送闸不跑测试**。`prePushCheck` 上方的注释写着"不跑测试；全量门禁仍是 check"。理由是上面这六项覆盖了绝大多数"低级但会污染主干"的问题，而测试要连数据库、启动 Spring 上下文，放进 `pre-push` 会让人开始用 `--no-verify`。闸一旦被人绕过，它就比没有闸更糟。
+关键设计取舍一句话：**推送闸不跑测试**。`prePushCheck` 上方的注释写着"不跑测试；全量门禁仍是 check"。理由是上面这几项覆盖了绝大多数"低级但会污染主干"的问题，而测试要连数据库、启动 Spring 上下文，放进 `pre-push` 会让人开始用 `--no-verify`。闸一旦被人绕过，它就比没有闸更糟。
 
 三个钩子都由 `settings.gradle.kts` 的 `gitHooks { }` 块**生成**，不是手写文件：
 
@@ -186,6 +186,14 @@ Method <com.zen.ecs.controller.DeviceController.list()> calls method <...> in (D
 - 判定：文本看 `name`↔`summary`、`description`↔`description`，「代码领先」与「两边不同文」分开报，并为每条漂移打印可直接执行的 `endpoint update` 命令；响应示例单独检——同一响应码挂多份、示例内容与 spec 不等、示例绑不到响应，都算失败。接口集合差异只在 `--fail-on-missing` 下算失败（导入不删资源时，多出来的接口是正常状态）。
 - 现状：由 `.github/workflows/apifox-sync.yml` 在手动触发时执行，`--warn-only` 起步；接进 `check` 之前要先解决"它需要网络与 token"，那与 §2.8 的干净机器可执行原则冲突，所以**刻意不进 `check`**。
 
+### 2.10 README 不手抄架构规则名 —— 文档与测试之间的第二道漂移闸
+
+- 技术：根 `build.gradle.kts` 的 `readmeDoesNotHandCopyArchRules` 任务，纯 Gradle/Kotlin，不碰网络、不启上下文。它扫每个模块 `src/test/java/**/ArchitectureTest.java` 里 `@Test` / `@ParameterizedTest` 的方法名（即规则名），断言这些名字不逐字出现在同模块 `README.md`；命中即失败并逐条列出「哪个 README 抄了哪条规则名」。
+- 为什么需要：`AGENTS.md`「不做第二份清单」要求模块 README 的「架构约束」段只写结论 + 指向测试类，绝不手抄规则名——抄本没有门禁，测试一改名 README 就悄悄过时。issue #68 清理了存量抄本，但清理本身不带防回归机制：#68 实现的第一版提交就又漏了 `ecs-service` 关键实现段里的一个规则名，靠人工 review 才抓到。这条把那条散文约定变成机器判定。
+- 边界：只查 `<module>/README.md`，**不查 `docs/modules/<module>.md`**——后者是「为什么有这条规则」的唯一去处，按 `AGENTS.md` 的文档分工本就该点名具体规则。匹配带词边界（`(?<![A-Za-z0-9_])…(?![A-Za-z0-9_])`），不把规则名当子串误判。
+- 接入：挂进 `check` 与 `prePushCheck`。它与 §2.9 的分工在于：§2.9 要联网与 token 故刻意不进 `check`，本条纯本地零依赖，所以能进 pre-push 并常驻 CI。
+- 产物：无文件产物，失败信息只在标准输出，逐条形如 `ecs-service/README.md names rule method 'neverReadsTheSystemClockDirectly'`。
+
 ## 3. 前后对比：这套门禁整体换来了什么
 
 把 §2 的散点收拢成一句可检验的话：**这套门禁拦住的不是"写得丑的代码"，而是"编译和测试都发现不了的失效模式"**。逐条对照：
@@ -312,15 +320,16 @@ CI **不**上传版本一致性报告和 `problems-report.html`（`check` job �
 
 ## 5. 红灯定位：先判断是哪道闸
 
-| 症状                                        | 大概率原因                                                               | 下一步                                                           |
-| ------------------------------------------- | ------------------------------------------------------------------------ | ---------------------------------------------------------------- |
-| `git commit` 就被拒，几秒                   | 格式（pre-commit）                                                       | `./gradlew spotlessApply`                                        |
-| 提交信息被拒但代码没动                      | Conventional Commits                                                     | 看 `gradle/git-hooks/commit-msg.sh` 允许的 type 列表             |
-| `push` 被拒，没有测试相关字样               | `prePushCheck` 六项之一：SpotBugs / 架构 / `-Werror` / 版本一致性 / 格式 | 看终端首行任务名；SpotBugs 去开 `main.html`，架构去开测试报告    |
-| 编译期报 `use of deprecated... is an error` | `-Werror` + `deprecation`                                                | 换 jspecify / 换非废弃 API，别去关 lint                          |
-| 本地一切正常，CI 的 `check` 红              | 缓存或脏 `build/`；或某个 `@Tag("integration")` 忘了打 tag               | `./gradlew --no-build-cache clean check` 复现                    |
-| CI 的 `integration` 红、`check` 绿          | 真中间件相关（Flyway 脚本、RabbitMQ 契约、Nacos 注册）                   | 看 `integration-reports` 产物                                    |
-| 架构测试"通过"但你刚改过包结构              | 可能踩了 §2.5 的空导入静默失效                                           | 看 `importedClassesAreNeverEmpty()` 在不在该模块，跑一次确认类数 |
+| 症状                                        | 大概率原因                                                                             | 下一步                                                               |
+| ------------------------------------------- | -------------------------------------------------------------------------------------- | -------------------------------------------------------------------- |
+| `git commit` 就被拒，几秒                   | 格式（pre-commit）                                                                     | `./gradlew spotlessApply`                                            |
+| 提交信息被拒但代码没动                      | Conventional Commits                                                                   | 看 `gradle/git-hooks/commit-msg.sh` 允许的 type 列表                 |
+| `push` 被拒，没有测试相关字样               | `prePushCheck` 之一：SpotBugs / 架构 / `-Werror` / 版本一致性 / 格式 / README 抄规则名 | 看终端首行任务名；SpotBugs 去开 `main.html`，架构去开测试报告        |
+| 报错含 `names rule method`                  | 模块 README 手抄了架构规则名（§2.10）                                                  | 把该段改回「结论 + 指向测试类」，理由写进 `docs/modules/<module>.md` |
+| 编译期报 `use of deprecated... is an error` | `-Werror` + `deprecation`                                                              | 换 jspecify / 换非废弃 API，别去关 lint                              |
+| 本地一切正常，CI 的 `check` 红              | 缓存或脏 `build/`；或某个 `@Tag("integration")` 忘了打 tag                             | `./gradlew --no-build-cache clean check` 复现                        |
+| CI 的 `integration` 红、`check` 绿          | 真中间件相关（Flyway 脚本、RabbitMQ 契约、Nacos 注册）                                 | 看 `integration-reports` 产物                                        |
+| 架构测试"通过"但你刚改过包结构              | 可能踩了 §2.5 的空导入静默失效                                                         | 看 `importedClassesAreNeverEmpty()` 在不在该模块，跑一次确认类数     |
 
 ---
 

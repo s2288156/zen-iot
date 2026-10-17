@@ -349,6 +349,41 @@ val lintMarkdownFix = tasks.register<Exec>("lintMarkdownFix") {
 	commandLine(listOf(npx, "markdownlint-cli") + markdownTargets + listOf("--fix"))
 }
 
+// 模块 README 的「架构约束」段只写结论并指向测试类，绝不手抄 ArchitectureTest 的规则方法名——抄本没有门禁，
+// 必然漂移（见 issue #68）。这条把 AGENTS.md「不做第二份清单」里那条机械约定变成确定检查：抽取每个模块
+// ArchitectureTest 的规则方法名，断言它们不逐字出现在同模块 README.md 里。docs/modules/*.md 不受此限——那正是
+// 允许写「为什么有这条规则」、可以点名具体规则的地方。
+val readmeDoesNotHandCopyArchRules = tasks.register("readmeDoesNotHandCopyArchRules") {
+	group = "verification"
+	description = "Fail if a module README names an ArchitectureTest rule method (the copy that drifts)"
+	val modules = subprojects
+		.map { it.name to it.projectDir }
+		.filter { (_, dir) -> File(dir, "README.md").isFile && File(dir, "src/test/java").isDirectory }
+	val methodDecl = Regex("""\bvoid\s+([A-Za-z_]\w*)\s*\(""")
+	doLast {
+		val violations = mutableListOf<String>()
+		modules.forEach { (moduleName, dir) ->
+			val readme = File(dir, "README.md")
+			val ruleNames = File(dir, "src/test/java").walkTopDown()
+				.filter { it.name == "ArchitectureTest.java" }
+				.flatMap { methodDecl.findAll(it.readText()).map { m -> m.groupValues[1] } }
+				.toSet()
+			val text = readme.readText()
+			ruleNames.filter { Regex("""(?<![A-Za-z0-9_])${Regex.escape(it)}(?![A-Za-z0-9_])""").containsMatchIn(text) }
+				.sorted()
+				.forEach { violations += "  $moduleName/README.md names rule method '$it'" }
+		}
+		if (violations.isNotEmpty()) {
+			throw GradleException(
+				"模块 README 手抄了 ArchitectureTest 的规则方法名——抄本没有门禁，会随测试改名而漂移。\n" +
+					"「架构约束」段只留运行命令、测试类路径与本模块结论（不适用 / 盲区 / 为何独有该条），把「为什么有这条规则」写进 docs/modules/<module>.md。\n" +
+					"见 AGENTS.md「不做第二份清单」与 issue #68。\n" +
+					violations.sorted().joinToString("\n"),
+			)
+		}
+	}
+}
+
 // TaskProvider 懒加载，避免配置期急切解析所有子项目
 val versionChecks = subprojects.map { it.tasks.named("versionCoherenceCheck") }
 
@@ -404,9 +439,10 @@ val crossModuleVersionCheck = tasks.register("crossModuleVersionCheck") {
 val prePushCheck = tasks.register("prePushCheck") {
 	group = "verification"
 	description =
-		"Pre-push gate (Markdown check is incremental): format + Markdown rules + compile (-Werror) + " +
-			"SpotBugs + architecture + version coherence"
+		"Pre-push gate (Markdown check is incremental): format + Markdown rules + README/arch-rule copy guard + " +
+			"compile (-Werror) + SpotBugs + architecture + version coherence"
 	dependsOn(tasks.named("spotlessCheck"), lintMarkdown)
+	dependsOn(readmeDoesNotHandCopyArchRules)
 	dependsOn(compileGate)
 	dependsOn(crossModuleVersionCheck)
 }
@@ -416,7 +452,7 @@ tasks.named("spotlessApply") {
 }
 
 tasks.named("check") {
-	dependsOn(lintMarkdown, crossModuleVersionCheck)
+	dependsOn(lintMarkdown, readmeDoesNotHandCopyArchRules, crossModuleVersionCheck)
 }
 
 // 本机开发栈编排（devUp / devDown / devStatus / devComposeDown）：逻辑独立成文件，根脚本不长；
