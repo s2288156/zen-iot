@@ -19,14 +19,14 @@
   "dependencies": {
     "@ant-design/icons": "6.3.4",
     "@tanstack/react-query": "^5.104.1",
-    "antd": "6.6.5",
+    "antd": "6.6.6",
     "react": "^19.2.8",
     "react-dom": "^19.2.8",
     "react-router": "^8.4.0",
     "zustand": "^5.0.15"
   },
   "devDependencies": {
-    "@ant-design/cli": "6.6.5",
+    "@ant-design/cli": "6.6.6",
     "@eslint/js": "^10.0.1",
     "@testing-library/react": "^16.3.3",
     "@types/node": "^24.13.3",
