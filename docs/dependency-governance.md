@@ -58,4 +58,6 @@ Dependabot 只覆盖三个位置，`directory` 指到哪里就扫到哪里：
 - **gradle 只写 `/` 不是漏写**：按 §1 的约定，模块脚本里没有版本号，能升的坐标本来就都在根——这正是「版本只在根声明一次」带来的好处。
 - **分组怎么分的**：gradle 与 npm 都把 patch 和 minor 合成一个 PR，major 单独开（有破坏风险）。npm 另外有一组 `antd` 三件套，它**必须排在 `patch-and-minor` 之前**：一个依赖同时命中多个分组时，只会归入最先匹配的那一组，顺序就决定归属。这三件必须一起升，因为 `@ant-design/cli` 的检查规则和 `@ant-design/icons` 的 major 都对应某个 antd 版本，拆开升会让检查的一方和被检查的一方对不上。github-actions 不分组，因为节奏不同（月更，而依赖是周更）。
 - **没有任何依赖被刻意排除**：文件里没有一条 `ignore`。它的边界靠覆盖范围和 CI 校验来划，不靠排除名单——每个 PR 都会自动触发 CI（gradle 与 npm 的 PR 分别走 `ci.yml` 与 `web-ci.yml`），且不会自动合并。
+- **Node 版本同源这条靠门禁，不靠评审**：`web/package.json` 的 `engines.node`、`web-ci.yml` 的 `node-version` 与 `@types/node` 解析到的版本必须指向同一个 Node 大版本，由 `web/scripts/node-types-gate.mjs` 在 `web-ci.yml` 里断言（脚本跑在 `node-version` 给的运行时上，所以只需比对另两处）。这条 Dependabot 看不见：npm 生态只抬 `package.json`，`node-version` 不是任何生态的依赖项——上一条说的「靠覆盖范围划边界」在这里正好留了个洞，靠脚本补。
+- **`apifox-sync.yml` 的 Node 22 不属于这条同源约束**：那里的 `setup-node` 只为 `npm i -g apifox-cli` 服务，与前端运行时无关。别为了「全仓统一」把它一起抬——那等于把一个第三方 CLI 的兼容矩阵绑进前端的升级节奏。
 - **代价**：这套自动化换来的是耦合——插件版本动一格，可能五个模块一起受影响。[`docs/quality-gates.md`](quality-gates.md) §3 记录的就是这笔成本。

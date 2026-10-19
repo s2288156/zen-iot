@@ -54,6 +54,10 @@ jobs:
       - name: Install dependencies (frozen lockfile)
         run: pnpm install --frozen-lockfile
 
+      # 同源判定由脚本做，它跑在上面 node-version 提供的运行时上，所以只比 engines.node 与 @types/node
+      - name: Node version coupling gate
+        run: node scripts/node-types-gate.mjs
+
       - name: Lint (eslint)
         run: pnpm lint
 
