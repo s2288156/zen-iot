@@ -50,6 +50,32 @@ jobs:
           if-no-files-found: ignore
           retention-days: 7
 
+  # ——— 抬开发线（只在 main 上跑：比对的是一份共享状态，PR 分支上比没有意义）———
+  # tag 之后忘记抬 -SNAPSHOT 会让开发中的制品顶着已发布的版本号跑，而别的门禁都不会红。
+  # 刻意不进 required checks：release commit 与抬开发线的 PR 之间 main 可能红一次，那是设计接受的代价。
+  release-line:
+    name: ./gradlew releaseLineCheck (main only)
+    if: github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          # 需要全部 tag 才能算出最近一个发布；浅克隆只带 HEAD 那一个，别处的 checkout 不受影响
+          fetch-depth: 0
+
+      - name: Setup JDK 25
+        uses: actions/setup-java@v6
+        with:
+          distribution: temurin
+          java-version: "25"
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v6
+
+      - name: Run releaseLineCheck
+        run: ./gradlew --no-daemon releaseLineCheck
+
   # ——— 集成测试（依赖 MySQL/Redis/RabbitMQ 容器与单独拉起的 Nacos）———
   integration:
     name: ./gradlew check -PintegrationTests (JDK 25)
