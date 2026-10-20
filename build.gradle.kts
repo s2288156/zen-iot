@@ -428,6 +428,53 @@ val versionSourceCheck = tasks.register("versionSourceCheck") {
 	}
 }
 
+// 抬开发线的门禁（#84）：tag 之后忘记抬 -SNAPSHOT，开发中的制品会顶着已发布的版本号跑，而没有任何检查会红。
+// 判据只有一条——开发线版本严格大于最近一个 vX.Y.Z tag；连「相等」也不放行，因为「等于 tag」正是漏抬那一刻的形态。
+// 发版人自己就是第一个用户：先把 tag 打了、抬开发线的 PR 还没合，这条会红，正好提醒开发线还停在已发布值上。
+// 版本取自根脚本顶部那唯一一处字面量（versionSourceCheck 已断言它是 semver），tag 取自 git，取不到就跳过。
+val releaseLineCheck = tasks.register("releaseLineCheck") {
+	group = "verification"
+	description = "Assert the Gradle dev version is ahead of the newest v* tag (release discipline gate)"
+	val tagPattern = Regex("""v(\d+)\.(\d+)\.(\d+)""")
+	val versionPattern = Regex("""(\d+)\.(\d+)\.(\d+)""")
+	doLast {
+		// git 不可用（源码归档、沙箱）时装不出来，与 lintMarkdown 的降级口径一致
+		val tags = gitOutput("tag", "--list", "v*", "--sort=-v:refname")
+		if (tags == null) {
+			logger.lifecycle("git is unavailable; releaseLineCheck skipped")
+			return@doLast
+		}
+		// 非 semver 的 tag 直接忽略：判据只认 vX.Y.Z，别的写法不做解释；排序已由 --sort=-v:refname 给出，
+		// 第一个能解析的即最新。tag 不必是 HEAD 的祖先——它的语义是「这棵树 = 这个版本」。
+		val newestTag = tags.firstNotNullOfOrNull { tag ->
+			tagPattern.matchEntire(tag)?.let { tag to it.groupValues.drop(1).map { segment -> segment.toInt() } }
+		}
+		if (newestTag == null) {
+			logger.lifecycle("no vX.Y.Z tag found; there is no released version for the dev line to stay ahead of")
+			return@doLast
+		}
+		val gradleVersion = rootProject.version.toString()
+		val gradleSegments = versionPattern.find(gradleVersion)?.groupValues?.drop(1)?.map { it.toInt() }
+		if (gradleSegments == null) {
+			throw GradleException(
+				"root build.gradle.kts declares version '$gradleVersion', which is not semver; releaseLineCheck cannot compare it",
+			)
+		}
+		val (tagName, tagSegments) = newestTag
+		val ahead = gradleSegments.zip(tagSegments)
+			.firstOrNull { (dev, released) -> dev != released }
+			?.let { (dev, released) -> dev > released }
+			?: false
+		if (!ahead) {
+			throw GradleException(
+				"gradle version ${gradleSegments.joinToString(".")} is not ahead of the newest tag $tagName:\n" +
+					"the dev line is still claiming a released version. Bump the root build.gradle.kts\n" +
+					"version to the next -SNAPSHOT (docs/release-versioning.md §2 step 5).",
+			)
+		}
+	}
+}
+
 // TaskProvider 懒加载，避免配置期急切解析所有子项目
 val versionChecks = subprojects.map { it.tasks.named("versionCoherenceCheck") }
 

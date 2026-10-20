@@ -8,14 +8,15 @@
 
 ## 1. 全景：一次改动要过几道闸
 
-门禁不是"一个 CI 任务"，而是按**反馈速度**分层的四道闸。越靠左的闸越快、拦得越浅，越靠右越慢、拦得越深。
+门禁不是"一个 CI 任务"，而是按**反馈速度**分层的四道闸（下表把 CI 这一道按触发范围拆成两行：PR 与 main 上的检查并不相同）。越靠左的闸越快、拦得越浅，越靠右越慢、拦得越深。
 
-| 关口                 | 触发时机              | 执行内容                                                                                                                | 单进程实测耗时      | 失败后果               |
-| -------------------- | --------------------- | ----------------------------------------------------------------------------------------------------------------------- | ------------------- | ---------------------- |
-| `pre-commit`         | 每次 `git commit`     | `spotlessCheck`（Java/MD/kts/YAML 格式）                                                                                | 约 2s（热守护进程） | 提交被拒               |
-| `commit-msg`         | 提交信息写完之后      | Conventional Commits 校验（`gradle/git-hooks/commit-msg.sh`）                                                           | 毫秒                | 提交被拒               |
-| `pre-push`           | 每次 `git push`       | `prePushCheck`：格式 + Markdown 规范 + README/规则名漂移 + 编译 `-Werror` + SpotBugs + 架构 + 版本一致性 + 版本单一真源 | 见 §6               | 推送被拒，**不跑测试** |
-| CI（GitHub Actions） | PR / push main / 定时 | `check`（含测试）、集成测试 + 真中间件、gitleaks、OSV                                                                   | 见 §6               | PR 红灯                |
+| 关口                 | 触发时机              | 执行内容                                                                                                                | 单进程实测耗时        | 失败后果                   |
+| -------------------- | --------------------- | ----------------------------------------------------------------------------------------------------------------------- | --------------------- | -------------------------- |
+| `pre-commit`         | 每次 `git commit`     | `spotlessCheck`（Java/MD/kts/YAML 格式）                                                                                | 约 2s（热守护进程）   | 提交被拒                   |
+| `commit-msg`         | 提交信息写完之后      | Conventional Commits 校验（`gradle/git-hooks/commit-msg.sh`）                                                           | 毫秒                  | 提交被拒                   |
+| `pre-push`           | 每次 `git push`       | `prePushCheck`：格式 + Markdown 规范 + README/规则名漂移 + 编译 `-Werror` + SpotBugs + 架构 + 版本一致性 + 版本单一真源 | 见 §6                 | 推送被拒，**不跑测试**     |
+| CI（GitHub Actions） | PR / push main / 定时 | `check`（含测试）、集成测试 + 真中间件、gitleaks、OSV                                                                   | 见 §6                 | PR 红灯                    |
+| CI（仅 main，非 PR） | push main / 定时      | `releaseLineCheck`：开发线版本必须严格大于最近一个 `vX.Y.Z` tag                                                         | 秒级（一次 tag 比对） | main 红灯，**PR 不受影响** |
 
 对应源码：根 `build.gradle.kts` 的 `prePushCheck` 任务、`settings.gradle.kts` 的 `gitHooks { }` 块、`.github/workflows/ci.yml`。
 
@@ -201,6 +202,16 @@ Method <com.zen.ecs.controller.DeviceController.list()> calls method <...> in (D
 - 断言三条：根版本不为 `unspecified` 且形如 semver（含可选 `-SNAPSHOT`）；每个子项目解析到的 `version` 等于根版本（在 `doLast` 读，才抓得到模块脚本后加的覆盖）；`web/package.json` 不含 `version` 键（`groovy.json.JsonSlurper` 解析，文件缺失同样失败）。
 - 接入：挂进 `check` 与 `prePushCheck`。运行期那一侧由 `OpenApiDocContractTest` 守（`info.version` 必须等于构建版本），它需要完整上下文，所以只在 CI 的 integration job 跑。
 - 产物：无文件产物，失败信息逐条形如 `ecs-service resolves to version '0.1.0', root is '0.2.0-SNAPSHOT'`。
+
+### 2.12 抬开发线 —— 开发线版本必须领先于最近一个 tag
+
+- 技术：根 `build.gradle.kts` 的 `releaseLineCheck` 任务，纯 Gradle/Kotlin，不启上下文，只读 git 的 tag 列表。
+- 为什么需要：发版的顺序是「先打 tag，再抬开发线」（[`release-versioning.md`](release-versioning.md) §2 第 5 步），而抬开发线原先只是一条纪律——漏掉的话开发中的制品会顶着已发布的版本号跑，而编译、测试、SpotBugs、架构约束一个都不会红。按 `AGENTS.md`「每条坑自带删除条件」，这类只活在评审经验里的约定就该换成一条可执行的判据（issue #84）。
+- 判据：取根脚本版本字面量的前三段数字（`0.1.0-SNAPSHOT` → `0.1.0`），与 `git tag --list 'v*' --sort=-v:refname` 里最新的 `vX.Y.Z` 逐段比较，必须**严格大于**；相等也判失败，因为「等于 tag」正是漏抬那一刻的形态。
+- 边界四条：非 `vX.Y.Z` 的 tag 直接忽略；一个 tag 都没有时通过（还没有已发布版本可以落后于）；tag 不必是 HEAD 的祖先——它的语义是「这棵树 = 这个版本」，不是「最新提交」；git 不可用（源码归档、沙箱）时跳过，与 §2.2 的 `lintMarkdown` 同一种降级口径。
+- 接入：只注册，**不进 `check` 也不进 `prePushCheck`**。它依赖 tag 这份人为时机，本地跑同样会红，而一次改代码的推送不该被一次发版时机的遗留问题拦住——发版人可以在打完 tag 之后手动跑一次自检。CI 侧是 `.github/workflows/ci.yml` 的 `release-line` job，带 `if: github.event_name != 'pull_request'`，并且**只有它**用 `fetch-depth: 0`（浅克隆拿不到 tag），`check` job 的 checkout 保持不动。
+- 取舍：它**故意不求进 required checks**。release commit 与抬开发线的 PR 之间若有别的提交落到 main、或周一的定时任务正好落在那个窗口，main 会红一次，直到抬开发线合入——那不是假阳性，那一刻的开发线确实还停在已发布值上。设计取舍见 [`docs/adr/0001-gate-the-dev-line-against-the-newest-tag.md`](adr/0001-gate-the-dev-line-against-the-newest-tag.md)。
+- 产物：无文件产物，失败信息在标准输出，形如 `gradle version 0.1.0 is not ahead of the newest tag v0.1.0`，并指向 `release-versioning.md` §2 第 5 步。
 
 ## 3. 前后对比：这套门禁整体换来了什么
 
