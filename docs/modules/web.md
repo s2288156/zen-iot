@@ -51,6 +51,14 @@
 - 理由：CLI 退出码恒 0，本身不构成门禁，阻断只能由外层按摘要计数补；同一层顺带校验 CLI 与 antd 同版，否则检查器与被检对象错位。
 - 代价：门禁语义是「不许新增废弃别名」，但 CLI 对 `Tabs.TabPane` 与 `size="default"` 漏检，这两条仍靠评审，不因转阻断而视为已覆盖。
 
+### Node major 跟 Active LTS，不跟 Current
+
+- 背景：`web-ci.yml` 的 `node-version`、`web/package.json` 的 `engines.node` 与 `@types/node` 必须同抬（见 [`docs/dependency-governance.md`](../dependency-governance.md) §3），而 Node major 先走 6 个月 Current、再由每年 10 月转入 Active LTS。
+- 选项：Current 一发布就抬 / 等进 Active LTS 再抬 / 交给 Dependabot 分步抬。
+- 结论：只在 major 进入 Active LTS 后落地；`node-version`、`engines.node`、`@types/node` 在同一个提交里一起改。
+- 理由：CI 不追还没转正的 major——Node 官方口径是生产使用 Active LTS 或 Maintenance LTS；Dependabot 看不见 `node-version`，分步抬必然在中间态被同源门禁判红。
+- 代价：合入窗口由 Node 发布日程决定；本机 Node 要自行跟进到同一 major，否则 `pnpm` 命令持续报 engines 警告。
+
 ## 坑
 
 - **`@ant-design/cli` 的退出码恒为 0。** 现象：注入违规后仍 `exit 0`，只有 stdout 多出 `Summary: N deprecated, …` 行；任何直接把它当 CI 步骤的写法都是假绿。做法：外层 `antd-lint-gate.mjs` 解析该摘要、按四类计数求和判非零，并对「既无 `No issues found` 也无 `Summary`」按失败处理。**删除条件**：CLI 自身改为非零退出码后。
