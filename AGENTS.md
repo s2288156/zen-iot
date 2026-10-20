@@ -76,6 +76,7 @@
 | `docs/modules/<module>.md`      | 为什么这样选、否决过什么、哪里坑过我们                     | 别处已经写过的任何内容     |
 | `docs/quality-gates.md`         | 某项门禁技术是什么、如何接进来                             | 规则清单                   |
 | `docs/dependency-governance.md` | 依赖放哪一层、版本耦合在哪、自动升版抬到哪一步             | 坐标与版本号清单           |
+| `docs/release-versioning.md`    | 发版那一刻按什么顺序做、版本号写在哪几处、tag 的形态       | 当前版本号清单、发版历史   |
 | `docs/observability.md`         | 一个 traceId 怎么穿过链路、哪里是断的、actuator 能看到什么 | 为什么只做 A 层、门禁规则  |
 | `docs/agents/*.md`              | Agent 技能怎么读 tracker、标签、领域文档                   | 命令、门禁规则             |
 | `SECURITY.md`                   | 漏洞上报与密钥处置                                         | 架构细节                   |
