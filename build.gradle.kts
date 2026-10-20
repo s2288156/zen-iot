@@ -13,7 +13,7 @@ plugins {
 }
 
 group = "com.zen"
-version = "0.0.1"
+version = "0.1.0-SNAPSHOT"
 
 // 依赖本机中间件（MySQL/Nacos/Redis/RabbitMQ）的测试一律打 @Tag("integration")，默认从 test/check 排除，
 // 这样 check 在干净环境下也是可执行的真门禁；容器就绪时用 ./gradlew test -PintegrationTests 纳入
@@ -85,7 +85,7 @@ subprojects {
 	}
 
 	group = "com.zen"
-	version = "0.0.1"
+	version = "0.1.0-SNAPSHOT"
 
 	configure<JavaPluginExtension> {
 		toolchain {
