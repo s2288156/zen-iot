@@ -2,6 +2,7 @@ import com.github.spotbugs.snom.Confidence
 import com.github.spotbugs.snom.Effort
 import com.github.spotbugs.snom.SpotBugsExtension
 import com.github.spotbugs.snom.SpotBugsTask
+import groovy.json.JsonSlurper
 import io.spring.gradle.dependencymanagement.dsl.DependencyManagementExtension
 
 plugins {
@@ -85,7 +86,8 @@ subprojects {
 	}
 
 	group = "com.zen"
-	version = "0.1.0-SNAPSHOT"
+	// 版本只在根脚本顶部声明一次；模块脚本里再写 version 会被 versionSourceCheck 判红
+	version = rootProject.version
 
 	configure<JavaPluginExtension> {
 		toolchain {
@@ -384,6 +386,48 @@ val readmeDoesNotHandCopyArchRules = tasks.register("readmeDoesNotHandCopyArchRu
 	}
 }
 
+// 版本号只有一处声明：本文件顶部那一行。其余全部派生——子项目继承它，OpenAPI 的 info.version 由 buildInfo
+// 注入（见 admin-service/build.gradle.kts），web/package.json 不再持有 version 字段。结构上已经不可能分叉，
+// 这条守的是「下一个人再写一份」：模块脚本里的 version 覆盖、或把 version 加回 web/package.json，都会在这里变红。
+// 子项目版本必须在 doLast 才读——配置期读会漏掉模块脚本里后加的覆盖。
+val versionSourceCheck = tasks.register("versionSourceCheck") {
+	group = "verification"
+	description = "Fail if a second version declaration exists (a module script or web/package.json)"
+	val semver = Regex("""\d+\.\d+\.\d+(-SNAPSHOT)?""")
+	val webPackageJson = layout.projectDirectory.file("web/package.json")
+	doLast {
+		val rootVersion = rootProject.version.toString()
+		val violations = mutableListOf<String>()
+		if (rootVersion == Project.DEFAULT_VERSION || !semver.matches(rootVersion)) {
+			violations +=
+				"  root build.gradle.kts declares '$rootVersion', expected a semver like 0.1.0-SNAPSHOT"
+		}
+		subprojects.forEach { module ->
+			val moduleVersion = module.version.toString()
+			if (moduleVersion != rootVersion) {
+				violations += "  ${module.name} resolves to version '$moduleVersion', root is '$rootVersion'"
+			}
+		}
+		val packageJsonFile = webPackageJson.asFile
+		if (!packageJsonFile.isFile) {
+			violations +=
+				"  ${packageJsonFile.path} is missing: web must not hold its own version, but the file is still required"
+		} else {
+			@Suppress("UNCHECKED_CAST")
+			val packageJson = JsonSlurper().parseText(packageJsonFile.readText()) as Map<String, Any?>
+			if (packageJson.containsKey("version")) {
+				violations += "  web/package.json declares version '${packageJson["version"]}', the build version is the only source"
+			}
+		}
+		if (violations.isNotEmpty()) {
+			throw GradleException(
+				"more than one version declaration; the build version lives only at the top of the root build.gradle.kts:\n" +
+					violations.joinToString("\n"),
+			)
+		}
+	}
+}
+
 // TaskProvider 懒加载，避免配置期急切解析所有子项目
 val versionChecks = subprojects.map { it.tasks.named("versionCoherenceCheck") }
 
@@ -440,11 +484,12 @@ val prePushCheck = tasks.register("prePushCheck") {
 	group = "verification"
 	description =
 		"Pre-push gate (Markdown check is incremental): format + Markdown rules + README/arch-rule copy guard + " +
-			"compile (-Werror) + SpotBugs + architecture + version coherence"
+			"compile (-Werror) + SpotBugs + architecture + version coherence + version single source"
 	dependsOn(tasks.named("spotlessCheck"), lintMarkdown)
 	dependsOn(readmeDoesNotHandCopyArchRules)
 	dependsOn(compileGate)
 	dependsOn(crossModuleVersionCheck)
+	dependsOn(versionSourceCheck)
 }
 
 tasks.named("spotlessApply") {
@@ -452,7 +497,7 @@ tasks.named("spotlessApply") {
 }
 
 tasks.named("check") {
-	dependsOn(lintMarkdown, readmeDoesNotHandCopyArchRules, crossModuleVersionCheck)
+	dependsOn(lintMarkdown, readmeDoesNotHandCopyArchRules, crossModuleVersionCheck, versionSourceCheck)
 }
 
 // 本机开发栈编排（devUp / devDown / devStatus / devComposeDown）：逻辑独立成文件，根脚本不长；

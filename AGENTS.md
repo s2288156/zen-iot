@@ -57,6 +57,9 @@
   （规则 + 包，绝不整类豁免；是否狭窄靠评审）。政策、级别配置与报告产物位置见 `docs/quality-gates.md`。
 - **测试**：任何需要本地中间件（MySQL/Nacos/Redis/RabbitMQ）的测试都带 `@Tag("integration")`（漏打不会被拦，靠评审），让
   `test`/`check` 在干净机器上依然可跑。
+- **版本单一真源**（门禁，`versionSourceCheck`）：版本号只在根 `build.gradle.kts` 顶部声明一次，子项目继承它、
+  OpenAPI 的 `info.version` 由 `build-info.properties` 注入、`web/package.json` 不带 `version`；派生口径见
+  `docs/release-versioning.md` §1。
 - **格式化**（门禁，`spotlessCheck` + `lintMarkdown`）：Java 用 `palantirJavaFormat`、Markdown 用 Prettier +
   markdownlint；文件类型范围与 `db/migration/*.sql` 的豁免见根 `build.gradle.kts` 的 `spotless` 块，编辑器行为见
   `.editorconfig`。

@@ -32,3 +32,13 @@ dependencies {
 tasks.bootJar {
 	archiveFileName.set("admin-service.jar")
 }
+
+// OpenAPI 的 info.version 由构建注入：bootBuildInfo 产出的 META-INF/build-info.properties 被挂成 main resources
+// 的 srcDir，所以测试、bootRun 与 bootJar 里都在（见 ZenAdminOpenApiConfiguration 的构造参数）。
+// excludes 掉 time：它默认是「当前时刻」、本身又是任务的 @Input，留着会让 bootBuildInfo 与随后的
+// processResources 每次构建都失稳；本项目只读 build.version。第二个产出对外文档的模块照抄这一段。
+springBoot {
+	buildInfo {
+		excludes.set(setOf("time"))
+	}
+}

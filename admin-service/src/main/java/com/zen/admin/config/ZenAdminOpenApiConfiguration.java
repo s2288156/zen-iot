@@ -21,9 +21,11 @@ import java.lang.reflect.RecordComponent;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import org.springdoc.core.customizers.GlobalOpenApiCustomizer;
 import org.springdoc.core.customizers.OperationCustomizer;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.info.BuildProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.Ordered;
@@ -117,7 +119,11 @@ public class ZenAdminOpenApiConfiguration {
     public OpenAPI adminOpenApi(
             @Value("${zen.api-docs.direct-url:http://localhost:28081}") String directUrl,
             @Value("${zen.api-docs.gateway-url:http://localhost:28080/api/admin}") String gatewayUrl,
-            @Value("${zen.api-docs.version:0.0.1}") String version) {
+            BuildProperties buildProperties) {
+        // 版本来自构建（admin-service/build.gradle.kts 的 buildInfo()），刻意不留默认值：build-info.properties 缺失时
+        // BuildProperties bean 不存在，上下文直接起不来；这里只兜底「文件在但缺 build.version」。
+        String version =
+                Objects.requireNonNull(buildProperties.getVersion(), "build-info.properties has no build.version");
         return new OpenAPI()
                 .info(new Info()
                         .title("zen-iot admin-service API")
