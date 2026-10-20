@@ -26,6 +26,7 @@ import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.boot.info.BuildProperties;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.core.annotation.AnnotatedElementUtils;
@@ -89,6 +90,16 @@ class OpenApiDocContractTest {
     @Autowired
     @Qualifier("requestMappingHandlerMapping")
     private RequestMappingHandlerMapping handlerMapping;
+
+    /**
+     * 构建版本，即 {@code info.version} 的唯一来源：{@code bootBuildInfo} 产出的
+     * {@code META-INF/build-info.properties}，见 {@code admin-service/build.gradle.kts}。
+     *
+     * <p>生产代码不再有硬编码默认值（文件缺失时上下文根本起不来），所以这里断「文档版本 == 构建版本」：
+     * 有人把字面量写回 {@code .version("...")} 就会红。
+     */
+    @Autowired
+    private BuildProperties buildProperties;
 
     @Test
     void successResponsesSurviveAndEveryRefResolves() throws Exception {
@@ -198,7 +209,9 @@ class OpenApiDocContractTest {
         JsonNode doc = loadDoc();
 
         assertThat(doc.at("/info/title").asText()).isEqualTo("zen-iot admin-service API");
-        assertThat(doc.at("/info/version").asText()).isNotBlank();
+        assertThat(doc.at("/info/version").asText())
+                .isEqualTo(buildProperties.getVersion())
+                .matches("\\d+\\.\\d+\\.\\d+(-SNAPSHOT)?");
         assertThat(doc.at("/servers").findValuesAsText("url"))
                 .containsExactly("http://localhost:28081", "http://localhost:28080/api/admin");
     }

@@ -10,12 +10,12 @@
 
 门禁不是"一个 CI 任务"，而是按**反馈速度**分层的四道闸。越靠左的闸越快、拦得越浅，越靠右越慢、拦得越深。
 
-| 关口                 | 触发时机              | 执行内容                                                                                                 | 单进程实测耗时      | 失败后果               |
-| -------------------- | --------------------- | -------------------------------------------------------------------------------------------------------- | ------------------- | ---------------------- |
-| `pre-commit`         | 每次 `git commit`     | `spotlessCheck`（Java/MD/kts/YAML 格式）                                                                 | 约 2s（热守护进程） | 提交被拒               |
-| `commit-msg`         | 提交信息写完之后      | Conventional Commits 校验（`gradle/git-hooks/commit-msg.sh`）                                            | 毫秒                | 提交被拒               |
-| `pre-push`           | 每次 `git push`       | `prePushCheck`：格式 + Markdown 规范 + README/规则名漂移 + 编译 `-Werror` + SpotBugs + 架构 + 版本一致性 | 见 §6               | 推送被拒，**不跑测试** |
-| CI（GitHub Actions） | PR / push main / 定时 | `check`（含测试）、集成测试 + 真中间件、gitleaks、OSV                                                    | 见 §6               | PR 红灯                |
+| 关口                 | 触发时机              | 执行内容                                                                                                                | 单进程实测耗时      | 失败后果               |
+| -------------------- | --------------------- | ----------------------------------------------------------------------------------------------------------------------- | ------------------- | ---------------------- |
+| `pre-commit`         | 每次 `git commit`     | `spotlessCheck`（Java/MD/kts/YAML 格式）                                                                                | 约 2s（热守护进程） | 提交被拒               |
+| `commit-msg`         | 提交信息写完之后      | Conventional Commits 校验（`gradle/git-hooks/commit-msg.sh`）                                                           | 毫秒                | 提交被拒               |
+| `pre-push`           | 每次 `git push`       | `prePushCheck`：格式 + Markdown 规范 + README/规则名漂移 + 编译 `-Werror` + SpotBugs + 架构 + 版本一致性 + 版本单一真源 | 见 §6               | 推送被拒，**不跑测试** |
+| CI（GitHub Actions） | PR / push main / 定时 | `check`（含测试）、集成测试 + 真中间件、gitleaks、OSV                                                                   | 见 §6               | PR 红灯                |
 
 对应源码：根 `build.gradle.kts` 的 `prePushCheck` 任务、`settings.gradle.kts` 的 `gitHooks { }` 块、`.github/workflows/ci.yml`。
 
@@ -193,6 +193,14 @@ Method <com.zen.ecs.controller.DeviceController.list()> calls method <...> in (D
 - 边界：只查 `<module>/README.md`，**不查 `docs/modules/<module>.md`**——后者是「为什么有这条规则」的唯一去处，按 `AGENTS.md` 的文档分工本就该点名具体规则。匹配带词边界（`(?<![A-Za-z0-9_])…(?![A-Za-z0-9_])`），不把规则名当子串误判。
 - 接入：挂进 `check` 与 `prePushCheck`。它与 §2.9 的分工在于：§2.9 要联网与 token 故刻意不进 `check`，本条纯本地零依赖，所以能进 pre-push 并常驻 CI。
 - 产物：无文件产物，失败信息只在标准输出，逐条形如 `ecs-service/README.md names rule method 'neverReadsTheSystemClockDirectly'`。
+
+### 2.11 版本单一真源 —— 防的是「再写一份」
+
+- 技术：根 `build.gradle.kts` 的 `versionSourceCheck` 任务，纯 Gradle/Kotlin，不碰网络、不启上下文。
+- 为什么需要：版本号收成「根脚本一处声明、其余派生」之后，分叉在结构上已不可能；剩下唯一还能发生的是一份新的字面量——模块脚本里的 `version =`，或把 `version` 加回 `web/package.json`。`docs/release-versioning.md` §1 写了真源在哪，这条让「第二处声明」变成构建失败而不是评审意见。
+- 断言三条：根版本不为 `unspecified` 且形如 semver（含可选 `-SNAPSHOT`）；每个子项目解析到的 `version` 等于根版本（在 `doLast` 读，才抓得到模块脚本后加的覆盖）；`web/package.json` 不含 `version` 键（`groovy.json.JsonSlurper` 解析，文件缺失同样失败）。
+- 接入：挂进 `check` 与 `prePushCheck`。运行期那一侧由 `OpenApiDocContractTest` 守（`info.version` 必须等于构建版本），它需要完整上下文，所以只在 CI 的 integration job 跑。
+- 产物：无文件产物，失败信息逐条形如 `ecs-service resolves to version '0.1.0', root is '0.2.0-SNAPSHOT'`。
 
 ## 3. 前后对比：这套门禁整体换来了什么
 

@@ -42,7 +42,7 @@
 
 - **方法上不写 `@ApiResponses`**：实测那会让 springdoc 不再自动生成成功响应、`ApiResponse*` 模型连带消失、文档里的 `$ref` 悬空。
 - `OpenApiDocContractTest` 的期望从注解自动推导，新增接口不需手改测试，但会拦住漏标 `@SecurityRequirement` / `@Tag`。它需要完整上下文，标 `@Tag("integration")`：本机 `check` 不跑，CI 的 integration job 跑。
-- 文档的 server 与版本可用 `zen.api-docs.direct-url` / `gateway-url` / `version` 覆盖。
+- 文档的 server 可用 `zen.api-docs.direct-url` / `gateway-url` 覆盖；`info.version` 由构建注入，不设配置键。
 
 ## 关键实现
 
@@ -59,6 +59,7 @@
 - **`deleted` 列不映射到实体**：删除走 native `UPDATE ... SET deleted = 1`，实体只靠 `@SQLRestriction` 过滤（见 `V1__init_auth.sql` 头注释）。
 - **操作审计用 `HandlerInterceptor` 而非 AOP**：`OperationLogInterceptor` order 排在安全拦截器之后，`afterCompletion` 逆序最先回调、此时 `UserContext` 尚未清除；`module` 列取同方法 `@RequireModule` 推导，缺该注解则跳过落库并记 ERROR。
 - **表结构归 Flyway**：`V1` 建表、`V2` 灌种子、`V3` 加资料列、`V4` 建 `t_login_log`、`V5` 建 `t_operation_log`；两张日志表只写不读、无 `deleted` 列。
+- **`info.version` 来自构建**：`admin-service/build.gradle.kts` 的 `buildInfo()` 产出 `META-INF/build-info.properties`（挂成 main resources 的 srcDir，测试与 `bootRun` 都看得到），`ZenAdminOpenApiConfiguration` 从 `BuildProperties` 取值，没有默认值。
 
 ## 架构约束
 

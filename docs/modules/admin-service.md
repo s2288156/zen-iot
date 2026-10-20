@@ -48,8 +48,18 @@
 ### 显式声明两条 server
 
 - 背景：springdoc 默认按「当前请求」推导 server——谁在哪个地址访问就写成哪个，多环境下不稳定。
-- 结论：显式列直连与经网关两条，可用 `zen.api-docs.direct-url` / `gateway-url` / `version` 覆盖。
+- 结论：显式列直连与经网关两条，可用 `zen.api-docs.direct-url` / `gateway-url` 覆盖；`info.version` 改由构建注入（见下一条决策）。
 - 代价：端口改了要记得同步默认值。
+
+### OpenAPI 版本由构建注入，不从 yml 展开
+
+- 背景：`info.version` 是 `/v3/api-docs` 对外报告的版本，Apifox 与 SDK 生成器都读它；它此前是 `@Value("${zen.api-docs.version:0.0.1}")` 的硬编码默认值，不随 Gradle 走，是四处版本字面量里唯一被运行时读着的那个。
+- 选项：`springBoot { buildInfo() }` + `BuildProperties` 构造依赖 / `processResources` 展开进 `application.yml` / jar manifest 属性。
+- 结论：`build-info.properties`。文件缺失时 `BuildProperties` bean 不存在（`ProjectInfoAutoConfiguration` 的 `@ConditionalOnResource`），构造器注入让上下文直接起不来——**没有可回退的默认值**，这正是要的失败语义。
+- 否决 `application.yml` 展开：`expand()` 会吃掉 yml 里现成的 `${NACOS_SERVER_ADDR:...}` 占位符；换 `@version@` 这类分隔符则漏展开时会把 `@version@` 原样送进对外文档，属于静默失效。
+- 否决 jar manifest：manifest 只在 jar 里，`bootRun`、IDE 与测试类路径都看不到，`OpenApiDocContractTest` 永远断言不到它。
+- 坑：`buildInfo` 的 `time` 默认是「当前时刻」，本身又是任务的 `@Input`，而任务输出被挂成 main resources 的 srcDir——不排掉它，`bootBuildInfo` 与随后的 `processResources` 每次构建都失稳。写法是 `excludes.set(setOf("time"))`；`time = null` 在 Boot 4.1 无效（缺值时回落到 `Instant.now()`）。
+- 配套：`OpenApiDocContractTest` 断言 `info.version` 等于上下文里的 `BuildProperties.getVersion()` 且匹配 semver——把版本写回字面量就会红。
 
 ### `default-produces-media-type` 与不开 `use-fqn`
 
