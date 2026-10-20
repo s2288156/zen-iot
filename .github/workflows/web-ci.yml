@@ -28,7 +28,7 @@ defaults:
 
 jobs:
   web:
-    name: web lint / typecheck / test / build (Node 24)
+    name: web lint / typecheck / test / build
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
@@ -43,11 +43,12 @@ jobs:
           package_json_file: web/package.json
           run_install: false
 
-      # node-version 与 web/package.json 的 engines.node（>=24.0.0）同源，抬版本时两处一起改
-      - name: Setup Node 24
+      # 版本口径只有三个值、两个文件：本文件的 node-version 与 web/package.json 的 engines.node、@types/node；
+      # 三者必须同为一个大版本，由 scripts/node-types-gate.mjs 在 install 后断言，抬版本时一起改
+      - name: Setup Node
         uses: actions/setup-node@v7
         with:
-          node-version: "24"
+          node-version: "26"
           cache: pnpm
           cache-dependency-path: web/pnpm-lock.yaml
 
