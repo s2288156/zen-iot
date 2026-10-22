@@ -19,7 +19,7 @@ val devLogDir = devRootDir.map { it.dir("logs").asFile }
 val isWindows = System.getProperty("os.name").lowercase().contains("windows")
 
 // 启动顺序：业务服务在前，网关最后（它靠 lb:// 懒解析下游，先起不依赖实例），前端依赖网关端口已就绪
-val devBootModules = listOf("admin-service", "ecs-service", "gateway-service")
+val devBootModules = listOf("admin-service", "gateway-service")
 val devWebName = "web"
 val devComposeFile = File(rootDir, "docker/docker-compose.dev.yml")
 

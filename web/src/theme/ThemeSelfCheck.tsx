@@ -13,7 +13,6 @@ interface Row {
 const rows: Row[] = [
   { key: '1', name: 'gateway-service', status: 'ok' },
   { key: '2', name: 'admin-service', status: 'warn' },
-  { key: '3', name: 'ecs-service', status: 'error' },
 ]
 
 const statusTag: Record<Row['status'], { color: string; text: string }> = {

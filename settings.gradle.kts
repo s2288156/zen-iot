@@ -45,5 +45,4 @@ rootProject.name = "zen-iot"
 include("admin-service")
 include("common-core")
 include("common-security")
-include("ecs-service")
 include("gateway-service")

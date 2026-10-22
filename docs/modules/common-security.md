@@ -77,7 +77,7 @@
 
 ## 坑
 
-- **`noClasses()` 在一个类都没导入时也判通过。** 现象：包根改名、目录误删、`importPackages` 写错，都会让本模块所有边界规则一起变成零断言绿——CI 全绿而约束早已不存在。做法：`importedClassesAreNeverEmpty()` 哨兵断言导入类数 > 20（拆模块时实测 19 的下一档）。目前只有本模块与 `ecs-service` 带哨兵，`common-core` / `gateway-service` / `admin-service` 是已知空白，新模块建议照抄。
+- **`noClasses()` 在一个类都没导入时也判通过。** 现象：包根改名、目录误删、`importPackages` 写错，都会让本模块所有边界规则一起变成零断言绿——CI 全绿而约束早已不存在。做法：`importedClassesAreNeverEmpty()` 哨兵断言导入类数 > 20。目前只有本模块带哨兵，`common-core` / `gateway-service` / `admin-service` 是已知空白，新模块建议照抄。
 
 - **密钥缺失与密钥置空是两条完全不同的路。** 现象：`ZEN_JWT_SECRET=` 让属性**存在**，条件成立 → `JwtKeys.hmacKey` 抛 `IllegalStateException`，服务启动失败；而完全不写这个键是整个配置类不评估，服务正常启动。做法：不需要 JWT 的服务不要留一个空值的环境变量；排查启动失败时先分清这两种表现。
 
