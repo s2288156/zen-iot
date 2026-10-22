@@ -48,12 +48,6 @@ spring:
                 - Path=/api/rcs/**
               filters:
                 - StripPrefix=2
-            - id: ecs-service
-              uri: lb://ecs-service
-              predicates:
-                - Path=/api/ecs/**
-              filters:
-                - StripPrefix=2
 
 management:
   endpoints:

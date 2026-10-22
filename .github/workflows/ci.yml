@@ -109,7 +109,6 @@ jobs:
           --health-retries 10
           --health-start-period 5s
       # 与 docker/docker-compose.dev.yml 同一镜像与同一套 dev 口令：
-      # ecs-service 的指令中转消费者测试（@Tag("integration")）要真 broker，不能只在本机跑得绿
       rabbitmq:
         image: rabbitmq:4-management-alpine
         env:
@@ -183,16 +182,6 @@ jobs:
             -user=root \
             -password=root \
             -locations=filesystem:admin-service/src/main/resources/db/migration \
-            migrate
-
-      - name: Verify ECS Flyway migrations on empty DB
-        run: |
-          docker run --rm --network host \
-            flyway/flyway:12.4.0 \
-            -url="jdbc:mysql://localhost:3306/zen_ecs?useSSL=false&allowPublicKeyRetrieval=true" \
-            -user=root \
-            -password=root \
-            -locations=filesystem:ecs-service/src/main/resources/db/migration \
             migrate
 
       - name: Run check with integration tests

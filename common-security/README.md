@@ -2,7 +2,7 @@
 
 Web 无关的**安全内核**：JWT 签发/验签、统一响应与错误码、身份透传头与令牌撤销契约。它刻意不依赖任何传输栈或持久化栈，因此反应式网关与 Servlet 业务服务复用同一份验签代码时，谁都不需要排依赖。
 
-本模块**不提供 HTTP 接口**，也不含 Servlet/Reactor 类型的签名。所有服务都是它的消费方：网关直接依赖，`admin-service` / `ecs-service` 经 `common-core` 的 `api` 透传拿到。
+本模块**不提供 HTTP 接口**，也不含 Servlet/Reactor 类型的签名。所有服务都是它的消费方：网关直接依赖，`admin-service` 经 `common-core` 的 `api` 透传拿到。
 
 本文只写事实与结论。**为什么这样选、否掉了什么、踩过什么坑**见 [`docs/modules/common-security.md`](../docs/modules/common-security.md)；跨模块必须同时成立的约定（密钥一致、撤销读写两侧、身份头防伪）见 [`docs/architecture.md`](../docs/architecture.md)。
 

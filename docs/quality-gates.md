@@ -121,7 +121,7 @@
 **接入前后**，四个案例：
 
 1. **分层规则有明确盲区，无环规则补上**。commit message 里记着实测：把 `config ↔ controller` 造个环，分层规则**仍然全绿**（它只约束 controller/service/repository/entity 四层之间的方向，config 不在任何层里），是 `packageSlicesAreFreeOfCycles()` 单独报的红灯（`c935dc2`）。这是一次典型的"规则之间不重叠"验证。
-2. **防"静默失效"的哨兵**。`noClasses()` 在**一个类都没导入**时也判通过。所以包根改名、目录误删、`importPackages` 写错，会让整个模块的架构规则一起变成零断言绿。`common-security` 与 `ecs-service` 各有一条 `importedClassesAreNeverEmpty()` 断言导入类数下限（`common-security/src/test/java/**/ArchitectureTest.java`），专门用来抓这种失效。**这条值得每个新项目抄**——它是唯一一条防守"门禁本身坏掉"的规则。
+2. **防"静默失效"的哨兵**。`noClasses()` 在**一个类都没导入**时也判通过。所以包根改名、目录误删、`importPackages` 写错，会让整个模块的架构规则一起变成零断言绿。`common-security` 有一条 `importedClassesAreNeverEmpty()` 断言导入类数下限（`common-security/src/test/java/**/ArchitectureTest.java`），专门用来抓这种失效。**这条值得每个新项目抄**——它是唯一一条防守"门禁本身坏掉"的规则。
 3. **把模块的存在理由写成断言**。`common-security` 的全部意义是"Web 无关，所以反应式网关能直接复用同一份验签代码"。破坏方式只需要"有人往这个模块加了个用 `HttpServletRequest` 的类"，而编译和 IDE 都不会提醒。于是 `common-security` 的 `ArchitectureTest#moduleStaysFreeOfWebAndPersistence()` 把这条存在理由变成测试。
 4. **一条规则被拆成两半**。拆模块之前，`common-core` 有一条只盯 `jakarta.servlet` 的 `jwtPackageStaysServletFree()`，网关侧靠 `build.gradle.kts` 里三个 `exclude` 维持隔离。拆出 `common-security` 之后：生产方按包禁全（Servlet / Spring Web / JPA / Spring Data / 事务 / validation），消费方网关再加一道 `GatewayDependencyIsolationTest`。于是同一条边界两端各有一次断言，**一边漏风也会被抓住**。
 
@@ -190,10 +190,10 @@ Method <com.zen.ecs.controller.DeviceController.list()> calls method <...> in (D
 ### 2.10 README 不手抄架构规则名 —— 文档与测试之间的第二道漂移闸
 
 - 技术：根 `build.gradle.kts` 的 `readmeDoesNotHandCopyArchRules` 任务，纯 Gradle/Kotlin，不碰网络、不启上下文。它扫每个模块 `src/test/java/**/ArchitectureTest.java` 里 `@Test` / `@ParameterizedTest` 的方法名（即规则名），断言这些名字不逐字出现在同模块 `README.md`；命中即失败并逐条列出「哪个 README 抄了哪条规则名」。
-- 为什么需要：`AGENTS.md`「不做第二份清单」要求模块 README 的「架构约束」段只写结论 + 指向测试类，绝不手抄规则名——抄本没有门禁，测试一改名 README 就悄悄过时。issue #68 清理了存量抄本，但清理本身不带防回归机制：#68 实现的第一版提交就又漏了 `ecs-service` 关键实现段里的一个规则名，靠人工 review 才抓到。这条把那条散文约定变成机器判定。
+- 为什么需要：`AGENTS.md`「不做第二份清单」要求模块 README 的「架构约束」段只写结论 + 指向测试类，绝不手抄规则名——抄本没有门禁，测试一改名 README 就悄悄过时。issue #68 清理了存量抄本，但清理本身不带防回归机制：#68 实现的第一版提交就又漏了某个模块关键实现段里的一个规则名，靠人工 review 才抓到。这条把那条散文约定变成机器判定。
 - 边界：只查 `<module>/README.md`，**不查 `docs/modules/<module>.md`**——后者是「为什么有这条规则」的唯一去处，按 `AGENTS.md` 的文档分工本就该点名具体规则。匹配带词边界（`(?<![A-Za-z0-9_])…(?![A-Za-z0-9_])`），不把规则名当子串误判。
 - 接入：挂进 `check` 与 `prePushCheck`。它与 §2.9 的分工在于：§2.9 要联网与 token 故刻意不进 `check`，本条纯本地零依赖，所以能进 pre-push 并常驻 CI。
-- 产物：无文件产物，失败信息只在标准输出，逐条形如 `ecs-service/README.md names rule method 'neverReadsTheSystemClockDirectly'`。
+- 产物：无文件产物，失败信息只在标准输出，逐条形如 `admin-service/README.md names rule method 'neverReadsTheSystemClockDirectly'`。
 
 ### 2.11 版本单一真源 —— 防的是「再写一份」
 
@@ -201,7 +201,7 @@ Method <com.zen.ecs.controller.DeviceController.list()> calls method <...> in (D
 - 为什么需要：版本号收成「根脚本一处声明、其余派生」之后，分叉在结构上已不可能；剩下唯一还能发生的是一份新的字面量——模块脚本里的 `version =`，或把 `version` 加回 `web/package.json`。`docs/release-versioning.md` §1 写了真源在哪，这条让「第二处声明」变成构建失败而不是评审意见。
 - 断言三条：根版本不为 `unspecified` 且形如 semver（含可选 `-SNAPSHOT`）；每个子项目解析到的 `version` 等于根版本（在 `doLast` 读，才抓得到模块脚本后加的覆盖）；`web/package.json` 不含 `version` 键（`groovy.json.JsonSlurper` 解析，文件缺失同样失败）。
 - 接入：挂进 `check` 与 `prePushCheck`。运行期那一侧由 `OpenApiDocContractTest` 守（`info.version` 必须等于构建版本），它需要完整上下文，所以只在 CI 的 integration job 跑。
-- 产物：无文件产物，失败信息逐条形如 `ecs-service resolves to version '0.1.0', root is '0.2.0-SNAPSHOT'`。
+- 产物：无文件产物，失败信息逐条形如 `admin-service resolves to version '0.1.0', root is '0.2.0-SNAPSHOT'`。
 
 ### 2.12 抬开发线 —— 开发线版本必须领先于最近一个 tag
 
@@ -296,7 +296,7 @@ grep -o '<counter type="\(LINE\|BRANCH\)"[^/]*>' admin-service/build/reports/jac
 ### 4.5 已解析依赖版本报告
 
 ```bash
-column -s'|' -t ecs-service/build/reports/dependency-versions.txt | grep jackson-databind
+column -s'|' -t admin-service/build/reports/dependency-versions.txt | grep jackson-databind
 ```
 
 跨模块找差异（`crossModuleVersionCheck` 做的同样的事，只是给人看）：

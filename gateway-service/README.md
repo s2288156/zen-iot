@@ -1,6 +1,6 @@
 # gateway-service
 
-API 网关（端口 `28080`，WebFlux 反应式）：统一路由与剥前缀、JWT 验签与撤销读取、身份头覆写透传、跨域放行、网关级错误的统一 JSON。它是透传身份的唯一签发点——`gateway-header` 模式的下游（如 ecs）不持密钥，绕过网关就拿不到可信身份；`jwt` 模式的下游（admin）自行验签。
+API 网关（端口 `28080`，WebFlux 反应式）：统一路由与剥前缀、JWT 验签与撤销读取、身份头覆写透传、跨域放行、网关级错误的统一 JSON。它是透传身份的唯一签发点——`gateway-header` 模式的下游不持密钥，绕过网关就拿不到可信身份；`jwt` 模式的下游（admin）自行验签。
 
 本文只写事实与结论。**为什么这样选、否掉了什么、踩过什么坑**见 [`docs/modules/gateway-service.md`](../docs/modules/gateway-service.md)；跨模块必须同时成立的约定（前缀所有权、密钥一致、两套白名单、撤销链、身份头与可信 IP）见 [`docs/architecture.md`](../docs/architecture.md)。
 
@@ -17,7 +17,6 @@ API 网关（端口 `28080`，WebFlux 反应式）：统一路由与剥前缀、
 | `/api/admin/**` | `lb://admin-service` | `GATEWAY_ADMIN_URI` |
 | `/api/wcs/**`   | `lb://wcs-service`   | —                   |
 | `/api/rcs/**`   | `lb://rcs-service`   | —                   |
-| `/api/ecs/**`   | `lb://ecs-service`   | —                   |
 
 只有 `admin-service` 一条允许用 `GATEWAY_ADMIN_URI` 钉到固定地址，predicates/filters 仍来自 `application.yml`，于是路由契约本身继续是被测对象（见 `GatewayRoutingTest`）。新增业务服务要同时改 `application.yml` 与 `GatewayRouteContractTest`（四段前缀逐条比对）——少了比对用例，前缀写错不会有任何报警。
 

@@ -41,7 +41,7 @@ class GatewayRouteContractTest {
         List<RouteDefinition> routes = gatewayProperties.getRoutes();
         assertThat(routes)
                 .extracting(RouteDefinition::getId)
-                .containsExactly("admin-service", "wcs-service", "rcs-service", "ecs-service");
+                .containsExactly("admin-service", "wcs-service", "rcs-service");
 
         for (RouteDefinition route : routes) {
             // RouteDefinition.getId() 在规范化前可为 null（SCG 的签名），这里显式要求非空而不是悄悄跳过

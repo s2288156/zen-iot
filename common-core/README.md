@@ -1,6 +1,6 @@
 # common-core
 
-Servlet 业务服务的公共模块：统一异常出口、鉴权拦截的自动装配、分页与审计基类。消费方是 `admin-service` 与 `ecs-service`；反应式网关不依赖本模块，只用拆出去的 `common-security`。
+Servlet 业务服务的公共模块：统一异常出口、鉴权拦截的自动装配、分页与审计基类。消费方是 `admin-service`；反应式网关不依赖本模块，只用拆出去的 `common-security`。
 
 本模块**不提供 HTTP 接口**，对外表面是三样：自动装配的 Bean、公共类型（`BaseEntity` / `PageQuery` / `PageResult` / `GlobalExceptionHandler`）、配置键。装配入口是 `common-core/src/main/resources/META-INF/spring/org.springframework.boot.autoconfigure.AutoConfiguration.imports`，消费方不改启动类、不需 `@Import`。
 
@@ -61,7 +61,7 @@ Servlet 业务服务的公共模块：统一异常出口、鉴权拦截的自动
 
 `api` 透传 `common-security` 与 `spring-boot-starter-web` / `-validation` / `-data-jpa`（类型出现在公共签名里）；`implementation` `spring-boot-micrometer-tracing-opentelemetry`、`runtimeOnly` `micrometer-tracing-bridge-otel`；Lombok `compileOnly` + `annotationProcessor`。
 
-追踪依赖用 `implementation` 声明，靠运行时传递性落到消费方的 classpath——admin/ecs 都不用自己引就拿到 traceId。反过来，`common-security` 不需消费方重复声明，但 web/validation/jpa 三个 starter 在 `admin-service/build.gradle.kts` 与 `ecs-service/build.gradle.kts` 里仍各自显式声明了一次，属既有的冗余写法。
+追踪依赖用 `implementation` 声明，靠运行时传递性落到消费方的 classpath——admin 不用自己引就拿到 traceId。反过来，`common-security` 不需消费方重复声明，但 web/validation/jpa 三个 starter 在 `admin-service/build.gradle.kts` 里仍各自显式声明了一次，属既有的冗余写法。
 
 ## 命令
 
