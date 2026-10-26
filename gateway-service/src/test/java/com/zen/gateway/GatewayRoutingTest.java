@@ -122,7 +122,7 @@ class GatewayRoutingTest {
     @Test
     void gatewayOwnsTrustedIdentityHeaders() throws IOException, InterruptedException {
         String token = tokenIssuer
-                .issue(new TokenPrincipal(7L, "demo", List.of("user"), List.of("ecs", "rcs")))
+                .issue(new TokenPrincipal(7L, "demo", List.of("user"), List.of("wcs", "rcs")))
                 .accessToken();
 
         HttpResponse<String> response = send(HttpRequest.newBuilder(uri("/api/admin/demo/admin"))
@@ -136,14 +136,14 @@ class GatewayRoutingTest {
         assertThat(BACKEND_HEADERS.get(TrustedHeaders.USER_ID.toLowerCase())).isEqualTo("7");
         assertThat(BACKEND_HEADERS.get(TrustedHeaders.USERNAME.toLowerCase())).isEqualTo("demo");
         assertThat(BACKEND_HEADERS.get(TrustedHeaders.USER_MODULES.toLowerCase()))
-                .isEqualTo("ecs,rcs");
+                .isEqualTo("wcs,rcs");
     }
 
     @Test
     void revokedTokenIsRejectedEvenThoughSignatureIsValid() throws IOException, InterruptedException {
         when(tokenBlocklist.isBlocked(any())).thenReturn(Mono.just(Boolean.TRUE));
         String token = tokenIssuer
-                .issue(new TokenPrincipal(7L, "demo", List.of("user"), List.of("ecs")))
+                .issue(new TokenPrincipal(7L, "demo", List.of("user"), List.of("rcs")))
                 .accessToken();
 
         HttpResponse<String> response = send(HttpRequest.newBuilder(uri("/api/admin/demo/admin"))

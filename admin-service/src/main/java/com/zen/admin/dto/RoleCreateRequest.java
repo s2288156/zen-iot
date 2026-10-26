@@ -16,7 +16,7 @@ public record RoleCreateRequest(
         @Size(max = 255) @Schema(description = "描述，可空", example = "负责 WCS 任务与站点分配")
         String description,
 
-        @Schema(description = "授予的模块集合，取值限 admin/wcs/rcs/ecs，非法值 400；空或缺省表示不授予任何模块", example = "[\"wcs\"]")
+        @Schema(description = "授予的模块集合，取值限 admin/wcs/rcs，非法值 400；空或缺省表示不授予任何模块", example = "[\"wcs\"]")
         Set<String> modules) {
 
     public RoleCreateRequest {

@@ -16,8 +16,8 @@ import org.springframework.context.ApplicationContext;
 /**
  * 路由与配置的契约测试：直接断言 {@code application.yml} 绑定出来的结果，不启服务器、不碰中间件。
  *
- * <p>{@link com.zen.gateway.GatewayRoutingTest} 只在 {@code /api/admin} 这一条路由上跑真实请求，另外三条（wcs/rcs/ecs）
- * 写错了一律没人发现——路径段与服务名各写一遍，正是最容易写岔的地方。这里逐条比对四段前缀。
+ * <p>{@link com.zen.gateway.GatewayRoutingTest} 只在 {@code /api/admin} 这一条路由上跑真实请求，另外两条（wcs/rcs）
+ * 写错了一律没人发现——路径段与服务名各写一遍，正是最容易写岔的地方。这里逐条比对三段前缀。
  *
  * <p>顺带把模块边界的启动期后果钉住：网关上下文里不许出现 {@code DataSource}，且 {@code common-core} 的 JWT
  * 自动装配要在排掉三个 starter 之后仍然生效。

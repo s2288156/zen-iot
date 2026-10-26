@@ -162,7 +162,7 @@ describe('401 → refresh 轮转单飞', () => {
       }
       const current = calls[calls.length - 1].headers.Authorization
       if (current !== 'Bearer A2') return fail(401, '未认证或登录已失效')
-      return ok(url.includes('/roles/1') ? ['admin', 'ecs'] : { id: 1 })
+      return ok(url.includes('/roles/1') ? ['admin', 'rcs'] : { id: 1 })
     })
 
     const [me, role] = await Promise.all([
@@ -171,7 +171,7 @@ describe('401 → refresh 轮转单飞', () => {
     ])
 
     expect(me).toEqual({ id: 1 })
-    expect(role).toEqual(['admin', 'ecs'])
+    expect(role).toEqual(['admin', 'rcs'])
     expect(refreshCount).toBe(1)
     expect(getAccessToken()).toBe('A2')
     expect(getRefreshToken()).toBe('R2')

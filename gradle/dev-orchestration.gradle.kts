@@ -329,7 +329,7 @@ subprojects {
 
 tasks.register("devUp") {
 	group = "dev"
-	description = "Start the local dev stack in one go: docker middleware + gateway/admin/ecs + web, skipping what already runs"
+	description = "Start the local dev stack in one go: docker middleware + gateway/admin + web, skipping what already runs"
 	dependsOn(devBootModules.map { ":$it:devSpec" })
 	doLast {
 		devPidDir.get().mkdirs()

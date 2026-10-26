@@ -48,7 +48,7 @@ public class RoleController {
         this.roleService = roleService;
     }
 
-    @Operation(summary = "新建角色", description = "roleCode 全库唯一，重复返回 409；modules 取值限 admin/wcs/rcs/ecs，非法值 400。")
+    @Operation(summary = "新建角色", description = "roleCode 全库唯一，重复返回 409；modules 取值限 admin/wcs/rcs，非法值 400。")
     // 同 UserController#create：409 来自 service 的显式检查，签名推不出来
     @DocError(status = 409, message = "角色编码已存在: wcs-operator", description = "roleCode 全库唯一，撞车即 409，message 里带那个已存在的编码")
     @PostMapping

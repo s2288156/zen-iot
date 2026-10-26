@@ -162,7 +162,7 @@ jobs:
           docker logs nacos-integration 2>&1 | tail -50
           exit 1
 
-      # service 容器的 MYSQL_DATABASE 同样只能建一个库，复用 compose 那份 init SQL 建 zen_ecs
+      # service 容器的 MYSQL_DATABASE 同样只能建一个库，复用 compose 那份 init SQL 建各业务库
       # （用 docker exec 灌进容器，避免依赖 runner 上是否装了 mysql 客户端）
       - name: Create business databases
         run: |

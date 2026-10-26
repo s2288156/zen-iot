@@ -58,11 +58,10 @@ describe('角色列表列定义', () => {
   })
 
   it('模块列渲染中文显示名而不是模块码', () => {
-    renderRow(role({ modules: ['admin', 'wcs', 'rcs', 'ecs'] }))
+    renderRow(role({ modules: ['admin', 'wcs', 'rcs'] }))
     expect(screen.getByText('管理后台')).toBeDefined()
     expect(screen.getByText('仓库控制')).toBeDefined()
     expect(screen.getByText('机器人调度')).toBeDefined()
-    expect(screen.getByText('设备控制')).toBeDefined()
   })
 
   it('未授权任何模块时给「未授权」提示，而不是空单元格', () => {

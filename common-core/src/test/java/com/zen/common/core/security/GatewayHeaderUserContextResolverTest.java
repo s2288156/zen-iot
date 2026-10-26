@@ -18,12 +18,12 @@ class GatewayHeaderUserContextResolverTest {
         request.addHeader(TrustedHeaders.USER_ID, "7");
         request.addHeader(TrustedHeaders.USERNAME, "demo");
         request.addHeader(TrustedHeaders.USER_ROLES, "user");
-        request.addHeader(TrustedHeaders.USER_MODULES, "ECS, RCS,wcs");
+        request.addHeader(TrustedHeaders.USER_MODULES, "ADMIN, RCS,wcs");
 
         assertThat(resolver.resolve(request))
                 .extracting(
                         UserPrincipal::userId, UserPrincipal::username, UserPrincipal::roles, UserPrincipal::modules)
-                .containsExactly(7L, "demo", List.of("user"), List.of("ECS", "RCS", "wcs"));
+                .containsExactly(7L, "demo", List.of("user"), List.of("ADMIN", "RCS", "wcs"));
     }
 
     @Test

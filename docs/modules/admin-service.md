@@ -41,7 +41,7 @@
 
 ### `operationId` 加服务名前缀
 
-- 背景：springdoc 取的是裸方法名（`list`、`detail`、`admin`…），admin/ecs/wcs/rcs 的文档并进同一个 Apifox 项目或同一份 SDK 时必然撞名。
+- 背景：springdoc 取的是裸方法名（`list`、`detail`、`admin`…），admin/wcs/rcs 的文档并进同一个 Apifox 项目或同一份 SDK 时必然撞名。
 - 结论：`namespacedOperationIds` 以 `${spring.application.name}-` 为前缀，且**幂等**（已带前缀不叠加）、`operationId` 缺失时按「方法 + 路径」补确定值。
 - 关键实现约束：必须是 `GlobalOpenApiCustomizer` 而非 `OperationCustomizer`——springdoc 在全局阶段才写 `operationId`，逐接口阶段拿到的是 null，前缀在那种写法下完全不生效；同时要 `Ordered.LOWEST_PRECEDENCE` 排在 springdoc 自己的 OperationIdCustomizer 之后，否则会被它写回的裸方法名覆盖。
 

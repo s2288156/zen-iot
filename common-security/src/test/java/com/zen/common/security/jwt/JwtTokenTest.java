@@ -15,7 +15,7 @@ class JwtTokenTest {
     private static final String OTHER_SECRET = "totally-different-zen-iot-hs256-secret-key-32b!";
 
     private static final TokenPrincipal PRINCIPAL =
-            new TokenPrincipal(42L, "admin", List.of("admin"), List.of("admin", "ecs", "wcs", "rcs"));
+            new TokenPrincipal(42L, "admin", List.of("admin"), List.of("admin", "wcs", "rcs"));
 
     private final JwtTokenIssuer issuer = new JwtTokenIssuer(properties(SECRET, Duration.ofMinutes(30)));
     private final JwtTokenVerifier verifier = new JwtTokenVerifier(properties(SECRET, Duration.ofMinutes(30)));
@@ -29,7 +29,7 @@ class JwtTokenTest {
         assertThat(verified.userId()).isEqualTo(42L);
         assertThat(verified.username()).isEqualTo("admin");
         assertThat(verified.roles()).containsExactly("admin");
-        assertThat(verified.modules()).containsExactly("admin", "ecs", "wcs", "rcs");
+        assertThat(verified.modules()).containsExactly("admin", "wcs", "rcs");
         assertThat(verified.type()).isEqualTo(TokenType.ACCESS);
         assertThat(verified.jti()).isNotBlank();
         assertThat(verified.remainingTtl()).isBetween(Duration.ofSeconds(1), Duration.ofMinutes(30));

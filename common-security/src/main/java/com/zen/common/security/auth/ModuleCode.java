@@ -8,8 +8,7 @@ package com.zen.common.security.auth;
 public enum ModuleCode {
     ADMIN("admin"),
     WCS("wcs"),
-    RCS("rcs"),
-    ECS("ecs");
+    RCS("rcs");
 
     /** 落库与 {@code modules} claim 里使用的码值，均为小写。 */
     private final String code;

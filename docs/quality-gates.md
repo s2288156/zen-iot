@@ -112,7 +112,7 @@
 
 **是什么**：一个把"依赖关系"变成 JUnit 测试的库。它把 class 文件读成一张依赖图，然后用 fluent API 断言图的模式。价值在于**架构规则通常只存在于某人的脑子里和一份没人读的文档里**，ArchUnit 让它变成 CI 上一行红。
 
-**本项目怎么接**：每个模块一个 `ArchitectureTest`，共 50 个用例（`admin 11 / common-core 6 / common-security 9 / ecs 14 / gateway 10`），全部打 `@Tag("architecture")`，并且：
+**本项目怎么接**：每个模块一个 `ArchitectureTest`，共 36 个用例（`admin 11 / common-core 6 / common-security 9 / gateway 10`），全部打 `@Tag("architecture")`，并且：
 
 - 根任务 `architectureTest` 用 `includeTags("architecture")` 单独跑这些（`subprojects` 里的 `tasks.register<Test>("architectureTest")`）。注释点明了动机：**秒级、不碰中间件、不启动 Spring 上下文**，因此可以安全放进 `pre-push`。
 - 内置规则直接用：`layeredArchitecture()`、`slices().matching("<root>.(*)..").beFreeOfCycles()`、`NO_CLASSES_SHOULD_USE_FIELD_INJECTION`、`NO_CLASSES_SHOULD_ACCESS_STANDARD_STREAMS`。
@@ -131,7 +131,7 @@
 
 ```text
 Architecture Violation [Priority: MEDIUM] - Rule '...' was violated (3 times):
-Method <com.zen.ecs.controller.DeviceController.list()> calls method <...> in (DeviceController.java:42)
+Method <com.zen.admin.controller.RoleController.detail()> calls method <...> in (RoleController.java:87)
 ```
 
 ### 2.6 JaCoCo —— 覆盖率只测量，不设门槛

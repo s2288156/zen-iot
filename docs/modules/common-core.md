@@ -6,7 +6,7 @@
 
 ### 只服务 Servlet 侧，反应式形态一律不进
 
-- 背景：网关是 WebFlux/Netty，admin/ecs 是 MVC/JPA，两者要复用的东西不一样。
+- 背景：网关是 WebFlux/Netty，admin 是 MVC/JPA，两者要复用的东西不一样。
 - 选项：本模块同时提供两套装配 / 只装 Servlet 一套，反应式需要的部分拆走。
 - 结论：后者。Web 无关的安全内核拆成 `common-security`，本模块只放拦截器、`WebMvcConfigurer`、`@RestControllerAdvice`、JPA 基类与分页类型（`PageQuery` / `PageResult`）。
 - 代价：网关要用的类型只能待在 `common-security`，一旦有人图方便往本模块加个 Servlet 无关的通用工具，网关就得跟着排依赖。方向依赖由两边的 `ArchitectureTest` 各断言一次。
@@ -28,7 +28,7 @@
 
 - 背景：`GlobalExceptionHandler` 与两个拦截器的签名用到 `ApiResponse` / `BusinessException` / `UserPrincipal`，JPA 与 validation 的类型同理。
 - 结论：`common-security` 与 web/validation/data-jpa 三个 starter 用 `api`，追踪是 `implementation` `spring-boot-micrometer-tracing-opentelemetry` + `runtimeOnly` `micrometer-tracing-bridge-otel`。
-- 理由：消费方（admin/ecs）不该为了用异常处理而重复声明安全类型；追踪是运行期能力，编译期不需要看见。
+- 理由：消费方（admin）不该为了用异常处理而重复声明安全类型；追踪是运行期能力，编译期不需要看见。
 - 代价：`api` 是对外承诺，把某个 starter 从 `api` 降级成 `implementation` 会让消费方编译失败；这也是跨模块版本比对（`crossModuleVersionCheck`）的输入之一。
 
 ### 异常出口集中，但每个 Bean 都可被消费方接管
@@ -78,7 +78,7 @@
 - 选项：本模块内置实体属性校验 / 只做 `toPageable()` 并声明责任在调用方。
 - 结论：后者。`orderBy` 的 Javadoc 写明「调用方必须先用实体属性白名单校验后再传入」。
 - 理由：公共模块不知道每个实体的合法属性集，硬做要么反射扫实体（慢且脆）要么搞一份全局注册表（重）。
-- 代价：漏校验就是任意排序属性可达，慢查询与列探测都归调用方。两个消费方的做法一致：非法排序字段直接 400（admin 见 `RoleController` 类 Javadoc，ecs 见其 README 口径）。
+- 代价：漏校验就是任意排序属性可达，慢查询与列探测都归调用方。非法排序字段直接 400（admin 见 `RoleController` 类 Javadoc）。
 
 ## 坑
 
@@ -92,6 +92,6 @@
 
 - **透传模式的 principal 缺 `jti` 与过期时刻。** 现象：`GatewayHeaderUserContextResolver` 造的 `UserPrincipal` 里 `jti`/`expiresAt` 为 null，`remainingTtl()` 随之返回 null；任何「按剩余有效期写撤销」的逻辑在 `gateway-header` 服务上都是空操作，而编译期毫无提示。做法：调用 `remainingTtl()` 的分支必须显式处理 null（口径见 `UserPrincipal` 的 Javadoc）。
 
-- **`ArchitectureTest` 的反向依赖靠硬编码包名列表。** 现象：`commonCoreNeverDependsOnBusinessServices` 逐模块写死 `com.zen.{admin,ecs,gateway,rcs,wcs}`，新建模块不补这一条，它的反向依赖就无人拦——测试仍然全绿。做法：新建模块时到各模块这类测试的包名列表里补一条（现状 5 个模块逐模块硬编码，无统一清单可改）。删除条件：换成按注解或按 `settings.gradle.kts` 模块列表动态推导之后。
+- **`ArchitectureTest` 的反向依赖靠硬编码包名列表。** 现象：`commonCoreNeverDependsOnBusinessServices` 逐模块写死 `com.zen.{admin,gateway,rcs,wcs}`，新建模块不补这一条，它的反向依赖就无人拦——测试仍然全绿。做法：新建模块时到各模块这类测试的包名列表里补一条（现状 4 个模块逐模块硬编码，无统一清单可改）。删除条件：换成按注解或按 `settings.gradle.kts` 模块列表动态推导之后。
 
 - **自动装配的测试只覆盖到 Bean 层。** 现象：`ZenSecurityAutoConfigurationTest` 用 `WebApplicationContextRunner` 断言 Bean 存在与类型，但拦截器的**注册顺序**与 `excludePathPatterns` 的实际生效只能在真实 MVC 上下文里观察到，本机 `test` 不跑这类断言。做法：改拦截器注册逻辑时，用 `DemoController` 那组自证接口在 `./gradlew :admin-service:bootRun` 上手工验一次顺序效应。

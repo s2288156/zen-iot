@@ -51,14 +51,14 @@ beforeEach(() => {
 describe('bootstrap：以 /auth/me 装配会话', () => {
   it('roleIds 逐个取角色后求 modules 并集并去重', async () => {
     api.getMe.mockResolvedValue(profile([1, 2]))
-    api.getRole.mockImplementation(async (id: number) => role(id, id === 1 ? ['admin', 'ecs'] : ['ecs', 'wcs']))
+    api.getRole.mockImplementation(async (id: number) => role(id, id === 1 ? ['admin', 'rcs'] : ['rcs', 'wcs']))
 
     await useAuthStore.getState().bootstrap()
 
     const state = useAuthStore.getState()
     expect(state.status).toBe('authenticated')
     expect(state.user).toEqual(profile([1, 2]))
-    expect(state.modules).toEqual(['admin', 'ecs', 'wcs'])
+    expect(state.modules).toEqual(['admin', 'rcs', 'wcs'])
     expect(api.getRole.mock.calls.map((call) => call[0])).toEqual([1, 2])
   })
 
