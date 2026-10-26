@@ -8,7 +8,7 @@ import io.spring.gradle.dependencymanagement.dsl.DependencyManagementExtension
 plugins {
 	java
 	id("io.spring.dependency-management") version "1.1.7" apply false
-	id("org.springframework.boot") version "4.1.1" apply false
+	id("org.springframework.boot") version "4.1.2" apply false
 	id("com.diffplug.spotless") version "8.10.4"
 	id("com.github.spotbugs") version "6.5.13" apply false
 }
@@ -71,8 +71,8 @@ subprojects {
 	// 版本只在根声明一次，子模块依赖一律不写版本号；接入新的第三方栈时在此追加 BOM
 	configure<DependencyManagementExtension> {
 		imports {
-			mavenBom("org.springframework.boot:spring-boot-dependencies:4.1.1")
-			mavenBom("org.springframework.cloud:spring-cloud-dependencies:2025.1.3")
+			mavenBom("org.springframework.boot:spring-boot-dependencies:4.1.2")
+			mavenBom("org.springframework.cloud:spring-cloud-dependencies:2025.1.4")
 			mavenBom("com.alibaba.cloud:spring-cloud-alibaba-dependencies:2025.1.0.0")
 			// common-security 以 api 暴露 jjwt 类型，版本必须在根统一管；模块局部 BOM 不会传递给消费方
 			mavenBom("io.jsonwebtoken:jjwt-bom:0.13.0")
