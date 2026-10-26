@@ -12,7 +12,7 @@
 CREATE TABLE t_operation_log (
     id          BIGINT       NOT NULL AUTO_INCREMENT COMMENT '主键',
     operator    VARCHAR(64)  NOT NULL COMMENT '操作人用户名',
-    module      VARCHAR(32)  NOT NULL COMMENT '模块码: admin/wcs/rcs，由 @RequireModule 推导',
+    module      VARCHAR(32)  NOT NULL COMMENT '模块码: admin/wcs/rcs/ecs，由 @RequireModule 推导',
     action      VARCHAR(32)  NOT NULL COMMENT '动作: CREATE/UPDATE/DELETE/ASSIGN_MODULES/ASSIGN_ROLES/CHANGE_STATUS/RESET_PASSWORD',
     target_type VARCHAR(32)  NOT NULL COMMENT '目标类型: USER/ROLE/SESSION',
     target_id   VARCHAR(64)  DEFAULT NULL COMMENT '目标 id（路径变量），创建类为空',
