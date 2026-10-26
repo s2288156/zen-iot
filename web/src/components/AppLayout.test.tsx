@@ -73,7 +73,7 @@ describe('AppLayout 菜单过滤', () => {
   })
 
   it('未授予 admin 时只剩个人中心，避免点进去一路 403', () => {
-    signIn(['ecs'])
+    signIn(['rcs'])
 
     renderAt()
 

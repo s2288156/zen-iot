@@ -60,9 +60,9 @@ class ModuleAuthInterceptorTest {
 
     static Stream<Arguments> cases() {
         return Stream.of(
-                // 码值是小写：种子数据与 modules claim 都用 admin/ecs/rcs/wcs
+                // 码值是小写：种子数据与 modules claim 都用 admin/rcs/wcs
                 Arguments.of(List.of("admin"), null),
-                Arguments.of(List.of("ecs", "wcs"), BusinessException.class),
+                Arguments.of(List.of("wcs", "rcs"), BusinessException.class),
                 Arguments.of(List.of("ADMIN"), BusinessException.class),
                 Arguments.of(List.of(), BusinessException.class));
     }

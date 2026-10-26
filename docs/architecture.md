@@ -18,7 +18,7 @@
 
 ## 请求链路与前缀所有权
 
-浏览器 → 网关 `28080` `/api/{admin,wcs,rcs,ecs}/**` → Nacos 发现 → `lb://{service}` → `StripPrefix=2` 剥掉两段前缀 → 服务。
+浏览器 → 网关 `28080` `/api/{admin,wcs,rcs}/**` → Nacos 发现 → `lb://{service}` → `StripPrefix=2` 剥掉两段前缀 → 服务。
 
 - 前缀所有权见 [`GLOSSARY.md`](../GLOSSARY.md)。
 - OpenAPI 文档里同时声明两条 server：直连与经网关（`zen.api-docs.direct-url` / `gateway-url`）。
@@ -92,7 +92,7 @@ Redis 三处布局（`RedisSessionRegistry`）：
 
 `@RequireModule`（见 [`GLOSSARY.md`](../GLOSSARY.md)）的判定不落库回查，依据是 Token 快照。因此改角色授权不会影响已签出的 Token，需要 403 变成 200 就得重新登录或刷新。
 
-`t_role_module.module_code` 存的就是 `ModuleCode` 的四个字符串（见 [`GLOSSARY.md`](../GLOSSARY.md)）。样例接口 `DemoController`（`/demo/admin`、`/demo/ecs`）存在的唯一目的是验证这条判定链与网关透传身份接得上。
+`t_role_module.module_code` 存的就是 `ModuleCode` 的三个字符串（见 [`GLOSSARY.md`](../GLOSSARY.md)）。样例接口 `DemoController`（`/demo/admin`）存在的唯一目的是验证这条判定链与网关透传身份接得上。
 
 ## 身份头透传与伪造防护
 

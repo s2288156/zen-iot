@@ -47,7 +47,7 @@ class RoleRepositoryIntegrationTest {
 
     @Test
     void softDeleteHidesRoleFromEveryLookup() {
-        RoleEntity role = roleRepository.saveAndFlush(role("it-role-soft-delete", "待删角色", "ecs"));
+        RoleEntity role = roleRepository.saveAndFlush(role("it-role-soft-delete", "待删角色", "rcs"));
 
         assertThat(roleRepository.softDeleteById(role.getId())).isEqualTo(1);
         // 已删行的重复删除不再命中：WHERE 条件带 deleted = 0

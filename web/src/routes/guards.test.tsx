@@ -131,7 +131,7 @@ describe('RequireAuth', () => {
 
 describe('RequireModule', () => {
   it('授予该模块时放行页面', () => {
-    setState('authenticated', ['admin', 'ecs'], profile)
+    setState('authenticated', ['admin', 'rcs'], profile)
 
     const router = renderAt('/users')
 
@@ -140,7 +140,7 @@ describe('RequireModule', () => {
   })
 
   it('未授予时渲染 403 状态页而非重定向', () => {
-    setState('authenticated', ['ecs'], profile)
+    setState('authenticated', ['rcs'], profile)
 
     const router = renderAt('/users')
 
@@ -160,7 +160,7 @@ describe('DefaultHome', () => {
   })
 
   it('无 admin 模块时退到个人中心，避免首屏即 403', () => {
-    setState('authenticated', ['ecs'], profile)
+    setState('authenticated', ['rcs'], profile)
 
     const router = renderAt('/entry')
 

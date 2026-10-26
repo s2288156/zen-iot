@@ -20,7 +20,7 @@
 | `POST` `PUT` `PATCH` `DELETE /users/**`         | `admin` 模块               | 400 / 404 / 409 用户名重复           |
 | `GET /users/page`、`GET /users/{id}`            | 登录                       | 400 / 404                            |
 | `GET /sessions`、`DELETE /sessions/{sessionId}` | `admin` 模块               | 400 踢自己 / 404 会话不存在          |
-| `GET /demo/admin`、`GET /demo/ecs`              | 对应模块                   | 401 / 403，用于自证鉴权闭环          |
+| `GET /demo/admin`                               | 对应模块                   | 401 / 403，用于自证鉴权闭环          |
 
 `DemoController` 不是业务功能，只用来验证 `@RequireModule` 的判定与网关透传身份接得上。
 

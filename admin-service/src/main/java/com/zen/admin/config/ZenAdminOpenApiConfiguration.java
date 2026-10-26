@@ -51,7 +51,7 @@ import org.springframework.web.method.HandlerMethod;
  * {@code OpenApiDocContractTest} 断住。
  *
  * <p>{@link #namespacedOperationIds(String)} 给 operationId 加服务名前缀：springdoc 取的是裸方法名（{@code admin}、
- * {@code ecs}、{@code list}…），把 admin/ecs/wcs/rcs 的文档并进同一个 Apifox 项目或同一份 SDK 时必然撞名。
+ * {@code list}…），把 admin/wcs/rcs 的文档并进同一个 Apifox 项目或同一份 SDK 时必然撞名。
  */
 @Configuration(proxyBeanMethods = false)
 public class ZenAdminOpenApiConfiguration {

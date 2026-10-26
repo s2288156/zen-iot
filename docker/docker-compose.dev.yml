@@ -3,7 +3,7 @@
 # 停止：docker compose -f docker/docker-compose.dev.yml down
 #
 # 建库：initdb/*.sql 只在 MySQL 数据卷为空时执行。已有 zen_mysql_data 卷的开发机补一次即可：
-#   docker exec zen-mysql-dev mysql -uroot -proot -e "CREATE DATABASE IF NOT EXISTS zen_ecs CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci"
+#   docker exec zen-mysql-dev mysql -uroot -proot -e "CREATE DATABASE IF NOT EXISTS zen_admin CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci"
 # 注意：旧卷里按 utf8mb4_unicode_ci 建的表不会自动转换，本仓库开发库请删卷重建：
 #   docker compose -f docker/docker-compose.dev.yml down && docker volume rm docker_zen_mysql_data && docker compose -f docker/docker-compose.dev.yml up -d
 services:
@@ -67,7 +67,7 @@ services:
       - "8080:8080"
     volumes:
       # standalone 用内嵌 Derby，全部状态在 /home/nacos/data；不挂载则 down 一次即清空
-      # （admin/ecs 的 optional:nacos:* 配置会随之丢失）
+      # （admin 的 optional:nacos:* 配置会随之丢失）
       - zen_nacos_data:/home/nacos/data
     healthcheck:
       # Nacos 3.x 健康端点从 /v1/ 迁移到 /v3/；liveness 才是就绪探针，
@@ -82,7 +82,7 @@ services:
       retries: 18
       start_period: 30s
 
-  # Phase 3 的指令中转（RCS → ECS 消费）与 Phase 9 的全链路异步都打这里。
+  # Phase 3 的指令中转（RCS → 设备侧服务消费）与 Phase 9 的全链路异步都打这里。
   # 刻意不用 guest/guest：RabbitMQ 默认把 guest 限制为「只能从 broker 自身 loopback 登录」，
   # 经发布端口进来的连接源地址是网桥网关而不是 127.0.0.1，会被直接拒。
   rabbitmq:

@@ -37,8 +37,7 @@ class ArchitectureTest {
         noClasses()
                 .should()
                 .dependOnClassesThat()
-                .resideInAnyPackage(
-                        "com.zen.admin..", "com.zen.ecs..", "com.zen.gateway..", "com.zen.rcs..", "com.zen.wcs..")
+                .resideInAnyPackage("com.zen.admin..", "com.zen.gateway..", "com.zen.rcs..", "com.zen.wcs..")
                 .because("common-core 是被依赖方,不得引用任何业务服务或网关的类型")
                 .check(COMMON_CORE);
     }

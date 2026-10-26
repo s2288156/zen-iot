@@ -35,7 +35,7 @@ class JpaAuditingIntegrationTest {
 
     @Test
     void createdByMatchesTheLoggedInUser() {
-        UserContext.set(new UserPrincipal(2L, "demo", List.of("user"), List.of("ecs"), "jti", null));
+        UserContext.set(new UserPrincipal(2L, "demo", List.of("user"), List.of("rcs"), "jti", null));
 
         UserEntity saved = userRepository.save(auditProbe());
 

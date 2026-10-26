@@ -184,7 +184,7 @@ class JwtAuthGlobalFilterTest {
         assertThat(headers.getFirst(TrustedHeaders.USERNAME)).isEqualTo("demo");
         assertThat(headers.getFirst(TrustedHeaders.USER_ROLES)).isEqualTo("user");
         // 下游 GatewayHeaderUserContextResolver 按逗号切分，这里固化两侧共同的编码格式
-        assertThat(headers.getFirst(TrustedHeaders.USER_MODULES)).isEqualTo("ecs,rcs");
+        assertThat(headers.getFirst(TrustedHeaders.USER_MODULES)).isEqualTo("wcs,rcs");
     }
 
     @Test
@@ -208,7 +208,7 @@ class JwtAuthGlobalFilterTest {
     }
 
     private TokenPrincipal principal() {
-        return new TokenPrincipal(7L, "demo", List.of("user"), List.of("ecs", "rcs"));
+        return new TokenPrincipal(7L, "demo", List.of("user"), List.of("wcs", "rcs"));
     }
 
     /**

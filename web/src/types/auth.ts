@@ -1,8 +1,8 @@
 /**
- * `ModuleCode` 枚举的字符串值（`common-security` `ModuleCode#getCode()`）：库里存的就是这四个小写码。
+ * `ModuleCode` 枚举的字符串值（`common-security` `ModuleCode#getCode()`）：库里存的就是这三个小写码。
  * wcs / rcs 暂无后端服务，但仍属合法枚举值。
  */
-export const MODULE_CODES = ['admin', 'wcs', 'rcs', 'ecs'] as const
+export const MODULE_CODES = ['admin', 'wcs', 'rcs'] as const
 
 export type ModuleCode = (typeof MODULE_CODES)[number]
 
@@ -15,7 +15,6 @@ export const MODULE_LABELS: Record<ModuleCode, string> = {
   admin: '管理后台',
   wcs: '仓库控制',
   rcs: '机器人调度',
-  ecs: '设备控制',
 }
 
 /** `Checkbox.Group` / `Select` 的模块候选项；顺序固定按 `MODULE_CODES`，与后端枚举声明序一致 */

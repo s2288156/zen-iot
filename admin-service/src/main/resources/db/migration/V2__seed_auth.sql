@@ -20,9 +20,7 @@ VALUES ((SELECT id FROM t_user WHERE username = 'admin'),
 
 INSERT INTO t_role_module (role_id, module_code)
 VALUES ((SELECT id FROM t_role WHERE role_code = 'admin'), 'admin'),
-       ((SELECT id FROM t_role WHERE role_code = 'admin'), 'ecs'),
        ((SELECT id FROM t_role WHERE role_code = 'admin'), 'wcs'),
        ((SELECT id FROM t_role WHERE role_code = 'admin'), 'rcs'),
-       ((SELECT id FROM t_role WHERE role_code = 'user'), 'ecs'),
        ((SELECT id FROM t_role WHERE role_code = 'user'), 'wcs'),
        ((SELECT id FROM t_role WHERE role_code = 'user'), 'rcs');

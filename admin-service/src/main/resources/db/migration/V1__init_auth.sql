@@ -41,6 +41,6 @@ CREATE TABLE t_user_role (
 
 CREATE TABLE t_role_module (
     role_id     BIGINT      NOT NULL COMMENT '角色ID',
-    module_code VARCHAR(32) NOT NULL COMMENT '模块: admin/ecs/wcs/rcs',
+    module_code VARCHAR(32) NOT NULL COMMENT '模块: admin/wcs/rcs',
     PRIMARY KEY (role_id, module_code)
 ) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '角色模块权限关联表';
