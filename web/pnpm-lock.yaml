@@ -15,8 +15,8 @@ importers:
         specifier: ^5.104.3
         version: 5.104.3(react@19.3.1)
       antd:
-        specifier: 6.6.6
-        version: 6.6.6(react-dom@19.3.1(react@19.3.1))(react@19.3.1)
+        specifier: 6.6.7
+        version: 6.6.7(react-dom@19.3.1(react@19.3.1))(react@19.3.1)
       react:
         specifier: ^19.3.1
         version: 19.3.1
@@ -31,8 +31,8 @@ importers:
         version: 5.0.15(@types/react@19.3.0)(react@19.3.1)
     devDependencies:
       '@ant-design/cli':
-        specifier: 6.6.6
-        version: 6.6.6
+        specifier: 6.6.7
+        version: 6.6.7
       '@eslint/js':
         specifier: ^10.0.1
         version: 10.0.1(eslint@10.12.0)
@@ -87,8 +87,8 @@ importers:
 
 packages:
 
-  '@ant-design/cli@6.6.6':
-    resolution: {integrity: sha512-hTBHSUB7gzz+dx2KrFTfCmo6xG3p3UfSd9HCZKec44YhWS2iUUfLzCiyVRzObqobvYzkZOyHqHZTTqxRgnDz1A==}
+  '@ant-design/cli@6.6.7':
+    resolution: {integrity: sha512-dfTN/hoFv9pgxatro4cYTRj0DUyFjUruBhndxldphFZLsYB6uLcbxtezjOxlhGeWJvtr8BOulAe7qw6e/UqKFQ==}
     engines: {node: '>=20.0.0'}
     hasBin: true
 
@@ -780,8 +780,8 @@ packages:
       react: '>=18.0.0'
       react-dom: '>=18.0.0'
 
-  '@rc-component/virtual-list@1.5.2':
-    resolution: {integrity: sha512-igfe7NP9cOmDAhLy5z+Juz8fhjOMzMbF7TRoR/yqXIsbU6XZm4TU7ogcm5O553P0rLF6n0j5F6J+n15Izb1tqg==}
+  '@rc-component/virtual-list@1.6.0':
+    resolution: {integrity: sha512-aHPlTWVtfgDmzb4oJNrqBW1yeEdFeIS28EoJLQ/dGBgZPRlrQ84c2Rk/Il6JxDUV5P7FDtNFD0aXc7EB22kR3Q==}
     engines: {node: '>=8.x'}
     peerDependencies:
       react: '>=18.0.0'
@@ -1059,8 +1059,8 @@ packages:
     resolution: {integrity: sha512-Cxwpt2SfTzTtXcfOlzGEee8O+c+MmUgGrNiBcXnuWxuFJHe6a5Hz7qwhwe5OgaSYI0IJvkLqWX1ASG+cJOkEiA==}
     engines: {node: '>=10'}
 
-  antd@6.6.6:
-    resolution: {integrity: sha512-+x4M755a6kyZyxkN2vpfm3HbYkyytPBPSncXHKPHU2ZPs3Z1ctrWwWApe/4ek4O0eUGKNFCpb461yficetktYQ==}
+  antd@6.6.7:
+    resolution: {integrity: sha512-6D9oSAot26LIHYmR0ZyquOZY4WIcgRurZ/9//1GEJoo/vWvKV3E1PJPmB3orGkRlmGxArX3vSJFxQfRKr5qHZA==}
     peerDependencies:
       react: '>=18.0.0'
       react-dom: '>=18.0.0'
@@ -1979,7 +1979,7 @@ packages:
 
 snapshots:
 
-  '@ant-design/cli@6.6.6':
+  '@ant-design/cli@6.6.7':
     dependencies:
       cfonts: 3.3.1
       fast-glob: 3.3.3
@@ -2459,7 +2459,7 @@ snapshots:
       '@rc-component/portal': 2.2.1(react-dom@19.3.1(react@19.3.1))(react@19.3.1)
       '@rc-component/resize-observer': 1.1.2(react-dom@19.3.1(react@19.3.1))(react@19.3.1)
       '@rc-component/util': 1.14.0(react-dom@19.3.1(react@19.3.1))(react@19.3.1)
-      '@rc-component/virtual-list': 1.5.2(react-dom@19.3.1(react@19.3.1))(react@19.3.1)
+      '@rc-component/virtual-list': 1.6.0(react-dom@19.3.1(react@19.3.1))(react@19.3.1)
       clsx: 2.1.1
       react: 19.3.1
       react-dom: 19.3.1(react@19.3.1)
@@ -2584,7 +2584,7 @@ snapshots:
       '@rc-component/overflow': 1.0.1(react-dom@19.3.1(react@19.3.1))(react@19.3.1)
       '@rc-component/trigger': 3.10.1(react-dom@19.3.1(react@19.3.1))(react@19.3.1)
       '@rc-component/util': 1.14.0(react-dom@19.3.1(react@19.3.1))(react@19.3.1)
-      '@rc-component/virtual-list': 1.5.2(react-dom@19.3.1(react@19.3.1))(react@19.3.1)
+      '@rc-component/virtual-list': 1.6.0(react-dom@19.3.1(react@19.3.1))(react@19.3.1)
       clsx: 2.1.1
       react: 19.3.1
       react-dom: 19.3.1(react@19.3.1)
@@ -2615,7 +2615,7 @@ snapshots:
       '@rc-component/context': 2.0.2(react-dom@19.3.1(react@19.3.1))(react@19.3.1)
       '@rc-component/resize-observer': 1.1.2(react-dom@19.3.1(react@19.3.1))(react@19.3.1)
       '@rc-component/util': 1.14.0(react-dom@19.3.1(react@19.3.1))(react@19.3.1)
-      '@rc-component/virtual-list': 1.5.2(react-dom@19.3.1(react@19.3.1))(react@19.3.1)
+      '@rc-component/virtual-list': 1.6.0(react-dom@19.3.1(react@19.3.1))(react@19.3.1)
       clsx: 2.1.1
       react: 19.3.1
       react-dom: 19.3.1(react@19.3.1)
@@ -2661,7 +2661,7 @@ snapshots:
     dependencies:
       '@rc-component/motion': 1.3.3(react-dom@19.3.1(react@19.3.1))(react@19.3.1)
       '@rc-component/util': 1.14.0(react-dom@19.3.1(react@19.3.1))(react@19.3.1)
-      '@rc-component/virtual-list': 1.5.2(react-dom@19.3.1(react@19.3.1))(react@19.3.1)
+      '@rc-component/virtual-list': 1.6.0(react-dom@19.3.1(react@19.3.1))(react@19.3.1)
       clsx: 2.1.1
       react: 19.3.1
       react-dom: 19.3.1(react@19.3.1)
@@ -2697,7 +2697,7 @@ snapshots:
       react-dom: 19.3.1(react@19.3.1)
       react-is: 19.3.1
 
-  '@rc-component/virtual-list@1.5.2(react-dom@19.3.1(react@19.3.1))(react@19.3.1)':
+  '@rc-component/virtual-list@1.6.0(react-dom@19.3.1(react@19.3.1))(react@19.3.1)':
     dependencies:
       '@babel/runtime': 8.0.7
       '@rc-component/resize-observer': 1.1.2(react-dom@19.3.1(react@19.3.1))(react@19.3.1)
@@ -2936,7 +2936,7 @@ snapshots:
 
   ansi-styles@5.2.0: {}
 
-  antd@6.6.6(react-dom@19.3.1(react@19.3.1))(react@19.3.1):
+  antd@6.6.7(react-dom@19.3.1(react@19.3.1))(react@19.3.1):
     dependencies:
       '@ant-design/colors': 8.0.1
       '@ant-design/cssinjs': 2.1.2(react-dom@19.3.1(react@19.3.1))(react@19.3.1)
