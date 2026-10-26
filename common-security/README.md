@@ -29,7 +29,7 @@ Token 声明（`username` / `typ` / `roles` / `modules` 四个字面量集中在
 
 - **验签只保证签名有效、未过期、`typ` 与期望一致**；不查黑名单——那是持有 Redis 的一侧的事（`JwtTokenVerifier#verify` 恒要求传 `expectedType`）。
 - **任何不通过都是同一个结果**：抛 `BusinessException(GlobalErrorCode.UNAUTHORIZED)`，不区分「签名错 / 过期 / 用途错 / 格式错」，也不关心传输层怎么把它变成 401。
-- 撤销键名单点定义：`TokenRevocationChecker.blacklistKey(jti)` → `auth:blacklist:{jti}`。写侧（`admin-service`）与读侧（网关）都调它，不各自拼字符串。
+- 撤销键名只在一处定义：`TokenRevocationChecker.blacklistKey(jti)` → `auth:blacklist:{jti}`。写侧（`admin-service`）与读侧（网关）都调它，不各自拼字符串。
 - 身份头名唯一来源：`TrustedHeaders` 的 `X-User-Id` / `X-Username` / `X-User-Roles` / `X-User-Modules`。
 - `SecurityProperties`（前缀 `zen.security`：`enabled` / `context-source` / `whitelist`）也住本模块，但只在 Servlet 侧由 `common-core` 的自动配置绑定消费；网关不复用它（另立 `zen.gateway.*`）。
 - 统一响应 `ApiResponse<T>`：`code` / `message` / `data`，成功码 200；`@JsonInclude(NON_NULL)`——失败响应里 `data` 字段**不出现**，不是 `null`。

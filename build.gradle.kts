@@ -80,7 +80,7 @@ subprojects {
 		// ArchUnit 没有 BOM，用单条约束把版本留在根，模块仍不写版本号
 		dependencies {
 			dependency("com.tngtech.archunit:archunit-junit5:1.5.1")
-			// springdoc 同样不在任何已 import 的 BOM 里，就地钉住会让版本脱离根这一处真源
+			// springdoc 同样不在任何已 import 的 BOM 里，就地钉住会让版本脱离根这一处唯一声明
 			dependency("org.springdoc:springdoc-openapi-starter-webmvc-ui:3.1.1")
 		}
 	}
@@ -428,9 +428,9 @@ val versionSourceCheck = tasks.register("versionSourceCheck") {
 	}
 }
 
-// 抬开发线的门禁（#84）：tag 之后忘记抬 -SNAPSHOT，开发中的制品会顶着已发布的版本号跑，而没有任何检查会红。
-// 判据只有一条——开发线版本严格大于最近一个 vX.Y.Z tag；连「相等」也不放行，因为「等于 tag」正是漏抬那一刻的形态。
-// 发版人自己就是第一个用户：先把 tag 打了、抬开发线的 PR 还没合，这条会红，正好提醒开发线还停在已发布值上。
+// 检查开发版本号的门禁（#84）：打了 tag 之后忘记把版本号调回 -SNAPSHOT，开发中的制品会顶着已发布的版本号跑，而没有任何检查会红。
+// 判据只有一条——main 上的开发版本号必须严格大于最近一个 vX.Y.Z tag；连「相等」也不放行，因为「等于 tag」正是忘记调版本那一刻的形态。
+// 发版人自己就是第一个用户：先把 tag 打了、上调开发版本号的 PR 还没合，这条会红，正好提醒 main 上的版本号还停在已发布值上。
 // 版本取自根脚本顶部那唯一一处字面量（versionSourceCheck 已断言它是 semver），tag 取自 git，取不到就跳过。
 val releaseLineCheck = tasks.register("releaseLineCheck") {
 	group = "verification"

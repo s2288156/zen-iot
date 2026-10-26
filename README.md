@@ -11,7 +11,7 @@
 | `gateway-service` | 28080 | 路由、JWT 验签与黑名单、身份头透传、CORS、统一异常                                      | [README](gateway-service/README.md) |
 | `admin-service`   | 28081 | 登录 / 刷新 / 登出、会话与强制下线、用户与角色、两类审计（库 `zen_admin`）              | [README](admin-service/README.md)   |
 | `web`             | 5173  | 管理控制台前端：Vite + React + TypeScript strict + Ant Design，经网关访问 admin-service | [README](web/README.md)             |
-| `common-core`     | —     | Servlet 业务服务的公共件：响应契约、全局异常、用户上下文、拦截器                        | [README](common-core/README.md)     |
+| `common-core`     | —     | Servlet 业务服务的公共组件：响应契约、全局异常、用户上下文、拦截器                      | [README](common-core/README.md)     |
 | `common-security` | —     | Web 无关的安全内核：JWT、错误码、`ApiResponse`、`TrustedHeaders`                        | [README](common-security/README.md) |
 
 另有 `docs/`（跨模块契约、模块决策与坑、门禁技术笔记）、`docker/`（本地中间件 compose + `initdb` 建库脚本）、`gradle/`（wrapper、SpotBugs 豁免、commit-msg 脚本）；跨模块公共配置与门禁任务在 `build.gradle.kts`。
@@ -33,7 +33,7 @@ JDK 25（由根 `build.gradle.kts` 的 `toolchain` 强制，未装则构建失�
 3. 起服务：`./gradlew :admin-service:bootRun`，同理 `:gateway-service:`。表结构与种子数据由 Flyway 自动灌，种子账号见 `admin-service/src/main/resources/db/migration/V2__seed_auth.sql`。一条命令起全套（中间件 + 两个后端 + 前端 Vite）用 `./gradlew devUp`，`devDown` 停应用、`devStatus` 看状态，进程日志落在 `build/dev/logs/`；前端要求 `web/` 已跑过 `pnpm install`。
 4. 冒烟：经网关 `POST /api/admin/auth/login` 拿 Token，带 `Authorization: Bearer <token>` 访问 `GET /api/admin/demo/admin`；服务自己的 OpenAPI 文档在 `http://localhost:28081/swagger-ui.html`（不经网关，需先在 UI 里 Authorize 填 Token；`/v3/api-docs` 同样要带 `Authorization`）。
 
-命令与门禁以 [`AGENTS.md`](AGENTS.md) 为唯一事实源，本文件不重复。
+命令与门禁以 [`AGENTS.md`](AGENTS.md) 为唯一出处，本文件不重复。
 
 ## 文档分工
 

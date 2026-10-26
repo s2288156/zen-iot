@@ -59,7 +59,7 @@
 
 - **写侧**（`admin-service`）：登出、refresh 轮转被换下的旧 refresh Token、会话吊销，都把 `jti` 按剩余有效期写进 Redis。
 - **读侧**（`gateway-service`）：每个请求查 `auth:blacklist:{jti}`。
-- **键名单点定义**：`common-security` 的 `TokenRevocationChecker.blacklistKey(jti)`。写侧与读侧都调它，不各自拼字符串——键名写岔不报错，只会让撤销静默失效。
+- **键名只在一处定义**：`common-security` 的 `TokenRevocationChecker.blacklistKey(jti)`。写侧与读侧都调它，不各自拼字符串——键名写岔不报错，只会让撤销静默失效。
 - **TTL = Token 剩余有效期**，到期自然消失，因此不需要任何清理任务。
 
 ### 撤销动作的口径
@@ -98,7 +98,7 @@ Redis 三处布局（`RedisSessionRegistry`）：
 
 网关验签成功后覆写四个头，头名以 `common-security` 的 `TrustedHeaders` 为唯一来源（`X-User-Id` / `X-Username` / `X-User-Roles` / `X-User-Modules`）。
 
-**入站同名头一律先剥离，白名单路径也剥**。不剥离的话，任何人自带 `X-User-Id: 1` 就能冒充超管——这是整套透传设计成立的前提。头名写岔（`X-User-Module` vs `X-User-Modules`）同样不报错，只会让下游判成「未认证」，故收敛到单点常量。
+**入站同名头一律先剥离，白名单路径也剥**。不剥离的话，任何人自带 `X-User-Id: 1` 就能冒充超管——这是整套透传设计成立的前提。头名写岔（`X-User-Module` vs `X-User-Modules`）同样不报错，只会让下游判成「未认证」，故统一成一个常量。
 
 ## 真实客户端 IP 的可信边界
 

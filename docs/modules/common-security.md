@@ -52,7 +52,7 @@
 - 背景：撤销必须能被两端复用——写侧 `admin-service`（有 Redis），读侧网关（反应式 Redis client）。
 - 选项：本模块直接引 Redis / 只定义接口。
 - 结论：只定义 `TokenRevocationChecker`，`revoke(jti, ttl)` 按剩余有效期写入、记录随 TTL 自然过期，不做清理任务。
-- 关键约束：`BLACKLIST_KEY_PREFIX` 与 `blacklistKey(jti)` 是本模块唯一的键名来源。两侧各拼一遍字符串时，写错不会编译失败也不会报错，只会让登出的 Token 在网关侧继续可用——属安全失效，所以收敛到单点（同一个道理见 `TrustedHeaders`）。
+- 关键约束：`BLACKLIST_KEY_PREFIX` 与 `blacklistKey(jti)` 是本模块唯一的键名来源。两侧各拼一遍字符串时，写错不会编译失败也不会报错，只会让登出的 Token 在网关侧继续可用——这属于安全层面的失效，所以统一由一处定义（同一个道理见 `TrustedHeaders`）。
 - 代价：缺实现时得有个兜底，而这个兜底天然是「不校验撤销」，见坑清单。
 
 ### 错误码只放 HTTP 语义码，业务码段留给消费方

@@ -1,6 +1,6 @@
 # 依赖与版本治理
 
-> **这篇文档放在哪**：依赖版本的真源是根 `build.gradle.kts` 的 `configure<DependencyManagementExtension>` 与 `settings.gradle.kts` 的 `dependencyResolutionManagement`——某个坐标用哪个版本，以这两份脚本为准。本文不把清单再抄一遍，只说明背后的规则；它回答三个问题：新加一个依赖该写在哪一层、`spring-cloud-alibaba` 与 Boot 插件之间有哪些互相牵制、Dependabot 能自动把版本升到哪一步。
+> **这篇文档放在哪**：依赖版本只在根 `build.gradle.kts` 的 `configure<DependencyManagementExtension>` 与 `settings.gradle.kts` 的 `dependencyResolutionManagement` 两处声明——某个坐标用哪个版本，以这两份脚本为准。本文不把清单再抄一遍，只说明背后的规则；它回答三个问题：新加一个依赖该写在哪一层、`spring-cloud-alibaba` 与 Boot 插件之间有哪些互相牵制、Dependabot 能自动把版本升到哪一步。
 >
 > 门禁怎么跑、报告去哪看属于门禁文档的范围，见 [`docs/quality-gates.md`](quality-gates.md) §2.7；某个模块为什么这样取舍，见 `docs/modules/<module>.md`。
 
@@ -27,7 +27,7 @@
 这样做有两条硬理由：
 
 - **写在模块里的 BOM 和约束只对该模块生效，不会传给使用它的模块。** `common-security` 用 `api` 把 jjwt 的类型暴露给了别人，所以 jjwt 的版本必须在根部统一管；写在自己模块里，只有它自己看得见，别的模块仍会解析到另一个版本。
-- **版本真源多一个，`crossModuleVersionCheck` 的比对就失去意义。** 这个门禁比的是「同一个坐标在各个模块里解析出的版本是否一致」；而只给组内一个构件钉死版本、不管 BOM 里其余同组构件，正是当初把 SpotBugs 拆成两个版本的起因（`#15`、`#20`，经过见 [`docs/quality-gates.md`](quality-gates.md) §2.7）。
+- **版本号多出第二个声明处，`crossModuleVersionCheck` 的比对就失去意义。** 这个门禁比的是「同一个坐标在各个模块里解析出的版本是否一致」；而只给组内一个构件钉死版本、不管 BOM 里其余同组构件，正是当初把 SpotBugs 拆成两个版本的起因（`#15`、`#20`，经过见 [`docs/quality-gates.md`](quality-gates.md) §2.7）。
 
 另外两条相关约定：仓库地址统一声明在 `settings.gradle.kts` 的 `dependencyResolutionManagement`，并设了 `RepositoriesMode.PREFER_SETTINGS`，所以子项目不再各自写 `repositories`；插件版本同样一律直接写在脚本里（`settings.gradle.kts` 与根脚本的 `plugins` 块），没有使用版本目录。
 

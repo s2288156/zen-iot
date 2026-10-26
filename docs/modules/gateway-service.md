@@ -59,9 +59,9 @@
 
 ### 网关侧另立 `TokenBlocklist`，不复用 `TokenRevocationChecker`
 
-- 背景：撤销的读侧就是查一个 Redis 键，`common-security` 已有 `TokenRevocationChecker` 接口与键名单点。
+- 背景：撤销的读侧就是查一个 Redis 键，`common-security` 已有 `TokenRevocationChecker` 接口，键名也集中在一处。
 - 选项：实现那个接口 / 定义一个返回 `Mono<Boolean>` 的网关侧接口。
-- 结论：另立接口，但**键名仍复用 `TokenRevocationChecker.blacklistKey(jti)`**——接口分开、字符串单点。
+- 结论：另立接口，但**键名仍复用 `TokenRevocationChecker.blacklistKey(jti)`**——接口分开，键名只有一处。
 - 理由：那个接口是命令式的，在 Netty EventLoop 上调用它就是 P3-2 BlockHound 要拦的第一类问题。
 - 关键实现约束：实现必须返回不会空完成的 `Mono<Boolean>`，空完成会让请求既不放行也不拒绝，直接挂住。`RedisTokenBlocklist` 以 `defaultIfEmpty(FALSE)` 兜住。
 
@@ -112,7 +112,7 @@
 - 背景：admin-service 的接口与回归用例已进 Apifox 项目，而网关作为浏览器唯一的入口在里面没有任何位置，「要不要给 gateway-service 建模块、把 `/api/{service}/**` 录成接口」会被反复问起。
 - 选项：① 不建，前缀只活在环境的「前置 URL」里；② 网关占一个模块，按带前缀的路径把下游接口再录一遍作为对外入口视图；③ 网关占一个空模块或把路由清单抄进去。
 - 结论：①。本模块在 Apifox 里既不建模块也不建接口。
-- 理由：Apifox 的「模块」定义是「一个服务 = 一份完整独立的 OpenAPI 规范」，而本模块不提供业务接口、没有自己的 `/v3/api-docs`，没有可导入的东西。② 把 `/api/admin` 这个只应存在于网关的字符串抄进第二处，而 Apifox 不支持批量修改接口 URL 前缀，抄进去就改不动；Mock 又按裸路径匹配，带前缀的 path 会让 Mock 直接失效。③ 的路由清单真身在 `application.yml`，并由 `GatewayRouteContractTest` 逐条比对前缀，抄一份就是等着漂移的第二真源。
+- 理由：Apifox 的「模块」定义是「一个服务 = 一份完整独立的 OpenAPI 规范」，而本模块不提供业务接口、没有自己的 `/v3/api-docs`，没有可导入的东西。② 把 `/api/admin` 这个只应存在于网关的字符串抄进第二处，而 Apifox 不支持批量修改接口 URL 前缀，抄进去就改不动；Mock 又按裸路径匹配，带前缀的 path 会让 Mock 直接失效。③ 的路由清单真身在 `application.yml`，并由 `GatewayRouteContractTest` 逐条比对前缀，抄一份就是等着漂移的第二个来源。
 - 触发条件：本模块出现自己实现的 controller、也就是拥有独立 `/v3/api-docs` 时，改按模块导入为它建模块。在那之前，任何「入口视图」都不得手工录入下游接口。
 - 代价：从 Apifox 复制出的示例不带前缀直接打网关会失败，这一段只由环境的「前置 URL」承担。调用方规则写在 Apifox 项目文档《统一入口与鉴权口径（调用方须知）》，那份文档只写规则，不抄路由与白名单清单。
 

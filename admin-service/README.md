@@ -48,7 +48,7 @@
 
 - **身份来源是 `jwt`**：本服务自己验签，与网关共用同一把 `zen.jwt.secret`（生产由 `ZEN_JWT_SECRET` 覆盖，UTF-8 ≥ 32 字节）。`access-ttl: 30m` / `refresh-ttl: 7d`。
 - **不引 `spring-boot-starter-security`**：只用 `spring-security-crypto` 的 `BCryptPasswordEncoder`，401/403 仍由 `GlobalExceptionHandler` 统一输出。
-- **撤销的写侧在这里**：`RedisTokenRevocationChecker` 按剩余有效期把 `jti` 写进 Redis，读侧是网关；键名由 `common-security` 的 `TokenRevocationChecker.blacklistKey(jti)` 单点定义。
+- **撤销的写侧在这里**：`RedisTokenRevocationChecker` 按剩余有效期把 `jti` 写进 Redis，读侧是网关；键名只在 `common-security` 的 `TokenRevocationChecker.blacklistKey(jti)` 这一处定义。
 - **登录失败锁定**：`zen.security.login` 控制阈值与时长（默认窗口 15m 内 5 次失败锁定 15m），达阈值那次与锁定期内的尝试一律 429；Redis 故障 fail-open 放行。
 - **每次登录尝试都记 `t_login_log`**：reason 词表 `SUCCESS` / `BAD_CREDENTIALS` / `LOCKED` / `DISABLED`，落库失败只记 ERROR 不阻断认证。
 - **会话 = refresh 令牌谱系**：`SessionService.recordLogin` 建登记、`rotate` 迁移、`removeOnLogout` 清理；Redis 三处布局与轮转语义见 [`docs/architecture.md`](../docs/architecture.md)。

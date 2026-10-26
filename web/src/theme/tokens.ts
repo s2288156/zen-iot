@@ -1,7 +1,7 @@
 import type { ThemeConfig } from 'antd'
 
 /**
- * 科技蓝色系完整色阶（blue-1 最浅 → blue-10 最深），视觉基调的唯一事实源。
+ * 科技蓝色系完整色阶（blue-1 最浅 → blue-10 最深），视觉基调的唯一来源。
  * 调整主色只改这里，经 ConfigProvider 全站即时生效。
  */
 export const palette = {

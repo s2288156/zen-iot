@@ -26,7 +26,7 @@
 
 - 结论：色值集中在 `src/theme/tokens.ts`（`palette` / `neutrals` / `layout`），经 `ConfigProvider` 注入；业务代码零硬编码色值。
 - 理由：改主色只改一处并全站即时生效；违规也可评审——grep 十六进制色值即可发现。
-- 代价：`tokens.ts` 是唯一事实源，任何「就地写个色值更省事」都是退化；antd CLI 不检查色值，只能靠评审兜住。
+- 代价：`tokens.ts` 是唯一来源，任何「就地写个色值更省事」都是退化；antd CLI 不检查色值，只能靠评审兜住。
 
 ### refreshToken 落 localStorage，accessToken 只驻内存
 
@@ -47,7 +47,7 @@
 
 - 背景：spec 把「组件属性一律写 v6 口径、不用 v5 废弃别名」定为硬约束，此前仅靠评审把关。
 - 选项：只报告（输出 GitHub `::warning` annotation、不进 required check）/ 只加 ESLint 规则 / 外层包一层转阻断。
-- 结论：外层包一层（`web/scripts/antd-lint-gate.mjs`）直接转阻断，未落中间态——Task 5 收口时基线即为 0 issue，无历史问题要背，中间态纯属空转。
+- 结论：外层包一层（`web/scripts/antd-lint-gate.mjs`）直接转阻断，未落中间态——Task 5 收尾时基线即为 0 issue，无历史问题要背，中间态纯属空转。
 - 理由：CLI 退出码恒 0，本身不构成门禁，阻断只能由外层按摘要计数补；同一层顺带校验 CLI 与 antd 同版，否则检查器与被检对象错位。
 - 代价：门禁语义是「不许新增废弃别名」，但 CLI 对 `Tabs.TabPane` 与 `size="default"` 漏检，这两条仍靠评审，不因转阻断而视为已覆盖。
 

@@ -50,9 +50,9 @@ jobs:
           if-no-files-found: ignore
           retention-days: 7
 
-  # ——— 抬开发线（只在 main 上跑：比对的是一份共享状态，PR 分支上比没有意义）———
-  # tag 之后忘记抬 -SNAPSHOT 会让开发中的制品顶着已发布的版本号跑，而别的门禁都不会红。
-  # 刻意不进 required checks：release commit 与抬开发线的 PR 之间 main 可能红一次，那是设计接受的代价。
+  # ——— 上调开发版本号（只在 main 上跑：比对的是一份共享状态，PR 分支上比没有意义）———
+  # 打了 tag 之后忘记把版本号调回 -SNAPSHOT，会让开发中的制品顶着已发布的版本号跑，而别的门禁都不会红。
+  # 刻意不进 required checks：release commit 与上调开发版本号的 PR 之间 main 可能红一次，那是设计接受的代价。
   release-line:
     name: ./gradlew releaseLineCheck (main only)
     if: github.event_name != 'pull_request'

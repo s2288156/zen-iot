@@ -26,9 +26,9 @@
 | 缺陷扫描    | `./gradlew spotbugsMain`            | 仅 main 源码                         |
 | 全量检查    | `./gradlew check`                   | 含测试                               |
 | 推送门禁    | `./gradlew prePushCheck`            | **不跑测试**                         |
-| 起本机栈    | `./gradlew devUp`                   | 已在运行的跳过                       |
-| 停本机栈    | `./gradlew devDown`                 | 不动容器                             |
-| 看本机栈    | `./gradlew devStatus`               | 日志在 `build/dev/logs/`             |
+| 起本地这套  | `./gradlew devUp`                   | 已在运行的跳过                       |
+| 停本地这套  | `./gradlew devDown`                 | 不动容器                             |
+| 看本地这套  | `./gradlew devStatus`               | 日志在 `build/dev/logs/`             |
 | 前端门禁    | 见 `web/README.md`                  | 不在任何 `./gradlew` 任务里          |
 
 各门禁跑到哪一步、包含哪几项，以 `./gradlew tasks` 输出的任务 description 为准，本表不重述。
@@ -57,7 +57,7 @@
   （规则 + 包，绝不整类豁免；是否狭窄靠评审）。政策、级别配置与报告产物位置见 `docs/quality-gates.md`。
 - **测试**：任何需要本地中间件（MySQL/Nacos/Redis/RabbitMQ）的测试都带 `@Tag("integration")`（漏打不会被拦，靠评审），让
   `test`/`check` 在干净机器上依然可跑。
-- **版本单一真源**（门禁，`versionSourceCheck`）：版本号只在根 `build.gradle.kts` 顶部声明一次，子项目继承它、
+- **版本号只在一处声明**（门禁，`versionSourceCheck`）：版本号只在根 `build.gradle.kts` 顶部声明一次，子项目继承它、
   OpenAPI 的 `info.version` 由 `build-info.properties` 注入、`web/package.json` 不带 `version`；派生口径见
   `docs/release-versioning.md` §1。
 - **格式化**（门禁，`spotlessCheck` + `lintMarkdown`）：Java 用 `palantirJavaFormat`、Markdown 用 Prettier +

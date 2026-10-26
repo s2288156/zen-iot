@@ -65,7 +65,7 @@
 
 ## 架构约束
 
-- 色值唯一事实源是 `src/theme/tokens.ts`，业务代码不得硬编码色值。
+- 色值只在 `src/theme/tokens.ts` 一处定义，业务代码不得硬编码色值。
 - 路由模块必须具名导出 `Component`；dev-only 路由用 `import.meta.env.DEV` 条件挂载。
 - api 层不得依赖 store 与 router，跨层通知通过 `setSessionExpiredHandler` 反向注册。
 - 公共组件留在 `src/components`，不拆独立组件库包；列表页不得绕过 `PageTable` 直连 `useQuery`。

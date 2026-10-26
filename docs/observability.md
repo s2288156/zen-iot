@@ -1,6 +1,6 @@
 # traceId 可观测性
 
-> **这篇文档放在哪**：链路每一环的真源是代码与配置——网关的 `application.yml`、各模块 `build.gradle.kts` 里的 tracing 依赖、`common-core` 的 `AuthInterceptor`。本文不抄那份清单，只回答三个问题：**一个 traceId 怎么从入站请求走到某条服务日志、中间哪一段现在是断的、actuator 端点里能看到什么与看不到什么**。「为什么只做 A 层、否掉了什么」归 [`docs/modules/common-core.md`](modules/common-core.md) 与 [`docs/modules/gateway-service.md`](modules/gateway-service.md)；本文只写这条链路落地后的形态与它的前提。术语定义见 [`GLOSSARY.md`](../GLOSSARY.md) 的「A 层追踪」。
+> **这篇文档放在哪**：链路每一环的真实来源是代码与配置——网关的 `application.yml`、各模块 `build.gradle.kts` 里的 tracing 依赖、`common-core` 的 `AuthInterceptor`。本文不抄那份清单，只回答三个问题：**一个 traceId 怎么从入站请求走到某条服务日志、中间哪一段现在是断的、actuator 端点里能看到什么与看不到什么**。「为什么只做 A 层、否掉了什么」归 [`docs/modules/common-core.md`](modules/common-core.md) 与 [`docs/modules/gateway-service.md`](modules/gateway-service.md)；本文只写这条链路落地后的形态与它的前提。术语定义见 [`GLOSSARY.md`](../GLOSSARY.md) 的「A 层追踪」。
 
 ## 1. 链路终点在哪里
 

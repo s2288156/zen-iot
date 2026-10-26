@@ -10,8 +10,8 @@ import java.time.Duration;
 public interface TokenRevocationChecker {
 
     /**
-     * 黑名单 Key 前缀,后面接 Token 的 {@code jti}。写入方(admin-service)与读取方(Phase 2 网关)必须共用这一份字面量:
-     * 两边各写一遍时,改错了不会编译失败也不会报错,只会让登出的 Token 在网关侧继续可用——属于安全失效,故收敛到单一来源。
+     * 黑名单 Key 前缀，后面接 Token 的 {@code jti}。写入方（admin-service）与读取方（Phase 2 网关）必须共用这一份字面量：
+     * 两边各写一遍时，改错了不会编译失败也不会报错，只会让登出的 Token 在网关侧继续可用——这属于安全层面的失效，所以统一由这一处定义。
      */
     String BLACKLIST_KEY_PREFIX = "auth:blacklist:";
 

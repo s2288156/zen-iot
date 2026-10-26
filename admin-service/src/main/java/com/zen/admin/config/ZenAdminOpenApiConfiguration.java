@@ -59,7 +59,7 @@ public class ZenAdminOpenApiConfiguration {
     /**
      * Bearer Token 安全方案名，controller 的 {@code @SecurityRequirement(name = ...)} 按此名引用。
      *
-     * <p>名字写岔不会报错，只会让文档引用一个未定义的方案（Apifox 侧表现为「鉴权又没了」），属于静默失效，故收敛到单点。
+     * <p>名字写岔不会报错，只会让文档引用一个未定义的方案（Apifox 侧表现为「鉴权又没了」），属于静默失效，故只留这一处定义。
      * 它是编译期常量，会被内联进注解，controller 因此在字节码上不依赖本 config 包。
      */
     public static final String BEARER_JWT_SCHEME = "bearerJwt";
