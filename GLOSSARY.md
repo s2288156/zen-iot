@@ -49,19 +49,3 @@
 追踪只做到这一层：traceId 进日志、跨服务向下游注入 `traceparent`；span 不外发，也没有追踪后端可查。日志与指标 exemplar 因此是唯一的查询面。
 
 链路的走法、前提与断点见 [`docs/observability.md`](docs/observability.md)；为什么停在这一层见 `docs/modules/common-core.md`。
-
-## 边界未确认
-
-设备侧的域边界尚未定案。下列三条只占位、不含定义，定案前不得据此做实现决策；结论见 [#67](https://github.com/s2288156/zen-iot/issues/67)。
-
-### RCS
-
-边界未确认。
-
-### WCS
-
-边界未确认。
-
-### AMR
-
-边界未确认。
