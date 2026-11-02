@@ -15,8 +15,8 @@ importers:
         specifier: ^5.104.5
         version: 5.104.5(@types/react@19.3.0)(react@19.3.1)
       antd:
-        specifier: 6.6.7
-        version: 6.6.7(react-dom@19.3.1(react@19.3.1))(react@19.3.1)
+        specifier: 6.6.8
+        version: 6.6.8(react-dom@19.3.1(react@19.3.1))(react@19.3.1)
       react:
         specifier: ^19.3.1
         version: 19.3.1
@@ -31,8 +31,8 @@ importers:
         version: 5.0.16(@types/react@19.3.0)(react@19.3.1)
     devDependencies:
       '@ant-design/cli':
-        specifier: 6.6.7
-        version: 6.6.7
+        specifier: 6.6.8
+        version: 6.6.8
       '@eslint/js':
         specifier: ^10.0.1
         version: 10.0.1(eslint@10.13.0)
@@ -87,8 +87,8 @@ importers:
 
 packages:
 
-  '@ant-design/cli@6.6.7':
-    resolution: {integrity: sha512-dfTN/hoFv9pgxatro4cYTRj0DUyFjUruBhndxldphFZLsYB6uLcbxtezjOxlhGeWJvtr8BOulAe7qw6e/UqKFQ==}
+  '@ant-design/cli@6.6.8':
+    resolution: {integrity: sha512-plMKhNH4XrxZIVoM/ULNqY8EJQIu7HPUOpGDb0yJ9y9uEVPqz5y6GpRl05zpXCNoa+xevLkOG33wigAp+JDVbA==}
     engines: {node: '>=20.0.0'}
     hasBin: true
 
@@ -198,8 +198,8 @@ packages:
     resolution: {integrity: sha512-Nq8OhGWiZIZGV6hLHoyAKLLcJihP/xFeBMGJoUrxTX2psI8dCifzLhZISFb+VWS3wFMRDmCGw5R+dOySCqPLhw==}
     engines: {node: '>=6.9.0'}
 
-  '@babel/runtime@8.0.7':
-    resolution: {integrity: sha512-k0hagDDq/6w4v+0Sp4wFvIz/yswH5O7Va6aRTnD7N62Tnborp4X+YB+H3XUcWVSR4aE47WPEXiIIZchBs0GmYg==}
+  '@babel/runtime@8.0.10':
+    resolution: {integrity: sha512-0QyWQOIhl2onOgg96BuOYV+oCgLINVDPC8RkVPCiQhLILVqpefDUmcY+aAsW6vp7fcuTZL6SXXlFrSDCTFIu1w==}
 
   '@babel/template@7.29.7':
     resolution: {integrity: sha512-puq+Gf35oI24FeN11LkoUQFqv9uwNeWpxXZi/Ji3rRIoKAzKnxRaZ+Gkj0vKS9ZCiTESfng1N9LyOyXvo+m+Gg==}
@@ -1055,16 +1055,16 @@ packages:
     resolution: {integrity: sha512-quJQXlTSUGL2LH9SUXo8VwsY4soanhgo6LNSm84E1LBcE8s3O0wpdiRzyR9z/ZZJMlMWv37qOOb9pdJlMUEKFQ==}
     engines: {node: '>=8'}
 
-  ansi-regex@6.4.0:
-    resolution: {integrity: sha512-KzTVk2tCWAHtYrvvvaP8bJKJq2pVinhLcGEQdtLIYPbmNGNyYe8QwNaTUYQp2J7/vIsUKt5QCqAfUkYyG9DkOw==}
+  ansi-regex@6.5.0:
+    resolution: {integrity: sha512-zhvbbbdt1kbw7EJ9OQoxmQcuaNR9P5kTj7e/YdmOSU10aHWbycofJxA6jKfoEy3vlLdctOF9ZHaxLtmSm998wQ==}
     engines: {node: '>=12'}
 
   ansi-styles@5.2.0:
     resolution: {integrity: sha512-Cxwpt2SfTzTtXcfOlzGEee8O+c+MmUgGrNiBcXnuWxuFJHe6a5Hz7qwhwe5OgaSYI0IJvkLqWX1ASG+cJOkEiA==}
     engines: {node: '>=10'}
 
-  antd@6.6.7:
-    resolution: {integrity: sha512-6D9oSAot26LIHYmR0ZyquOZY4WIcgRurZ/9//1GEJoo/vWvKV3E1PJPmB3orGkRlmGxArX3vSJFxQfRKr5qHZA==}
+  antd@6.6.8:
+    resolution: {integrity: sha512-e+hDj/0myqbLBn8UGS0dYhPROAENruNscWe4gzyTnwx7yTip7D72wJUNxtsTplPXwRM1Mo4tXNSgaSb3UmV3RQ==}
     peerDependencies:
       react: '>=18.0.0'
       react-dom: '>=18.0.0'
@@ -1989,7 +1989,7 @@ packages:
 
 snapshots:
 
-  '@ant-design/cli@6.6.7':
+  '@ant-design/cli@6.6.8':
     dependencies:
       cfonts: 3.3.1
       fast-glob: 3.3.3
@@ -2140,7 +2140,7 @@ snapshots:
 
   '@babel/runtime@7.29.7': {}
 
-  '@babel/runtime@8.0.7': {}
+  '@babel/runtime@8.0.10': {}
 
   '@babel/template@7.29.7':
     dependencies:
@@ -2582,7 +2582,7 @@ snapshots:
 
   '@rc-component/segmented@1.4.0(react-dom@19.3.1(react@19.3.1))(react@19.3.1)':
     dependencies:
-      '@babel/runtime': 8.0.7
+      '@babel/runtime': 8.0.10
       '@rc-component/motion': 1.3.3(react-dom@19.3.1(react@19.3.1))(react@19.3.1)
       '@rc-component/util': 1.14.0(react-dom@19.3.1(react@19.3.1))(react@19.3.1)
       clsx: 2.1.1
@@ -2709,7 +2709,7 @@ snapshots:
 
   '@rc-component/virtual-list@1.6.0(react-dom@19.3.1(react@19.3.1))(react@19.3.1)':
     dependencies:
-      '@babel/runtime': 8.0.7
+      '@babel/runtime': 8.0.10
       '@rc-component/resize-observer': 1.1.2(react-dom@19.3.1(react@19.3.1))(react@19.3.1)
       '@rc-component/util': 1.14.0(react-dom@19.3.1(react@19.3.1))(react@19.3.1)
       clsx: 2.1.1
@@ -2944,11 +2944,11 @@ snapshots:
 
   ansi-regex@5.0.1: {}
 
-  ansi-regex@6.4.0: {}
+  ansi-regex@6.5.0: {}
 
   ansi-styles@5.2.0: {}
 
-  antd@6.6.7(react-dom@19.3.1(react@19.3.1))(react@19.3.1):
+  antd@6.6.8(react-dom@19.3.1(react@19.3.1))(react@19.3.1):
     dependencies:
       '@ant-design/colors': 8.0.1
       '@ant-design/cssinjs': 2.1.2(react-dom@19.3.1(react@19.3.1))(react@19.3.1)
@@ -3636,7 +3636,7 @@ snapshots:
 
   strip-ansi@7.2.0:
     dependencies:
-      ansi-regex: 6.4.0
+      ansi-regex: 6.5.0
 
   stylis@4.4.0: {}
 
